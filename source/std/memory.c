@@ -10,6 +10,12 @@ int strlen(const char *string)
     return string_end - string;
 }
 
+int isprint(char c) {
+	if (c >= 32 && c <= 127)
+        return 1;
+    return 0;
+}
+
 void memcpy(void *dest, const void *src, size_t size)
 {
     char *destc = (char *)dest;

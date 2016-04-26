@@ -5,17 +5,24 @@ void load_options() {
 }
 
 void init_system() {}
+
 int menu_handler() {
-    render_textbufs();
     return 1;
 }
 
 void main() {
     if (fmount()) {
         // Failed to mount SD. Bomb out.
+        cprintf(BOTTOM_SCREEN, "%pFailed to mount SD card.\n", COLOR(RED, BLACK));
+    } else {
+        cprintf(BOTTOM_SCREEN, "Mounted SD card.\n");
     }
 
-    cprintf(TOP_SCREEN, "Hello, %d, %s!\n", 5042, "person");
+    for (int i = 0; i < 200; i++) {
+        cprintf(TOP_SCREEN, "%d\n", i);
+    }
+
+    cprintf(TOP_SCREEN, "Done printing.");
 
     load_options(); // Load configuration.
 

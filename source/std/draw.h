@@ -1,6 +1,9 @@
 #ifndef __STD_DRAW_H
 #define __STD_DRAW_H
 
+/* This is in a nutshell a partial implementation of stdio.
+   It isn't perfect, but it does work. */
+
 #include <stdint.h>
 
 #define SCREEN_TOP_WIDTH 400
@@ -43,20 +46,41 @@ static struct framebuffers {
 
 void clear_screen(uint8_t* screen);
 void clear_screens();
-void draw_character(char* screen, const char character, const unsigned int pos_x, const unsigned int pos_y, const uint32_t color);
+void draw_character(uint8_t* screen, const char character, const unsigned int pos_x, const unsigned int pos_y, const uint32_t color_fg, const uint32_t color_bg);
 
 #define TOP_SCREEN    0
-#define BOTTOM_SCREEN 0
+#define BOTTOM_SCREEN 1
 
-void putc(int buf, const char c);
-void puts(int buf, const char *string);
-void render_textbufs();
+void putc(int buf, unsigned char color, const char c);
+void puts(int buf, unsigned char color, const char *string);
+void cflush(int channel);
 
-void put_int(int channel, int n);
-void put_uint(int channel, unsigned int n);
+void put_int(int channel, unsigned char color, int n);
+void put_uint(int channel, unsigned char color, unsigned int n);
 
 // Like printf. Supports the following format specifiers:
 //   %s %c %d %u
-int cprintf(int channel, const char* format, ...);
+// The following non-standard formats are also supported (but are subject to replacement)
+//   %p - unsigned char, changes color of text (will be replaced with ANSI codes eventually)
+void cprintf(int channel, const char* format, ...);
+
+#define BLACK     0
+#define BLUE      1
+#define GREEN     2
+#define CYAN      3
+#define RED       4
+#define MAGENTA   5
+#define BROWN     6
+#define GRAY      7
+#define D_GRAY    8
+#define B_BLUE    9
+#define B_GREEN   10
+#define B_CYAN    11
+#define B_RED     12
+#define B_MAGENTA 13
+#define YELLOW    14
+#define WHITE     15
+
+#define COLOR(fg, bg) (((fg & 0x0f) << 4) | (bg & 0x0f))
 
 #endif

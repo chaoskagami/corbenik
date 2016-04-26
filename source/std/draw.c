@@ -38,6 +38,11 @@ void clear_screen(uint8_t* screen) {
 	uint32_t size = 0;
 	char* buffer  = 0;
 	uint32_t buffer_size = 0;
+    if (screen == TOP_SCREEN)
+        screen = framebuffers->top_left;
+    else if (screen == BOTTOM_SCREEN)
+        screen = framebuffers->bottom;
+
 	if(screen == framebuffers->top_left ||
        screen == framebuffers->top_right) {
 		size = SCREEN_TOP_SIZE;

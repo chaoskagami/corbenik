@@ -13,5 +13,8 @@
 
 #include "patch_format.h"
 #include "config.h"
+#include "input.h"
+
+#include "i2c.h"
 
 #endif

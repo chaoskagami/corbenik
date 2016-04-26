@@ -68,4 +68,12 @@ $(dir_build)/std/%.o: $(dir_source)/std/%.s
 	@mkdir -p "$(@D)"
 	$(COMPILE.s) -mthumb -mthumb-interwork $(OUTPUT_OPTION) $<
 
+$(dir_build)/firm/%.o: $(dir_source)/firm/%.c
+	@mkdir -p "$(@D)"
+	$(COMPILE.c) -mthumb -mthumb-interwork -Wno-unused-function $(OUTPUT_OPTION) $<
+
+$(dir_build)/firm/%.o: $(dir_source)/firm/%.s
+	@mkdir -p "$(@D)"
+	$(COMPILE.s) -mthumb -mthumb-interwork $(OUTPUT_OPTION) $<
+
 include $(call rwildcard, $(dir_build), *.d)

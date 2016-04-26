@@ -7,8 +7,11 @@
 #include "std/fs.h"
 #include "std/memory.h"
 
-#include "crypto.h"
-#include "headers.h"
+#include "firm/fcram.h"
+#include "firm/crypto.h"
+#include "firm/headers.h"
+
 #include "patch_format.h"
+#include "config.h"
 
 #endif

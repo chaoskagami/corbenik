@@ -17,20 +17,20 @@ static char color_buffer_bottom [TEXT_BOTTOM_SIZE];
 
 static uint32_t colors[16] = {
 	0x000000, // Black
-	0x0000aa, // Blue
+	0xaa0000, // Blue
 	0x00aa00, // Green
-	0x00aaaa, // Cyan
-	0xaa0000, // Red
+	0xaaaa00, // Cyan
+	0x0000aa, // Red
 	0xaa00aa, // Magenta
-	0xaa5500, // Brown
+	0x0055aa, // Brown
 	0xaaaaaa, // Gray
 	0x555555, // Dark gray
-	0x5555ff, // Bright blue
+	0xff5555, // Bright blue
 	0x55ff55, // Bright green
-	0x55ffff, // Bright cyan
-	0xff5555, // Bright red
+	0xffff55, // Bright cyan
+	0x5555ff, // Bright red
 	0xff55ff, // Bright megenta
-	0xffff55, // Yellow
+	0x55ffff, // Yellow
 	0xffffff  // White
 };
 
@@ -43,10 +43,14 @@ void clear_screen(uint8_t* screen) {
 		size = SCREEN_TOP_SIZE;
 		buffer = text_buffer_top;
 		buffer_size = TEXT_TOP_SIZE;
+		top_cursor_x = 0;
+		top_cursor_y = 0;
 	} else if(screen == framebuffers->bottom) {
 		size = SCREEN_BOTTOM_SIZE;
 		buffer = text_buffer_bottom;
 		buffer_size = TEXT_BOTTOM_SIZE;
+		bottom_cursor_x = 0;
+		bottom_cursor_y = 0;
 	} else {
 		return; // Invalid buffer.
 	}
@@ -55,13 +59,22 @@ void clear_screen(uint8_t* screen) {
 	memset(buffer, 0, buffer_size);
 }
 
+void set_cursor(int channel, unsigned int x, unsigned int y) {
+	switch(channel) {
+		case TOP_SCREEN:
+            top_cursor_x = x;
+            top_cursor_y = y;
+            break;
+		case BOTTOM_SCREEN:
+            bottom_cursor_x = x;
+            bottom_cursor_y = y;
+            break;
+	}
+}
+
 void clear_screens() {
     clear_screen(framebuffers->top_left);
     clear_screen(framebuffers->bottom);
-	top_cursor_x = 0;
-	top_cursor_y = 0;
-	bottom_cursor_x = 0;
-	bottom_cursor_y = 0;
 }
 
 void draw_character(uint8_t* screen, const char character, const unsigned int buf_x, const unsigned int buf_y, const uint32_t color_fg, const uint32_t color_bg) {
@@ -103,7 +116,7 @@ void draw_character(uint8_t* screen, const char character, const unsigned int bu
     }
 }
 
-void putc(int buf, unsigned char color, const char c) {
+void putc(int buf, unsigned char color, const int c) {
 	unsigned int width  = 0;
 	unsigned int height = 0;
 	unsigned int size = 0;

@@ -31,7 +31,11 @@ int    feof      (FILE* fp);
 
 size_t fsize     (FILE* fp);
 
-size_t fwrite    (const char *buffer, size_t elementSize, size_t elementCnt, FILE* fp);
-size_t fread     (char *buffer,       size_t elementSize, size_t elementCnt, FILE* fp);
+size_t fwrite    (const void *buffer, size_t elementSize, size_t elementCnt, FILE* fp);
+size_t fread     (void *buffer,       size_t elementSize, size_t elementCnt, FILE* fp);
+
+
+size_t write_file(void* data, char* path, size_t size);
+size_t read_file(void* data, char* path, size_t size);
 
 #endif

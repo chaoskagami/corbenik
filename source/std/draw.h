@@ -51,12 +51,14 @@ void draw_character(uint8_t* screen, const char character, const unsigned int po
 #define TOP_SCREEN    0
 #define BOTTOM_SCREEN 1
 
-void putc(int buf, unsigned char color, const char c);
+void putc(int buf, unsigned char color, const int c);
 void puts(int buf, unsigned char color, const char *string);
 void cflush(int channel);
 
 void put_int(int channel, unsigned char color, int n);
 void put_uint(int channel, unsigned char color, unsigned int n);
+
+void set_cursor(int channel, unsigned int x, unsigned int y);
 
 // Like printf. Supports the following format specifiers:
 //   %s %c %d %u

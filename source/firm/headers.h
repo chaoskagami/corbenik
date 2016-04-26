@@ -17,6 +17,11 @@
 #define ARM9BIN_MAGIC           (0x47704770)
 #define LGY_ARM9BIN_MAGIC       (0xB0862000)
 
+struct memory_header {
+    uint32_t location;
+    uint32_t size;
+} memory_header_t;
+
 typedef struct firm_section_h {
     uint32_t offset;
     uint32_t address;

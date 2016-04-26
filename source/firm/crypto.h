@@ -1,6 +1,7 @@
 // From http://github.com/b1l1s/ctr
 
-#pragma once
+#ifndef __CRYPTO_H
+#define __CRYPTO_H
 
 #include <stdint.h>
 #include "headers.h"
@@ -132,3 +133,5 @@ typedef enum
 } ctr_ncchtypes;
 
 void ncch_getctr(const ncch_h* ncch, uint8_t* ctr, uint8_t type);
+
+#endif

@@ -21,9 +21,7 @@ int fopen(FILE* fp, const char *filename, const char *mode) {
 
 	fp->mode = (*mode == 'r' ? FA_READ : (FA_WRITE | FA_OPEN_ALWAYS));
 
-    f_open(&(fp->handle), filename, fp->mode);
-
-    return 0;
+    return f_open(&(fp->handle), filename, fp->mode);
 }
 
 void fclose(FILE* fp) {
@@ -61,16 +59,38 @@ size_t fsize(FILE* fp) {
     return f_size(&(fp->handle));
 }
 
-size_t fwrite(const char *buffer, size_t elementSize, size_t elementCnt, FILE* fp) {
-    uint32_t br;
+size_t fwrite(const void *buffer, size_t elementSize, size_t elementCnt, FILE* fp) {
+    UINT br;
     if(f_write(&(fp->handle), buffer, elementSize*elementCnt, &br)) return 0;
     if (br == elementSize*elementCnt) br /= elementSize; else return 0;
     return br;
 }
 
-size_t fread(char *buffer, size_t elementSize, size_t elementCnt, FILE* fp) {
-    uint32_t br;
-    if(f_read(&(fp->handle), buffer, elementSize*elementCnt, &br)) return 0;
-    if (br == elementSize*elementCnt) br /= elementSize; else return 0;
+size_t fread(void *buffer, size_t elementSize, size_t elementCnt, FILE* fp) {
+    UINT br;
+    if(f_read(&(fp->handle), buffer, elementSize*elementCnt, &br))
+        return 0;
+    if (br == elementSize*elementCnt)
+        br /= elementSize;
+    else
+        return 0;
     return br;
+}
+
+size_t write_file(void* data, char* path, size_t size) {
+    FILE temp;
+    fopen(&temp, path, "w");
+    size_t written = fwrite(data, 1, size, &temp);
+    fclose(&temp);
+    return written;
+}
+
+size_t read_file(void* data, char* path, size_t size) {
+    FILE temp;
+    fopen(&temp, path, "r");
+
+    size_t read = fread(data, 1, size, &temp);
+    fclose(&temp);
+
+    return read;
 }

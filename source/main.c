@@ -32,7 +32,7 @@ uint32_t wait_key() {
 }
 
 void header() {
-    cprintf(TOP_SCREEN, "%p[Corbenik - The Rebirth]\n", COLOR(CYAN, BLACK));
+    cprintf(TOP_SCREEN, "%p[Corbenik - The Rebirth - %s]\n", COLOR(CYAN, BLACK), VERSION);
 }
 
 int menu_options() { return MENU_MAIN; }
@@ -110,7 +110,7 @@ int menu_main() {
 
     for(int i=0; i < menu_max; i++) {
         if (cursor_y == i)
-            cprintf(TOP_SCREEN, "%p-> ", COLOR(GREEN, BLACK));
+            cprintf(TOP_SCREEN, "%p>> ", COLOR(GREEN, BLACK));
         else
             cprintf(TOP_SCREEN, "   ");
         cprintf(TOP_SCREEN, "%s\n", list[i]);
@@ -133,10 +133,11 @@ int menu_main() {
             break;
     }
 
+    // Loop around the cursor.
     if (cursor_y < 0)
-        cursor_y = 0;
+        cursor_y = menu_max -1;
     if (cursor_y > menu_max - 1)
-        cursor_y = menu_max - 1;
+        cursor_y = 0;
 
     return 0;
 }

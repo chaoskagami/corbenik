@@ -14,8 +14,10 @@ dir_data   := data
 dir_build  := build
 dir_out    := out
 
+REVISION := $(shell git rev-list --count HEAD)
+
 ASFLAGS := -mlittle-endian -mcpu=arm946e-s -march=armv5te
-CFLAGS  := -Wall -Wextra -MMD -MP -O2 -marm $(ASFLAGS) -fno-builtin -fshort-wchar -std=c11 -Wno-main
+CFLAGS  := -Wall -Wextra -MMD -MP -O2 -marm $(ASFLAGS) -fno-builtin -fshort-wchar -std=c11 -Wno-main -DVERSION=\"r$(REVISION)\"
 FLAGS   := dir_out=$(abspath $(dir_out)) ICON=$(abspath icon.png) --no-print-directory
 LDFLAGS := -nostdlib -lgcc
 

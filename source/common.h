@@ -6,6 +6,7 @@
 #include "std/font.h"
 #include "std/fs.h"
 #include "std/memory.h"
+#include "std/abort.h"
 
 #include "firm/fcram.h"
 #include "firm/crypto.h"

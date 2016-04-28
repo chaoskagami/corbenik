@@ -1,6 +1,6 @@
 #include "common.h"
 
-FILE conf_handle;
+FILE* conf_handle;
 
 void regenerate_config() {
 	f_mkdir(PATH_CFW);
@@ -11,33 +11,35 @@ void regenerate_config() {
     f_mkdir(PATH_KEYS);
     f_mkdir(PATH_EXEFS);
 
-    cprintf(BOTTOM_SCREEN, "Created directory structure.\n");
+    fprintf(BOTTOM_SCREEN, "Created directory structure.\n");
 
     memset(&config, 0, sizeof(config));
     memcpy(&(config.magic), CONFIG_MAGIC, 4);
     config.config_ver = config_version;
 
-    fopen(&conf_handle, PATH_CONFIG, "w");
-    fwrite(&config, 1, sizeof(config), &conf_handle);
-    fclose(&conf_handle);
+    if(!(conf_handle = fopen(PATH_CONFIG, "w")))
+        abort("Failed to open config for write?\n");
 
-    cprintf(BOTTOM_SCREEN, "Config file written.\n");
+    fwrite(&config, 1, sizeof(config), conf_handle);
+    fclose(conf_handle);
+
+    fprintf(BOTTOM_SCREEN, "Config file written.\n");
 }
 
 void load_config() {
     // Zero on success.
-    if (fopen(&conf_handle, PATH_CONFIG, "r")) {
-        cprintf(BOTTOM_SCREEN, "Config file is missing:\n"
+    if (!(conf_handle = fopen(PATH_CONFIG, "r"))) {
+        fprintf(BOTTOM_SCREEN, "Config file is missing:\n"
                                "  %s\n"
                                "Will create it with defaults.\n",
                                PATH_CONFIG);
         regenerate_config();
     } else {
-        fread(&config, 1, sizeof(config), &conf_handle);
-        fclose(&conf_handle);
+        fread(&config, 1, sizeof(config), conf_handle);
+        fclose(conf_handle);
 
         if (memcmp(&(config.magic), CONFIG_MAGIC, 4)) {
-            cprintf(BOTTOM_SCREEN, "Config file at:\n"
+            fprintf(BOTTOM_SCREEN, "Config file at:\n"
                                    "  %s\n"
                                    "has incorrect magic:\n"
                                    "  '%c%c%c%c'\n"
@@ -49,7 +51,7 @@ void load_config() {
         }
 
         if (config.config_ver < config_version) {
-            cprintf(BOTTOM_SCREEN, "Config file has outdated version:\n"
+            fprintf(BOTTOM_SCREEN, "Config file has outdated version:\n"
                                    "  %s\n"
                                    "Regenerating with defaults.\n",
                                    PATH_CONFIG);
@@ -58,6 +60,6 @@ void load_config() {
         }
     }
 
-    cprintf(BOTTOM_SCREEN, "Config file loaded.\n");
+    fprintf(BOTTOM_SCREEN, "Config file loaded.\n");
 }
 

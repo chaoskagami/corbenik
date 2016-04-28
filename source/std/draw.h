@@ -49,22 +49,30 @@ void clear_screens();
 void draw_character(uint8_t* screen, const char character, const unsigned int pos_x, const unsigned int pos_y, const uint32_t color_fg, const uint32_t color_bg);
 
 #define TOP_SCREEN    0
-#define BOTTOM_SCREEN 1
+#define BOTTOM_SCREEN 2
 
-void putc(int buf, unsigned char color, const int c);
-void puts(int buf, unsigned char color, const char *string);
-void cflush(int channel);
+#define stdout TOP_SCREEN
+#define stderr BOTTOM_SCREEN
 
-void put_int(int channel, unsigned char color, int n);
-void put_uint(int channel, unsigned char color, unsigned int n);
+void putc(void* buf, unsigned char color, const int c);
+void puts(void* buf, unsigned char color, const char *string);
+void fflush(void* channel);
 
 void set_cursor(int channel, unsigned int x, unsigned int y);
 
 // Like printf. Supports the following format specifiers:
-//   %s %c %d %u
-// The following non-standard formats are also supported (but are subject to replacement)
-//   %p - unsigned char, changes color of text (will be replaced with ANSI codes eventually)
-void cprintf(int channel, const char* format, ...);
+//  %s - char*
+//  %c - char
+//  %d - int
+//  %u - unsigned int
+// The following non-standard
+// The following prefixes are also supported:
+//  %h  - word (stub)
+//  %hh - byte (stub)
+//  %[0-9][0-9]
+// Formats are also supported (but are subject to replacement)
+//  %p - unsigned char, changes color of text (will be replaced with ANSI codes eventually) 
+void fprintf(void* channel, const char* format, ...);
 
 #define BLACK     0
 #define BLUE      1

@@ -17,9 +17,9 @@ dir_out    := out
 REVISION := $(shell git rev-list --count HEAD)
 
 ASFLAGS := -mlittle-endian -mcpu=arm946e-s -march=armv5te
-CFLAGS  := -Wall -Wextra -MMD -MP -O2 -marm $(ASFLAGS) -fno-builtin -fshort-wchar -std=c11 -Wno-main -DVERSION=\"r$(REVISION)\"
-FLAGS   := dir_out=$(abspath $(dir_out)) ICON=$(abspath icon.png) --no-print-directory
-LDFLAGS := -nostdlib -lgcc
+CFLAGS  := -Wall -Wextra -Os $(ASFLAGS) -fno-builtin -std=c11 -DVERSION=\"r$(REVISION)\"
+FLAGS   := dir_out=$(abspath $(dir_out)) --no-print-directory
+LDFLAGS := -nostdlib -Wl,-z,defs -lgcc
 
 objects_cfw = $(patsubst $(dir_source)/%.s, $(dir_build)/%.o, \
 			  $(patsubst $(dir_source)/%.c, $(dir_build)/%.o, \

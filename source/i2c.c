@@ -2,7 +2,7 @@
 
 //-----------------------------------------------------------------------------
 
-static const struct { uint8_t bus_id, reg_addr } dev_data[] = {
+static const struct { uint8_t bus_id, reg_addr; } dev_data[] = {
     {0, 0x4A}, {0, 0x7A}, {0, 0x78},
     {1, 0x4A}, {1, 0x78}, {1, 0x2C},
     {1, 0x2E}, {1, 0x40}, {1, 0x44},
@@ -10,11 +10,11 @@ static const struct { uint8_t bus_id, reg_addr } dev_data[] = {
     {2, 0xA4}, {2, 0x9A}, {2, 0xA0},
 };
 
-const uint8_t i2cGetDeviceBusId(uint8_t device_id) {
+uint8_t i2cGetDeviceBusId(uint8_t device_id) {
     return dev_data[device_id].bus_id;
 }
 
-const uint8_t i2cGetDeviceRegAddr(uint8_t device_id) {
+uint8_t i2cGetDeviceRegAddr(uint8_t device_id) {
     return dev_data[device_id].reg_addr;
 }
 
@@ -26,7 +26,7 @@ static volatile uint8_t* const reg_data_addrs[] = {
     (volatile uint8_t*)(I2C3_REG_OFF + I2C_REG_DATA),
 };
 
-volatile uint8_t* const i2cGetDataReg(uint8_t bus_id) {
+volatile uint8_t* i2cGetDataReg(uint8_t bus_id) {
     return reg_data_addrs[bus_id];
 }
 
@@ -38,13 +38,13 @@ static volatile uint8_t* const reg_cnt_addrs[] = {
     (volatile uint8_t*)(I2C3_REG_OFF + I2C_REG_CNT),
 };
 
-volatile uint8_t* const i2cGetCntReg(uint8_t bus_id) {
+volatile uint8_t* i2cGetCntReg(uint8_t bus_id) {
     return reg_cnt_addrs[bus_id];
 }
 
 //-----------------------------------------------------------------------------
 
-int i2cWaitBusy(uint8_t bus_id) {
+void i2cWaitBusy(uint8_t bus_id) {
     while (*i2cGetCntReg(bus_id) & 0x80);
 }
 

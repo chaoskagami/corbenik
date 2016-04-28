@@ -26,13 +26,14 @@ void slot0x11key96_init()
     uint8_t key[AES_BLOCK_SIZE];
     if (read_file(key, PATH_SLOT0X11KEY96, AES_BLOCK_SIZE) ||
         read_file(key, PATH_ALT_SLOT0X11KEY96, AES_BLOCK_SIZE)) {
-        // If we can't read the key, we assume it's not needed, and the firmware is the right version.
-        // Otherwise, we make sure the error message for decrypting arm9bin mentions this.
+        // Read key successfully.
         aes_setkey(0x11, key, AES_KEYNORMAL, AES_INPUT_BE | AES_INPUT_NORMAL);
 
         // Tell boot_firm it needs to regenerate the keys.
         update_96_keys = 1;
     }
+    // If we can't read the key, we assume it's not needed, and the firmware is the right version.
+    // Otherwise, we make sure the error message for decrypting arm9bin mentions this.
 }
 
 int decrypt_cetk_key(void *key, const void *cetk)
@@ -59,7 +60,7 @@ int decrypt_cetk_key(void *key, const void *cetk)
                 // At i, there's 7 keys with 4 bytes padding between them.
                 // We only need the 2nd.
                 memcpy(common_key_y, i + AES_BLOCK_SIZE + 4, sizeof(common_key_y));
-                cprintf(BOTTOM_SCREEN, "Found the common key Y\n");
+                fprintf(BOTTOM_SCREEN, "Found the common key Y\n");
 
                 break;
             }
@@ -74,7 +75,7 @@ int decrypt_cetk_key(void *key, const void *cetk)
 
     memcpy(iv, ticket->titleID, sizeof(ticket->titleID));
 
-    cprintf(BOTTOM_SCREEN, "Decrypting key\n");
+    fprintf(BOTTOM_SCREEN, "Decrypting key\n");
     memcpy(key, ticket->titleKey, sizeof(ticket->titleKey));
     aes(key, key, 1, iv, AES_CBC_DECRYPT_MODE, AES_INPUT_BE | AES_INPUT_NORMAL);
 
@@ -87,7 +88,7 @@ int decrypt_firm_title(firm_h *dest, ncch_h *ncch, uint32_t *size, void *key)
     uint8_t exefs_key[16] = {0};
     uint8_t exefs_iv[16] = {0};
 
-    cprintf(BOTTOM_SCREEN, "Decrypting the NCCH\n");
+    fprintf(BOTTOM_SCREEN, "Decrypting the NCCH\n");
     aes_setkey(0x16, key, AES_KEYNORMAL, AES_INPUT_BE | AES_INPUT_NORMAL);
     aes_use_keyslot(0x16);
     aes(ncch, ncch, *size / AES_BLOCK_SIZE, firm_iv, AES_CBC_DECRYPT_MODE, AES_INPUT_BE | AES_INPUT_NORMAL);
@@ -102,7 +103,7 @@ int decrypt_firm_title(firm_h *dest, ncch_h *ncch, uint32_t *size, void *key)
     exefs_h *exefs = (exefs_h *)((void *)ncch + ncch->exeFSOffset * MEDIA_UNITS);
     uint32_t exefs_size = ncch->exeFSSize * MEDIA_UNITS;
 
-    cprintf(BOTTOM_SCREEN, "Decrypting the exefs\n");
+    fprintf(BOTTOM_SCREEN, "Decrypting the exefs\n");
     aes_setkey(0x2C, exefs_key, AES_KEYY, AES_INPUT_BE | AES_INPUT_NORMAL);
     aes_use_keyslot(0x2C);
     aes(exefs, exefs, exefs_size / AES_BLOCK_SIZE, exefs_iv, AES_CTR_MODE, AES_INPUT_BE | AES_INPUT_NORMAL);
@@ -123,7 +124,7 @@ int decrypt_firm_title(firm_h *dest, ncch_h *ncch, uint32_t *size, void *key)
 int decrypt_arm9bin(arm9bin_h *header, uint64_t firm_title) {
     uint8_t slot = 0x15;
 
-    cprintf(BOTTOM_SCREEN, "Decrypting ARM9 FIRM binary\n");
+    fprintf(BOTTOM_SCREEN, "Decrypting ARM9 FIRM binary\n");
 
 //    if (firm_title == NATIVE_FIRM_TITLEID && version > 0x0F) {
     if (firm_title == NATIVE_FIRM_TITLEID) {
@@ -158,28 +159,28 @@ int decrypt_firm(firm_h *dest, char *path_firmkey, char *path_cetk, uint32_t *si
 
     // Firmware is likely encrypted. Decrypt.
     if (!read_file(firm_key, path_firmkey, AES_BLOCK_SIZE)) {
-        cprintf(BOTTOM_SCREEN, "Failed to load FIRM key,\n"
+        fprintf(BOTTOM_SCREEN, "Failed to load FIRM key,\n"
                                "  Attempting to generate with CETK.\n");
 
         if (!read_file(fcram_temp, path_cetk, FCRAM_SPACING)) {
-            cprintf(BOTTOM_SCREEN, "Failed to load CETK\n");
+            fprintf(BOTTOM_SCREEN, "Failed to load CETK\n");
             return 1;
         }
-        cprintf(BOTTOM_SCREEN, "Loaded CETK\n");
+        fprintf(BOTTOM_SCREEN, "Loaded CETK\n");
 
         if (decrypt_cetk_key(firm_key, fcram_temp) != 0) {
-            cprintf(BOTTOM_SCREEN, "Failed to decrypt the CETK\n");
+            fprintf(BOTTOM_SCREEN, "Failed to decrypt the CETK\n");
             return 1;
         }
-        cprintf(BOTTOM_SCREEN, "Saving FIRM key for future use\n");
+        fprintf(BOTTOM_SCREEN, "Saving FIRM key for future use\n");
         write_file(firm_key, path_firmkey, AES_BLOCK_SIZE);
     } else {
-        cprintf(BOTTOM_SCREEN, "Loaded FIRM key\n");
+        fprintf(BOTTOM_SCREEN, "Loaded FIRM key\n");
     }
 
-    cprintf(BOTTOM_SCREEN, "Decrypting FIRM\n");
+    fprintf(BOTTOM_SCREEN, "Decrypting FIRM\n");
     if (decrypt_firm_title(dest, (void *)dest, size, firm_key) != 0) {
-        cprintf(BOTTOM_SCREEN, "Failed to decrypt the firmware\n");
+        fprintf(BOTTOM_SCREEN, "Failed to decrypt the firmware\n");
         return 1;
     }
 	return 0;
@@ -190,11 +191,11 @@ int load_firm(firm_h *dest, char *path, char *path_firmkey, char *path_cetk, uin
     int firmware_changed = 0;
 
     if (read_file(dest, path, *size)) {
-        cprintf(BOTTOM_SCREEN, "Failed to read FIRM from SD\n");
+        fprintf(BOTTOM_SCREEN, "Failed to read FIRM from SD\n");
 
         // Only whine about this if it's NATIVE_FIRM, which is important.
         if (firm_title == NATIVE_FIRM_TITLEID) {
-            cprintf(BOTTOM_SCREEN, "Failed to load NATIVE_FIRM from:\n"
+            fprintf(BOTTOM_SCREEN, "Failed to load NATIVE_FIRM from:\n"
                                    "  " PATH_NATIVE_F "\n"
                                    "This is fatal. Aborting.\n");
         }
@@ -208,14 +209,14 @@ int load_firm(firm_h *dest, char *path, char *path_firmkey, char *path_cetk, uin
         status = decrypt_firm(dest, path_firmkey, path_cetk, size, firm_title);
         if (status != 0) {
             if (firm_title == NATIVE_FIRM_TITLEID) {
-                cprintf(BOTTOM_SCREEN, "Failed to decrypt firmware.\n"
+                fprintf(BOTTOM_SCREEN, "Failed to decrypt firmware.\n"
                                        "This is fatal. Aborting.\n");
             }
             goto exit_error;
         }
         firmware_changed = 1; // Decryption performed.
     } else {
-        cprintf(BOTTOM_SCREEN, "FIRM not encrypted\n");
+        fprintf(BOTTOM_SCREEN, "FIRM not encrypted\n");
     }
 
     // The N3DS firm has an additional encryption layer for ARM9
@@ -236,7 +237,7 @@ int load_firm(firm_h *dest, char *path, char *path_firmkey, char *path_cetk, uin
                 if (arm9bin_iscrypt) {
                     // Decrypt the arm9bin.
                     if (decrypt_arm9bin((arm9bin_h *)((uintptr_t)dest + section->offset), firm_title)) {
-                        cprintf(BOTTOM_SCREEN, "Couldn't decrypt ARM9 FIRM binary.\n"
+                        fprintf(BOTTOM_SCREEN, "Couldn't decrypt ARM9 FIRM binary.\n"
                                                "Check if you have the needed key at:\n"
                                                "  " PATH_SLOT0X11KEY96 "\n");
                         status = 1;
@@ -244,7 +245,7 @@ int load_firm(firm_h *dest, char *path, char *path_firmkey, char *path_cetk, uin
                     }
                     firmware_changed = 1; // Decryption of arm9bin performed.
                 } else {
-                    cprintf(BOTTOM_SCREEN, "ARM9 FIRM binary not encrypted\n");
+                    fprintf(BOTTOM_SCREEN, "ARM9 FIRM binary not encrypted\n");
 //                    if (firm_type == NATIVE_FIRM && firm_current->version > 0x0F) {
                         slot0x11key96_init(); // This has to be loaded regardless, otherwise boot will fail.
 //                    }
@@ -258,13 +259,13 @@ int load_firm(firm_h *dest, char *path, char *path_firmkey, char *path_cetk, uin
 
     // Save firmware.bin if decryption was done.
     if (firmware_changed) {
-        cprintf(BOTTOM_SCREEN, "Saving decrypted FIRM\n");
+        fprintf(BOTTOM_SCREEN, "Saving decrypted FIRM\n");
         write_file(dest, path, *size);
     }
 
     //if (firm_current->console == console_n3ds)
     {
-        cprintf(BOTTOM_SCREEN, "Fixing arm9 entrypoint\n");
+        fprintf(BOTTOM_SCREEN, "Fixing arm9 entrypoint\n");
 
         // Patch the entrypoint to skip arm9loader
         if (firm_title == NATIVE_FIRM_TITLEID) {
@@ -310,7 +311,7 @@ void boot_firm() {
             *(uint8_t *)(keydata + 0xF) += 1;
         }
 
-        cprintf(BOTTOM_SCREEN, "Updated keyX keyslots\n");
+        fprintf(BOTTOM_SCREEN, "Updated keyX keyslots\n");
     }
 
     struct memory_header *memory = (void *)(memory_loc + 1);
@@ -318,43 +319,43 @@ void boot_firm() {
         memcpy((void *)memory->location, memory + 1, memory->size);
         memory = (void *)((uintptr_t)(memory + 1) + memory->size);
     }
-    cprintf(BOTTOM_SCREEN, "Copied memory\n");
+    fprintf(BOTTOM_SCREEN, "Copied memory\n");
 
     for (firm_section_h *section = firm_loc->section;
             section < firm_loc->section + 4 && section->address != 0; section++) {
         memcpy((void *)section->address, (void *)firm_loc + section->offset, section->size);
     }
-    cprintf(BOTTOM_SCREEN, "Copied FIRM\n");
+    fprintf(BOTTOM_SCREEN, "Copied FIRM\n");
 
     *a11_entry = (uint32_t)disable_lcds;
     while (*a11_entry);  // Make sure it jumped there correctly before changing it.
     *a11_entry = (uint32_t)firm_loc->a11Entry;
 
-    cprintf(BOTTOM_SCREEN, "Prepared arm11 entry, jumping to FIRM\n");
+    fprintf(BOTTOM_SCREEN, "Prepared arm11 entry, jumping to FIRM\n");
 
     ((void (*)())firm_loc->a9Entry)();
 }
 
 int load_firms() {
-    cprintf(TOP_SCREEN, "[Loading FIRM]");
+    fprintf(TOP_SCREEN, "[Loading FIRM]");
 
-    cprintf(BOTTOM_SCREEN, "Loading NATIVE_FIRM\n");
+    fprintf(BOTTOM_SCREEN, "Loading NATIVE_FIRM\n");
     if (load_firm(firm_loc, PATH_NATIVE_F, PATH_NATIVE_FIRMKEY, PATH_NATIVE_CETK, &firm_size, NATIVE_FIRM_TITLEID) != 0)
         return 1;
 
-    cprintf(BOTTOM_SCREEN, "Loading TWL_FIRM\n");
+    fprintf(BOTTOM_SCREEN, "Loading TWL_FIRM\n");
     if(load_firm(twl_firm_loc, PATH_TWL_F, PATH_TWL_FIRMKEY, PATH_TWL_CETK, &twl_firm_size, TWL_FIRM_TITLEID))
-        cprintf(BOTTOM_SCREEN, "TWL_FIRM failed to load.\n");
+        fprintf(BOTTOM_SCREEN, "TWL_FIRM failed to load.\n");
 
-    cprintf(BOTTOM_SCREEN, "Loading AGB_FIRM\n");
+    fprintf(BOTTOM_SCREEN, "Loading AGB_FIRM\n");
     if(load_firm(agb_firm_loc, PATH_AGB_F, PATH_AGB_FIRMKEY, PATH_AGB_CETK, &agb_firm_size, AGB_FIRM_TITLEID))
-        cprintf(BOTTOM_SCREEN, "AGB_FIRM failed to load.\n");
+        fprintf(BOTTOM_SCREEN, "AGB_FIRM failed to load.\n");
 
     return 0;
 }
 
 void boot_cfw() {
-    cprintf(TOP_SCREEN, "[Patching]");
+    fprintf(TOP_SCREEN, "[Patching]");
 //    if (patch_firm_all() != 0)
 //        return;
 
@@ -362,34 +363,34 @@ void boot_cfw() {
     //   and either the patches have been modified, or the file doesn't exist.
     if ((save_firm || config.options[OPTION_AUTOBOOT]) &&
             f_stat(PATH_NATIVE_P, NULL) != 0) {
-        cprintf(BOTTOM_SCREEN, "Saving patched NATIVE_FIRM\n");
+        fprintf(BOTTOM_SCREEN, "Saving patched NATIVE_FIRM\n");
         if (write_file(firm_loc, PATH_NATIVE_P, firm_size) != firm_size) {
-            cprintf(BOTTOM_SCREEN, "%pFailed to save patched FIRM.\nWriting SD failed.\nThis is fatal.\n", COLOR(RED, BLACK));
+            fprintf(BOTTOM_SCREEN, "%pFailed to save patched FIRM.\nWriting SD failed.\nThis is fatal.\n", COLOR(RED, BLACK));
             return;
         }
     }
 
     if ((save_firm || config.options[OPTION_AUTOBOOT]) &&
             f_stat(PATH_MEMBIN, NULL) != 0) {
-        cprintf(BOTTOM_SCREEN, "Saving patched memory\n");
+        fprintf(BOTTOM_SCREEN, "Saving patched memory\n");
         if (write_file(memory_loc, PATH_MEMBIN, *memory_loc) != *memory_loc) {
-            cprintf(BOTTOM_SCREEN, "%pFailed to save the patched FIRM\nWriting SD failed.\n", COLOR(RED, BLACK));
+            fprintf(BOTTOM_SCREEN, "%pFailed to save the patched FIRM\nWriting SD failed.\n", COLOR(RED, BLACK));
             return;
         }
     }
 
     if (f_stat(PATH_TWL_P, NULL) != 0) {
-        cprintf(BOTTOM_SCREEN, "Saving patched TWL_FIRM\n");
+        fprintf(BOTTOM_SCREEN, "Saving patched TWL_FIRM\n");
         if (write_file(twl_firm_loc, PATH_TWL_P, twl_firm_size) != twl_firm_size) {
-            cprintf(BOTTOM_SCREEN, "%pFailed to save the patched FIRM\nWriting SD failed.\n", COLOR(RED, BLACK));
+            fprintf(BOTTOM_SCREEN, "%pFailed to save the patched FIRM\nWriting SD failed.\n", COLOR(RED, BLACK));
             return;
         }
     }
 
     if (f_stat(PATH_AGB_P, NULL) != 0) {
-        cprintf(BOTTOM_SCREEN, "Saving patched AGB_FIRM\n");
+        fprintf(BOTTOM_SCREEN, "Saving patched AGB_FIRM\n");
         if (write_file(agb_firm_loc, PATH_AGB_P, agb_firm_size) != agb_firm_size) {
-            cprintf(BOTTOM_SCREEN, "%pFailed to save the patched FIRM\nWriting SD failed.\n", COLOR(RED, BLACK));
+            fprintf(BOTTOM_SCREEN, "%pFailed to save the patched FIRM\nWriting SD failed.\n", COLOR(RED, BLACK));
             return;
         }
     }

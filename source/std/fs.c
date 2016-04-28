@@ -2,30 +2,63 @@
 #include "fs.h"
 #include "memory.h"
 #include "../fatfs/ff.h"
+#include "draw.h"
 
 static FATFS fs;
 
+static FILE files[MAX_FILES_OPEN];
+
 int fmount(void) {
-    if (f_mount(&fs, "0:", 1)) return 1;
+    if (f_mount(&fs, "0:", 1))
+        return 1;
+
+    for(int i=0; i < MAX_FILES_OPEN; i++)
+        memset(&files[i], 0, sizeof(FILE));
+
     return 0;
 }
 
 int fumount(void) {
-    if (f_mount(NULL, "0:", 1)) return 1;
+    for(int i=0; i < MAX_FILES_OPEN; i++)
+        if (files[i].is_open)
+            fclose(&files[i]);
+
+    if (f_mount(NULL, "0:", 1))
+        return 1;
+
     return 0;
 }
 
-int fopen(FILE* fp, const char *filename, const char *mode) {
+FILE* fopen(const char *filename, const char *mode) {
     if (*mode != 'r' && *mode != 'w' && *mode != 'a')
-        return 1; // Mode not valid.
+        return NULL; // Mode not valid.
+
+    FILE* fp;
+    int i;
+    for(i=0; i < MAX_FILES_OPEN; i++) {
+        if(!files[i].is_open) {
+           fp = &files[i];
+           break;
+        }
+    }
+
+    if (i == MAX_FILES_OPEN)
+        return NULL; // Out of handles.
 
 	fp->mode = (*mode == 'r' ? FA_READ : (FA_WRITE | FA_OPEN_ALWAYS));
 
-    return f_open(&(fp->handle), filename, fp->mode);
+    if (f_open(&(fp->handle), filename, fp->mode))
+        return NULL;
+
+    fp->is_open = 1;
+
+    return fp;
 }
 
 void fclose(FILE* fp) {
     f_close(&(fp->handle));
+
+    memset(fp, 0, sizeof(FILE));
 }
 
 void fseek(FILE* fp, int64_t offset, int whence) {
@@ -78,19 +111,27 @@ size_t fread(void *buffer, size_t elementSize, size_t elementCnt, FILE* fp) {
 }
 
 size_t write_file(void* data, char* path, size_t size) {
-    FILE temp;
-    fopen(&temp, path, "w");
-    size_t written = fwrite(data, 1, size, &temp);
-    fclose(&temp);
-    return written;
+    FILE* temp = fopen(path, "w");
+
+    if (!temp)
+        return 0;
+
+    size_t wrote = fwrite(data, 1, size, temp);
+
+    fclose(temp);
+
+    return wrote;
 }
 
 size_t read_file(void* data, char* path, size_t size) {
-    FILE temp;
-    fopen(&temp, path, "r");
+    FILE* temp = fopen(path, "r");
 
-    size_t read = fread(data, 1, size, &temp);
-    fclose(&temp);
+    if (!temp)
+        return 0;
+
+    size_t read = fread(data, 1, size, temp);
+
+    fclose(temp);
 
     return read;
 }

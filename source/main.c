@@ -32,7 +32,7 @@ uint32_t wait_key() {
 }
 
 void header() {
-    cprintf(TOP_SCREEN, "%p[Corbenik - The Rebirth - %s]\n", COLOR(CYAN, BLACK), VERSION);
+    fprintf(stdout, "\x1b[33;40m[.corbenik//%s]\n", VERSION);
 }
 
 int menu_options() { return MENU_MAIN; }
@@ -46,7 +46,7 @@ int menu_help() {
 
     header();
 
-    cprintf(TOP_SCREEN, "Corbenik is a 3DS firmware patcher\n"
+    fprintf(stdout,     "Corbenik is a 3DS firmware patcher\n"
                         "  commonly known as a CFW. It seeks to address\n"
                         "  some faults in other CFWs and is generally\n"
                         "  just another choice for users - but primarily\n"
@@ -78,15 +78,19 @@ int menu_help() {
 }
 
 int menu_reset() {
+    fumount(); // Unmount SD.
+
     // Reboot.
-    cprintf(BOTTOM_SCREEN, "Resetting system.\n");
+    fprintf(BOTTOM_SCREEN, "Resetting system.\n");
     i2cWriteRegister(I2C_DEV_MCU, 0x20, 1 << 2);
     while(1);
 }
 
 int menu_poweroff() {
+    fumount(); // Unmount SD.
+
     // Reboot.
-    cprintf(BOTTOM_SCREEN, "Powering off system.\n");
+    fprintf(BOTTOM_SCREEN, "Powering off system.\n");
     i2cWriteRegister(I2C_DEV_MCU, 0x20, 1 << 0);
     while(1);
 }
@@ -95,13 +99,13 @@ int menu_main() {
     set_cursor(TOP_SCREEN, 0, 0);
 
     const char *list[] = {
-        "Options",
-        "Patches",
-        "Info",
-        "Help/Readme",
-        "Reset",
-        "Power off",
-        "Boot firmware"
+        "Options   ",
+        "Patches   ",
+        "Info   ",
+        "Help/Readme   ",
+        "Reset   ",
+        "Power off   ",
+        "Boot firmware   "
     };
 
     header();
@@ -110,10 +114,10 @@ int menu_main() {
 
     for(int i=0; i < menu_max; i++) {
         if (cursor_y == i)
-            cprintf(TOP_SCREEN, "%p>> ", COLOR(GREEN, BLACK));
+            fprintf(TOP_SCREEN, "\x1b[42m>>   ");
         else
-            cprintf(TOP_SCREEN, "   ");
-        cprintf(TOP_SCREEN, "%s\n", list[i]);
+            fprintf(TOP_SCREEN, "   ");
+        fprintf(TOP_SCREEN, "%s\n", list[i]);
     }
 
     uint32_t key = wait_key();
@@ -177,9 +181,9 @@ int menu_handler() {
 void main() {
     if (fmount()) {
         // Failed to mount SD. Bomb out.
-        cprintf(BOTTOM_SCREEN, "%pFailed to mount SD card.\n", COLOR(RED, BLACK));
+        fprintf(BOTTOM_SCREEN, "%pFailed to mount SD card.\n", COLOR(RED, BLACK));
     } else {
-        cprintf(BOTTOM_SCREEN, "Mounted SD card.\n");
+        fprintf(BOTTOM_SCREEN, "Mounted SD card.\n");
     }
 
     load_config(); // Load configuration.

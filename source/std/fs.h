@@ -5,12 +5,15 @@
 #include "memory.h"
 #include "../fatfs/ff.h"
 
+#define MAX_FILES_OPEN 64
+
 typedef struct {
 	FIL handle;
 	uint32_t mode;
 	size_t size;
 	size_t at;
-} FILE;
+    uint8_t is_open;
+} __attribute__((packed)) FILE;
 
 #define SEEK_SET 0
 #define SEEK_CUR 1
@@ -19,7 +22,7 @@ typedef struct {
 int    fmount   (void);
 int    fumount  (void);
 
-int    fopen     (FILE* fp, const char *filename, const char *mode);
+FILE*  fopen     (const char *filename, const char *mode);
 
 void   fclose    (FILE* fp);
 

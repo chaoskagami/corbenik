@@ -5,6 +5,8 @@
 #include <stdarg.h>
 #include "memory.h"
 #include "font.h"
+#include "../fatfs/ff.h"
+#include "fs.h"
 
 static unsigned int top_cursor_x = 0, top_cursor_y = 0;
 static unsigned int bottom_cursor_x = 0, bottom_cursor_y = 0;
@@ -38,9 +40,9 @@ void clear_screen(uint8_t* screen) {
 	uint32_t size = 0;
 	char* buffer  = 0;
 	uint32_t buffer_size = 0;
-    if (screen == TOP_SCREEN)
+    if ((int)screen == TOP_SCREEN)
         screen = framebuffers->top_left;
-    else if (screen == BOTTOM_SCREEN)
+    else if ((int)screen == BOTTOM_SCREEN)
         screen = framebuffers->bottom;
 
 	if(screen == framebuffers->top_left ||
@@ -121,80 +123,83 @@ void draw_character(uint8_t* screen, const char character, const unsigned int bu
     }
 }
 
-void putc(int buf, unsigned char color, const int c) {
-	unsigned int width  = 0;
-	unsigned int height = 0;
-	unsigned int size = 0;
-    unsigned int cursor_x;
-    unsigned int cursor_y;
-    char* colorbuf;
-    char* strbuf;
+void putc(void* buf, unsigned char color, const int c) {
+    if ((int)buf == stdout || (int)buf == stderr) {
+		unsigned int width  = 0;
+		unsigned int height = 0;
+		unsigned int size = 0;
+    	unsigned int cursor_x;
+    	unsigned int cursor_y;
+    	char* colorbuf;
+    	char* strbuf;
 
-	if (buf == TOP_SCREEN) {
-		width    = TEXT_TOP_WIDTH;
-		height   = TEXT_TOP_HEIGHT;
-		size     = TEXT_TOP_SIZE;
-        colorbuf = color_buffer_top;
-        strbuf   = text_buffer_top;
-        cursor_x = top_cursor_x;
-        cursor_y = top_cursor_y;
-	} else if (buf == BOTTOM_SCREEN) {
-		width    = TEXT_BOTTOM_WIDTH;
-		height   = TEXT_BOTTOM_HEIGHT;
-		size     = TEXT_BOTTOM_SIZE;
-        colorbuf = color_buffer_bottom;
-        strbuf   = text_buffer_bottom;
-        cursor_x = bottom_cursor_x;
-        cursor_y = bottom_cursor_y;
+		if ((int)buf == TOP_SCREEN) {
+			width    = TEXT_TOP_WIDTH;
+			height   = TEXT_TOP_HEIGHT;
+			size     = TEXT_TOP_SIZE;
+    	    colorbuf = color_buffer_top;
+    	    strbuf   = text_buffer_top;
+    	    cursor_x = top_cursor_x;
+    	    cursor_y = top_cursor_y;
+		} else if ((int)buf == BOTTOM_SCREEN) {
+			width    = TEXT_BOTTOM_WIDTH;
+			height   = TEXT_BOTTOM_HEIGHT;
+			size     = TEXT_BOTTOM_SIZE;
+	        colorbuf = color_buffer_bottom;
+	        strbuf   = text_buffer_bottom;
+	        cursor_x = bottom_cursor_x;
+	        cursor_y = bottom_cursor_y;
+		}
+
+		unsigned int offset = width * cursor_y + cursor_x;
+
+		if (offset >= size) {
+	        // Scroll a line back. This involves memcpy.
+	        // Yes, memcpy overwrites part of the buffer it is reading.
+	        memcpy(strbuf, strbuf+width, size-width);
+	        memcpy(colorbuf, colorbuf+width, size-width);
+	        cursor_y -= 1;
+			offset = width * cursor_y + cursor_x;
+	    }
+
+		if (offset >= size) {
+	        // So if we're being real, this won't ever happen.
+	        return;
+	    }
+
+	    switch(c) {
+	        case '\n':
+	            cursor_y++;   // Increment line.
+	            cursor_x = 0;
+	            break;
+	        case '\r':
+	            cursor_x = 0; // Reset to beginning of line.
+	            break;
+	        default:
+	            strbuf[offset] = c;
+	            colorbuf[offset] = color; // White on black.
+	            cursor_x++;
+	            if (cursor_x >= width) {
+	                cursor_y++;
+	                cursor_x = 0;
+	            }
+	            break;
+	    }
+
+	    if ((int)buf == TOP_SCREEN) {
+	        top_cursor_x = cursor_x;
+	        top_cursor_y = cursor_y;
+	    } else if ((int)buf == BOTTOM_SCREEN) {
+	        bottom_cursor_x = cursor_x;
+	        bottom_cursor_y = cursor_y;
+	    }
 	} else {
-		return; // Invalid buffer.
+		// FILE*, not stdin or stdout.
+		fwrite(&c, 1, 1, (FILE*)buf);
 	}
-
-	unsigned int offset = width * cursor_y + cursor_x;
-
-	if (offset >= size) {
-        // Scroll a line back. This involves memcpy.
-        // Yes, memcpy overwrites part of the buffer it is reading.
-        memcpy(strbuf, strbuf+width, size-width);
-        memcpy(colorbuf, colorbuf+width, size-width);
-        cursor_y -= 1;
-		offset = width * cursor_y + cursor_x;
-    }
-
-	if (offset >= size) {
-        // So if we're being real, this won't ever happen.
-        return;
-    }
-
-    switch(c) {
-        case '\n':
-            cursor_y++;   // Increment line.
-            cursor_x = 0;
-            break;
-        case '\r':
-            cursor_x = 0; // Reset to beginning of line.
-            break;
-        default:
-            strbuf[offset] = c;
-            colorbuf[offset] = color; // White on black.
-            cursor_x++;
-            if (cursor_x >= width) {
-                cursor_y++;
-                cursor_x = 0;
-            }
-            break;
-    }
-
-    if (buf == TOP_SCREEN) {
-        top_cursor_x = cursor_x;
-        top_cursor_y = cursor_y;
-    } else if (buf == BOTTOM_SCREEN) {
-        bottom_cursor_x = cursor_x;
-        bottom_cursor_y = cursor_y;
-    }
 }
 
-void puts(int buf, unsigned char color, const char *string) {
+void puts(void* buf, unsigned char color, const char *string) {
     char *ref = (char*)string;
 
     while(*ref != '\0') {
@@ -203,10 +208,10 @@ void puts(int buf, unsigned char color, const char *string) {
     }
 }
 
-void put_int(int channel, unsigned char color, int n) {
-    char conv[16], out[16];
-    memset(conv, 0, 16);
-    memset(out, 0, 16);
+void put_int64(void* channel, unsigned char color, int64_t n, int length) {
+    char conv[32], out[32];
+    memset(conv, 0, 32);
+    memset(out, 0, 32);
 
     int i = 0, sign = 0;
     if (n < 0) {
@@ -222,6 +227,9 @@ void put_int(int channel, unsigned char color, int n) {
     if (sign)
         conv[i++] = '-';
 
+    if (length > 0)
+        out[length] = '\0';
+
     int len = strlen(conv);
     for(int i=0; i < len; i++)
         out[i] = conv[(len-1) - i];
@@ -229,16 +237,19 @@ void put_int(int channel, unsigned char color, int n) {
     puts(channel, color, out);
 }
 
-void put_uint(int channel, unsigned char color, unsigned int n) {
-    char conv[16], out[16];
-    memset(conv, 0, 16);
-    memset(out, 0, 16);
+void put_uint64(void* channel, unsigned char color, uint64_t n, int length) {
+    char conv[32], out[32];
+    memset(conv, 0, 32);
+    memset(out, 0, 32);
 
     int i = 0;
     do {
         conv[i++] = (n % 10) + '0';
     } while((n /= 10) != 0);
 
+    if (length > 0)
+        out[length] = '\0';
+
     int len = strlen(conv);
     for(int i=0; i < len; i++)
         out[i] = conv[(len-1) - i];
@@ -246,8 +257,16 @@ void put_uint(int channel, unsigned char color, unsigned int n) {
     puts(channel, color, out);
 }
 
-void cflush(int channel) {
-    if (channel == TOP_SCREEN) {
+void put_uint(void* channel, unsigned char color, unsigned int n, int length) {
+    put_uint64(channel, color, n, length);
+}
+
+void put_int(void* channel, unsigned char color, int n, int length) {
+    put_int64(channel, color, n, length);
+}
+
+void fflush(void* channel) {
+    if ((int)channel == TOP_SCREEN) {
 		for(int x=0; x < TEXT_TOP_WIDTH; x++) {
 			for(int y=0; y < TEXT_TOP_HEIGHT; y++) {
             	char c = text_buffer_top[y*TEXT_TOP_WIDTH+x];
@@ -256,7 +275,7 @@ void cflush(int channel) {
 				draw_character(framebuffers->top_left, c, x, y, color_fg, color_bg);
 			}
 		}
-    } else if (channel == BOTTOM_SCREEN) {
+    } else if ((int)channel == BOTTOM_SCREEN) {
 		for(int x=0; x < TEXT_BOTTOM_WIDTH; x++) {
 			for(int y=0; y < TEXT_BOTTOM_HEIGHT; y++) {
             	char c = text_buffer_bottom[y*TEXT_BOTTOM_WIDTH+x];
@@ -265,10 +284,12 @@ void cflush(int channel) {
 				draw_character(framebuffers->bottom, c, x, y, color_fg, color_bg);
 			}
 		}
+	} else {
+		f_sync(&(((FILE*)channel)->handle)); // Sync to disk.
 	}
 }
 
-void cprintf(int channel, const char* format, ...) {
+void fprintf(void* channel, const char* format, ...) {
     va_list ap;
     va_start( ap, format );
 
@@ -276,15 +297,63 @@ void cprintf(int channel, const char* format, ...) {
     unsigned char color = 0xf0;
 
     while(*ref != '\0') {
-        if(*ref == '%') {
+		if (*ref == 0x1B && *(++ref) == '[' && ( (int)channel == stdout || (int)channel == stderr) ) {
+ansi_codes:
+            // Ansi escape code.
+            ++ref;
+            // [30-37] Set text color
+            if (*ref == '3') {
+                ++ref;
+                if(*ref >= '0' && *ref <= '7') {
+                    // Valid FG color.
+                    color &= 0x0f; // Remove fg color.
+                    color |= (*ref - '0') << 4;
+                }
+            }
+            // [40-47] Set bg color
+            else if (*ref == '4') {
+                ++ref;
+                if(*ref >= '0' && *ref <= '7') {
+                    // Valid BG color.
+                    color &= 0xf0; // Remove bg color.
+                    color |= *ref - '0';
+                }
+            }
+
+            ++ref;
+
+            if (*ref == ';') {
+                goto ansi_codes; // Another code.
+            }
+
+            // Loop until the character is somewhere 0x40 - 0x7E, which terminates an ANSI sequence
+            while(!(*ref >= 0x40 && *ref <= 0x7E)) ref++;
+        } else if (*ref == '%') {
+            int type_size = 0;
+            int length = -1;
+check_format:
             // Format string.
-            ref++;
+            ++ref;
             switch(*ref) {
                 case 'd':
-                    put_int(channel, color, va_arg( ap, int ));
+                    switch(type_size) {
+                        case 2:
+                            put_int64(channel, color, va_arg( ap, int64_t ), length);
+                            break;
+                        default:
+                            put_int(channel, color, va_arg( ap, int ), length);
+                            break;
+                    }
                     break;
                 case 'u':
-                    put_uint(channel, color, va_arg( ap, unsigned int ));
+                    switch(type_size) {
+                        case 2:
+                            put_uint64(channel, color, va_arg( ap, uint64_t ), length);
+                            break;
+                        default:
+                            put_uint(channel, color, va_arg( ap, unsigned int ), length);
+                            break;
+                    }
                     break;
                 case 's':
                     puts(channel, color, va_arg( ap, char* ));
@@ -298,17 +367,26 @@ void cprintf(int channel, const char* format, ...) {
                 case '%':
                     putc(channel, color, '%');
                     break;
+                case 'h':
+                    goto check_format; // Integers get promoted. No point here.
+                case 'l':
+                    ++type_size;
+                    goto check_format;
                 default:
+                    if (*ref >= '0' && *ref <= '9') {
+                        length = *ref - '0';
+                        goto check_format;
+                    }
                     break;
             }
         } else {
             putc(channel, color, *ref);
         }
-        ref++;
+        ++ref;
     }
 
     va_end( ap );
 
-    cflush(channel);
+    fflush(channel);
 }
 

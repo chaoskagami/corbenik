@@ -46,29 +46,29 @@ int menu_help() {
 
     header();
 
-    fprintf(stdout,     "Corbenik is a 3DS firmware patcher\n"
+    fprintf(stdout,     "\nCorbenik is a 3DS firmware patcher\n"
                         "  commonly known as a CFW. It seeks to address\n"
                         "  some faults in other CFWs and is generally\n"
                         "  just another choice for users - but primarily\n"
                         "  the kind of person who runs Gentoo or LFS. ;P\n"
-                        "\n"
+                        "\n                                             "
                         "Credits to people who've helped me put this\n"
                         "  together either by having written GPL code,\n"
                         "  or being just generally helpful/cool people:\n"
                         "  @mid-kid, @Wolfvak, @Reisyukaku, @AuroraWright\n"
                         "  @d0k3, and others\n"
-                        "\n"
+                        "\n                                            "
                         "The name of this comes from the .hack//series.\n"
                         "  Look it up, if you don't already know it.\n"
-                        "\n"
+                        "\n                                            "
                         "Any bugs filed including the letters S, A\n"
                         "  and O will be closed with no discussion.\n"
-                        "\n"
+                        "\n                                          "
                         " <https://github.com/chaoskagami/corbenik>\n"
-                        "\n"
-                        "Press B to return.\n");
+                        "\n                                        "
+                        "Press any button to return.\n");
     while (1) {
-        if (wait_key() & BUTTON_B)
+        if (wait_key() & BUTTON_ANY)
             break;
     }
 

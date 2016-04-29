@@ -114,7 +114,7 @@ int menu_main() {
 
     for(int i=0; i < menu_max; i++) {
         if (cursor_y == i)
-            fprintf(TOP_SCREEN, "\x1b[42m>>   ");
+            fprintf(TOP_SCREEN, "\x1b[32m>>   ");
         else
             fprintf(TOP_SCREEN, "   ");
         fprintf(TOP_SCREEN, "%s\n", list[i]);

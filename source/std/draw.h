@@ -54,8 +54,8 @@ void draw_character(uint8_t* screen, const char character, const unsigned int po
 #define stdout TOP_SCREEN
 #define stderr BOTTOM_SCREEN
 
-void putc(void* buf, unsigned char color, const int c);
-void puts(void* buf, unsigned char color, const char *string);
+void putc(void* buf, const int c);
+void puts(void* buf, const char *string);
 void fflush(void* channel);
 
 void set_cursor(int channel, unsigned int x, unsigned int y);
@@ -91,6 +91,6 @@ void fprintf(void* channel, const char* format, ...);
 #define YELLOW    14
 #define WHITE     15
 
-#define COLOR(fg, bg) (((fg & 0x0f) << 4) | (bg & 0x0f))
+#define COLOR(fg, bg) "\x1b[3" #fg ";4" #bg "m"
 
 #endif

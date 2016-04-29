@@ -36,52 +36,6 @@ void slot0x11key96_init()
     // Otherwise, we make sure the error message for decrypting arm9bin mentions this.
 }
 
-int decrypt_cetk_key(void *key, const void *cetk)
-{
-    // This function only decrypts the NATIVE_FIRM CETK.
-    // I don't need it for anything else atm.
-    // Either way, this is the reason for the two checks here at the top.
-
-    static int common_key_y_init = 0;
-    uint8_t iv[AES_BLOCK_SIZE] = {0};
-
-    uint32_t sigtype = __builtin_bswap32(*(uint32_t *)cetk);
-    if (sigtype != SIG_TYPE_RSA2048_SHA256) return 1;
-
-    ticket_h *ticket = (ticket_h *)(cetk + sizeof(sigtype) + 0x13C);
-    if (ticket->ticketCommonKeyYIndex != 1) return 1;
-
-    if (!common_key_y_init) {
-        uint8_t common_key_y[AES_BLOCK_SIZE] = {0};
-        uint8_t *p9_base = (uint8_t *)0x08028000;
-        uint8_t *i;
-        for (i = p9_base + 0x70000 - AES_BLOCK_SIZE; i >= p9_base; i--) {
-            if (i[0] == 0xD0 && i[4] == 0x9C && i[8] == 0x32 && i[12] == 0x23) {
-                // At i, there's 7 keys with 4 bytes padding between them.
-                // We only need the 2nd.
-                memcpy(common_key_y, i + AES_BLOCK_SIZE + 4, sizeof(common_key_y));
-                fprintf(BOTTOM_SCREEN, "Found the common key Y\n");
-
-                break;
-            }
-        }
-        if (i < p9_base) return 1;
-
-        aes_setkey(0x3D, common_key_y, AES_KEYY, AES_INPUT_BE | AES_INPUT_NORMAL);
-        common_key_y_init = 1;
-    }
-
-    aes_use_keyslot(0x3D);
-
-    memcpy(iv, ticket->titleID, sizeof(ticket->titleID));
-
-    fprintf(BOTTOM_SCREEN, "Decrypting key\n");
-    memcpy(key, ticket->titleKey, sizeof(ticket->titleKey));
-    aes(key, key, 1, iv, AES_CBC_DECRYPT_MODE, AES_INPUT_BE | AES_INPUT_NORMAL);
-
-    return 0;
-}
-
 int decrypt_firm_title(firm_h *dest, ncch_h *ncch, uint32_t *size, void *key)
 {
     uint8_t firm_iv[16] = {0};
@@ -159,21 +113,8 @@ int decrypt_firm(firm_h *dest, char *path_firmkey, char *path_cetk, uint32_t *si
 
     // Firmware is likely encrypted. Decrypt.
     if (!read_file(firm_key, path_firmkey, AES_BLOCK_SIZE)) {
-        fprintf(BOTTOM_SCREEN, "Failed to load FIRM key,\n"
-                               "  Attempting to generate with CETK.\n");
-
-        if (!read_file(fcram_temp, path_cetk, FCRAM_SPACING)) {
-            fprintf(BOTTOM_SCREEN, "Failed to load CETK\n");
-            return 1;
-        }
-        fprintf(BOTTOM_SCREEN, "Loaded CETK\n");
-
-        if (decrypt_cetk_key(firm_key, fcram_temp) != 0) {
-            fprintf(BOTTOM_SCREEN, "Failed to decrypt the CETK\n");
-            return 1;
-        }
-        fprintf(BOTTOM_SCREEN, "Saving FIRM key for future use\n");
-        write_file(firm_key, path_firmkey, AES_BLOCK_SIZE);
+        fprintf(BOTTOM_SCREEN, "Failed to load FIRM key\n");
+        return 1;
     } else {
         fprintf(BOTTOM_SCREEN, "Loaded FIRM key\n");
     }

@@ -32,7 +32,7 @@ uint32_t wait_key() {
 }
 
 void header() {
-    fprintf(stdout, "\x1b[33;40m[.corbenik//%s]\n", VERSION);
+    fprintf(stdout, "\x1b[33;40m[.corbenik//%s]\x1b[0m\n", VERSION);
 }
 
 int menu_options() { return MENU_MAIN; }
@@ -114,7 +114,7 @@ int menu_main() {
 
     for(int i=0; i < menu_max; i++) {
         if (cursor_y == i)
-            fprintf(TOP_SCREEN, "\x1b[32m>>   ");
+            fprintf(TOP_SCREEN, "\x1b[32m>>\x1b[0m   ");
         else
             fprintf(TOP_SCREEN, "   ");
         fprintf(TOP_SCREEN, "%s\n", list[i]);

@@ -1,5 +1,7 @@
 rwildcard = $(foreach d, $(wildcard $1*), $(filter $(subst *, %, $2), $d) $(call rwildcard, $d/, $2))
 
+PATH := $(PATH):$(DEVKITARM)/bin
+
 CC := arm-none-eabi-gcc
 AS := arm-none-eabi-as
 LD := arm-none-eabi-ld
@@ -14,10 +16,10 @@ dir_data   := data
 dir_build  := build
 dir_out    := out
 
-REVISION := $(shell git rev-list --count HEAD)
+REVISION := r$(shell git rev-list --count HEAD):$(shell git rev-parse HEAD | head -c8)
 
 ASFLAGS := -mlittle-endian -mcpu=arm946e-s -march=armv5te
-CFLAGS  := -Wall -Wextra -Os $(ASFLAGS) -fno-builtin -std=c11 -DVERSION=\"r$(REVISION)\"
+CFLAGS  := -MMD -MP -Wall -Wextra -Werror -Os $(ASFLAGS) -fno-builtin -std=c11 -DVERSION=\"$(REVISION)\"
 FLAGS   := dir_out=$(abspath $(dir_out)) --no-print-directory
 LDFLAGS := -nostdlib -Wl,-z,defs -lgcc
 

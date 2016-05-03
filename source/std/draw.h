@@ -35,11 +35,14 @@ enum screen {
     screen_bottom
 };
 
-static struct framebuffers {
+#include "unused.h"
+
+_UNUSED static struct framebuffers {
     uint8_t *top_left;
     uint8_t *top_right;
     uint8_t *bottom;
 } *framebuffers = (struct framebuffers *)0x23FFFE00;
+// This is marked unused since it occurs in all files.
 
 #define TOP_FB    framebuffers->top_left
 #define BOTTOM_FB framebuffers->bottom
@@ -48,8 +51,8 @@ void clear_screen(uint8_t* screen);
 void clear_screens();
 void draw_character(uint8_t* screen, const char character, const unsigned int pos_x, const unsigned int pos_y, const uint32_t color_fg, const uint32_t color_bg);
 
-#define TOP_SCREEN    0
-#define BOTTOM_SCREEN 2
+#define TOP_SCREEN    ((void*)0)
+#define BOTTOM_SCREEN ((void*)2)
 
 #define stdout TOP_SCREEN
 #define stderr BOTTOM_SCREEN
@@ -58,7 +61,7 @@ void putc(void* buf, const int c);
 void puts(void* buf, const char *string);
 void fflush(void* channel);
 
-void set_cursor(int channel, unsigned int x, unsigned int y);
+void set_cursor(void* channel, unsigned int x, unsigned int y);
 
 // Like printf. Supports the following format specifiers:
 //  %s - char*

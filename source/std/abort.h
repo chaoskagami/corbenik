@@ -1,8 +1,10 @@
 #ifndef __ABORT_H
 #define __ABORT_H
 
+#include "draw.h"
+
 #define abort(x...) { \
-  fprintf(2, x); \
+  fprintf(stderr, x); \
   fumount(); \
   while(1); \
 }

@@ -7,6 +7,7 @@
 #include "font.h"
 #include "../fatfs/ff.h"
 #include "fs.h"
+#include "unused.h"
 
 static unsigned int top_cursor_x = 0, top_cursor_y = 0;
 static unsigned int bottom_cursor_x = 0, bottom_cursor_y = 0;
@@ -40,9 +41,10 @@ void clear_screen(uint8_t* screen) {
 	uint32_t size = 0;
 	char* buffer  = 0;
 	uint32_t buffer_size = 0;
-    if ((int)screen == TOP_SCREEN)
+
+    if (screen == TOP_SCREEN)
         screen = framebuffers->top_left;
-    else if ((int)screen == BOTTOM_SCREEN)
+    else if (screen == BOTTOM_SCREEN)
         screen = framebuffers->bottom;
 
 	if(screen == framebuffers->top_left ||
@@ -66,16 +68,13 @@ void clear_screen(uint8_t* screen) {
 	memset(buffer, 0, buffer_size);
 }
 
-void set_cursor(int channel, unsigned int x, unsigned int y) {
-	switch(channel) {
-		case TOP_SCREEN:
-            top_cursor_x = x;
-            top_cursor_y = y;
-            break;
-		case BOTTOM_SCREEN:
-            bottom_cursor_x = x;
-            bottom_cursor_y = y;
-            break;
+void set_cursor(void* channel, unsigned int x, unsigned int y) {
+	if (channel == TOP_SCREEN) {
+        top_cursor_x = x;
+        top_cursor_y = y;
+	} else if (channel == BOTTOM_SCREEN) {
+        bottom_cursor_x = x;
+        bottom_cursor_y = y;
 	}
 }
 
@@ -88,7 +87,7 @@ void draw_character(uint8_t* screen, const char character, const unsigned int bu
     if (!isprint(character))
         return; // Don't output non-printables.
 
-	int width  = 0;
+	_UNUSED int width  = 0;
 	int height = 0;
 	if(screen == framebuffers->top_left ||
        screen == framebuffers->top_right) {
@@ -127,9 +126,9 @@ unsigned char color_top = 0xf0;
 unsigned char color_bottom = 0xf0;
 
 void putc(void* buf, const int c) {
-    if ((int)buf == stdout || (int)buf == stderr) {
+    if (buf == stdout || buf == stderr) {
 		unsigned int width  = 0;
-		unsigned int height = 0;
+		_UNUSED unsigned int height = 0;
 		unsigned int size = 0;
     	unsigned int cursor_x;
     	unsigned int cursor_y;
@@ -138,7 +137,7 @@ void putc(void* buf, const int c) {
 
 		unsigned char* color = NULL;
 
-		if ((int)buf == TOP_SCREEN) {
+		if (buf == TOP_SCREEN) {
 			width    = TEXT_TOP_WIDTH;
 			height   = TEXT_TOP_HEIGHT;
 			size     = TEXT_TOP_SIZE;
@@ -147,7 +146,7 @@ void putc(void* buf, const int c) {
     	    cursor_x = top_cursor_x;
     	    cursor_y = top_cursor_y;
 			color = &color_top;
-		} else if ((int)buf == BOTTOM_SCREEN) {
+		} else if (buf == BOTTOM_SCREEN) {
 			width    = TEXT_BOTTOM_WIDTH;
 			height   = TEXT_BOTTOM_HEIGHT;
 			size     = TEXT_BOTTOM_SIZE;
@@ -193,10 +192,10 @@ void putc(void* buf, const int c) {
 	            break;
 	    }
 
-	    if ((int)buf == TOP_SCREEN) {
+	    if (buf == TOP_SCREEN) {
 	        top_cursor_x = cursor_x;
 	        top_cursor_y = cursor_y;
-	    } else if ((int)buf == BOTTOM_SCREEN) {
+	    } else if (buf == BOTTOM_SCREEN) {
 	        bottom_cursor_x = cursor_x;
 	        bottom_cursor_y = cursor_y;
 	    }
@@ -273,7 +272,7 @@ void put_int(void* channel, int n, int length) {
 }
 
 void fflush(void* channel) {
-    if ((int)channel == TOP_SCREEN) {
+    if (channel == TOP_SCREEN) {
 		for(int x=0; x < TEXT_TOP_WIDTH; x++) {
 			for(int y=0; y < TEXT_TOP_HEIGHT; y++) {
             	char c = text_buffer_top[y*TEXT_TOP_WIDTH+x];
@@ -282,7 +281,7 @@ void fflush(void* channel) {
 				draw_character(framebuffers->top_left, c, x, y, color_fg, color_bg);
 			}
 		}
-    } else if ((int)channel == BOTTOM_SCREEN) {
+    } else if (channel == BOTTOM_SCREEN) {
 		for(int x=0; x < TEXT_BOTTOM_WIDTH; x++) {
 			for(int y=0; y < TEXT_BOTTOM_HEIGHT; y++) {
             	char c = text_buffer_bottom[y*TEXT_BOTTOM_WIDTH+x];
@@ -303,13 +302,13 @@ void fprintf(void* channel, const char* format, ...) {
     char *ref = (char*)format;
 
 	unsigned char* color;
-	if ((int)channel == TOP_SCREEN)
+	if (channel == TOP_SCREEN)
 		color = &color_top;
-	else if ((int)channel == TOP_SCREEN)
+	else if (channel == TOP_SCREEN)
 		color = &color_bottom;
 
     while(*ref != '\0') {
-		if (*ref == 0x1B && *(++ref) == '[' && ( (int)channel == stdout || (int)channel == stderr) ) {
+		if (*ref == 0x1B && *(++ref) == '[' && ( channel == stdout || channel == stderr) ) {
 ansi_codes:
             // Ansi escape code.
             ++ref;

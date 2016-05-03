@@ -113,7 +113,7 @@ int i2cReadRegisterBuffer(unsigned int dev_id, int reg, uint8_t* buffer, size_t 
     }
 
     if (buf_size != 1) {
-        for (int i = 0; i < buf_size - 1; i++) {
+        for (size_t i = 0; i < buf_size - 1; i++) {
             i2cWaitBusy(bus_id);
             *i2cGetCntReg(bus_id) = 0xF0;
             i2cWaitBusy(bus_id);

@@ -7,12 +7,15 @@
 
 firm_h *firm_loc = (firm_h *)FCRAM_FIRM_LOC;
 static uint32_t firm_size = FCRAM_SPACING;
+firm_section_h firm_proc9;
 
 firm_h *twl_firm_loc = (firm_h *)FCRAM_TWL_FIRM_LOC;
 static uint32_t twl_firm_size = FCRAM_SPACING * 2;
+firm_section_h twl_firm_proc9;
 
 firm_h *agb_firm_loc = (firm_h *)FCRAM_AGB_FIRM_LOC;
 static uint32_t agb_firm_size = FCRAM_SPACING;
+firm_section_h agb_firm_proc9;
 
 static int update_96_keys = 0;
 static int save_firm = 0;
@@ -36,8 +39,7 @@ void slot0x11key96_init()
     // Otherwise, we make sure the error message for decrypting arm9bin mentions this.
 }
 
-int decrypt_firm_title(firm_h *dest, ncch_h *ncch, uint32_t *size, void *key)
-{
+int decrypt_firm_title(firm_h *dest, ncch_h *ncch, uint32_t *size, void *key) {
     uint8_t firm_iv[16] = {0};
     uint8_t exefs_key[16] = {0};
     uint8_t exefs_iv[16] = {0};
@@ -108,7 +110,7 @@ int decrypt_arm9bin(arm9bin_h *header, uint64_t firm_title) {
     else return 0;
 }
 
-int decrypt_firm(firm_h *dest, char *path_firmkey, char *path_cetk, uint32_t *size, uint64_t firm_title) {
+int decrypt_firm(firm_h *dest, char *path_firmkey, uint32_t *size) {
     uint8_t firm_key[AES_BLOCK_SIZE];
 
     // Firmware is likely encrypted. Decrypt.
@@ -127,7 +129,7 @@ int decrypt_firm(firm_h *dest, char *path_firmkey, char *path_cetk, uint32_t *si
 	return 0;
 }
 
-int load_firm(firm_h *dest, char *path, char *path_firmkey, char *path_cetk, uint32_t *size, uint64_t firm_title) {
+int load_firm(firm_h *dest, char *path, char *path_firmkey, uint32_t *size, uint64_t firm_title) {
     int status = 0;
     int firmware_changed = 0;
 
@@ -147,7 +149,7 @@ int load_firm(firm_h *dest, char *path, char *path_firmkey, char *path_cetk, uin
 
 	// Check and decrypt FIRM if it is encrypted.
     if (dest->magic != FIRM_MAGIC) {
-        status = decrypt_firm(dest, path_firmkey, path_cetk, size, firm_title);
+        status = decrypt_firm(dest, path_firmkey, size);
         if (status != 0) {
             if (firm_title == NATIVE_FIRM_TITLEID) {
                 fprintf(BOTTOM_SCREEN, "Failed to decrypt firmware.\n"
@@ -277,28 +279,62 @@ void boot_firm() {
     ((void (*)())firm_loc->a9Entry)();
 }
 
+int find_proc9(firm_h* firm, firm_section_h* process9) {
+	for (firm_section_h *section = firm->section; section < firm->section + 4; section++) {
+		if (section->address == 0)
+			break;
+
+		if (section->type == FIRM_TYPE_ARM9) {
+			void* arm9section = (void*)firm + section->offset;
+			while (arm9section < arm9section + section->size) {
+				if (!memcmp(arm9section, "Process9", 8)) { // Process9
+					ncch_h *ncch = (ncch_h*)(arm9section - sizeof(ncch_h));
+					if (ncch->magic == NCCH_MAGIC) {
+						// Found Process9
+						ncch_ex_h *p9exheader = (ncch_ex_h *)(ncch + 1);
+						exefs_h *p9exefs = (exefs_h *)(p9exheader + 1);
+						process9->address = p9exheader->sci.textCodeSet.address;
+						process9->size = p9exefs->fileHeaders[0].size;
+						process9->offset = (void*)(p9exefs + 1) - (void*)firm;
+						fprintf(BOTTOM_SCREEN, "Found Process9 for FIRM.\n");
+						return 0;
+					}
+				}
+				++arm9section;
+			}
+		}
+	}
+	fprintf(BOTTOM_SCREEN, "Couldn't find Process9 for FIRM?\n");
+	return 1;
+}
+
 int load_firms() {
     fprintf(TOP_SCREEN, "[Loading FIRM]");
 
     fprintf(BOTTOM_SCREEN, "Loading NATIVE_FIRM\n");
-    if (load_firm(firm_loc, PATH_NATIVE_F, PATH_NATIVE_FIRMKEY, PATH_NATIVE_CETK, &firm_size, NATIVE_FIRM_TITLEID) != 0)
+    if (load_firm(firm_loc, PATH_NATIVE_F, PATH_NATIVE_FIRMKEY, &firm_size, NATIVE_FIRM_TITLEID) != 0)
         return 1;
+    find_proc9(firm_loc, &firm_proc9);
 
     fprintf(BOTTOM_SCREEN, "Loading TWL_FIRM\n");
-    if(load_firm(twl_firm_loc, PATH_TWL_F, PATH_TWL_FIRMKEY, PATH_TWL_CETK, &twl_firm_size, TWL_FIRM_TITLEID))
+    if(load_firm(twl_firm_loc, PATH_TWL_F, PATH_TWL_FIRMKEY, &twl_firm_size, TWL_FIRM_TITLEID))
         fprintf(BOTTOM_SCREEN, "TWL_FIRM failed to load.\n");
+	else
+    	find_proc9(twl_firm_loc, &twl_firm_proc9);
 
     fprintf(BOTTOM_SCREEN, "Loading AGB_FIRM\n");
-    if(load_firm(agb_firm_loc, PATH_AGB_F, PATH_AGB_FIRMKEY, PATH_AGB_CETK, &agb_firm_size, AGB_FIRM_TITLEID))
+    if(load_firm(agb_firm_loc, PATH_AGB_F, PATH_AGB_FIRMKEY, &agb_firm_size, AGB_FIRM_TITLEID))
         fprintf(BOTTOM_SCREEN, "AGB_FIRM failed to load.\n");
+	else
+    	find_proc9(agb_firm_loc, &agb_firm_proc9);
 
     return 0;
 }
 
 void boot_cfw() {
     fprintf(TOP_SCREEN, "[Patching]");
-//    if (patch_firm_all() != 0)
-//        return;
+    if (patch_firm_all() != 0)
+        return;
 
     // Only save the firm if that option is required (or it's needed for autoboot),
     //   and either the patches have been modified, or the file doesn't exist.
@@ -336,5 +372,5 @@ void boot_cfw() {
         }
     }
 
-//    boot_firm();
+    boot_firm();
 }

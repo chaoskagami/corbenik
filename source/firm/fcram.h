@@ -6,6 +6,8 @@
 
 #include <stdint.h>
 
+#include "../std/unused.h"
+
 extern void *fcram_temp;
 
 // Space between most of the locations
@@ -22,7 +24,7 @@ extern void *fcram_temp;
 // patch.c
 #define FCRAM_MEMORY_LOC (FCRAM_START + FCRAM_SPACING * 4)
 
-static uint8_t *memory_loc = (uint8_t *)FCRAM_MEMORY_LOC;
-static void *current_memory_loc;
+_UNUSED static uint8_t *memory_loc = (uint8_t *)FCRAM_MEMORY_LOC;
+_UNUSED static void *current_memory_loc;
 
 #endif

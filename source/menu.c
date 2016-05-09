@@ -13,6 +13,7 @@
 
 static int cursor_y = 0;
 static int which_menu = 1;
+static int need_redraw = 1;
 
 uint32_t wait_key() {
     uint32_t get = 0;
@@ -37,8 +38,6 @@ void header() {
 int menu_patches() { return MENU_MAIN; }
 
 int menu_options() {
-    clear_screen(TOP_SCREEN);
-
     set_cursor(TOP_SCREEN, 0, 0);
 
     const char *list[] = {
@@ -67,8 +66,19 @@ int menu_options() {
         else
             fprintf(TOP_SCREEN, "   ");
 
-        fprintf(TOP_SCREEN, "[%c] %s\n", (config.options[i] ? 'X' : ' '), list[i]);
+        if (need_redraw)
+			fprintf(TOP_SCREEN, "[%c] %s\n", (config.options[i] ? 'X' : ' '), list[i]);
+		else {
+			// Yes, this is weird. printf does a large number of extra things we don't
+			// want computed at the moment; this is faster.
+			putc(TOP_SCREEN, '[');
+			putc(TOP_SCREEN, (config.options[i] ? 'X' : ' '));
+			putc(TOP_SCREEN, ']');
+			putc(TOP_SCREEN, '\n');
+		}
     }
+
+	need_redraw = 0;
 
     uint32_t key = wait_key();
 
@@ -84,6 +94,9 @@ int menu_options() {
             config.options[cursor_y] = !config.options[cursor_y];
             break;
         case BUTTON_B:
+			need_redraw = 1;
+		    clear_screen(TOP_SCREEN);
+			cursor_y = 0;
             return MENU_MAIN;
             break;
     }
@@ -126,10 +139,14 @@ int menu_help() {
                         "\n"
                         " <https://github.com/chaoskagami/corbenik>\n"
                         "\n");
+
     while (1) {
         if (wait_key() & BUTTON_ANY)
             break;
     }
+
+	need_redraw = 1;
+    clear_screen(TOP_SCREEN);
 
     return MENU_MAIN;
 }
@@ -153,8 +170,6 @@ int menu_poweroff() {
 }
 
 int menu_main() {
-    clear_screen(TOP_SCREEN);
-
     set_cursor(TOP_SCREEN, 0, 0);
 
     const char *list[] = {
@@ -176,11 +191,19 @@ int menu_main() {
 	            fprintf(TOP_SCREEN, "\x1b[32m>>\x1b[0m ");
 	        else
 	            fprintf(TOP_SCREEN, "   ");
-	        fprintf(TOP_SCREEN, "%s\n", list[i]);
+
+        	if (need_redraw)
+	        	fprintf(TOP_SCREEN, "%s\n", list[i]);
+			else
+				putc(TOP_SCREEN, '\n');
 		}
     }
 
+	need_redraw = 0;
+
     uint32_t key = wait_key();
+
+	int ret = cursor_y+2;
 
     switch(key) {
         case BUTTON_UP:
@@ -194,8 +217,9 @@ int menu_main() {
 				cursor_y += 1; // Disable help.
             break;
         case BUTTON_A:
-            return cursor_y+2;
-            break;
+			need_redraw = 1;
+			cursor_y = 0;
+            return ret;
     }
 
     // Loop around the cursor.

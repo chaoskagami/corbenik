@@ -89,15 +89,69 @@ int patch_signatures() {
 	return 0;
 }
 
+int patch_firmprot() {
+	uint8_t *firm_mem = (uint8_t*)firm_p9_exefs + sizeof(exefs_h) + firm_p9_exefs->fileHeaders[0].offset;
+	uint32_t size = firm_p9_exefs->fileHeaders[0].size;
+
+    //Look for FIRM writing code
+    uint8_t* off = memfind(firm_mem, size, (uint8_t*)"exe:", 4);
+
+	if(off == NULL) {
+		fprintf(stderr, "Couldn't find 'exe:' string.\n");
+		return 1;
+	}
+
+	fprintf(stderr, "Firmprot: 'exe:' string @ %x\n", (uint32_t)off);
+
+    uint8_t pattern[] = {0x00, 0x28, 0x01, 0xDA};
+
+    uint8_t* firmprot = memfind(off - 0x100, 0x100, pattern, 4);
+
+	if(firmprot == NULL) {
+		fprintf(stderr, "Couldn't find firmprot code.\n");
+		return 2;
+	}
+
+	fprintf(stderr, "Firmprot: %x\n", (uint32_t)firmprot);
+
+	uint8_t patch[] = {0x00, 0x20, 0xC0, 0x46};
+	memcpy(firmprot, patch, 4);
+
+	fprintf(stderr, "Applied firmprot patch.\n");
+
+	return 0;
+}
+
+void wait() {
+	if (config.options[OPTION_TRACE]) {
+		fprintf(stderr, "Pausing because trace is on.\n");
+		wait_key();
+	}
+}
+
 int patch_firm_all() {
 	// Use builtin signature patcher?
 
-	fprintf(stderr, "Signature patch: %s\n", ((config.options[OPTION_SIGPATCH]) ? "yes" : "no" ));
+	fprintf(stderr, "Sigpatch: %s\n", ((config.options[OPTION_SIGPATCH]) ? "yes" : "no" ));
+	fprintf(stderr, "Protect: %s\n", ((config.options[OPTION_FIRMPROT]) ? "yes" : "no" ));
+
+	wait();
+
 	if (config.options[OPTION_SIGPATCH]) {
 		if(patch_signatures()) {
 			abort("Fatal. Sigpatch has failed.");
 		}
 	}
+
+	wait();
+
+	if (config.options[OPTION_FIRMPROT]) {
+		if(patch_firmprot()) {
+			abort("Fatal. Firmprot has failed.");
+		}
+	}
+
+	wait();
 
 	// Replace loader?
 	if (config.options[OPTION_LOADER]) {
@@ -112,8 +166,6 @@ int patch_firm_all() {
 
 		// FIXME - NYI
 	}
-
-	wait_key();
 
 	return 0;
 }

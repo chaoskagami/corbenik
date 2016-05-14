@@ -58,9 +58,10 @@ int menu_options() {
     set_cursor(TOP_SCREEN, 0, 0);
 
     const char *list[] = {
-        "Signature patch (builtin)",
-        "Loader module (builtin)",
-        "ARM9 thread (builtin)",
+        "Signature Patch",
+        "FIRM Write Protection",
+        "Inject Loader",
+        "Enable ARM9 Thread",
 
         "Autoboot",
         "Silence debug output",

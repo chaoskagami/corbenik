@@ -2,6 +2,8 @@
 
 FILE* conf_handle;
 
+struct config_file config;
+
 void regenerate_config() {
 	f_mkdir(PATH_CFW);
     f_mkdir(PATH_FIRMWARES);
@@ -16,6 +18,7 @@ void regenerate_config() {
     memset(&config, 0, sizeof(config));
     memcpy(&(config.magic), CONFIG_MAGIC, 4);
     config.config_ver = config_version;
+
 
     if(!(conf_handle = fopen(PATH_CONFIG, "w")))
         abort("Failed to open config for write?\n");
@@ -63,3 +66,14 @@ void load_config() {
     fprintf(BOTTOM_SCREEN, "Config file loaded.\n");
 }
 
+void save_config() {
+	fprintf(stderr, "Saving config.\n");
+
+    f_unlink(PATH_CONFIG);
+
+    if(!(conf_handle = fopen(PATH_CONFIG, "w")))
+        abort("Failed to open config for write?\n");
+
+    fwrite(&config, 1, sizeof(config), conf_handle);
+    fclose(conf_handle);
+}

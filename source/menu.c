@@ -10,10 +10,27 @@
 #define MENU_HELP     5
 #define MENU_RESET    6
 #define MENU_POWER    7
+#define MENU_DUMPBOOT 8
 
 static int cursor_y = 0;
 static int which_menu = 1;
 static int need_redraw = 1;
+
+int menu_dumpboot() {
+	// No, we can't dump the whole bootrom.
+	// I'm still curious what's in the readable half.
+
+	FILE *output9;
+    if(!(output9 = fopen("/bootrom9_low.bin", "w")))
+        abort("Failed to open file for write?\n");
+
+    fwrite((uint8_t*)0xffff0000, 1, 0x8000, output9);
+    fclose(output9);
+
+	fprintf(stderr, "Dumped 0x8000 bytes at 0xffff0000\n");
+
+	return MENU_MAIN;
+}
 
 uint32_t wait_key() {
     uint32_t get = 0;
@@ -179,9 +196,10 @@ int menu_main() {
         "Help/Readme",
         "Reset",
         "Power off",
+        "Dump partial arm9 bootrom",
         "Boot firmware"
     };
-    int menu_max = 6;
+    int menu_max = 8;
 
     header();
 
@@ -219,6 +237,8 @@ int menu_main() {
         case BUTTON_A:
 			need_redraw = 1;
 			cursor_y = 0;
+            if (ret == 9)
+				return MENU_BOOTME; // Boot meh, damnit!
             return ret;
     }
 
@@ -248,6 +268,9 @@ int menu_handler() {
             break;
         case MENU_HELP:
             to_menu = menu_help();
+            break;
+        case MENU_DUMPBOOT:
+            to_menu = menu_dumpboot();
             break;
         case MENU_BOOTME:
             return 0;

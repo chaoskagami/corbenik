@@ -8,17 +8,19 @@
 firm_h *firm_loc = (firm_h *)FCRAM_FIRM_LOC;
 static uint32_t firm_size = FCRAM_SPACING;
 firm_section_h firm_proc9;
+exefs_h *firm_p9_exefs;
 
 firm_h *twl_firm_loc = (firm_h *)FCRAM_TWL_FIRM_LOC;
 static uint32_t twl_firm_size = FCRAM_SPACING * 2;
 firm_section_h twl_firm_proc9;
+exefs_h *twl_firm_p9_exefs;
 
 firm_h *agb_firm_loc = (firm_h *)FCRAM_AGB_FIRM_LOC;
 static uint32_t agb_firm_size = FCRAM_SPACING;
 firm_section_h agb_firm_proc9;
+exefs_h *agb_firm_p9_exefs;
 
 static int update_96_keys = 0;
-static int save_firm = 0;
 
 static volatile uint32_t *const a11_entry = (volatile uint32_t *)0x1FFFFFF8;
 
@@ -77,13 +79,12 @@ int decrypt_firm_title(firm_h *dest, ncch_h *ncch, uint32_t *size, void *key) {
     return 0;
 }
 
-int decrypt_arm9bin(arm9bin_h *header, uint64_t firm_title) {
+int decrypt_arm9bin(arm9bin_h *header, uint64_t firm_title, uint8_t version) {
     uint8_t slot = 0x15;
 
     fprintf(BOTTOM_SCREEN, "Decrypting ARM9 FIRM binary\n");
 
-//    if (firm_title == NATIVE_FIRM_TITLEID && version > 0x0F) {
-    if (firm_title == NATIVE_FIRM_TITLEID) {
+    if (firm_title == NATIVE_FIRM_TITLEID && version > 0x0F) {
         uint8_t decrypted_keyx[AES_BLOCK_SIZE];
 
         slot0x11key96_init();
@@ -162,9 +163,12 @@ int load_firm(firm_h *dest, char *path, char *path_firmkey, uint32_t *size, uint
         fprintf(BOTTOM_SCREEN, "FIRM not encrypted\n");
     }
 
+	struct firm_signature* fsig = get_firm_info(dest);
+
+	fprintf(BOTTOM_SCREEN, "FIRM version: %s\n", fsig->version_string);
+
     // The N3DS firm has an additional encryption layer for ARM9
-    // Only run if n3ds.
-    {
+	if (fsig->console == console_n3ds) {
         // Look for the arm9 section
         for (firm_section_h *section = dest->section;
                 section < dest->section + 4; section++) {
@@ -179,7 +183,7 @@ int load_firm(firm_h *dest, char *path, char *path_firmkey, uint32_t *size, uint
 
                 if (arm9bin_iscrypt) {
                     // Decrypt the arm9bin.
-                    if (decrypt_arm9bin((arm9bin_h *)((uintptr_t)dest + section->offset), firm_title)) {
+                    if (decrypt_arm9bin((arm9bin_h *)((uintptr_t)dest + section->offset), firm_title, fsig->version)) {
                         fprintf(BOTTOM_SCREEN, "Couldn't decrypt ARM9 FIRM binary.\n"
                                                "Check if you have the needed key at:\n"
                                                "  " PATH_SLOT0X11KEY96 "\n");
@@ -189,9 +193,9 @@ int load_firm(firm_h *dest, char *path, char *path_firmkey, uint32_t *size, uint
                     firmware_changed = 1; // Decryption of arm9bin performed.
                 } else {
                     fprintf(BOTTOM_SCREEN, "ARM9 FIRM binary not encrypted\n");
-//                    if (firm_type == NATIVE_FIRM && firm_current->version > 0x0F) {
+                    if (firm_title == NATIVE_FIRM_TITLEID && fsig->version > 0x0F) {
                         slot0x11key96_init(); // This has to be loaded regardless, otherwise boot will fail.
-//                    }
+                    }
                 }
 
                 // We assume there's only one section to decrypt.
@@ -206,7 +210,7 @@ int load_firm(firm_h *dest, char *path, char *path_firmkey, uint32_t *size, uint
         write_file(dest, path, *size);
     }
 
-    //if (firm_current->console == console_n3ds)
+    if (fsig->console == console_n3ds)
     {
         fprintf(BOTTOM_SCREEN, "Fixing arm9 entrypoint\n");
 
@@ -257,13 +261,6 @@ void boot_firm() {
         fprintf(BOTTOM_SCREEN, "Updated keyX keyslots\n");
     }
 
-    struct memory_header *memory = (void *)(memory_loc + 1);
-    while ((uintptr_t)memory < (uintptr_t)memory_loc + *memory_loc) {
-        memcpy((void *)memory->location, memory + 1, memory->size);
-        memory = (void *)((uintptr_t)(memory + 1) + memory->size);
-    }
-    fprintf(BOTTOM_SCREEN, "Copied memory\n");
-
     for (firm_section_h *section = firm_loc->section;
             section < firm_loc->section + 4 && section->address != 0; section++) {
         memcpy((void *)section->address, (void *)firm_loc + section->offset, section->size);
@@ -279,7 +276,7 @@ void boot_firm() {
     ((void (*)())firm_loc->a9Entry)();
 }
 
-int find_proc9(firm_h* firm, firm_section_h* process9) {
+int find_proc9(firm_h* firm, firm_section_h* process9, exefs_h** p9exefs) {
 	for (firm_section_h *section = firm->section; section < firm->section + 4; section++) {
 		if (section->address == 0)
 			break;
@@ -292,10 +289,10 @@ int find_proc9(firm_h* firm, firm_section_h* process9) {
 					if (ncch->magic == NCCH_MAGIC) {
 						// Found Process9
 						ncch_ex_h *p9exheader = (ncch_ex_h *)(ncch + 1);
-						exefs_h *p9exefs = (exefs_h *)(p9exheader + 1);
+						*p9exefs = (exefs_h *)(p9exheader + 1);
 						process9->address = p9exheader->sci.textCodeSet.address;
-						process9->size = p9exefs->fileHeaders[0].size;
-						process9->offset = (void*)(p9exefs + 1) - (void*)firm;
+						process9->size = (*p9exefs)->fileHeaders[0].size;
+						process9->offset = (void*)((*p9exefs) + 1) - (void*)firm;
 						fprintf(BOTTOM_SCREEN, "Found Process9 for FIRM.\n");
 						return 0;
 					}
@@ -314,19 +311,19 @@ int load_firms() {
     fprintf(BOTTOM_SCREEN, "Loading NATIVE_FIRM\n");
     if (load_firm(firm_loc, PATH_NATIVE_F, PATH_NATIVE_FIRMKEY, &firm_size, NATIVE_FIRM_TITLEID) != 0)
         return 1;
-    find_proc9(firm_loc, &firm_proc9);
+    find_proc9(firm_loc, &firm_proc9, &firm_p9_exefs);
 
     fprintf(BOTTOM_SCREEN, "Loading TWL_FIRM\n");
     if(load_firm(twl_firm_loc, PATH_TWL_F, PATH_TWL_FIRMKEY, &twl_firm_size, TWL_FIRM_TITLEID))
         fprintf(BOTTOM_SCREEN, "TWL_FIRM failed to load.\n");
 	else
-    	find_proc9(twl_firm_loc, &twl_firm_proc9);
+    	find_proc9(twl_firm_loc, &twl_firm_proc9, &twl_firm_p9_exefs);
 
     fprintf(BOTTOM_SCREEN, "Loading AGB_FIRM\n");
     if(load_firm(agb_firm_loc, PATH_AGB_F, PATH_AGB_FIRMKEY, &agb_firm_size, AGB_FIRM_TITLEID))
         fprintf(BOTTOM_SCREEN, "AGB_FIRM failed to load.\n");
 	else
-    	find_proc9(agb_firm_loc, &agb_firm_proc9);
+    	find_proc9(agb_firm_loc, &agb_firm_proc9, &agb_firm_p9_exefs);
 
     return 0;
 }
@@ -335,42 +332,6 @@ void boot_cfw() {
     fprintf(TOP_SCREEN, "[Patching]");
     if (patch_firm_all() != 0)
         return;
-
-    // Only save the firm if that option is required (or it's needed for autoboot),
-    //   and either the patches have been modified, or the file doesn't exist.
-    if ((save_firm || config.options[OPTION_AUTOBOOT]) &&
-            f_stat(PATH_NATIVE_P, NULL) != 0) {
-        fprintf(BOTTOM_SCREEN, "Saving patched NATIVE_FIRM\n");
-        if (write_file(firm_loc, PATH_NATIVE_P, firm_size) != firm_size) {
-            fprintf(BOTTOM_SCREEN, "%pFailed to save patched FIRM.\nWriting SD failed.\nThis is fatal.\n", COLOR(RED, BLACK));
-            return;
-        }
-    }
-
-    if ((save_firm || config.options[OPTION_AUTOBOOT]) &&
-            f_stat(PATH_MEMBIN, NULL) != 0) {
-        fprintf(BOTTOM_SCREEN, "Saving patched memory\n");
-        if (write_file(memory_loc, PATH_MEMBIN, *memory_loc) != *memory_loc) {
-            fprintf(BOTTOM_SCREEN, "%pFailed to save the patched FIRM\nWriting SD failed.\n", COLOR(RED, BLACK));
-            return;
-        }
-    }
-
-    if (f_stat(PATH_TWL_P, NULL) != 0) {
-        fprintf(BOTTOM_SCREEN, "Saving patched TWL_FIRM\n");
-        if (write_file(twl_firm_loc, PATH_TWL_P, twl_firm_size) != twl_firm_size) {
-            fprintf(BOTTOM_SCREEN, "%pFailed to save the patched FIRM\nWriting SD failed.\n", COLOR(RED, BLACK));
-            return;
-        }
-    }
-
-    if (f_stat(PATH_AGB_P, NULL) != 0) {
-        fprintf(BOTTOM_SCREEN, "Saving patched AGB_FIRM\n");
-        if (write_file(agb_firm_loc, PATH_AGB_P, agb_firm_size) != agb_firm_size) {
-            fprintf(BOTTOM_SCREEN, "%pFailed to save the patched FIRM\nWriting SD failed.\n", COLOR(RED, BLACK));
-            return;
-        }
-    }
 
     boot_firm();
 }

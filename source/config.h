@@ -15,7 +15,7 @@ struct config_file {
     uint64_t patch_ids[256];    // What patches are enabled by UUID. 256 is an arbitrary limit - contact me if you hit it.
 }__attribute__((packed));
 
-_UNUSED static struct config_file config;
+extern struct config_file config;
 
 #define OPTION_SIGPATCH     0  // Use builtin signature patch.
 #define OPTION_LOADER       1  // Use builtin loader module replacer.
@@ -38,6 +38,7 @@ _UNUSED static struct config_file config;
 #define ARROW_COLOR         14 // Color of Arrow.
 
 void load_config();
+void save_config();
 
 /*
 [CORBENIK]

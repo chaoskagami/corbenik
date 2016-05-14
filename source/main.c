@@ -1,7 +1,8 @@
 #include "common.h"
 #include "firm/firm.h"
 
-void init_system() {}
+void init_system() {
+}
 
 int menu_handler();
 
@@ -23,6 +24,10 @@ int main() {
         in_menu = menu_handler();
     }
 
-    init_system();
+	fprintf(BOTTOM_SCREEN, "Booting CFW\n");
+
+	save_config(); // Save config file.
+
+	boot_cfw();
     // Under ideal conditions, we never get here.
 }

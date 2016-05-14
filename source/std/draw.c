@@ -263,6 +263,17 @@ void put_uint64(void* channel, uint64_t n, int length) {
     puts(channel, out);
 }
 
+void put_hexdump(void* channel, unsigned int num) {
+	uint8_t* num_8 = (uint8_t*)&num;
+	for(int i=3; i>=0; i--) {
+		uint8_t high = (num_8[i] >> 4) & 0xf;
+		uint8_t low  = num_8[i] & 0xf;
+
+		putc(channel, ("0123456789abcdef")[high]);
+		putc(channel, ("0123456789abcdef")[low]);
+	}
+}
+
 void put_uint(void* channel, unsigned int n, int length) {
     put_uint64(channel, n, length);
 }
@@ -386,6 +397,9 @@ check_format:
                 case 'l':
                     ++type_size;
                     goto check_format;
+				case 'x':
+					put_hexdump(channel, va_arg( ap, unsigned int ));
+					break;
                 default:
                     if (*ref >= '0' && *ref <= '9') {
                         length = *ref - '0';

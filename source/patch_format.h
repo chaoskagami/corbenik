@@ -70,6 +70,9 @@ struct system_patch {
     uint8_t patch_data[];     // The data for the patch. This is a sort of interpreted code...see below.
 } __attribute__((packed));
 
+struct patch_opcode {
+} __attribute__((packed));
+
 /*
 [PATCH]
 version=1

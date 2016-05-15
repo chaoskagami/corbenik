@@ -1,47 +1,18 @@
 Corbenik
 ==============================
 
-This is (yet another) CFW for the 3DS. Unlike other CFWs, this was mostly written from scratch for fun, and because I'm a control freak.
+This is (yet another) CFW for the 3DS. Unlike other CFWs, this was mostly written from scratch for fun, and because I'm a control freak. Some parts are inherited from other CFW - near everything in src/firm is based on CakesFW, and the signature patch/firmprot/svcbackdoor fix are all based on Luma3DS while using the more correct CakesFW section code.
 
-Conceptually, and in operation, it is most similar to mid-kid/CakesForeveryWan out of the bunch. That is, it uses external patches from the filesystem. Unlike cakes, patches are dynamically offset - the same way Luma3DS and ReiNand do things. But like cakes, they're software-defined.
+Conceptually, and in operation, this is most similar to mid-kid/CakesForeveryWan out of the bunch. That is, it uses external patches from the filesystem and is intended for developers and control freaks. Unlike cakes, patches are dynamically linked code for whatever processor it is on.
 
-More importantly - for arm9 programmers who don't like headaches - I have an implementation of console printf you may be interested in, and a very close imitation of stdio around fatfs in the `std` folder.
+Yes; you read that correctly. I initially was going to use a dynamic cake-like patch. I quickly realized a fatal flaw in any "patch" format: what you can do from a patch is limited to what the parser handles. The best way to fix this was to make patches standalone relocatable binaries instead.
 
-The version of loader in this repo is very tightly tied to the operation of Corbenik. It takes care of all binary changes on initialization. It should not be used with other versions of loader.
+The binary ABI is not yet stabilized. Do not expect a patch to simply function a version later. For this very reason, the CFW version field in the patch header is ignored at the moment until the ABI has been finalized. I *may* simply rewrite it as an elf loader; I'm unsure yet as to what I'll do.
 
-If you want to know how it sizes up to other CFWs - here's a quicklist of things it does:
+If you want to know how Corbenik sizes up to other CFWs - see `doc/features.md`.
 
-Signature patches
---------------------------
+For compilation instructions, see `doc/compiling.md`.
 
-Done via standard search and replace.
+Unless otherwise noted, everything in this repo can be used under the terms of the GNU GPL, Version 3 or later (if ever) at your discretion. This includes situations where there's no copyright header within a source file.
 
-FIRM Protection
---------------------------
-
-Done similarly to Reinand - replacing the 'exe' string with 'prt'
-
-System module replacement
---------------------------
-
-Overrides the complete module - can't change size.
-
-ExeFs replacement
---------------------------
-
-Overrides the whole exefs.
-
-Locale Emulation
---------------------------
-
-Different from existing solutions - a single text file of the format:
-```
-<TITLEID> <REGION> <LANGUAGE>
-```
-This is technically superior because it doesn't involve large and unloadable directory trees. Corbenik comes with an example locale configuration built automatically from single-region single-language games on 3DSDB.
-
-ARM9 control thread
---------------------------
-
-Because...well, I hate NTR with a passion. This is one of the primary features differentiating Corbenik from other CFWs. Hitting X+Y pops open a menu and allows configuring any loader-based patches, as well as taking screenshots and performing memory dumps. I will not add plugins created in ARM9 code, but I may embed an interpreter someday.
-
+Technically, all patches must be open source under a compatible license as well due to these linking restrictions. I will not be making the linking exception. Allowing proprietary patches to exist will only harm everyone in the homebrew community in long-term. Read: NTR.

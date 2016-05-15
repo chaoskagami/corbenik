@@ -22,9 +22,6 @@ extern void *fcram_temp;
 #define FCRAM_AGB_FIRM_LOC (FCRAM_START + FCRAM_SPACING * 3)
 
 // patch.c
-#define FCRAM_MEMORY_LOC (FCRAM_START + FCRAM_SPACING * 4)
-
-_UNUSED static uint8_t *memory_loc = (uint8_t *)FCRAM_MEMORY_LOC;
-_UNUSED static void *current_memory_loc;
+#define FCRAM_PATCHBIN_EXEC_LOC (FCRAM_START + FCRAM_SPACING * 4)
 
 #endif

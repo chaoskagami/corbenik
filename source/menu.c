@@ -63,16 +63,16 @@ int menu_options() {
         "Inject Loader",
         "Enable ARM9 Thread",
 
-        "Autoboot",
-        "Silence debug output",
-        "Trace steps with (A)",
+        "Autoboot (NYI)",
+        "Silence debug output (NYI)",
+        "Pause for input as trace",
 
-        "Don't draw background color",
-        "Preserve current framebuffer",
+        "Don't draw background color (NYI)",
+        "Preserve current framebuffer (NYI)",
         "Hide Readme/Help from menu",
 
-        "Ignore dependencies",
-        "Allow enabling broken",
+        "Ignore dependencies (NYI)",
+        "Allow enabling broken (NYI)",
     };
     const int menu_max = 11;
 

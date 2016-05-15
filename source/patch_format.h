@@ -67,7 +67,7 @@ struct system_patch {
     uint64_t depends[16];     // What patches need to be applied for this patch to be applied; as unique IDs
 
     uint32_t patch_size;      // Size of the following patch data.
-    uint8_t patch_data[];     // The data for the patch. This is a sort of interpreted code...see below.
+//    uint8_t patch_data[];     // The data for the patch. This is a compiled binary for ARM9/11.
 } __attribute__((packed));
 
 struct patch_opcode {

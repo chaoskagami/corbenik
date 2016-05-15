@@ -6,7 +6,6 @@
 #include "common.h"
 
 uint32_t wait_key();
-int link_and_load_patchbin(char* path);
 
 // A portion of this file is inherited from Luma3DS.
 /*
@@ -131,14 +130,10 @@ void wait() {
 }
 
 int patch_firm_all() {
-	link_and_load_patchbin(PATH_PATCHES "/patch.vco");
-
-	wait();
-
 	// Use builtin signature patcher?
 
 	fprintf(stderr, "Sigpatch: %s\n", ((config.options[OPTION_SIGPATCH]) ? "yes" : "no" ));
-	fprintf(stderr, "Protect: %s\n",  ((config.options[OPTION_FIRMPROT]) ? "yes" : "no" ));
+	fprintf(stderr, "Protect: %s\n", ((config.options[OPTION_FIRMPROT]) ? "yes" : "no" ));
 
 	wait();
 

@@ -1,7 +1,6 @@
 #include "common.h"
 #include "firm/firm.h"
 #include "firm/headers.h"
-#define MENU_BOOTME  -1
 #define MENU_MAIN     1
 
 #define MENU_OPTIONS  2
@@ -10,6 +9,32 @@
 #define MENU_HELP     5
 #define MENU_RESET    6
 #define MENU_POWER    7
+#define MENU_BOOTME   8
+
+static struct options_s options[] = {
+	{ 0, "Signature Patch", boolean_val, 0, 0 },
+	{ 1, "FIRM Protection", boolean_val, 0, 0 },
+	{ 2, "SysModule Replacement", boolean_val, 0, 0 },
+	{ 3, "Service Replacement", boolean_val, 0, 0 },
+	{ 4, "ARM9 Thread", boolean_val, 0, 0 },
+
+	{ 5, "Autoboot", boolean_val, 0, 0 },
+	{ 6, "Silence w/ Autoboot", boolean_val, 0, 0 },
+	{ 7, "Step through with button", boolean_val, 0, 0 },
+
+	{ 8, "Don't draw background color", boolean_val, 0, 0 },
+	{ 9, "Preserve framebuffer data", boolean_val, 0, 0 },
+
+	{ 10, "Hide Help from menu", boolean_val, 0, 0 },
+
+	{ 11, "Loader: CPU L2 enable", boolean_val, 0, 0 },
+	{ 12, "Loader: CPU 800Mhz mode", boolean_val, 0, 0 },
+	{ 13, "Loader: Language Emulation", boolean_val, 0, 0 },
+
+	{ 14, "No dependency tracking", boolean_val, 0, 0 },
+	{ 15, "Allow unsafe options", boolean_val, 0, 0 },
+	{ -1, "", 0, 0, 0},
+};
 
 static int cursor_y = 0;
 static int which_menu = 1;
@@ -40,44 +65,26 @@ int menu_patches() { return MENU_MAIN; }
 int menu_options() {
     set_cursor(TOP_SCREEN, 0, 0);
 
-    const char *list[] = {
-        "Signature Patch",
-        "FIRM Write Protection",
-        "Inject Loader (NYI)",
-		"Inject Services",
-        "Enable ARM9 Thread",
-
-        "Autoboot",
-        "Silence debug w/ autoboot",
-        "Pause for input on steps",
-
-        "Don't draw background color (NYI)",
-        "Preserve current framebuffer (NYI)",
-        "Hide Readme/Help from menu",
-
-        "Ignore dependencies (NYI)",
-        "Allow enabling broken (NYI)",
-    };
-    const int menu_max = 12;
-
     header();
 
-    for(int i=0; i < menu_max; i++) {
+	int i = 0;
+    while(options[i].index != -1) { // -1 Sentinel.
         if (cursor_y == i)
             fprintf(TOP_SCREEN, "\x1b[32m>>\x1b[0m ");
         else
             fprintf(TOP_SCREEN, "   ");
 
         if (need_redraw)
-			fprintf(TOP_SCREEN, "[%c] %s\n", (config.options[i] ? 'X' : ' '), list[i]);
+			fprintf(TOP_SCREEN, "[%c] %s\n", (config.options[options[i].index] ? 'X' : ' '), options[i].name);
 		else {
 			// Yes, this is weird. printf does a large number of extra things we don't
 			// want computed at the moment; this is faster.
 			putc(TOP_SCREEN, '[');
-			putc(TOP_SCREEN, (config.options[i] ? 'X' : ' '));
+			putc(TOP_SCREEN, (config.options[options[i].index] ? 'X' : ' '));
 			putc(TOP_SCREEN, ']');
 			putc(TOP_SCREEN, '\n');
 		}
+		++i;
     }
 
 	need_redraw = 0;
@@ -87,13 +94,17 @@ int menu_options() {
     switch(key) {
         case BUTTON_UP:
             cursor_y -= 1;
+			if (cursor_y < 0)
+				cursor_y = 0;
             break;
         case BUTTON_DOWN:
             cursor_y += 1;
+			if (options[cursor_y].index == -1)
+				cursor_y -= 1;
             break;
         case BUTTON_A:
             // TODO - Value options
-            config.options[cursor_y] = !config.options[cursor_y];
+            config.options[options[cursor_y].index] = !config.options[options[cursor_y].index];
             break;
         case BUTTON_B:
 			need_redraw = 1;
@@ -102,12 +113,6 @@ int menu_options() {
             return MENU_MAIN;
             break;
     }
-
-    // Loop around the cursor.
-    if (cursor_y < 0)
-        cursor_y = menu_max - 1;
-    if (cursor_y > menu_max - 1)
-        cursor_y = 0;
 
     return 0;
 }
@@ -246,7 +251,7 @@ int menu_main() {
         case BUTTON_A:
 			need_redraw = 1;
 			cursor_y = 0;
-            if (ret == menu_max + 2)
+            if (ret == MENU_BOOTME)
 				return MENU_BOOTME; // Boot meh, damnit!
             return ret;
     }
@@ -284,6 +289,9 @@ int menu_handler() {
             menu_reset();
         case MENU_POWER:
             menu_poweroff();
+		default:
+			fprintf(stderr, "Attempt to enter wrong menu!\n");
+			to_menu = MENU_MAIN;
     }
 
     if (to_menu != 0)

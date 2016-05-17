@@ -1,6 +1,4 @@
 out
-CakeHax
-CakeBrah
 build
 *.bin
 *.3dsx
@@ -10,3 +8,4 @@ build
 *.d
 *.elf
 *.bat
+input

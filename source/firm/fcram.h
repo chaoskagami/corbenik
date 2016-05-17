@@ -24,4 +24,7 @@ extern void *fcram_temp;
 // patch.c
 #define FCRAM_PATCHBIN_EXEC_LOC (FCRAM_START + FCRAM_SPACING * 4)
 
+// Throwaway temporary space. Don't expect it to stay sane.
+#define FCRAM_JUNK_LOCATION (FCRAM_START + FCRAM_SPACING * 5)
+
 #endif

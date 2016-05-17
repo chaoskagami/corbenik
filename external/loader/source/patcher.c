@@ -8,6 +8,7 @@
 #define _MAX_LFN 255
 #endif
 #include "config.h"
+#include "../../../source/patch_format.h"
 
 static int memcmp(const void *buf1, const void *buf2, u32 size)
 {
@@ -59,6 +60,7 @@ static u32 patchMemory(u8 *start, u32 size, const void *pattern, u32 patSize, in
 
         if(found == NULL) break;
 
+		// FIXME - This is throwing on Werror.
         memcpy(found + offset, replace, repSize);
 
         u32 at = (u32)(found - start);
@@ -115,50 +117,74 @@ static u32 secureInfoExists(void)
     return secureInfoExists;
 }
 
-static unsigned int config_ver = 4;
-static struct config_file config;
-static int failed_load_config = 1;
-void load_config() {
-    // Make sure we don't get random values if the config file doesn't load
-	for(int i=0;i<sizeof(struct config_file);i++) ((char*)&config)[i]=0;
+struct config_file config;
+int failed_load_config = 1;
 
+void clear_config() {
+	// Basically; memset.
+	for(int i=0;i<sizeof(struct config_file);i++)
+		((char*)&config)[i]=0;
+}
+
+void load_config() {
 	IFile file;
     u64 total;
 
 	// Open file.
-    if (!fileOpen(&file, ARCHIVE_SDMC, "/corbenik/config.dat", FS_OPEN_READ)) {
+    if (!fileOpen(&file, ARCHIVE_SDMC, PATH_CONFIG, FS_OPEN_READ)) {
 		// Failed to open.
 		failed_load_config = 1;
-        return;
+        goto ret_fail;
     }
 
 	// Read file.
     if(!IFile_Read(&file, &total, &config, sizeof(struct config_file))) {
 		// Failed to read.
-		failed_load_config = 1;
-		for(int i=0;i<sizeof(struct config_file);i++) ((char*)&config)[i]=0;
-		return;
+		goto ret_fail;
 	}
 
-    if (config.config_ver != config_ver) {
+	IFile_Close(&file); // Read to memory.
+
+	if (config.magic[0] != 'O' || config.magic[1] != 'V' || config.magic[2] != 'A' || config.magic[3] != 'N') {
+		// Incorrect magic.
+		// Failed to read.
+		goto ret_fail;
+	}
+
+	if (config.config_ver != config_version) {
 		// Invalid version.
-		failed_load_config = 1;
-		for(int i=0;i<sizeof(struct config_file);i++) ((char*)&config)[i]=0;
-        return;
+		goto ret_fail;
     }
 
-	IFile_Close(&file);
-	// Loaded okay.
+	failed_load_config = 0;
+
+	return;
+
+ret_fail:
+	clear_config();
+
+	return;
 }
 
 static int loadTitleLocaleConfig(u64 progId, u8 *regionId, u8 *languageId)
 {
-    /* Here we look for "/cfw/locale/[u64 titleID in hex, uppercase].txt"
+	// FIXME - Rewrite this function to use a single line-based config
+	// Directory seeks have severe issues on FAT and
+	// dumping configs based on 3dsdb (more than 1000) causes things
+	// to kind a choke.
+
+    /* Here we look for "/corbenik/locale/[u64 titleID in hex, uppercase].txt"
        If it exists it should contain, for example, "EUR IT" */
 
     char path[] = "/corbenik/locales/0000000000000000.txt";
 
-    u32 i = strlen(path) - 21;
+	u32 i = 0, j = 0;
+	while(path[j] != 0) {
+		if (path[j] == '/')
+			i = j;
+		j++;
+	}
+	i += 1;
 
     while(progId > 0)
     {
@@ -181,6 +207,9 @@ static int loadTitleLocaleConfig(u64 progId, u8 *regionId, u8 *languageId)
 
         for(u32 i = 0; i < 7; ++i)
         {
+			// TODO - Permit alternative names. They're using fixed strings for ease of use;
+			// we need to permit names like 'Japan', 'Europe', etc
+			// Maybe read locale data from the FS? http://cldr.unicode.org/
             static const char *regions[] = {"JPN", "USA", "EUR", "AUS", "CHN", "KOR", "TWN"};
 
             if(memcmp(buf, regions[i], 3) == 0)
@@ -192,6 +221,7 @@ static int loadTitleLocaleConfig(u64 progId, u8 *regionId, u8 *languageId)
 
         for(u32 i = 0; i < 12; ++i)
         {
+			// TODO - Same as above.
             static const char *languages[] = {"JP", "EN", "FR", "DE", "IT", "ES", "ZH", "KO", "NL", "PT", "RU", "TW"};
 
             if(memcmp(buf + 4, languages[i], 2) == 0)
@@ -316,9 +346,124 @@ static void patchCfgGetRegion(u8 *code, u32 size, u8 regionId, u32 CFGUHandleOff
     }
 }
 
+void region_patch(u64 progId, u8 *code, u32 size) {
+	static const u8 regionFreePattern[] = {0x00, 0x00, 0x55, 0xE3, 0x01, 0x10, 0xA0, 0xE3};
+	static const u8 regionFreePatch[]   = {0x01, 0x00, 0xA0, 0xE3, 0x1E, 0xFF, 0x2F, 0xE1};
+
+	//Patch SMDH region checks
+	patchMemory(code, size,
+		regionFreePattern,
+		sizeof(regionFreePattern), -16,
+		regionFreePatch,
+		sizeof(regionFreePatch), 1
+    );
+}
+
+void disable_nim_updates(u64 progId, u8 *code, u32 size) {
+	static const u8 blockAutoUpdatesPattern[] = {0x25, 0x79, 0x0B, 0x99};
+	static const u8 blockAutoUpdatesPatch[]   = {0xE3, 0xA0};
+
+	//Block silent auto-updates
+	patchMemory(code, size,
+		blockAutoUpdatesPattern,
+		sizeof(blockAutoUpdatesPattern), 0,
+		blockAutoUpdatesPatch,
+		sizeof(blockAutoUpdatesPatch), 1
+	);
+}
+
+void disable_eshop_updates(u64 progId, u8 *code, u32 size) {
+	static const u8 skipEshopUpdateCheckPattern[] = {0x30, 0xB5, 0xF1, 0xB0};
+	static const u8 skipEshopUpdateCheckPatch[]   = {0x00, 0x20, 0x08, 0x60, 0x70, 0x47};
+
+	//Skip update checks to access the EShop
+	patchMemory(code, size,
+		skipEshopUpdateCheckPattern,
+		sizeof(skipEshopUpdateCheckPattern), 0,
+		skipEshopUpdateCheckPatch,
+		sizeof(skipEshopUpdateCheckPatch), 1
+	);
+}
+
+void fake_friends_version(u64 progId, u8 *code, u32 size) {
+	static const u8 fpdVerPattern[] = {0xE0, 0x1E, 0xFF, 0x2F, 0xE1, 0x01, 0x01, 0x01};
+	static const u8 fpdVerPatch = 0x06; // Latest version.
+
+	//Allow online access to work with old friends modules
+	patchMemory(code, size,
+		fpdVerPattern,
+		sizeof(fpdVerPattern), 9,
+		&fpdVerPatch,
+		sizeof(fpdVerPatch), 1
+	);
+}
+
+void settings_string(u64 progId, u8 *code, u32 size) {
+	static const u16 verPattern[] = u"Ver.";
+	static const u16 verPatch[] = u".hax";
+
+	//Patch Ver. string
+	patchMemory(code, size,
+		verPattern,
+		sizeof(verPattern) - sizeof(u16), 0,
+		verPatch,
+		sizeof(verPatch) - sizeof(u16), 1
+	);
+}
+
+void disable_cart_updates(u64 progId, u8 *code, u32 size) {
+	static const u8 stopCartUpdatesPattern[] = {0x0C, 0x18, 0xE1, 0xD8};
+	static const u8 stopCartUpdatesPatch[]   = {0x0B, 0x18, 0x21, 0xC8};
+
+	//Disable updates from foreign carts (makes carts region-free)
+	patchMemory(code, size,
+		stopCartUpdatesPattern,
+		sizeof(stopCartUpdatesPattern), 0,
+		stopCartUpdatesPatch,
+		sizeof(stopCartUpdatesPatch), 2
+	);
+}
+
+void adjust_cpu_settings(u64 progId, u8 *code, u32 size) {
+	if (!failed_load_config) {
+		u32 cpuSetting = 0;
+		// L2
+		cpuSetting |= config.options[OPTION_LOADER_CPU_L2];
+		// Speed
+		cpuSetting |= config.options[OPTION_LOADER_CPU_800MHZ] << 1;
+
+	    if(cpuSetting) {
+			static const u8 cfgN3dsCpuPattern[] = {0x00, 0x40, 0xA0, 0xE1, 0x07, 0x00};
+
+			u32 *cfgN3dsCpuLoc = (u32 *)memsearch(code, cfgN3dsCpuPattern, size, sizeof(cfgN3dsCpuPattern));
+
+			//Patch N3DS CPU Clock and L2 cache setting
+			if(cfgN3dsCpuLoc != NULL) {
+				*(cfgN3dsCpuLoc + 1) = 0xE1A00000;
+				*(cfgN3dsCpuLoc + 8) = 0xE3A00000 | cpuSetting;
+			}
+		}
+	}
+}
+
+void secureinfo_sigpatch(u64 progId, u8 *code, u32 size) {
+	static const u8 secureinfoSigCheckPattern[] = {0x06, 0x46, 0x10, 0x48, 0xFC};
+	static const u8 secureinfoSigCheckPatch[]   = {0x00, 0x26};
+
+	//Disable SecureInfo signature check
+	patchMemory(code, size,
+		secureinfoSigCheckPattern,
+		sizeof(secureinfoSigCheckPattern), 0,
+		secureinfoSigCheckPatch,
+		sizeof(secureinfoSigCheckPatch), 1
+	);
+}
+
 void patchCode(u64 progId, u8 *code, u32 size)
 {
-    load_config(); // Load cakes.dat
+	// FIXME - Config loading breaks loader. WTF is this?
+	// Maybe the memcpy?
+	// load_config();
 
     switch(progId)
     {
@@ -329,74 +474,20 @@ void patchCode(u64 progId, u8 *code, u32 size)
         case 0x000400300000A902LL: // KOR Menu
         case 0x000400300000B102LL: // TWN Menu
         {
-            static const u8 regionFreePattern[] = {
-                0x00, 0x00, 0x55, 0xE3, 0x01, 0x10, 0xA0, 0xE3
-            };
-            static const u8 regionFreePatch[] = {
-                0x01, 0x00, 0xA0, 0xE3, 0x1E, 0xFF, 0x2F, 0xE1
-            };
-
-            //Patch SMDH region checks
-            patchMemory(code, size,
-                regionFreePattern,
-                sizeof(regionFreePattern), -16,
-                regionFreePatch,
-                sizeof(regionFreePatch), 1
-            );
-
+			region_patch(progId, code, size);
             break;
         }
 
         case 0x0004013000002C02LL: // NIM
         {
-            static const u8 blockAutoUpdatesPattern[] = {
-                0x25, 0x79, 0x0B, 0x99
-            };
-            static const u8 blockAutoUpdatesPatch[] = {
-                0xE3, 0xA0
-            };
-            static const u8 skipEshopUpdateCheckPattern[] = {
-                0x30, 0xB5, 0xF1, 0xB0
-            };
-            static const u8 skipEshopUpdateCheckPatch[] = {
-                0x00, 0x20, 0x08, 0x60, 0x70, 0x47
-            };
-
-            //Block silent auto-updates
-            patchMemory(code, size,
-                blockAutoUpdatesPattern,
-                sizeof(blockAutoUpdatesPattern), 0,
-                blockAutoUpdatesPatch,
-                sizeof(blockAutoUpdatesPatch), 1
-            );
-
-            //Skip update checks to access the EShop
-            patchMemory(code, size,
-                skipEshopUpdateCheckPattern,
-                sizeof(skipEshopUpdateCheckPattern), 0,
-                skipEshopUpdateCheckPatch,
-                sizeof(skipEshopUpdateCheckPatch), 1
-            );
-
+			disable_nim_updates(progId, code, size);
+			disable_eshop_updates(progId, code, size);
             break;
         }
 
         case 0x0004013000003202LL: // FRIENDS
         {
-            static const u8 fpdVerPattern[] = {
-                0xE0, 0x1E, 0xFF, 0x2F, 0xE1, 0x01, 0x01, 0x01
-            };
-
-            static const u8 fpdVerPatch = 0x05;
-
-            //Allow online access to work with old friends modules
-            patchMemory(code, size,
-                fpdVerPattern,
-                sizeof(fpdVerPattern), 9,
-                &fpdVerPatch,
-                sizeof(fpdVerPatch), 1
-            );
-
+			fake_friends_version(progId, code, size);
             break;
         }
 
@@ -407,96 +498,24 @@ void patchCode(u64 progId, u8 *code, u32 size)
         case 0x0004001000027000LL: // KOR MSET
         case 0x0004001000028000LL: // TWN MSET
         {
-            static const u16 verPattern[] = u"Ver.";
-
-            //Patch Ver. string
-            patchMemory(code, size,
-                verPattern,
-                sizeof(verPattern) - sizeof(u16), 0,
-                u".hax",
-                sizeof(verPattern) - sizeof(u16), 1
-            );
+			settings_string(progId, code, size);
             break;
         }
-
         case 0x0004013000008002LL: // NS
         {
-            static const u8 stopCartUpdatesPattern[] = {
-                0x0C, 0x18, 0xE1, 0xD8
-            };
-            static const u8 stopCartUpdatesPatch[] = {
-                0x0B, 0x18, 0x21, 0xC8
-            };
-
-            //Disable updates from foreign carts (makes carts region-free)
-            patchMemory(code, size, 
-                stopCartUpdatesPattern, 
-                sizeof(stopCartUpdatesPattern), 0, 
-                stopCartUpdatesPatch,
-                sizeof(stopCartUpdatesPatch), 2
-            );
-
-			if (!failed_load_config) {
-	            u32 cpuSetting = 0;
-				cpuSetting += config.n3ds_clock ? 0x1 : 0x0;
-				cpuSetting += config.n3ds_l2    ? 0x2 : 0x0;
-
-	            if(cpuSetting)
-    	        {
-        	        static const u8 cfgN3dsCpuPattern[] = {
-            	        0x00, 0x40, 0xA0, 0xE1, 0x07, 0x00
-                	};
-
-	                u32 *cfgN3dsCpuLoc = (u32 *)memsearch(code, cfgN3dsCpuPattern, size, sizeof(cfgN3dsCpuPattern));
-
-    	            //Patch N3DS CPU Clock and L2 cache setting
-        	        if(cfgN3dsCpuLoc != NULL)
-            	    {
-                	    *(cfgN3dsCpuLoc + 1) = 0xE1A00000;
-                    	*(cfgN3dsCpuLoc + 8) = 0xE3A00000 | cpuSetting;
-                	}
-            	}
-			}
+			disable_cart_updates(progId, code, size);
+			adjust_cpu_settings(progId, code, size);
             break;
         }
 
         case 0x0004013000001702LL: // CFG
         {
-            static const u8 secureinfoSigCheckPattern[] = {
-                0x06, 0x46, 0x10, 0x48, 0xFC
-            };
-            static const u8 secureinfoSigCheckPatch[] = {
-                0x00, 0x26
-            };
-
-            //Disable SecureInfo signature check
-            patchMemory(code, size,
-                secureinfoSigCheckPattern,
-                sizeof(secureinfoSigCheckPattern), 0,
-                secureinfoSigCheckPatch,
-                sizeof(secureinfoSigCheckPatch), 1
-            );
-
-            if(secureInfoExists())
-            {
-                static const u16 secureinfoFilenamePattern[] = u"SecureInfo_";
-                static const u16 secureinfoFilenamePatch[] = u"C";
-
-                //Use SecureInfo_C
-                patchMemory(code, size,
-                    secureinfoFilenamePattern,
-                    sizeof(secureinfoFilenamePattern) - sizeof(u16),
-                    sizeof(secureinfoFilenamePattern) - sizeof(u16),
-                    secureinfoFilenamePatch,
-                    sizeof(secureinfoFilenamePatch) - sizeof(u16), 2
-                );
-            }
-
+			secureinfo_sigpatch(progId, code, size);
             break;
         }
-        default:
+/*        default:
 		{
-            if(!failed_load_config && config.language_emu)
+            if(!failed_load_config && config.options[OPTION_LOADER_LANGEMU])
             {
                 u32 tidHigh = (progId & 0xFFFFFFF000000000LL) >> 0x24;
 
@@ -522,8 +541,7 @@ void patchCode(u64 progId, u8 *code, u32 size)
                     }
                 }
             }
-
             break;
-        }
+        } */
     }
 }

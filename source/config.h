@@ -17,6 +17,23 @@ struct config_file {
 
 extern struct config_file config;
 
+enum type {
+	boolean_val, // Toggle
+	ranged_val,   // N1 - N2, left and right to pick.
+	mask_val     // Bitmask allowed values.
+};
+
+struct range_str {
+	int a, b;
+};
+
+struct options_s {
+	int index;
+	char name[64];
+	enum type allowed;
+	uint32_t a, b;
+}__attribute__((packed));
+
 #define OPTION_SIGPATCH     0  // Use builtin signature patch.
 #define OPTION_FIRMPROT     1  // Protect firmware from writes.
 #define OPTION_LOADER       2  // Use builtin loader module replacer.
@@ -31,8 +48,12 @@ extern struct config_file config;
 #define OPTION_NO_CLEAR_BG  9  // Framebuffer is preserved from whatever ran before us.
 #define OPTION_READ_ME      10 // Remove Help/Readme from menu.
 
-#define IGNORE_PATCH_DEPS   11  // Ignore patch UUID dependencies. Not recommended.
-#define IGNORE_BROKEN_SHIT  12 // Allow enabling patches which are marked as 'incompatible'. Chances are there's a reason.
+#define OPTION_LOADER_CPU_L2   11   // Enable L2 cache.
+#define OPTION_LOADER_CPU_800MHZ 12 // Enable 800Mhz mode.
+#define OPTION_LOADER_LANGEMU  13 // Enable 800Mhz mode.
+
+#define IGNORE_PATCH_DEPS    14  // Ignore patch UUID dependencies. Not recommended.
+#define IGNORE_BROKEN_SHIT   15 // Allow enabling patches which are marked as 'incompatible'. Chances are there's a reason.
 
 //#define HEADER_COLOR        12 // Color of header text.
 //#define BG_COLOR            13 // Color of background.

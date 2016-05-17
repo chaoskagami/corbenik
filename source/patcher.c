@@ -13,6 +13,7 @@ int execp(char* path);
 extern int patch_signatures();
 extern int patch_firmprot();
 extern int patch_services();
+extern int patch_modules();
 
 // A portion of this file is inherited from Luma3DS.
 /*u32 getLoader(u8 *pos, u32 *loaderSize) {
@@ -75,12 +76,15 @@ int patch_firm_all() {
 
 	// Replace loader?
 	if (config.options[OPTION_LOADER]) {
-		// Yes.
-
+		if(patch_modules()) {
+			abort("Fatal. Service patch has failed.");
+		}
 		// This requires OPTION_SIGPATCH.
 	}
 
-	// Replace loader?
+	wait();
+
+	// Inject services?
 	if (config.options[OPTION_SERVICES]) {
 		if(patch_services()) {
 			abort("Fatal. Service patch has failed.");
@@ -93,6 +97,8 @@ int patch_firm_all() {
 
 		// FIXME - NYI
 	}
+
+	wait();
 
 	return 0;
 }

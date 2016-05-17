@@ -1,10 +1,14 @@
 #include "common.h"
 #include "firm/firm.h"
+#include "input.h"
+#include "config.h"
 
 void init_system() {
 }
 
 int menu_handler();
+
+int doing_autoboot = 0;
 
 int main() {
     if (fmount()) {
@@ -17,6 +21,12 @@ int main() {
     load_config(); // Load configuration.
 
     load_firms();
+
+	// Autoboot, and not R?
+	if (config.options[OPTION_AUTOBOOT] && !(HID_PAD & BUTTON_R)) {
+		doing_autoboot = 1;
+		boot_cfw(); // Just boot shit.
+	}
 
     int in_menu = 1;
 

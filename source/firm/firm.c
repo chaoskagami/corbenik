@@ -244,6 +244,8 @@ void __attribute__((naked)) disable_lcds() {
     ((void (*)())*a11_entry)();
 }
 
+extern void wait();
+
 void boot_firm() {
     // Set up the keys needed to boot a few firmwares, due to them being unset, depending on which firmware you're booting from.
     // TODO: Don't use the hardcoded offset.
@@ -270,11 +272,13 @@ void boot_firm() {
     }
     fprintf(BOTTOM_SCREEN, "Copied FIRM\n");
 
+	wait();
+
+	// No fprintf will work from here on out.
+
     *a11_entry = (uint32_t)disable_lcds;
     while (*a11_entry);  // Make sure it jumped there correctly before changing it.
     *a11_entry = (uint32_t)firm_loc->a11Entry;
-
-    fprintf(BOTTOM_SCREEN, "Prepared arm11 entry, jumping to FIRM\n");
 
     ((void (*)())firm_loc->a9Entry)();
 }

@@ -160,7 +160,7 @@ int menu_help() {
                         "Credits to people who've helped me put this\n"
                         "  together either by code or helpfulness:\n"
                         "  @mid-kid, @Wolfvak, @Reisyukaku, @AuroraWright\n"
-                        "  @d0k3, and others\n"
+                        "  @d0k3, @TuxSH, and others\n"
                         "\n"
                         "[PROTECT BREAK] DATA DRAIN: OK\n"
                         "\n"

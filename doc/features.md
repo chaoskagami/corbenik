@@ -10,7 +10,7 @@ Feature graph
 +--------+-----------------+-----------------+------------------------------+-----------+---------------+-------------------+-------+
 |ReiNAND |Meme(SD)         |Builtin, Dynamic |Sig,Emu,Sys,Mod,Ptc           |N/A        |Readability    |Minimalist         | [4]   |
 +--------+-----------------+-----------------+------------------------------+-----------+---------------+-------------------+-------+
-|Corbenik|Dec/Enc (SD)     |Builtin, Dynamic |Sig,Ptc,Sys                   |N/A        |Read/Speed     |Advanced Devs      | [5]   |
+|Corbenik|Dec/Enc (SD)     |Builtin, Dynamic |Sig,Ptc,Sys,Svc               |N/A        |Read/Speed     |Advanced Devs      | [5]   |
 +--------+-----------------+-----------------+------------------------------+-----------+---------------+-------------------+-------+
 |NTR     |N/A              |Executable       |Mis                           |Mis        |Douchebaggery  |Shilling Closed Src| [6]   |
 +--------+-----------------+-----------------+------------------------------+-----------+---------------+-------------------+-------+
@@ -41,10 +41,13 @@ Misc features by CFW:
      * svcBackdoor (incomplete)
  * Luma
    * Loader replacement. CPU speed/language emulation
+ * Corbenik
+   * Arbitrary service injection to empty slots.
+     Similar results can be achieved in cakes, but with much pain.
 
 [1] I'm not just referring to speed; I'm referring to purpose-based optimization. For example;
     do you want something well documented? Would you choose a slower algorithm that can be more
-    easily debugged at the expense of speed? Would you use preprocessor macros to use multiple?
+    easily debugged at the expense of speed? Would you use preprocessor macros to use different implementations?
 
     CakesFW is Speed/Read. Speed first, keep readability if possible whenever possible. Which is a good
     approach.

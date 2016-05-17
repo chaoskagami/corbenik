@@ -22,8 +22,8 @@
 #define PATH_LOCEMU     PATH_CFW "/locale.conf"    // Locale emulation config
 #define PATH_CPU_CFG    PATH_CFW "/cpu.conf"       // CPU settings config
 
-#define PATH_FIRMWARES  PATH_CFW "/firmware"       // Firmware folder.
-#define PATH_PATCHES    PATH_CFW "/patches"        // Patches folder.
+#define PATH_FIRMWARES  PATH_CFW "/firm"       // Firmware folder.
+#define PATH_PATCHES    PATH_CFW "/bin"            // Patch binary folder.
 #define PATH_TEMP       PATH_CFW "/temp"           // Files that are transient (user can delete them and they will be regenerated)
 #define PATH_KEYS       PATH_CFW "/keys"           // Keyfiles will be loaded from this dir, and additionally the root if not found.
 #define PATH_EXEFS      PATH_CFW "/exefs"          // ExeFS overrides, named like '<titleid>.exefs'
@@ -41,7 +41,7 @@
 #define PATH_AGB_CETK       PATH_KEYS "/agb.cetk"
 #define PATH_AGB_FIRMKEY    PATH_KEYS "/agb.key"
 
-#define PATH_SLOT0X11KEY96  PATH_KEYS "/0x11.key"
+#define PATH_SLOT0X11KEY96  PATH_KEYS "/11.key"
 
 #define PATH_ALT_SLOT0X11KEY96 "/slot0x11key96.bin" // Hey, your perrogative, buddy. I like cleaned up paths.
 

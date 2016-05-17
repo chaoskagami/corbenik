@@ -1,4 +1,6 @@
 #!/bin/bash
-mount /dev/sdb1 /media/sd
-cp out/arm9loaderhax.bin /media/sd/anim/boot/a.bin
-umount /media/sd
+mount /dev/sdb1 /media/cd || exit 0
+cp out/arm9loaderhax.bin /media/cd/anim/boot/a.bin || exit 0
+cp -r out/corbenik /media/cd/ || exit 0
+umount /media/cd || exit 0
+eject /dev/sdb || exit 0

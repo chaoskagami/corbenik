@@ -12,11 +12,11 @@
 static unsigned int top_cursor_x = 0, top_cursor_y = 0;
 static unsigned int bottom_cursor_x = 0, bottom_cursor_y = 0;
 
-static char text_buffer_top    [TEXT_TOP_SIZE];
-static char text_buffer_bottom [TEXT_BOTTOM_SIZE];
+static char text_buffer_top    [TEXT_TOP_HEIGHT*TEXT_TOP_WIDTH+1];
+static char text_buffer_bottom [TEXT_BOTTOM_HEIGHT*TEXT_BOTTOM_WIDTH+1];
 
-static char color_buffer_top    [TEXT_TOP_SIZE];
-static char color_buffer_bottom [TEXT_BOTTOM_SIZE];
+static char color_buffer_top    [TEXT_TOP_HEIGHT*TEXT_TOP_WIDTH+1];
+static char color_buffer_bottom [TEXT_BOTTOM_HEIGHT*TEXT_BOTTOM_WIDTH+1];
 
 static uint32_t colors[16] = {
 	0x000000, // Black
@@ -37,11 +37,7 @@ static uint32_t colors[16] = {
 	0xffffff  // White
 };
 
-void clear_screen(uint8_t* screen) {
-	uint32_t size = 0;
-	char* buffer  = 0;
-	uint32_t buffer_size = 0;
-
+void clear_disp(uint8_t* screen) {
     if (screen == TOP_SCREEN)
         screen = framebuffers->top_left;
     else if (screen == BOTTOM_SCREEN)
@@ -49,23 +45,35 @@ void clear_screen(uint8_t* screen) {
 
 	if(screen == framebuffers->top_left ||
        screen == framebuffers->top_right) {
-		size = SCREEN_TOP_SIZE;
-		buffer = text_buffer_top;
-		buffer_size = TEXT_TOP_SIZE;
-		top_cursor_x = 0;
-		top_cursor_y = 0;
+		memset(screen, 0, SCREEN_TOP_SIZE);
 	} else if(screen == framebuffers->bottom) {
-		size = SCREEN_BOTTOM_SIZE;
-		buffer = text_buffer_bottom;
-		buffer_size = TEXT_BOTTOM_SIZE;
-		bottom_cursor_x = 0;
-		bottom_cursor_y = 0;
-	} else {
-		return; // Invalid buffer.
+		memset(screen, 0, SCREEN_BOTTOM_SIZE);
 	}
+}
 
-    memset(screen, 0, size);
-	memset(buffer, 0, buffer_size);
+void clear_text(uint8_t* screen) {
+    if (screen == TOP_SCREEN)
+        screen = framebuffers->top_left;
+    else if (screen == BOTTOM_SCREEN)
+        screen = framebuffers->bottom;
+
+	if(screen == framebuffers->top_left ||
+       screen == framebuffers->top_right) {
+		for(int i=0; i < TEXT_TOP_HEIGHT; i++) {
+			text_buffer_top[i*TEXT_TOP_WIDTH] = 0;
+			color_buffer_top[i*TEXT_TOP_WIDTH] = 0;
+		}
+	} else if(screen == framebuffers->bottom) {
+		for(int i=0; i < TEXT_BOTTOM_HEIGHT; i++) {
+			text_buffer_bottom[i*TEXT_BOTTOM_WIDTH] = 0;
+			color_buffer_bottom[i*TEXT_BOTTOM_WIDTH] = 0;
+		}
+	}
+}
+
+void clear_screen(uint8_t* screen) {
+	clear_disp(screen);
+	clear_text(screen);
 }
 
 void set_cursor(void* channel, unsigned int x, unsigned int y) {
@@ -129,75 +137,73 @@ void putc(void* buf, const int c) {
     if (buf == stdout || buf == stderr) {
 		unsigned int width  = 0;
 		_UNUSED unsigned int height = 0;
-		unsigned int size = 0;
-    	unsigned int cursor_x;
-    	unsigned int cursor_y;
-    	char* colorbuf;
-    	char* strbuf;
+    	unsigned int *cursor_x;
+    	unsigned int *cursor_y;
+    	char *colorbuf;
+    	char *strbuf;
 
 		unsigned char* color = NULL;
 
 		if (buf == TOP_SCREEN) {
 			width    = TEXT_TOP_WIDTH;
 			height   = TEXT_TOP_HEIGHT;
-			size     = TEXT_TOP_SIZE;
     	    colorbuf = color_buffer_top;
     	    strbuf   = text_buffer_top;
-    	    cursor_x = top_cursor_x;
-    	    cursor_y = top_cursor_y;
+    	    cursor_x = &top_cursor_x;
+    	    cursor_y = &top_cursor_y;
 			color = &color_top;
 		} else if (buf == BOTTOM_SCREEN) {
 			width    = TEXT_BOTTOM_WIDTH;
 			height   = TEXT_BOTTOM_HEIGHT;
-			size     = TEXT_BOTTOM_SIZE;
 	        colorbuf = color_buffer_bottom;
 	        strbuf   = text_buffer_bottom;
-	        cursor_x = bottom_cursor_x;
-	        cursor_y = bottom_cursor_y;
+	        cursor_x = &bottom_cursor_x;
+	        cursor_y = &bottom_cursor_y;
 			color = &color_bottom;
 		}
 
-		unsigned int offset = width * cursor_y + cursor_x;
+		if (cursor_x[0] >= width) {
+			cursor_x[0] = 0;
+			cursor_y[0]++;
+		}
 
-		if (offset >= size) {
-	        // Scroll a line back. This involves memcpy.
-	        // Yes, memcpy overwrites part of the buffer it is reading.
-	        memcpy(strbuf, strbuf+width, size-width);
-	        memcpy(colorbuf, colorbuf+width, size-width);
-	        cursor_y -= 1;
-			offset = width * cursor_y + cursor_x;
-	    }
+		while (cursor_y[0] >= height) {
+			// Scroll.
+			for(unsigned int y=0; y < height-1; y++) {
+				memset(&strbuf[y*width], 0, width);
+				memset(&colorbuf[y*width], 0, width);
+				strncpy(&strbuf[y*width],   &strbuf[(y+1)*width],   width);
+				strncpy(&colorbuf[y*width], &colorbuf[(y+1)*width], width);
+			}
+			memset(&strbuf[(height-1)*width], 0, width);
+			memset(&colorbuf[(height-1)*width], 0, width);
 
-		if (offset >= size) {
-	        // So if we're being real, this won't ever happen.
-	        return;
-	    }
+			cursor_y[0]--;
+
+			clear_disp(buf); // Clear screen.
+		}
 
 	    switch(c) {
 	        case '\n':
-	            cursor_y++;   // Increment line.
-	            cursor_x = 0;
-	            break;
+	            strbuf[cursor_y[0]*width+cursor_x[0]]   = 0;
+	            colorbuf[cursor_y[0]*width+cursor_x[0]] = 0;
+				cursor_y[0]++;
+				// Fall through intentional.
 	        case '\r':
-	            cursor_x = 0; // Reset to beginning of line.
+	            cursor_x[0] = 0; // Reset to beginning of line.
 	            break;
 	        default:
-	            strbuf[offset] = c;
-	            colorbuf[offset] = *color; // White on black.
-	            cursor_x++;
-	            if (cursor_x >= width) {
-	                cursor_y++;
-	                cursor_x = 0;
-	            }
-	            break;
-	    }
+	            strbuf[cursor_y[0]*width+cursor_x[0]]   = c;
+	            colorbuf[cursor_y[0]*width+cursor_x[0]] = *color;
 
-	    if (buf == TOP_SCREEN) {
-	        top_cursor_x = cursor_x;
-	        top_cursor_y = cursor_y;
-	    } else if (buf == BOTTOM_SCREEN) {
-	        bottom_cursor_x = cursor_x;
-	        bottom_cursor_y = cursor_y;
+				if (cursor_x[0] + 1 < width) {
+		            strbuf[cursor_y[0]*width+cursor_x[0]+1]   = 0; // Terminate.
+		            colorbuf[cursor_y[0]*width+cursor_x[0]+1] = 0;
+				}
+
+	            cursor_x[0]++;
+
+	            break;
 	    }
 	} else {
 		// FILE*, not stdin or stdout.
@@ -284,18 +290,22 @@ void put_int(void* channel, int n, int length) {
 
 void fflush(void* channel) {
     if (channel == TOP_SCREEN) {
-		for(int x=0; x < TEXT_TOP_WIDTH; x++) {
-			for(int y=0; y < TEXT_TOP_HEIGHT; y++) {
+		for(int y=0; y < TEXT_TOP_HEIGHT; y++) {
+			for(int x=0; x < TEXT_TOP_WIDTH; x++) {
             	char c = text_buffer_top[y*TEXT_TOP_WIDTH+x];
+				if (c == 0)
+					break;
             	uint32_t color_fg = colors[((color_buffer_top[y*TEXT_TOP_WIDTH+x] >> 4) & 0x0f)];
             	uint32_t color_bg = colors[(color_buffer_top[y*TEXT_TOP_WIDTH+x] & 0x0f)];
 				draw_character(framebuffers->top_left, c, x, y, color_fg, color_bg);
 			}
 		}
     } else if (channel == BOTTOM_SCREEN) {
-		for(int x=0; x < TEXT_BOTTOM_WIDTH; x++) {
-			for(int y=0; y < TEXT_BOTTOM_HEIGHT; y++) {
+		for(int y=0; y < TEXT_BOTTOM_HEIGHT; y++) {
+			for(int x=0; x < TEXT_BOTTOM_WIDTH; x++) {
             	char c = text_buffer_bottom[y*TEXT_BOTTOM_WIDTH+x];
+				if (c == 0)
+					break;
             	uint32_t color_fg = colors[((color_buffer_bottom[y*TEXT_BOTTOM_WIDTH+x] >> 4) & 0x0f)];
             	uint32_t color_bg = colors[(color_buffer_bottom[y*TEXT_BOTTOM_WIDTH+x] & 0x0f)];
 				draw_character(framebuffers->bottom, c, x, y, color_fg, color_bg);

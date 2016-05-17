@@ -1,11 +1,10 @@
 #ifndef EXPORTED_H
 #define EXPORTED_H
 
-#define stdout (void*)0
-#define stderr (void*)1
+#include "headers.h"
 
-extern uint8_t* memory_offset;
-extern uint32_t* memory_len;
+#define stdout ((void*)0)
+#define stderr ((void*)2)
 
 extern int strlen(const char *string);
 extern int isprint(char c);
@@ -21,5 +20,14 @@ extern uint8_t* memfind (uint8_t *string, uint32_t stringlen, uint8_t *pat, uint
 extern void putc(void* buf, const int c);
 extern void puts(void* buf, const char *string);
 extern void fprintf(void* channel, const char* format, ...);
+
+extern firm_h* get_firm();
+extern exefs_h* get_firm_proc9_exefs();
+
+extern firm_h* get_agb();
+extern exefs_h* get_agb_proc9_exefs();
+
+extern firm_h* get_twl();
+extern exefs_h* get_twl_proc9_exefs();
 
 #endif

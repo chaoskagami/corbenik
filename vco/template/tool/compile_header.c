@@ -23,6 +23,13 @@ void read_str(char* name, char* to, size_t len) {
 	FILE* hdl = fopen(name, "rb");
 	int r = fread(to, 1, len-1, hdl);
 	fclose(hdl);
+
+	for(int i=len-1; i >= 0; i--) {
+		if (to[i] == '\n') {
+			to[i] = 0;
+			break;
+		}
+	}
 }
 
 uint32_t size = 0;
@@ -39,8 +46,6 @@ uint8_t* read_file_mem(char* name) {
 
 	int r = fread(mem, 1, size, hdl);
 	fclose(hdl);
-
-	printf("%d\n", size);
 
 	return mem;
 }

@@ -135,7 +135,7 @@ int load_firm(firm_h *dest, char *path, char *path_firmkey, uint32_t *size, uint
     int firmware_changed = 0;
 
     if (read_file(dest, path, *size)) {
-        fprintf(BOTTOM_SCREEN, "Failed to read FIRM from SD\n");
+        fprintf(BOTTOM_SCREEN, "  Failed to read FIRM.\n");
 
         // Only whine about this if it's NATIVE_FIRM, which is important.
         if (firm_title == NATIVE_FIRM_TITLEID) {
@@ -155,17 +155,18 @@ int load_firm(firm_h *dest, char *path, char *path_firmkey, uint32_t *size, uint
             if (firm_title == NATIVE_FIRM_TITLEID) {
                 fprintf(BOTTOM_SCREEN, "Failed to decrypt firmware.\n"
                                        "This is fatal. Aborting.\n");
+		        status = 1;
+		        goto exit_error;
             }
-            goto exit_error;
         }
         firmware_changed = 1; // Decryption performed.
     } else {
-        fprintf(BOTTOM_SCREEN, "FIRM not encrypted\n");
+        fprintf(BOTTOM_SCREEN, "  FIRM not encrypted\n");
     }
 
 	struct firm_signature* fsig = get_firm_info(dest);
 
-	fprintf(BOTTOM_SCREEN, "FIRM version: %s\n", fsig->version_string);
+	fprintf(BOTTOM_SCREEN, "  FIRM version: %s\n", fsig->version_string);
 
     // The N3DS firm has an additional encryption layer for ARM9
 	if (fsig->console == console_n3ds) {
@@ -192,7 +193,7 @@ int load_firm(firm_h *dest, char *path, char *path_firmkey, uint32_t *size, uint
                     }
                     firmware_changed = 1; // Decryption of arm9bin performed.
                 } else {
-                    fprintf(BOTTOM_SCREEN, "ARM9 FIRM binary not encrypted\n");
+                    fprintf(BOTTOM_SCREEN, "  ARM9 FIRM binary not encrypted\n");
                     if (firm_title == NATIVE_FIRM_TITLEID && fsig->version > 0x0F) {
                         slot0x11key96_init(); // This has to be loaded regardless, otherwise boot will fail.
                     }
@@ -206,13 +207,12 @@ int load_firm(firm_h *dest, char *path, char *path_firmkey, uint32_t *size, uint
 
     // Save firmware.bin if decryption was done.
     if (firmware_changed) {
-        fprintf(BOTTOM_SCREEN, "Saving decrypted FIRM\n");
+        fprintf(BOTTOM_SCREEN, "  Saving decrypted FIRM\n");
         write_file(dest, path, *size);
     }
 
-    if (fsig->console == console_n3ds)
-    {
-        fprintf(BOTTOM_SCREEN, "Fixing arm9 entrypoint\n");
+    if (fsig->console == console_n3ds) {
+        fprintf(BOTTOM_SCREEN, "  Fixing arm9 entrypoint\n");
 
         // Patch the entrypoint to skip arm9loader
         if (firm_title == NATIVE_FIRM_TITLEID) {
@@ -261,6 +261,9 @@ void boot_firm() {
         fprintf(BOTTOM_SCREEN, "Updated keyX keyslots\n");
     }
 
+	fumount(); // Unmount SD. No longer needed.
+	fprintf(BOTTOM_SCREEN, "SD Unmounted.\n");
+
     for (firm_section_h *section = firm_loc->section;
             section < firm_loc->section + 4 && section->address != 0; section++) {
         memcpy((void *)section->address, (void *)firm_loc + section->offset, section->size);
@@ -293,7 +296,7 @@ int find_proc9(firm_h* firm, firm_section_h* process9, exefs_h** p9exefs) {
 						process9->address = p9exheader->sci.textCodeSet.address;
 						process9->size = (*p9exefs)->fileHeaders[0].size;
 						process9->offset = (void*)((*p9exefs) + 1) - (void*)firm;
-						fprintf(BOTTOM_SCREEN, "Found Process9 for FIRM.\n");
+						fprintf(BOTTOM_SCREEN, "  Found Process9 for FIRM.\n");
 						return 0;
 					}
 				}
@@ -301,12 +304,12 @@ int find_proc9(firm_h* firm, firm_section_h* process9, exefs_h** p9exefs) {
 			}
 		}
 	}
-	fprintf(BOTTOM_SCREEN, "Couldn't find Process9 for FIRM?\n");
+	fprintf(BOTTOM_SCREEN, "  Couldn't find Process9?\n");
 	return 1;
 }
 
 int load_firms() {
-    fprintf(TOP_SCREEN, "[Loading FIRM]");
+    fprintf(TOP_SCREEN, "[Loading FIRM]\n");
 
     fprintf(BOTTOM_SCREEN, "Loading NATIVE_FIRM\n");
     if (load_firm(firm_loc, PATH_NATIVE_F, PATH_NATIVE_FIRMKEY, &firm_size, NATIVE_FIRM_TITLEID) != 0)
@@ -315,13 +318,13 @@ int load_firms() {
 
     fprintf(BOTTOM_SCREEN, "Loading TWL_FIRM\n");
     if(load_firm(twl_firm_loc, PATH_TWL_F, PATH_TWL_FIRMKEY, &twl_firm_size, TWL_FIRM_TITLEID))
-        fprintf(BOTTOM_SCREEN, "TWL_FIRM failed to load.\n");
+        fprintf(BOTTOM_SCREEN, "  TWL_FIRM failed to load.\n");
 	else
     	find_proc9(twl_firm_loc, &twl_firm_proc9, &twl_firm_p9_exefs);
 
     fprintf(BOTTOM_SCREEN, "Loading AGB_FIRM\n");
     if(load_firm(agb_firm_loc, PATH_AGB_F, PATH_AGB_FIRMKEY, &agb_firm_size, AGB_FIRM_TITLEID))
-        fprintf(BOTTOM_SCREEN, "AGB_FIRM failed to load.\n");
+        fprintf(BOTTOM_SCREEN, "  AGB_FIRM failed to load.\n");
 	else
     	find_proc9(agb_firm_loc, &agb_firm_proc9, &agb_firm_p9_exefs);
 
@@ -329,7 +332,7 @@ int load_firms() {
 }
 
 void boot_cfw() {
-    fprintf(TOP_SCREEN, "[Patching]");
+    fprintf(TOP_SCREEN, "Applying patches...\n");
     if (patch_firm_all() != 0)
         return;
 

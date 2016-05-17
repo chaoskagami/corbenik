@@ -28,13 +28,18 @@ objects_cfw = $(patsubst $(dir_source)/%.s, $(dir_build)/%.o, \
 			  $(call rwildcard, $(dir_source), *.s *.c)))
 
 .PHONY: all
-all: a9lh
+all: a9lh vco
+
+.PHONY: vco
+vco:
+	make -C vco
 
 .PHONY: a9lh
 a9lh: $(dir_out)/arm9loaderhax.bin
 
 .PHONY: clean
 clean:
+	make -C vco clean
 	rm -rf $(dir_out) $(dir_build)
 
 .PHONY: $(dir_out)/arm9loaderhax.bin

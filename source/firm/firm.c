@@ -46,7 +46,7 @@ int decrypt_firm_title(firm_h *dest, ncch_h *ncch, uint32_t *size, void *key) {
     uint8_t exefs_key[16] = {0};
     uint8_t exefs_iv[16] = {0};
 
-    fprintf(BOTTOM_SCREEN, "Decrypting the NCCH\n");
+    fprintf(BOTTOM_SCREEN, "  Decrypting the NCCH\n");
     aes_setkey(0x16, key, AES_KEYNORMAL, AES_INPUT_BE | AES_INPUT_NORMAL);
     aes_use_keyslot(0x16);
     aes(ncch, ncch, *size / AES_BLOCK_SIZE, firm_iv, AES_CBC_DECRYPT_MODE, AES_INPUT_BE | AES_INPUT_NORMAL);
@@ -61,7 +61,7 @@ int decrypt_firm_title(firm_h *dest, ncch_h *ncch, uint32_t *size, void *key) {
     exefs_h *exefs = (exefs_h *)((void *)ncch + ncch->exeFSOffset * MEDIA_UNITS);
     uint32_t exefs_size = ncch->exeFSSize * MEDIA_UNITS;
 
-    fprintf(BOTTOM_SCREEN, "Decrypting the exefs\n");
+    fprintf(BOTTOM_SCREEN, "  Decrypting the exefs\n");
     aes_setkey(0x2C, exefs_key, AES_KEYY, AES_INPUT_BE | AES_INPUT_NORMAL);
     aes_use_keyslot(0x2C);
     aes(exefs, exefs, exefs_size / AES_BLOCK_SIZE, exefs_iv, AES_CTR_MODE, AES_INPUT_BE | AES_INPUT_NORMAL);
@@ -82,7 +82,7 @@ int decrypt_firm_title(firm_h *dest, ncch_h *ncch, uint32_t *size, void *key) {
 int decrypt_arm9bin(arm9bin_h *header, uint64_t firm_title, uint8_t version) {
     uint8_t slot = 0x15;
 
-    fprintf(BOTTOM_SCREEN, "Decrypting ARM9 FIRM binary\n");
+    fprintf(BOTTOM_SCREEN, "  Decrypting ARM9 FIRM binary\n");
 
     if (firm_title == NATIVE_FIRM_TITLEID && version > 0x0F) {
         uint8_t decrypted_keyx[AES_BLOCK_SIZE];
@@ -116,13 +116,13 @@ int decrypt_firm(firm_h *dest, char *path_firmkey, uint32_t *size) {
 
     // Firmware is likely encrypted. Decrypt.
     if (!read_file(firm_key, path_firmkey, AES_BLOCK_SIZE)) {
-        fprintf(BOTTOM_SCREEN, "Failed to load FIRM key\n");
+        fprintf(BOTTOM_SCREEN, "  Failed to load FIRM key\n");
         return 1;
     } else {
-        fprintf(BOTTOM_SCREEN, "Loaded FIRM key\n");
+        fprintf(BOTTOM_SCREEN, "  Loaded FIRM key\n");
     }
 
-    fprintf(BOTTOM_SCREEN, "Decrypting FIRM\n");
+    fprintf(BOTTOM_SCREEN, "  Decrypting FIRM\n");
     if (decrypt_firm_title(dest, (void *)dest, size, firm_key) != 0) {
         fprintf(BOTTOM_SCREEN, "Failed to decrypt the firmware\n");
         return 1;
@@ -322,7 +322,7 @@ int find_proc9(firm_h* firm, firm_section_h* process9, exefs_h** p9exefs) {
 }
 
 int load_firms() {
-    fprintf(TOP_SCREEN, "[Loading FIRM]\n");
+    fprintf(BOTTOM_SCREEN, "Loading FIRM...\n");
 
     fprintf(BOTTOM_SCREEN, "Loading NATIVE_FIRM\n");
     if (load_firm(firm_loc, PATH_NATIVE_F, PATH_NATIVE_FIRMKEY, &firm_size, NATIVE_FIRM_TITLEID) != 0)
@@ -345,7 +345,7 @@ int load_firms() {
 }
 
 void boot_cfw() {
-    fprintf(TOP_SCREEN, "Applying patches...\n");
+    fprintf(BOTTOM_SCREEN, "Applying patches...\n");
     if (patch_firm_all() != 0)
         return;
 

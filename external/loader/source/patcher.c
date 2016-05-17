@@ -117,30 +117,25 @@ static u32 secureInfoExists(void)
     return secureInfoExists;
 }
 
-struct config_file config;
-int failed_load_config = 1;
+static struct config_file config;
+static int failed_load_config = 1;
 
-void clear_config() {
-	// Basically; memset.
-	for(int i=0;i<sizeof(struct config_file);i++)
-		((char*)&config)[i]=0;
-}
-
-void load_config() {
-	IFile file;
-    u64 total;
+static void load_config() {
+	static IFile file;
+    static u64 total;
 
 	// Open file.
-    if (!fileOpen(&file, ARCHIVE_SDMC, PATH_CONFIG, FS_OPEN_READ)) {
+    if (!R_SUCCEEDED(fileOpen(&file, ARCHIVE_SDMC, PATH_CONFIG, FS_OPEN_READ))) {
 		// Failed to open.
-		failed_load_config = 1;
-        goto ret_fail;
+        return;
     }
 
 	// Read file.
-    if(!IFile_Read(&file, &total, &config, sizeof(struct config_file))) {
+    if (!R_SUCCEEDED(IFile_Read(&file, &total, &config, sizeof(struct config_file)))) {
+		IFile_Close(&file); // Read to memory.
+
 		// Failed to read.
-		goto ret_fail;
+		return;
 	}
 
 	IFile_Close(&file); // Read to memory.
@@ -148,20 +143,15 @@ void load_config() {
 	if (config.magic[0] != 'O' || config.magic[1] != 'V' || config.magic[2] != 'A' || config.magic[3] != 'N') {
 		// Incorrect magic.
 		// Failed to read.
-		goto ret_fail;
+		return;
 	}
 
 	if (config.config_ver != config_version) {
 		// Invalid version.
-		goto ret_fail;
+		return;
     }
 
 	failed_load_config = 0;
-
-	return;
-
-ret_fail:
-	clear_config();
 
 	return;
 }
@@ -346,7 +336,7 @@ static void patchCfgGetRegion(u8 *code, u32 size, u8 regionId, u32 CFGUHandleOff
     }
 }
 
-void region_patch(u64 progId, u8 *code, u32 size) {
+static void region_patch(u64 progId, u8 *code, u32 size) {
 	static const u8 regionFreePattern[] = {0x00, 0x00, 0x55, 0xE3, 0x01, 0x10, 0xA0, 0xE3};
 	static const u8 regionFreePatch[]   = {0x01, 0x00, 0xA0, 0xE3, 0x1E, 0xFF, 0x2F, 0xE1};
 
@@ -359,7 +349,7 @@ void region_patch(u64 progId, u8 *code, u32 size) {
     );
 }
 
-void disable_nim_updates(u64 progId, u8 *code, u32 size) {
+static void disable_nim_updates(u64 progId, u8 *code, u32 size) {
 	static const u8 blockAutoUpdatesPattern[] = {0x25, 0x79, 0x0B, 0x99};
 	static const u8 blockAutoUpdatesPatch[]   = {0xE3, 0xA0};
 
@@ -372,7 +362,7 @@ void disable_nim_updates(u64 progId, u8 *code, u32 size) {
 	);
 }
 
-void disable_eshop_updates(u64 progId, u8 *code, u32 size) {
+static void disable_eshop_updates(u64 progId, u8 *code, u32 size) {
 	static const u8 skipEshopUpdateCheckPattern[] = {0x30, 0xB5, 0xF1, 0xB0};
 	static const u8 skipEshopUpdateCheckPatch[]   = {0x00, 0x20, 0x08, 0x60, 0x70, 0x47};
 
@@ -385,7 +375,7 @@ void disable_eshop_updates(u64 progId, u8 *code, u32 size) {
 	);
 }
 
-void fake_friends_version(u64 progId, u8 *code, u32 size) {
+static void fake_friends_version(u64 progId, u8 *code, u32 size) {
 	static const u8 fpdVerPattern[] = {0xE0, 0x1E, 0xFF, 0x2F, 0xE1, 0x01, 0x01, 0x01};
 	static const u8 fpdVerPatch = 0x06; // Latest version.
 
@@ -398,7 +388,7 @@ void fake_friends_version(u64 progId, u8 *code, u32 size) {
 	);
 }
 
-void settings_string(u64 progId, u8 *code, u32 size) {
+static void settings_string(u64 progId, u8 *code, u32 size) {
 	static const u16 verPattern[] = u"Ver.";
 	static const u16 verPatch[] = u".hax";
 
@@ -411,7 +401,7 @@ void settings_string(u64 progId, u8 *code, u32 size) {
 	);
 }
 
-void disable_cart_updates(u64 progId, u8 *code, u32 size) {
+static void disable_cart_updates(u64 progId, u8 *code, u32 size) {
 	static const u8 stopCartUpdatesPattern[] = {0x0C, 0x18, 0xE1, 0xD8};
 	static const u8 stopCartUpdatesPatch[]   = {0x0B, 0x18, 0x21, 0xC8};
 
@@ -424,7 +414,7 @@ void disable_cart_updates(u64 progId, u8 *code, u32 size) {
 	);
 }
 
-void adjust_cpu_settings(u64 progId, u8 *code, u32 size) {
+static void adjust_cpu_settings(u64 progId, u8 *code, u32 size) {
 	if (!failed_load_config) {
 		u32 cpuSetting = 0;
 		// L2
@@ -446,7 +436,7 @@ void adjust_cpu_settings(u64 progId, u8 *code, u32 size) {
 	}
 }
 
-void secureinfo_sigpatch(u64 progId, u8 *code, u32 size) {
+static void secureinfo_sigpatch(u64 progId, u8 *code, u32 size) {
 	static const u8 secureinfoSigCheckPattern[] = {0x06, 0x46, 0x10, 0x48, 0xFC};
 	static const u8 secureinfoSigCheckPatch[]   = {0x00, 0x26};
 
@@ -459,11 +449,65 @@ void secureinfo_sigpatch(u64 progId, u8 *code, u32 size) {
 	);
 }
 
-void patchCode(u64 progId, u8 *code, u32 size)
-{
-	// FIXME - Config loading breaks loader. WTF is this?
-	// Maybe the memcpy?
-	// load_config();
+static void ro_sigpatch(u64 progId, u8 *code, u32 size) {
+	static const u8 sigCheckPattern[]      = {0x30, 0x40, 0x2D, 0xE9, 0x02, 0x50, 0xA0, 0xE1};
+	static const u8 sha256ChecksPattern1[] = {0x30, 0x40, 0x2D, 0xE9, 0x24, 0xD0, 0x4D, 0xE2};
+	static const u8 sha256ChecksPattern2[] = {0xF8, 0x4F, 0x2D, 0xE9, 0x01, 0x70, 0xA0, 0xE1};
+
+	// mov r0, #0; bx lr - equivalent to 'return 0;'
+	static const u8 stub[]                 = {0x00, 0x00, 0xA0, 0xE3, 0x1E, 0xFF, 0x2F, 0xE1};
+
+	//Disable CRR0 signature (RSA2048 with SHA256) check
+	patchMemory(code, size,
+		sigCheckPattern,
+		sizeof(sigCheckPattern), 0,
+		stub,
+		sizeof(stub), 1
+	);
+
+	//Disable CRO0/CRR0 SHA256 hash checks (section hashes, and hash table)
+	patchMemory(code, size,
+		sha256ChecksPattern1,
+		sizeof(sha256ChecksPattern1), 0,
+		stub,
+		sizeof(stub), 1
+	);
+
+	patchMemory(code, size,
+		sha256ChecksPattern2,
+		sizeof(sha256ChecksPattern2), 0,
+		stub,
+		sizeof(stub), 1
+	);
+}
+
+void language_emu(u64 progId, u8 *code, u32 size) {
+	if(!failed_load_config && config.options[OPTION_LOADER_LANGEMU]) {
+		u32 tidHigh = (progId & 0xFFFFFFF000000000LL) >> 0x24;
+
+		if(tidHigh == 0x0004000) { // Normal Game
+			//Language emulation
+			u8 regionId = 0xFF,
+			languageId = 0xFF;
+
+			if(R_SUCCEEDED(loadTitleLocaleConfig(progId, &regionId, &languageId))) {
+				u32 CFGUHandleOffset;
+
+				u8 *CFGU_GetConfigInfoBlk2_endPos = getCfgOffsets(code, size, &CFGUHandleOffset);
+
+				if(CFGU_GetConfigInfoBlk2_endPos != NULL) {
+					if(languageId != 0xFF)
+						patchCfgGetLanguage(code, size, languageId, CFGU_GetConfigInfoBlk2_endPos);
+					if(regionId != 0xFF)
+						patchCfgGetRegion(code, size, regionId, CFGUHandleOffset);
+				}
+			}
+		}
+	}
+}
+
+void patchCode(u64 progId, u8 *code, u32 size) {
+	load_config();
 
     switch(progId)
     {
@@ -504,7 +548,7 @@ void patchCode(u64 progId, u8 *code, u32 size)
         case 0x0004013000008002LL: // NS
         {
 			disable_cart_updates(progId, code, size);
-			adjust_cpu_settings(progId, code, size);
+			adjust_cpu_settings(progId, code, size); // DEFAULT cpu settings that are inherited system-wide. Per-app is handled in default.
             break;
         }
 
@@ -513,35 +557,15 @@ void patchCode(u64 progId, u8 *code, u32 size)
 			secureinfo_sigpatch(progId, code, size);
             break;
         }
-/*        default:
+		case 0x0004013000003702LL: // RO
 		{
-            if(!failed_load_config && config.options[OPTION_LOADER_LANGEMU])
-            {
-                u32 tidHigh = (progId & 0xFFFFFFF000000000LL) >> 0x24;
-
-                if(tidHigh == 0x0004000)
-                {
-                    //Language emulation
-                    u8 regionId = 0xFF,
-                       languageId = 0xFF;
-
-                    if(R_SUCCEEDED(loadTitleLocaleConfig(progId, &regionId, &languageId)))
-                    {
-                        u32 CFGUHandleOffset;
-
-                        u8 *CFGU_GetConfigInfoBlk2_endPos = getCfgOffsets(code, size, &CFGUHandleOffset);
-
-                        if(CFGU_GetConfigInfoBlk2_endPos != NULL)
-                        {
-                            if(languageId != 0xFF)
-                                patchCfgGetLanguage(code, size, languageId, CFGU_GetConfigInfoBlk2_endPos);
-                            if(regionId != 0xFF)
-                                patchCfgGetRegion(code, size, regionId, CFGUHandleOffset);
-                        }
-                    }
-                }
-            }
+			ro_sigpatch(progId, code, size);
+			break;
+		}
+        default:
+		{
+			language_emu(progId, code, size);
             break;
-        } */
+        }
     }
 }

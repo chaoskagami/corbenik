@@ -47,6 +47,10 @@ uint32_t wait_key() {
             get = BUTTON_UP;
         else if (HID_PAD & BUTTON_DOWN)
             get = BUTTON_DOWN;
+        else if (HID_PAD & BUTTON_RIGHT)
+            get = BUTTON_RIGHT;
+        else if (HID_PAD & BUTTON_LEFT)
+            get = BUTTON_LEFT;
         else if (HID_PAD & BUTTON_A)
             get = BUTTON_A;
         else if (HID_PAD & BUTTON_B)
@@ -56,8 +60,8 @@ uint32_t wait_key() {
     return get;
 }
 
-void header() {
-    fprintf(stdout, "\x1b[33;40m[.corbenik//%s]\x1b[0m\n", VERSION);
+void header(char* append) {
+    fprintf(stdout, "\x1b[33;40m[.corbenik//%s] %s\x1b[0m\n", VERSION, append);
 }
 
 int menu_patches() { return MENU_MAIN; }
@@ -65,7 +69,7 @@ int menu_patches() { return MENU_MAIN; }
 int menu_options() {
     set_cursor(TOP_SCREEN, 0, 0);
 
-    header();
+    header("A:Enter B:Back DPAD:Nav");
 
 	int i = 0;
     while(options[i].index != -1) { // -1 Sentinel.
@@ -75,7 +79,7 @@ int menu_options() {
             fprintf(TOP_SCREEN, "   ");
 
         if (need_redraw)
-			fprintf(TOP_SCREEN, "[%c] %s\n", (config.options[options[i].index] ? 'X' : ' '), options[i].name);
+			fprintf(TOP_SCREEN, "[%c]  %s\n", (config.options[options[i].index] ? 'X' : ' '), options[i].name);
 		else {
 			// Yes, this is weird. printf does a large number of extra things we don't
 			// want computed at the moment; this is faster.
@@ -122,7 +126,7 @@ int menu_info() {
 
     set_cursor(TOP_SCREEN, 0, 0);
 
-    header();
+    header("Any:Back");
 	struct firm_signature *native = get_firm_info(firm_loc);
 	struct firm_signature *agb = get_firm_info(agb_firm_loc);
 	struct firm_signature *twl = get_firm_info(twl_firm_loc);
@@ -132,9 +136,7 @@ int menu_info() {
                         "AGB_FIRM / GBA Firmware:\n"
                         "  Version: %s (%x)\n"
                         "TWL_FIRM / DSi Firmware:\n"
-                        "  Version: %s (%x)\n"
-                        "\n"
-						"[Press any key]\n",
+                        "  Version: %s (%x)\n",
 						native->version_string, native->version,
 						agb->version_string, agb->version,
 						twl->version_string, twl->version);
@@ -154,7 +156,7 @@ int menu_help() {
 
     set_cursor(TOP_SCREEN, 0, 0);
 
-    header();
+    header("Any:Back");
 
     fprintf(stdout,     "\nCorbenik is a 3DS firmware patching tool;\n"
                         "  commonly known as a CFW. It seeks to address\n"
@@ -215,7 +217,7 @@ int menu_main() {
     };
     int menu_max = 7;
 
-    header();
+    header("A:Enter DPAD:Nav");
 
     for(int i=0; i < menu_max; i++) {
         if (!(i+2 == MENU_HELP && config.options[OPTION_READ_ME])) {

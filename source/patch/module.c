@@ -40,6 +40,7 @@ int patch_modules() {
 		if (memcmp(sysmodule->programID, module->programID, 8) == 0) {
 			// Expand firmware module size if needed to accomodate replacement.
 			if (module->contentSize > sysmodule->contentSize) {
+				fprintf(stderr, "Module: Grow %d units\n", module->contentSize - sysmodule->contentSize);
 				// Location to shuffle to.
 				uint32_t need_units = (module->contentSize - sysmodule->contentSize);
 				uint8_t* move_to = ((uint8_t*)sysmodule + (module->contentSize + need_units) * 0x200);
@@ -53,6 +54,7 @@ int patch_modules() {
 
 			// Move the remaining modules closer
 			if (module->contentSize < sysmodule->contentSize) {
+				fprintf(stderr, "Module: Shrink %d units\n", sysmodule->contentSize - module->contentSize);
 				int remaining_size =
 					sysmodule_section->size -
                     (((uint32_t)sysmodule + sysmodule->contentSize * 0x200) -
@@ -62,6 +64,7 @@ int patch_modules() {
 				// Move end of section to be adjacent
 			}
 
+			fprintf(stderr, "Module: Injecting %llu\n", module->programID);
 			// Copy the module into the firm
 			memcpy(sysmodule, module, module->contentSize * 0x200);
 			break;

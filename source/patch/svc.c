@@ -25,7 +25,7 @@ int patch_services() {
     uint32_t *exceptionsPage;
     uint32_t *svcTable = getSvcAndExceptions(arm11Section1, firm_loc->section[1].size, &exceptionsPage);
 
-	fprintf(stderr, "Svc: table:%x\n", (uint32_t)svcTable);
+	fprintf(stderr, "Svc: table at %x\n", (uint32_t)svcTable);
 
     if(!svcTable[0x7B]) {
         // Firmware is missing svcBackdoor. Fix it.
@@ -42,14 +42,14 @@ int patch_services() {
 			for(freeSpace = exceptionsPage; *freeSpace != 0xFFFFFFFF; freeSpace++);
 		}
 
-		fprintf(stderr, "Svc: to:%x\n", (uint32_t)freeSpace);
+		fprintf(stderr, "Svc: Copy code to %x\n", (uint32_t)freeSpace);
 
         memcpy(freeSpace, svcbackdoor, sizeof(svcbackdoor));
         svcTable[0x7B] = 0xFFFF0000 + ((uint8_t *)freeSpace - (uint8_t *)exceptionsPage);
 
 		freeSpace += sizeof(svcbackdoor); // We keep track of this because there's more than 7B free.
 
-		fprintf(stderr, "Svc: ent:%x\n", svcTable[0x7B]);
+		fprintf(stderr, "Svc: entry set as %x\n", svcTable[0x7B]);
     } else {
         fprintf(stderr, "Svc: no change\n");
 	}

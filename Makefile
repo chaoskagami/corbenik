@@ -28,11 +28,15 @@ objects_cfw = $(patsubst $(dir_source)/%.s, $(dir_build)/%.o, \
 			  $(call rwildcard, $(dir_source), *.s *.c)))
 
 .PHONY: all
-all: a9lh vco
+all: a9lh vco external
 
 .PHONY: vco
 vco:
 	make -C vco
+
+.PHONY: external
+external:
+	make -C external
 
 .PHONY: a9lh
 a9lh: $(dir_out)/arm9loaderhax.bin
@@ -40,6 +44,7 @@ a9lh: $(dir_out)/arm9loaderhax.bin
 .PHONY: clean
 clean:
 	make -C vco clean
+	make -C external clean
 	rm -rf $(dir_out) $(dir_build)
 
 .PHONY: $(dir_out)/arm9loaderhax.bin
@@ -63,35 +68,35 @@ $(dir_build)/%.o: $(dir_source)/%.s
 
 $(dir_build)/fatfs/%.o: $(dir_source)/fatfs/%.c
 	@mkdir -p "$(@D)"
-	$(COMPILE.c) -mthumb -mthumb-interwork -Wno-unused-function $(OUTPUT_OPTION) $<
+	$(COMPILE.c) -Wno-unused-function $(OUTPUT_OPTION) $<
 
 $(dir_build)/fatfs/%.o: $(dir_source)/fatfs/%.s
 	@mkdir -p "$(@D)"
-	$(COMPILE.s) -mthumb -mthumb-interwork $(OUTPUT_OPTION) $<
+	$(COMPILE.s) $(OUTPUT_OPTION) $<
 
 $(dir_build)/std/%.o: $(dir_source)/std/%.c
 	@mkdir -p "$(@D)"
-	$(COMPILE.c) -mthumb -mthumb-interwork -Wno-unused-function $(OUTPUT_OPTION) $<
+	$(COMPILE.c) -Wno-unused-function $(OUTPUT_OPTION) $<
 
 $(dir_build)/std/%.o: $(dir_source)/std/%.s
 	@mkdir -p "$(@D)"
-	$(COMPILE.s) -mthumb -mthumb-interwork $(OUTPUT_OPTION) $<
+	$(COMPILE.s) $(OUTPUT_OPTION) $<
 
 $(dir_build)/firm/%.o: $(dir_source)/firm/%.c
 	@mkdir -p "$(@D)"
-	$(COMPILE.c) -mthumb -mthumb-interwork -Wno-unused-function $(OUTPUT_OPTION) $<
+	$(COMPILE.c) -Wno-unused-function $(OUTPUT_OPTION) $<
 
 $(dir_build)/firm/%.o: $(dir_source)/firm/%.s
 	@mkdir -p "$(@D)"
-	$(COMPILE.s) -mthumb -mthumb-interwork $(OUTPUT_OPTION) $<
+	$(COMPILE.s) $(OUTPUT_OPTION) $<
 
 
 $(dir_build)/patch/%.o: $(dir_source)/patch/%.c
 	@mkdir -p "$(@D)"
-	$(COMPILE.c) -mthumb -mthumb-interwork -Wno-unused-function $(OUTPUT_OPTION) $<
+	$(COMPILE.c) -Wno-unused-function $(OUTPUT_OPTION) $<
 
 $(dir_build)/patch/%.o: $(dir_source)/patch/%.s
 	@mkdir -p "$(@D)"
-	$(COMPILE.s) -mthumb -mthumb-interwork $(OUTPUT_OPTION) $<
+	$(COMPILE.s) $(OUTPUT_OPTION) $<
 
 include $(call rwildcard, $(dir_build), *.d)

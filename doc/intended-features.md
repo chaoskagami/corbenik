@@ -10,7 +10,7 @@ Feature graph
 +--------+-----------------+-----------------+------------------------------+-----------+---------------+-------------------+-------+
 |ReiNAND |Meme(SD)         |Builtin, Dynamic |Sig,Emu,Sys,Mod,Ptc           |N/A        |Readability    |Minimalist         | [4]   |
 +--------+-----------------+-----------------+------------------------------+-----------+---------------+-------------------+-------+
-|Corbenik|Dec/Enc (SD)     |Builtin, Dynamic |Sig,Ptc,Sys                   |N/A        |Read/Speed     |Advanced Devs      | [5]   |
+|Corbenik|Dec/Enc (SD)     |Executable       |Sig,Ptc,Bck,Mod,Sys           |Mis        |Read/Speed     |Advanced Devs      | [5]   |
 +--------+-----------------+-----------------+------------------------------+-----------+---------------+-------------------+-------+
 |NTR     |N/A              |Executable       |Mis                           |Mis        |Douchebaggery  |Shilling Closed Src| [6]   |
 +--------+-----------------+-----------------+------------------------------+-----------+---------------+-------------------+-------+
@@ -60,7 +60,7 @@ Misc features by CFW:
     My focus will always be readability over speed, unless choosing speed and adding additional documentation
     suffices. As an aside; if you see a single trigraph in my code, please report it. Trigraphs are by design a bug.
 
-[2] CakesFW uses a patch format that has static offsets. They're loaded off FS and in theory are impervious
+[2] CakesFW uses a patch format that has static offsets. They're dynamically loaded and in theory are impervious
     to updates. In practice, updating patches is a pain and better done by offset patches like Luma3DS/Rei.
 
     Either way, Cakes allows doing some things the other firmware authors would probably call idiotic; I call them
@@ -77,7 +77,11 @@ Misc features by CFW:
     ass magic to load a re-encrypted copy (?) of the nintendo firmware using a key refered to as the 'memekey'. How
     encrypting data differently makes it any less illegal to rehost I have no clue.
 
-[5] Yes, Corbenik currently lacks quite a few things from this graph. Quite. A. Few. This will change with time.
+[5] Yes, Corbenik currently lacks quite a few things from this graph. On the upside; patches can be implemented
+    externally. I currently have zero interest in implementing reboot; I never need it, having a n3ds. EmuNAND, as
+    well is something I have little interest in (but will happen eventually.)
+
+    As for other bits; Aside from fixing svcBackdoor, I can also inject arbitrary custom services. You're welcome.
 
 [6] Okay, first - I could rant about how NTR is harming us long run for hours. I won't rant for hours, but I will
     explain some of the rationale here:

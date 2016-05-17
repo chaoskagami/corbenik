@@ -14,7 +14,7 @@ dir_build  := build
 dir_out    := out
 
 ASFLAGS := -mlittle-endian -mcpu=arm946e-s -march=armv5te
-CFLAGS  := -MMD -MP -Wall -Wextra -Werror -O0 $(ASFLAGS) -fno-builtin -std=c11 -marm
+CFLAGS  := -MMD -MP -Wall -Wextra -Werror -O0 $(ASFLAGS) -fno-builtin -std=c11
 FLAGS   := dir_out=$(abspath $(dir_out)) --no-print-directory
 LDFLAGS := -nostdlib -Wl,-z,defs -lgcc
 

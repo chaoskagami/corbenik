@@ -132,15 +132,23 @@ void draw_character(uint8_t* screen, const char character, const unsigned int bu
 
 unsigned char color_top = 0xf0;
 unsigned char color_bottom = 0xf0;
+int kill_output = 0;
+
+void shut_up() {
+	kill_output = !kill_output;
+}
 
 void putc(void* buf, const int c) {
     if (buf == stdout || buf == stderr) {
+		if (kill_output)
+			return;
+
 		unsigned int width  = 0;
 		_UNUSED unsigned int height = 0;
-    	unsigned int *cursor_x;
-    	unsigned int *cursor_y;
-    	char *colorbuf;
-    	char *strbuf;
+    	unsigned int *cursor_x = NULL;
+    	unsigned int *cursor_y = NULL;
+    	char *colorbuf = NULL;
+    	char *strbuf = NULL;
 
 		unsigned char* color = NULL;
 
@@ -316,10 +324,7 @@ void fflush(void* channel) {
 	}
 }
 
-void fprintf(void* channel, const char* format, ...) {
-    va_list ap;
-    va_start( ap, format );
-
+void vfprintf(void* channel, const char* format, va_list ap ) {
     char *ref = (char*)format;
 
 	unsigned char* color;
@@ -423,8 +428,14 @@ check_format:
         ++ref;
     }
 
-    va_end( ap );
-
     fflush(channel);
 }
 
+void fprintf(void* channel, const char* format, ...) {
+    va_list ap;
+    va_start( ap, format );
+
+	vfprintf( channel, format, ap );
+
+    va_end( ap );
+}

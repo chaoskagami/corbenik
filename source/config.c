@@ -63,7 +63,8 @@ void load_config() {
         }
     }
 
-    fprintf(BOTTOM_SCREEN, "Config file loaded.\n");
+	if (!config.options[OPTION_SILENCE])
+    	fprintf(BOTTOM_SCREEN, "Config file loaded.\n");
 }
 
 void save_config() {

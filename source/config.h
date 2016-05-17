@@ -20,18 +20,19 @@ extern struct config_file config;
 #define OPTION_SIGPATCH     0  // Use builtin signature patch.
 #define OPTION_FIRMPROT     1  // Protect firmware from writes.
 #define OPTION_LOADER       2  // Use builtin loader module replacer.
-#define OPTION_ARM9THREAD   3  // Use builtin ARM9 thread injector.
+#define OPTION_SERVICES     3  // Inject services (including backdoor for 11)
+#define OPTION_ARM9THREAD   4  // Use builtin ARM9 thread injector.
 
-#define OPTION_AUTOBOOT     4  // Skip menu unless L is held.
-#define OPTION_SILENCE      5  // Don't print debug information.
-#define OPTION_TRACE        6  // Pause for A key on each step.
+#define OPTION_AUTOBOOT     5  // Skip menu unless L is held.
+#define OPTION_SILENCE      6  // Don't print debug information.
+#define OPTION_TRACE        7  // Pause for A key on each step.
 
-#define OPTION_TRANSP_BG    7  // Background color is not drawn under text.
-#define OPTION_NO_CLEAR_BG  8  // Framebuffer is preserved from whatever ran before us.
-#define OPTION_READ_ME      9  // Remove Help/Readme from menu.
+#define OPTION_TRANSP_BG    8  // Background color is not drawn under text.
+#define OPTION_NO_CLEAR_BG  9  // Framebuffer is preserved from whatever ran before us.
+#define OPTION_READ_ME      10 // Remove Help/Readme from menu.
 
-#define IGNORE_PATCH_DEPS   10  // Ignore patch UUID dependencies. Not recommended.
-#define IGNORE_BROKEN_SHIT  11 // Allow enabling patches which are marked as 'incompatible'. Chances are there's a reason.
+#define IGNORE_PATCH_DEPS   11  // Ignore patch UUID dependencies. Not recommended.
+#define IGNORE_BROKEN_SHIT  12 // Allow enabling patches which are marked as 'incompatible'. Chances are there's a reason.
 
 //#define HEADER_COLOR        12 // Color of header text.
 //#define BG_COLOR            13 // Color of background.

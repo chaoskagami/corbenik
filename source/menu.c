@@ -60,12 +60,13 @@ int menu_options() {
     const char *list[] = {
         "Signature Patch",
         "FIRM Write Protection",
-        "Inject Loader",
+        "Inject Loader (NYI)",
+		"Inject Services",
         "Enable ARM9 Thread",
 
-        "Autoboot (NYI)",
-        "Silence debug output (NYI)",
-        "Pause for input as trace",
+        "Autoboot",
+        "Silence debug w/ autoboot",
+        "Pause for input on steps",
 
         "Don't draw background color (NYI)",
         "Preserve current framebuffer (NYI)",
@@ -74,7 +75,7 @@ int menu_options() {
         "Ignore dependencies (NYI)",
         "Allow enabling broken (NYI)",
     };
-    const int menu_max = 11;
+    const int menu_max = 12;
 
     header();
 

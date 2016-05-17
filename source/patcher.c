@@ -12,6 +12,7 @@ int execp(char* path);
 
 extern int patch_signatures();
 extern int patch_firmprot();
+extern int patch_services();
 
 // A portion of this file is inherited from Luma3DS.
 /*u32 getLoader(u8 *pos, u32 *loaderSize) {
@@ -77,6 +78,13 @@ int patch_firm_all() {
 		// Yes.
 
 		// This requires OPTION_SIGPATCH.
+	}
+
+	// Replace loader?
+	if (config.options[OPTION_SERVICES]) {
+		if(patch_services()) {
+			abort("Fatal. Service patch has failed.");
+		}
 	}
 
 	// Use ARM9 hook thread?

@@ -5,38 +5,31 @@
 #include "../config.h"
 #include "../common.h"
 
-uint8_t* arm11Section1 = NULL;
-uint32_t *svc_tab_open = NULL, *exceptionsPage = NULL, *svcTable = NULL;
-int svc_offs_init = 0;
+uint32_t *getSvcAndExceptions(uint8_t *pos, uint32_t size, uint32_t **exceptionsPage) {
+    uint8_t pattern[] = {0x00, 0xB0, 0x9C, 0xE5}; //cpsid aif
+
+    *exceptionsPage = (uint32_t *)memfind(pos, size, pattern, 4) - 0xB;
+
+    uint32_t svcOffset = (-(((*exceptionsPage)[2] & 0xFFFFFF) << 2) & (0xFFFFFF << 2)) - 8; //Branch offset + 8 for prefetch
+    uint32_t *svcTable = (uint32_t *)(pos + *(uint32_t *)(pos + 0xFFFF0008 - svcOffset - 0xFFF00000 + 8) - 0xFFF00000); //SVC handler address
+    while(*svcTable) svcTable++; //Look for SVC0 (NULL)
+
+    return svcTable;
+}
+
+uint32_t *freeSpace = NULL;
 
 int patch_services() {
-	if (svc_offs_init == 0) {
-    	arm11Section1 = (uint8_t*)firm_loc + firm_loc->section[1].offset;
-
-    	uint8_t pattern[] = {0x00, 0xB0, 0x9C, 0xE5}; //cpsid aif
-
-    	exceptionsPage = (uint32_t *)memfind(arm11Section1, firm_loc->section[1].size, pattern, 4) - 0xB;
-
-    	uint32_t svcOffset = (-(((exceptionsPage)[2] & 0xFFFFFF) << 2) & (0xFFFFFF << 2)) - 8; //Branch offset + 8 for prefetch
-    	svcTable = (uint32_t *)(arm11Section1 + *(uint32_t *)(arm11Section1 + 0xFFFF0008 - svcOffset - 0xFFF00000 + 8) - 0xFFF00000); //SVC handler address
-    	while(*svcTable) svcTable++; //Look for SVC0 (NULL)
-
-		// Skip to free space
-		for(svc_tab_open = exceptionsPage; *svc_tab_open != 0xFFFFFFFF; svc_tab_open++);
-		svc_offs_init = 1;
-	}
-
-	fprintf(stderr, "Svc Stubs:\n");
-	for (int i=0; i < 0xFF; i++) {
-		if(!svcTable[i]) {
-			fprintf(stderr, "%d ", i);
-		}
-	}
-	fprintf(stderr, "\n");
-
     // Make sure svcBackdoor is there.
+    uint8_t* arm11Section1 = (uint8_t*)firm_loc + firm_loc->section[1].offset;
+    uint32_t *exceptionsPage;
+    uint32_t *svcTable = getSvcAndExceptions(arm11Section1, firm_loc->section[1].size, &exceptionsPage);
+
+	fprintf(stderr, "Svc: table:%x\n", (uint32_t)svcTable);
+
     if(!svcTable[0x7B]) {
-		fprintf(stderr, "svc: 0x7B (backdoor) missing.\n");
+        // Firmware is missing svcBackdoor. Fix it.
+        fprintf(stderr, "Svc: inject 0x7B (backdoor)\n");
 
         // See extra/backdoor.s for the code to this.
         const unsigned char svcbackdoor[40] = {
@@ -45,14 +38,20 @@ int patch_services() {
             0x00, 0xD0, 0xA0, 0xE1, 0x11, 0xFF, 0x2F, 0xE1
         };
 
-        memcpy(svc_tab_open, svcbackdoor, sizeof(svcbackdoor));
-        svcTable[0x7B] = 0xFFFF0000 + ((uint8_t *)svc_tab_open - (uint8_t *)exceptionsPage);
+		if (!freeSpace) {
+			for(freeSpace = exceptionsPage; *freeSpace != 0xFFFFFFFF; freeSpace++);
+		}
 
-		svc_tab_open += sizeof(svcbackdoor);
+		fprintf(stderr, "Svc: to:%x\n", (uint32_t)freeSpace);
 
-		fprintf(stderr, "svc: Injected 0x7B.\n");
+        memcpy(freeSpace, svcbackdoor, sizeof(svcbackdoor));
+        svcTable[0x7B] = 0xFFFF0000 + ((uint8_t *)freeSpace - (uint8_t *)exceptionsPage);
+
+		freeSpace += sizeof(svcbackdoor); // We keep track of this because there's more than 7B free.
+
+		fprintf(stderr, "Svc: ent:%x\n", svcTable[0x7B]);
     } else {
-		fprintf(stderr, "svc: No change needed.\n");
+        fprintf(stderr, "Svc: no change\n");
 	}
 
 	return 0;

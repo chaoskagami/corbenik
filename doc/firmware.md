@@ -29,3 +29,10 @@ New 3DS AGB_FIRM (Firmware for GBA games):
   cetk: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000202/cetk
 
   firm: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000202/00000000
+
+Note that while latest is usually greatest, if you MUST use 11.0 FIRMs, please enable
+both the loader replacement and service fix. Nintendo broke quite a bit, and it was
+quite literally a anti-hack.
+
+Also, I may reimplement a token based svcBackdoor since it can now be used to detect
+CFW's presence.

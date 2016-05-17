@@ -130,6 +130,8 @@ int decrypt_firm(firm_h *dest, char *path_firmkey, uint32_t *size) {
 	return 0;
 }
 
+extern int patch_services();
+
 int load_firm(firm_h *dest, char *path, char *path_firmkey, uint32_t *size, uint64_t firm_title) {
     int status = 0;
     int firmware_changed = 0;
@@ -247,10 +249,17 @@ void __attribute__((naked)) disable_lcds() {
 extern void wait();
 
 void boot_firm() {
+	struct firm_signature* fsig = get_firm_info(firm_loc);
+
     // Set up the keys needed to boot a few firmwares, due to them being unset, depending on which firmware you're booting from.
     // TODO: Don't use the hardcoded offset.
-    if (update_96_keys) {
-        void *keydata = (void *)((uintptr_t)firm_loc + firm_loc->section[2].offset + 0x89814);
+    if (update_96_keys && fsig->console == console_n3ds && fsig->version > 0x0F) {
+		void *keydata = NULL;
+		if (fsig->version == 0x1B || fsig->version == 0x1F) {
+			keydata = (void *)((uintptr_t)firm_loc + firm_loc->section[2].offset + 0x89814);
+		} else if (fsig->version == 0x21) {
+			keydata = (void *)((uintptr_t)firm_loc + firm_loc->section[2].offset + 0x89A14);
+		}
 
         aes_use_keyslot(0x11);
         uint8_t keyx[AES_BLOCK_SIZE];

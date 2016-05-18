@@ -10,7 +10,7 @@ Feature graph
 +--------+-----------------+-----------------+------------------------------+-----------+---------------+-------------------+-------+
 |ReiNAND |Meme(SD)         |Builtin, Dynamic |Sig,Emu,Sys,Mod,Ptc           |N/A        |Readability    |Minimalist         | [4]   |
 +--------+-----------------+-----------------+------------------------------+-----------+---------------+-------------------+-------+
-|Corbenik|Dec/Enc (SD)     |Builtin, Dynamic |Sig,Ptc,Sys,Svc               |N/A        |Read/Speed     |Advanced Devs      | [5]   |
+|Corbenik|Dec/Enc (SD)     |Builtin, Dynamic |Sig,Ptc,Sys,Mod,Bck,Mis       |N/A        |Read/Speed     |Advanced Devs      | [5]   |
 +--------+-----------------+-----------------+------------------------------+-----------+---------------+-------------------+-------+
 |NTR     |N/A              |Executable       |Mis                           |Mis        |Douchebaggery  |Shilling Closed Src| [6]   |
 +--------+-----------------+-----------------+------------------------------+-----------+---------------+-------------------+-------+
@@ -28,6 +28,7 @@ Feature graph
  * Mis: Other misc fixes and alterations including:
    * UNITINFO patch
    * GBA bios screen
+   * Region-free
 
 Misc features by CFW:
  * Cakes:
@@ -44,6 +45,11 @@ Misc features by CFW:
  * Corbenik
    * Arbitrary service injection to empty slots.
      Similar results can be achieved in cakes, but with much pain.
+     I've yet to find a use for this, but it's certainly neat.
+   * Arbitrary sysmodule injection.
+   * Loader replacement - loosely based on Luma3ds' with some significant
+     alterations.
+     * Again, shit will be moved someday soon to externals.
 
 [1] I'm not just referring to speed; I'm referring to purpose-based optimization. For example;
     do you want something well documented? Would you choose a slower algorithm that can be more
@@ -71,10 +77,18 @@ Misc features by CFW:
     format is incapable of accomodating some changes in a sane manner that doesn't require excessive RE or on console
     one off offset checks.
 
-[3] Luma is a weird beast - "Noob-proof" as github states very perfectly describes it for better or worse. Want to load
-    encrypted SD FIRM? Nope. Load SD firm with SysNAND? Nope. And many options aren't exposed to the user, period. Oh,
-    I suppose there's no legitimate reason to disable firmprot anyways, either. Detection of Emunand #2 tends to be
-    faulty. I have four.
+[3] Luma is a weird beast - "Noob-proof" as github states very perfectly describes it for better or worse. It can do
+    a lot, has a very good focus on what it wants to do and probably works good enough for 90% of users. It handles
+    the vast majority of use cases well and sanely.
+
+    Some internal bits aren't exposed as configurable because turning them off is bad for the inexperienced. This is both
+    good and bad. On the upside, less brick complaints. On the downside, it loses some power for hacker-ish people who
+    know what they're doing and have odd requirements.
+
+    As I've been told by @TuxSH - "Noob-proof" != Just for noobs. I find that "Noob-proof" as a goal tends to somewhat
+    limit the people who truly understand what they're doing, however, in any software - not just Luma.
+
+    My only real complaint about Luma is the sheer amount of pointer math instead of reading headers correctly.
 
 [4] Reisyukaku has fallen behind a bit; his firmware is still in use and rather slim. He does, however, do some fancy
     ass magic to load a re-encrypted copy (?) of the nintendo firmware using a key refered to as the 'memekey'. How
@@ -86,15 +100,18 @@ Misc features by CFW:
     explain some of the rationale here:
 
     NTR is a secondary CFW; it's designed to be used with a primary one. It consists of a proprietary blob, ntr.bin
-    which loads into memory and takes over the debug service and subsequently the arm11 kernel.
+    which loads into memory with some offset patches done by BootNTR - then takes over the debug service and
+    subsequently the arm11 kernel and threading to keep itself resident[7].
 
     Normally, the functionality would be useful, but when you consider he's using techniques he hasn't bothered to doc
-    on 3dbrew, you should by now know his goal is lock-in. From BootNTR it's apparent he's a shitty coder[7]. He
+    on 3dbrew, you should by now know his goal is lock-in. From BootNTR it's apparent he's a shitty coder[8]. He
     won't document it, because someone else will create a better optimized version. Hm...that sounds a lot like a
     certain Japanese company who developed a cons- oh wait.
 
     The point is; NTR is not your friend. Stop using it.
 
-[7] Tell me that giant switch statement couldn't be implemented as a dynamic patcher on the 3DS itself, considering
-    all of the python offset extractor could be rewritten in C. Dare you. He also can't be bothered to port to 10.4
+[7] At least from what I can tell. See https://github.com/patois/NTRDisasm. This is an out of date version, as well.
+
+[8] Tell me that giant switch statement couldn't be implemented as a dynamic patcher on the 3DS itself, considering
+    all of the python offset extractor code could be rewritten in C. Dare you. He also can't be bothered to port to 10.4
     NATIVE_FIRM even though there's literally no difference that should break NTR.

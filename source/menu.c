@@ -33,6 +33,7 @@ static struct options_s options[] = {
 
 	{ 14, "No dependency tracking", boolean_val, 0, 0 },
 	{ 15, "Allow unsafe options", boolean_val, 0, 0 },
+
 	{ -1, "", 0, 0, 0},
 };
 

@@ -506,6 +506,10 @@ void language_emu(u64 progId, u8 *code, u32 size) {
 	}
 }
 
+void overlay_patch(u64 progId, u8 *code, u32 size) {
+	// TODO - Prt
+}
+
 void patchCode(u64 progId, u8 *code, u32 size) {
 	load_config();
 
@@ -561,6 +565,12 @@ void patchCode(u64 progId, u8 *code, u32 size) {
 		{
 			ro_sigpatch(progId, code, size);
 			break;
+		}
+		case 0x00040000000B8B00LL: // Smash 4
+        case 0x00040000000EE000LL:
+        case 0x00040000000EDF00LL:
+		{
+			saltysd_patch(progId, code, size);
 		}
         default:
 		{

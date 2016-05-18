@@ -40,6 +40,7 @@ int patch_modules() {
 		if (memcmp(sysmodule->programID, module->programID, 8) == 0) {
 			// Expand firmware module size if needed to accomodate replacement.
 			if (module->contentSize > sysmodule->contentSize) {
+				// FIXME - Adjust sysmodule section and FIRM NCCH. This is not correct.
 				fprintf(stderr, "Module: Grow %d units\n", module->contentSize - sysmodule->contentSize);
 				// Location to shuffle to.
 				uint32_t need_units = (module->contentSize - sysmodule->contentSize);

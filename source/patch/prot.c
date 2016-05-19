@@ -5,6 +5,8 @@
 #include "../config.h"
 #include "../common.h"
 
+// This patch applies the FIRM protection code needed for safe a9lh usage.
+
 int patch_firmprot() {
 	uint8_t *firm_mem = (uint8_t*)firm_p9_exefs + sizeof(exefs_h) + firm_p9_exefs->fileHeaders[0].offset;
 	uint32_t size = firm_p9_exefs->fileHeaders[0].size;

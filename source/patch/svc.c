@@ -5,6 +5,11 @@
 #include "../config.h"
 #include "../common.h"
 
+// This patch handles replacement of services. This includes backdoor, but not just backdoor.
+// Any service can be replaced provided there's enough space within the exception page.
+
+// Please note that the actual code for services is in `external/service`.
+
 uint32_t *getSvcAndExceptions(uint8_t *pos, uint32_t size, uint32_t **exceptionsPage) {
     uint8_t pattern[] = {0x00, 0xB0, 0x9C, 0xE5}; //cpsid aif
 

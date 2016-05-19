@@ -5,6 +5,8 @@
 #include "../config.h"
 #include "../common.h"
 
+// This patch is responsible for fixing signature checks for the firmware.
+
 int patch_signatures() {
     //Look for signature checks
 

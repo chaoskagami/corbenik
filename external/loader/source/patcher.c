@@ -559,7 +559,7 @@ void patch_text(u64 progId, u8 *text, u32 size, u32 orig_size) {
         case 0x0004013000008002LL: // NS
         {
 			disable_cart_updates(progId, text, orig_size);
-			adjust_cpu_settings(progId, text, orig_size); // DEFAULT cpu settings that are inherited system-wide. Per-app is handled in default.
+			adjust_cpu_settings(progId, text, orig_size);
             break;
         }
 

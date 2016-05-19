@@ -120,7 +120,7 @@ static u32 secureInfoExists(void)
 static struct config_file config;
 static int failed_load_config = 1;
 
-static void load_config() {
+void load_config() {
 	static IFile file;
     static u64 total;
 
@@ -507,12 +507,19 @@ void language_emu(u64 progId, u8 *code, u32 size) {
 }
 
 void overlay_patch(u64 progId, u8 *code, u32 size) {
-	// TODO - Prt
+	// TODO - Implement.
 }
 
-void patchCode(u64 progId, u8 *code, u32 size) {
-	load_config();
+// This is only for the .data segment.
+void patch_data(u64 progId, u8 *data, u32 size, u32 orig_size) {
+}
 
+// This is only for the .ro segment.
+void patch_ro(u64 progId, u8 *ro, u32 size, u32 orig_size) {
+}
+
+// This is only for the .code segment.
+void patch_text(u64 progId, u8 *text, u32 size, u32 orig_size) {
     switch(progId)
     {
         case 0x0004003000008F02LL: // USA Menu
@@ -522,20 +529,20 @@ void patchCode(u64 progId, u8 *code, u32 size) {
         case 0x000400300000A902LL: // KOR Menu
         case 0x000400300000B102LL: // TWN Menu
         {
-			region_patch(progId, code, size);
+			region_patch(progId, text, orig_size);
             break;
         }
 
         case 0x0004013000002C02LL: // NIM
         {
-			disable_nim_updates(progId, code, size);
-			disable_eshop_updates(progId, code, size);
+			disable_nim_updates(progId, text, orig_size);
+			disable_eshop_updates(progId, text, orig_size);
             break;
         }
 
         case 0x0004013000003202LL: // FRIENDS
         {
-			fake_friends_version(progId, code, size);
+			fake_friends_version(progId, text, orig_size);
             break;
         }
 
@@ -546,36 +553,45 @@ void patchCode(u64 progId, u8 *code, u32 size) {
         case 0x0004001000027000LL: // KOR MSET
         case 0x0004001000028000LL: // TWN MSET
         {
-			settings_string(progId, code, size);
+			settings_string(progId, text, size);
             break;
         }
         case 0x0004013000008002LL: // NS
         {
-			disable_cart_updates(progId, code, size);
-			adjust_cpu_settings(progId, code, size); // DEFAULT cpu settings that are inherited system-wide. Per-app is handled in default.
+			disable_cart_updates(progId, text, orig_size);
+			adjust_cpu_settings(progId, text, orig_size); // DEFAULT cpu settings that are inherited system-wide. Per-app is handled in default.
             break;
         }
 
         case 0x0004013000001702LL: // CFG
         {
-			secureinfo_sigpatch(progId, code, size);
+			secureinfo_sigpatch(progId, text, orig_size);
             break;
         }
 		case 0x0004013000003702LL: // RO
 		{
-			ro_sigpatch(progId, code, size);
+			ro_sigpatch(progId, text, orig_size);
 			break;
 		}
-		case 0x00040000000B8B00LL: // Smash 4
-        case 0x00040000000EE000LL:
-        case 0x00040000000EDF00LL:
+        default: // Anything else.
 		{
-			saltysd_patch(progId, code, size);
-		}
-        default:
-		{
-			language_emu(progId, code, size);
+			language_emu(progId, text, orig_size);
             break;
         }
     }
+}
+
+// Gets how many bytes .text must be extended by for patches to fit.
+u32 get_text_extend(u64 progId, u32 size_orig) {
+	return 0; // Stub - nothing needs this yet
+}
+
+// Gets how many bytes .ro must be extended.
+u32 get_ro_extend(u64 progId, u32 size_orig) {
+	return 0; // Stub - nothing needs this yet
+}
+
+// Again, same, but for .data.
+u32 get_data_extend(u64 progId, u32 size_orig) {
+	return 0; // Stub - nothing needs this yet
 }

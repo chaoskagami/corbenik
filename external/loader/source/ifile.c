@@ -64,3 +64,7 @@ Result IFile_Read(IFile *file, u64 *total, void *buffer, u32 len)
   *total = cur;
   return res;
 }
+
+Result IFile_Write(IFile *file, u64 *total, void *buffer, u32 len) {
+	return 1; // FIXME - Not yet implemented.
+}

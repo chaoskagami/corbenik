@@ -37,10 +37,10 @@ extern int doing_autoboot;
 
 void wait() {
 	if (config.options[OPTION_TRACE] && !doing_autoboot) {
-		fprintf(stderr, "                                 [WAIT]");
+		fprintf(stderr, "                                  [WAIT]");
 		wait_key();
 	}
-	fprintf(stderr, "\r                                       \r");
+	fprintf(stderr, "\r                                        \r");
 }
 
 int patch_firm_all() {
@@ -50,10 +50,6 @@ int patch_firm_all() {
 //	wait();
 
 	// Use builtin signature patcher?
-
-	// TODO - Obviously these get moved to external patchers.
-	fprintf(stderr, "Sigpatch: %s\n", ((config.options[OPTION_SIGPATCH]) ? "yes" : "no" ));
-	fprintf(stderr, "Protect: %s\n",  ((config.options[OPTION_FIRMPROT]) ? "yes" : "no" ));
 
 	wait();
 

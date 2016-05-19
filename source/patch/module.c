@@ -40,16 +40,18 @@ int patch_modules() {
 		if (memcmp(sysmodule->programID, module->programID, 8) == 0) {
 			// Expand firmware module size if needed to accomodate replacement.
 			if (module->contentSize > sysmodule->contentSize) {
-				// FIXME - Adjust sysmodule section and FIRM NCCH. This is not correct.
-				fprintf(stderr, "Module: Grow %d units\n", module->contentSize - sysmodule->contentSize);
-				// Location to shuffle to.
 				uint32_t need_units = (module->contentSize - sysmodule->contentSize);
+				fprintf(stderr, "Module: Would grow %d units but NYI\n", need_units);
+				continue;
+				// FIXME - Adjust sysmodule section and FIRM NCCH. This is not correct.
+/*				fprintf(stderr, "Module: Grow %d units\n", module->contentSize - sysmodule->contentSize);
+				// Location to shuffle to.
 				uint8_t* move_to = ((uint8_t*)sysmodule + (module->contentSize + need_units) * 0x200);
 				uint8_t* move_from = ((uint8_t*)sysmodule + module->contentSize * 0x200);
 
 				uint32_t copy_size = 0x10000; // FIXME - Add a safe way to properly calculate the half of NCCH we need to copy. This is okay for now.
 
-				memmove(move_to, move_from, copy_size);
+				memmove(move_to, move_from, copy_size); */
 				// TODO - This is hackish and possibly incorrect. It needs testing.
 			}
 

@@ -27,16 +27,33 @@ int patch_services() {
 
 	fprintf(stderr, "Svc: table at %x\n", (uint32_t)svcTable);
 
-    if(!svcTable[0x7B]) {
-        // Firmware is missing svcBackdoor. Fix it.
-        fprintf(stderr, "Svc: inject 0x7B (backdoor)\n");
+	char str[] = PATH_SERVICES "/00.bin";
+	char* at = str + (strlen(str) - 6);
+	for(uint32_t i=0; i <= 0xff; i++) {
+		// Get string for svc.
+		at[0] = ("0123456789abcdef")[((i >> 4) & 0xf)]; // This is just hexdump. Nothing complicated.
+		at[1] = ("0123456789abcdef")[(i & 0xf)];
 
-        // See extra/backdoor.s for the code to this.
-        const unsigned char svcbackdoor[40] = {
-            0xFF, 0x10, 0xCD, 0xE3, 0x0F, 0x1C, 0x81, 0xE3, 0x28, 0x10, 0x81, 0xE2, 0x00, 0x20, 0x91, 0xE5,
-            0x00, 0x60, 0x22, 0xE9, 0x02, 0xD0, 0xA0, 0xE1, 0x30, 0xFF, 0x2F, 0xE1, 0x03, 0x00, 0xBD, 0xE8,
-            0x00, 0xD0, 0xA0, 0xE1, 0x11, 0xFF, 0x2F, 0xE1
-        };
+		FILE* data = fopen(str, "r");
+		if (!data) {
+			continue; // No file for svc. Move on.
+		}
+
+		// Refuse to replace non-NULL services unless the user says to.
+		if (svcTable[i] && !config.options[OPTION_REPLACE_ALLOCATED_SVC]) {
+			fclose(data);
+			fprintf(stderr, "Svc: %x non-null, moving on\n", i);
+			continue;
+		}
+
+		uint32_t size    = fsize(data);
+		uint8_t* read_to = (void*)FCRAM_JUNK_LOCATION;
+
+		fprintf(stderr, "Svc: %s, %d bytes\n", at, size);
+
+		fread(read_to, 1, size, data);
+
+		fclose(data);
 
 		if (!freeSpace) {
 			for(freeSpace = exceptionsPage; *freeSpace != 0xFFFFFFFF; freeSpace++);
@@ -44,14 +61,12 @@ int patch_services() {
 
 		fprintf(stderr, "Svc: Copy code to %x\n", (uint32_t)freeSpace);
 
-        memcpy(freeSpace, svcbackdoor, sizeof(svcbackdoor));
-        svcTable[0x7B] = 0xFFFF0000 + ((uint8_t *)freeSpace - (uint8_t *)exceptionsPage);
+        memcpy(freeSpace, read_to, size);
+        svcTable[i] = 0xFFFF0000 + ((uint8_t *)freeSpace - (uint8_t *)exceptionsPage);
 
-		freeSpace += sizeof(svcbackdoor); // We keep track of this because there's more than 7B free.
+		freeSpace += size; // We keep track of this because there's more than 7B free.
 
 		fprintf(stderr, "Svc: entry set as %x\n", svcTable[0x7B]);
-    } else {
-        fprintf(stderr, "Svc: no change\n");
 	}
 
 	return 0;

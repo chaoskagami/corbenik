@@ -52,6 +52,8 @@ struct options_s {
 #define OPTION_LOADER_CPU_800MHZ 12 // Enable 800Mhz mode.
 #define OPTION_LOADER_LANGEMU  13 // Enable 800Mhz mode.
 
+#define OPTION_REPLACE_ALLOCATED_SVC 14 // Replace allocated services. Normally you don't want this.
+
 #define IGNORE_PATCH_DEPS    14  // Ignore patch UUID dependencies. Not recommended.
 #define IGNORE_BROKEN_SHIT   15 // Allow enabling patches which are marked as 'incompatible'. Chances are there's a reason.
 

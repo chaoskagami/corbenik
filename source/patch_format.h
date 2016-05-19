@@ -35,7 +35,7 @@
 #define PATH_PATCHES    PATH_CFW "/bin"            // Patch binary folder.
 #define PATH_FIRMWARES  PATH_CFW "/lib/firmware"   // Firmware folder.
 #define PATH_MODULES    PATH_CFW "/lib/module"     // Sysmodule location
-#define PATH_SERVICES   PATH_CFW "/lib/svc"        // Service code location.
+#define PATH_SERVICES   PATH_CFW "/lib/service"        // Service code location.
 #define PATH_TEMP       PATH_CFW "/tmp"            // Files that are transient (user can delete them and they will be regenerated)
 #define PATH_KEYS       PATH_CFW "/share/keys"     // Keyfiles will be loaded from this dir, and additionally the root if not found.
 #define PATH_EXEFS      PATH_CFW "/lib/exe"        // ExeFS overrides, named like '<titleid>.exefs'

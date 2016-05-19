@@ -97,16 +97,18 @@ static int lzss_decompress(u8 *end)
 
 static Result allocate_shared_mem(prog_addrs_t *shared, prog_addrs_t *vaddr, int flags)
 {
+  // Somehow, we need to allow reallocating.
+
   u32 dummy;
 
   memcpy(shared, vaddr, sizeof(prog_addrs_t));
-  shared->text_addr = 0x10000000;
+  shared->text_addr = 0x10000000; // Code is forcibly relocated to this address to kill ASLR (I believe.)
   shared->ro_addr = shared->text_addr + (shared->text_size << 12);
   shared->data_addr = shared->ro_addr + (shared->ro_size << 12);
   return svcControlMemory(&dummy, shared->text_addr, 0, shared->total_size << 12, (flags & 0xF00) | MEMOP_ALLOC, MEMPERM_READ | MEMPERM_WRITE);
 }
 
-static Result load_code(u64 progid, prog_addrs_t *shared, u64 prog_handle, int is_compressed)
+static Result load_code(u64 progid, prog_addrs_t *shared, prog_addrs_t *original, u64 prog_handle, int is_compressed)
 {
   IFile file;
   FS_Archive archive;
@@ -156,8 +158,10 @@ static Result load_code(u64 progid, prog_addrs_t *shared, u64 prog_handle, int i
     lzss_decompress((u8 *)shared->text_addr + size);
   }
 
-  // patch
-  patchCode(progid, (u8 *)shared->text_addr, shared->total_size << 12);
+  // Patch segments
+  patch_text(progid, (u8 *)shared->text_addr, shared->text_size << 12, original->text_size << 12);
+  patch_data(progid, (u8 *)shared->data_addr, shared->data_size << 12, original->data_size << 12);
+  patch_ro  (progid, (u8 *)shared->ro_addr,   shared->ro_size << 12,   original->ro_size << 12);
 
   return 0;
 }
@@ -195,10 +199,12 @@ static Result loader_LoadProcess(Handle *process, u64 prog_handle)
   u32 dummy;
   prog_addrs_t shared_addr;
   prog_addrs_t vaddr;
+  prog_addrs_t original_vaddr;
   Handle codeset;
   CodeSetInfo codesetinfo;
   u32 data_mem_size;
   u64 progid;
+  u32 text_grow, data_grow, ro_grow;
 
   // make sure the cached info corrosponds to the current prog_handle
   if (g_cached_prog_handle != prog_handle)
@@ -227,15 +233,31 @@ static Result loader_LoadProcess(Handle *process, u64 prog_handle)
     return MAKERESULT(RL_PERMANENT, RS_INVALIDARG, 1, 2);
   }
 
-  // allocate process memory
+  load_config(); // First order of business - we need the config file.
+
+  // What the addressing info would be if not for expansion. This is passed to patchCode.
+  original_vaddr.text_size = (g_exheader.codesetinfo.text.codesize + 4095) >> 12; // (Text size + one page) >> page size
+  original_vaddr.ro_size = (g_exheader.codesetinfo.ro.codesize + 4095) >> 12;
+  original_vaddr.data_size = (g_exheader.codesetinfo.data.codesize + 4095) >> 12;
+  original_vaddr.total_size = original_vaddr.text_size + original_vaddr.ro_size + original_vaddr.data_size;
+
+  // Allow changing code, ro, data sizes to allow adding code
+  text_grow = get_text_extend(progid, g_exheader.codesetinfo.text.codesize);
+  ro_grow   = get_ro_extend(progid, g_exheader.codesetinfo.ro.codesize);
+  data_grow = get_data_extend(progid, g_exheader.codesetinfo.data.codesize);
+
+  // One page is 4096 bytes, thus all the 4095 constants.
+
+  // Allocate process memory, growing as needed for extra patches
   vaddr.text_addr = g_exheader.codesetinfo.text.address;
-  vaddr.text_size = (g_exheader.codesetinfo.text.codesize + 4095) >> 12;
+  vaddr.text_size = (g_exheader.codesetinfo.text.codesize + text_grow + 4095) >> 12; // (Text size + one page) >> page size
   vaddr.ro_addr = g_exheader.codesetinfo.ro.address;
-  vaddr.ro_size = (g_exheader.codesetinfo.ro.codesize + 4095) >> 12;
+  vaddr.ro_size = (g_exheader.codesetinfo.ro.codesize + ro_grow + 4095) >> 12;
   vaddr.data_addr = g_exheader.codesetinfo.data.address;
-  vaddr.data_size = (g_exheader.codesetinfo.data.codesize + 4095) >> 12;
-  data_mem_size = (g_exheader.codesetinfo.data.codesize + g_exheader.codesetinfo.bsssize + 4095) >> 12;
-  vaddr.total_size = vaddr.text_size + vaddr.ro_size + vaddr.data_size;
+  vaddr.data_size = (g_exheader.codesetinfo.data.codesize + data_grow + 4095) >> 12;
+  data_mem_size = (g_exheader.codesetinfo.data.codesize + text_grow + g_exheader.codesetinfo.bsssize + 4095) >> 12;
+  vaddr.total_size = vaddr.text_size + vaddr.ro_size + vaddr.data_size + text_grow + ro_grow + data_grow;
+
   if ((res = allocate_shared_mem(&shared_addr, &vaddr, flags)) < 0)
   {
     return res;
@@ -243,7 +265,7 @@ static Result loader_LoadProcess(Handle *process, u64 prog_handle)
 
   // load code
   progid = g_exheader.arm11systemlocalcaps.programid;
-  if ((res = load_code(progid, &shared_addr, prog_handle, g_exheader.codesetinfo.flags.flag & 1)) >= 0)
+  if ((res = load_code(progid, &shared_addr, &original_vaddr, prog_handle, g_exheader.codesetinfo.flags.flag & 1)) >= 0)
   {
     memcpy(&codesetinfo.name, g_exheader.codesetinfo.name, 8);
     codesetinfo.program_id = progid;

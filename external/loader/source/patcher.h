@@ -11,3 +11,5 @@ u32 get_ro_extend(u64 progId, u32 size_orig);
 u32 get_data_extend(u64 progId, u32 size_orig);
 
 void load_config();
+
+u32 patchMemory(u8 *start, u32 size, const void *pattern, u32 patSize, int offset, const void *replace, u32 repSize, u32 count);

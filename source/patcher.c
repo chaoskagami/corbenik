@@ -37,10 +37,10 @@ extern int doing_autoboot;
 
 void wait() {
 	if (config.options[OPTION_TRACE] && !doing_autoboot) {
-		fprintf(stderr, "                                  [WAIT]");
+		fprintf(stderr, "                                 [WAIT]");
 		wait_key();
 	}
-	fprintf(stderr, "\r                                        \r");
+	fprintf(stderr, "\r                                       \r");
 }
 
 int patch_firm_all() {

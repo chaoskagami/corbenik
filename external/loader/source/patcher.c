@@ -10,6 +10,8 @@
 #include "config.h"
 #include "../../../source/patch_format.h"
 
+#include "patch/patch.h"
+
 static int memcmp(const void *buf1, const void *buf2, u32 size)
 {
     const u8 *buf1c = (const u8 *)buf1;
@@ -50,7 +52,7 @@ static u8 *memsearch(u8 *startPos, const void *pattern, u32 size, u32 patternSiz
     return NULL;
 }
 
-static u32 patchMemory(u8 *start, u32 size, const void *pattern, u32 patSize, int offset, const void *replace, u32 repSize, u32 count)
+u32 patchMemory(u8 *start, u32 size, const void *pattern, u32 patSize, int offset, const void *replace, u32 repSize, u32 count)
 {
     u32 i;
 
@@ -159,28 +161,22 @@ void load_config() {
 static int loadTitleLocaleConfig(u64 progId, u8 *regionId, u8 *languageId)
 {
 	// FIXME - Rewrite this function to use a single line-based config
+
 	// Directory seeks have severe issues on FAT and
 	// dumping configs based on 3dsdb (more than 1000) causes things
-	// to kind a choke.
+	// to kinda choke. FAT is not meant for large numbers of files per
+	// directory due to linear seeks rather than tree or hash-based indexes
 
-    /* Here we look for "/corbenik/locale/[u64 titleID in hex, uppercase].txt"
-       If it exists it should contain, for example, "EUR IT" */
+    char path[] = "/corbenik/etc/locale.conf"; // The locale config file.
 
-    char path[] = "/corbenik/locales/0000000000000000.txt";
+    char progIdStr[17]; // Sizeof titleid as string + null terminator
+	progIdStr[sizeof(progIdStr)-1] = 0; // Set null term
 
-	u32 i = 0, j = 0;
-	while(path[j] != 0) {
-		if (path[j] == '/')
-			i = j;
-		j++;
-	}
-	i += 1;
-
-    while(progId > 0)
-    {
+	// Hexdump progId
+	for(int i=0; i < 8; i++) {
         static const char hexDigits[] = "0123456789ABCDEF";
-        path[i--] = hexDigits[(u32)(progId & 0xF)];
-        progId >>= 4;
+        progIdStr[i*2]   = hexDigits[(((uint8_t*)progId)[i] >> 4) & 0xf];
+        progIdStr[i*2+1] = hexDigits[ ((uint8_t*)progId)[i] & 0xf];
     }
 
     IFile file;
@@ -190,10 +186,18 @@ static int loadTitleLocaleConfig(u64 progId, u8 *regionId, u8 *languageId)
         char buf[6];
         u64 total;
 
+		// TODO - Open and seek file properly
+
         ret = IFile_Read(&file, &total, buf, 6);
         IFile_Close(&file);
 
         if(!R_SUCCEEDED(ret) || total < 6) return -1;
+
+		// TODO - Split by nl/spaces strtok style. This is not acceptable code.
+		// Entries should be of the format:
+		//   <tid> <region> <lang>
+		// No attempt will be made to fix dumbass use of CRLF or CR-only, but newline
+		// characters should be treated as spaces.
 
         for(u32 i = 0; i < 7; ++i)
         {
@@ -336,84 +340,6 @@ static void patchCfgGetRegion(u8 *code, u32 size, u8 regionId, u32 CFGUHandleOff
     }
 }
 
-static void region_patch(u64 progId, u8 *code, u32 size) {
-	static const u8 regionFreePattern[] = {0x00, 0x00, 0x55, 0xE3, 0x01, 0x10, 0xA0, 0xE3};
-	static const u8 regionFreePatch[]   = {0x01, 0x00, 0xA0, 0xE3, 0x1E, 0xFF, 0x2F, 0xE1};
-
-	//Patch SMDH region checks
-	patchMemory(code, size,
-		regionFreePattern,
-		sizeof(regionFreePattern), -16,
-		regionFreePatch,
-		sizeof(regionFreePatch), 1
-    );
-}
-
-static void disable_nim_updates(u64 progId, u8 *code, u32 size) {
-	static const u8 blockAutoUpdatesPattern[] = {0x25, 0x79, 0x0B, 0x99};
-	static const u8 blockAutoUpdatesPatch[]   = {0xE3, 0xA0};
-
-	//Block silent auto-updates
-	patchMemory(code, size,
-		blockAutoUpdatesPattern,
-		sizeof(blockAutoUpdatesPattern), 0,
-		blockAutoUpdatesPatch,
-		sizeof(blockAutoUpdatesPatch), 1
-	);
-}
-
-static void disable_eshop_updates(u64 progId, u8 *code, u32 size) {
-	static const u8 skipEshopUpdateCheckPattern[] = {0x30, 0xB5, 0xF1, 0xB0};
-	static const u8 skipEshopUpdateCheckPatch[]   = {0x00, 0x20, 0x08, 0x60, 0x70, 0x47};
-
-	//Skip update checks to access the EShop
-	patchMemory(code, size,
-		skipEshopUpdateCheckPattern,
-		sizeof(skipEshopUpdateCheckPattern), 0,
-		skipEshopUpdateCheckPatch,
-		sizeof(skipEshopUpdateCheckPatch), 1
-	);
-}
-
-static void fake_friends_version(u64 progId, u8 *code, u32 size) {
-	static const u8 fpdVerPattern[] = {0xE0, 0x1E, 0xFF, 0x2F, 0xE1, 0x01, 0x01, 0x01};
-	static const u8 fpdVerPatch = 0x06; // Latest version.
-
-	//Allow online access to work with old friends modules
-	patchMemory(code, size,
-		fpdVerPattern,
-		sizeof(fpdVerPattern), 9,
-		&fpdVerPatch,
-		sizeof(fpdVerPatch), 1
-	);
-}
-
-static void settings_string(u64 progId, u8 *code, u32 size) {
-	static const u16 verPattern[] = u"Ver.";
-	static const u16 verPatch[] = u".hax";
-
-	//Patch Ver. string
-	patchMemory(code, size,
-		verPattern,
-		sizeof(verPattern) - sizeof(u16), 0,
-		verPatch,
-		sizeof(verPatch) - sizeof(u16), 1
-	);
-}
-
-static void disable_cart_updates(u64 progId, u8 *code, u32 size) {
-	static const u8 stopCartUpdatesPattern[] = {0x0C, 0x18, 0xE1, 0xD8};
-	static const u8 stopCartUpdatesPatch[]   = {0x0B, 0x18, 0x21, 0xC8};
-
-	//Disable updates from foreign carts (makes carts region-free)
-	patchMemory(code, size,
-		stopCartUpdatesPattern,
-		sizeof(stopCartUpdatesPattern), 0,
-		stopCartUpdatesPatch,
-		sizeof(stopCartUpdatesPatch), 2
-	);
-}
-
 static void adjust_cpu_settings(u64 progId, u8 *code, u32 size) {
 	if (!failed_load_config) {
 		u32 cpuSetting = 0;
@@ -434,51 +360,6 @@ static void adjust_cpu_settings(u64 progId, u8 *code, u32 size) {
 			}
 		}
 	}
-}
-
-static void secureinfo_sigpatch(u64 progId, u8 *code, u32 size) {
-	static const u8 secureinfoSigCheckPattern[] = {0x06, 0x46, 0x10, 0x48, 0xFC};
-	static const u8 secureinfoSigCheckPatch[]   = {0x00, 0x26};
-
-	//Disable SecureInfo signature check
-	patchMemory(code, size,
-		secureinfoSigCheckPattern,
-		sizeof(secureinfoSigCheckPattern), 0,
-		secureinfoSigCheckPatch,
-		sizeof(secureinfoSigCheckPatch), 1
-	);
-}
-
-static void ro_sigpatch(u64 progId, u8 *code, u32 size) {
-	static const u8 sigCheckPattern[]      = {0x30, 0x40, 0x2D, 0xE9, 0x02, 0x50, 0xA0, 0xE1};
-	static const u8 sha256ChecksPattern1[] = {0x30, 0x40, 0x2D, 0xE9, 0x24, 0xD0, 0x4D, 0xE2};
-	static const u8 sha256ChecksPattern2[] = {0xF8, 0x4F, 0x2D, 0xE9, 0x01, 0x70, 0xA0, 0xE1};
-
-	// mov r0, #0; bx lr - equivalent to 'return 0;'
-	static const u8 stub[]                 = {0x00, 0x00, 0xA0, 0xE3, 0x1E, 0xFF, 0x2F, 0xE1};
-
-	//Disable CRR0 signature (RSA2048 with SHA256) check
-	patchMemory(code, size,
-		sigCheckPattern,
-		sizeof(sigCheckPattern), 0,
-		stub,
-		sizeof(stub), 1
-	);
-
-	//Disable CRO0/CRR0 SHA256 hash checks (section hashes, and hash table)
-	patchMemory(code, size,
-		sha256ChecksPattern1,
-		sizeof(sha256ChecksPattern1), 0,
-		stub,
-		sizeof(stub), 1
-	);
-
-	patchMemory(code, size,
-		sha256ChecksPattern2,
-		sizeof(sha256ChecksPattern2), 0,
-		stub,
-		sizeof(stub), 1
-	);
 }
 
 void language_emu(u64 progId, u8 *code, u32 size) {

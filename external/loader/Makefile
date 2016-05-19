@@ -22,7 +22,7 @@ include $(DEVKITARM)/3ds_rules
 #---------------------------------------------------------------------------------
 TARGET		:=	loader
 BUILD		:=	build
-SOURCES		:=	source
+SOURCES		:=	source source/patch
 DATA		:=	data
 INCLUDES	:=	include
 

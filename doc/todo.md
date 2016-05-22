@@ -17,3 +17,4 @@
    * All in all, this simplifies testing and allows multiple release types.
  * Rewrite all hardcoded constants that are machine code as assembly.
    * Read: all the patches
+ * Change some stdlib functions to more closely imitate their real userland counterparts

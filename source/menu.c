@@ -31,10 +31,10 @@ static struct options_s options[] = {
 	{ 12, "Loader: CPU 800Mhz mode", boolean_val, 0, 0 },
 	{ 13, "Loader: Language Emulation", boolean_val, 0, 0 },
 
-	{ 13, "Svc: Force replace allocated", boolean_val, 0, 0 },
+	{ 14, "Svc: Force replace allocated", boolean_val, 0, 0 },
 
-	{ 14, "No dependency tracking", boolean_val, 0, 0 },
-	{ 15, "Allow unsafe options", boolean_val, 0, 0 },
+	{ 15, "No dependency tracking", boolean_val, 0, 0 },
+	{ 16, "Allow unsafe options", boolean_val, 0, 0 },
 
 	{ -1, "", 0, 0, 0},
 };

@@ -4,9 +4,11 @@ FILE* conf_handle;
 
 struct config_file config;
 
-void regenerate_config() {
-	f_mkdir(PATH_CFW);
-	f_mkdir(PATH_CONFIG);
+void
+regenerate_config()
+{
+    f_mkdir(PATH_CFW);
+    f_mkdir(PATH_CONFIG);
 
     fprintf(BOTTOM_SCREEN, "Created directory structure.\n");
 
@@ -14,8 +16,7 @@ void regenerate_config() {
     memcpy(&(config.magic), CONFIG_MAGIC, 4);
     config.config_ver = config_version;
 
-
-    if(!(conf_handle = fopen(PATH_CONFIG, "w")))
+    if (!(conf_handle = fopen(PATH_CONFIG, "w")))
         abort("Failed to open config for write?\n");
 
     fwrite(&config, 1, sizeof(config), conf_handle);
@@ -24,13 +25,15 @@ void regenerate_config() {
     fprintf(BOTTOM_SCREEN, "Config file written.\n");
 }
 
-void load_config() {
+void
+load_config()
+{
     // Zero on success.
     if (!(conf_handle = fopen(PATH_CONFIG, "r"))) {
         fprintf(BOTTOM_SCREEN, "Config file is missing:\n"
                                "  %s\n"
                                "Will create it with defaults.\n",
-                               PATH_CONFIG);
+                PATH_CONFIG);
         regenerate_config();
     } else {
         fread(&config, 1, sizeof(config), conf_handle);
@@ -42,8 +45,8 @@ void load_config() {
                                    "has incorrect magic:\n"
                                    "  '%c%c%c%c'\n"
                                    "Regenerating with defaults.\n",
-                                   PATH_CONFIG,
-                                   config.magic[0], config.magic[1], config.magic[2], config.magic[3]);
+                    PATH_CONFIG, config.magic[0], config.magic[1],
+                    config.magic[2], config.magic[3]);
             f_unlink(PATH_CONFIG);
             regenerate_config();
         }
@@ -52,22 +55,24 @@ void load_config() {
             fprintf(BOTTOM_SCREEN, "Config file has outdated version:\n"
                                    "  %s\n"
                                    "Regenerating with defaults.\n",
-                                   PATH_CONFIG);
+                    PATH_CONFIG);
             f_unlink(PATH_CONFIG);
             regenerate_config();
         }
     }
 
-	if (!config.options[OPTION_SILENCE])
-    	fprintf(BOTTOM_SCREEN, "Config file loaded.\n");
+    if (!config.options[OPTION_SILENCE])
+        fprintf(BOTTOM_SCREEN, "Config file loaded.\n");
 }
 
-void save_config() {
-	fprintf(stderr, "Saving config.\n");
+void
+save_config()
+{
+    fprintf(stderr, "Saving config.\n");
 
     f_unlink(PATH_CONFIG);
 
-    if(!(conf_handle = fopen(PATH_CONFIG, "w")))
+    if (!(conf_handle = fopen(PATH_CONFIG, "w")))
         abort("Failed to open config for write?\n");
 
     fwrite(&config, 1, sizeof(config), conf_handle);

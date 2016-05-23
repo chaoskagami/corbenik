@@ -8,7 +8,7 @@
 
 #include "../std/unused.h"
 
-extern void *fcram_temp;
+extern void* fcram_temp;
 
 // Space between most of the locations
 #define FCRAM_SPACING 0x100000
@@ -18,7 +18,7 @@ extern void *fcram_temp;
 
 // firm.c
 #define FCRAM_FIRM_LOC FCRAM_START
-#define FCRAM_TWL_FIRM_LOC (FCRAM_START + FCRAM_SPACING)  // Double size
+#define FCRAM_TWL_FIRM_LOC (FCRAM_START + FCRAM_SPACING) // Double size
 #define FCRAM_AGB_FIRM_LOC (FCRAM_START + FCRAM_SPACING * 3)
 
 // patch.c

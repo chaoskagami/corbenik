@@ -11,7 +11,8 @@ Result srvSysInit(void);
 Result srvSysExit(void);
 
 /**
- * @brief Retrieves a service handle, retrieving from the environment handle list if possible.
+ * @brief Retrieves a service handle, retrieving from the environment handle
+ * list if possible.
  * @param out Pointer to write the handle to.
  * @param name Name of the service.
  */
@@ -28,7 +29,8 @@ Result srvSysEnableNotification(Handle* semaphoreOut);
 
 /**
  * @brief Receives a notification.
- * @param notificationIdOut Pointer to output the ID of the received notification to.
+ * @param notificationIdOut Pointer to output the ID of the received
+ * notification to.
  */
 Result srvSysReceiveNotification(u32* notificationIdOut);
 

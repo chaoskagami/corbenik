@@ -2,9 +2,9 @@
 
 // Do you like examples?
 
-PATCH(example) {
-	fprintf(stderr, "Testing, testing, 1, 2, 3, 4..\n");
+PATCH(example)
+{
+    fprintf(stderr, "Testing, testing, 1, 2, 3, 4..\n");
 
-	return 0;
+    return 0;
 }
-

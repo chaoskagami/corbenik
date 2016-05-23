@@ -151,64 +151,107 @@ static int loadTitleLocaleConfig(u64 progId, u8 *regionId, u8 *languageId)
 
     char path[] = "/corbenik/etc/locale.conf"; // The locale config file.
 
-    char progIdStr[17]; // Sizeof titleid as string + null terminator
-	progIdStr[sizeof(progIdStr)-1] = 0; // Set null term
+    char progid_str[16];
 
-	// Hexdump progId
-	for(int i=0; i < 8; i++) {
-        static const char hexDigits[] = "0123456789ABCDEF";
-        progIdStr[i*2]   = hexDigits[(((uint8_t*)&progId)[i] >> 4) & 0xf];
-        progIdStr[i*2+1] = hexDigits[ ((uint8_t*)&progId)[i] & 0xf];
+    // Hexdump.
+    for(int i=0; i < 16; i += 2) {
+      progid_str[i]   = ("0123456789ABCDEF")[ (((u8*)&progId)[0] >> 4) & 0xf ];
+      progid_str[i+1] = ("0123456789ABCDEF")[  ((u8*)&progId)[0] & 0xf       ];
     }
 
+    static const char *regions[] = {"JPN", "USA", "EUR", "AUS", "CHN", "KOR", "TWN"};
+    static const char *languages[] = {"JA", "EN", "FR", "DE", "IT", "ES", "ZH", "KO", "NL", "PT", "RU", "TW"};
+
     IFile file;
-    Result ret = fileOpen(&file, ARCHIVE_SDMC, path, FS_OPEN_READ);
-    if(R_SUCCEEDED(ret))
+    Result eof = fileOpen(&file, ARCHIVE_SDMC, path, FS_OPEN_READ);
+    if(R_SUCCEEDED(eof))
     {
-        char buf[6];
+        char c;
+        char buf_prog[16];
+        char country_tmp[16];
+        char lang_tmp[16];
         u64 total;
 
 		// TODO - Open and seek file properly
 
-        ret = IFile_Read(&file, &total, buf, 6);
-        IFile_Close(&file);
+        int i = 0;
+        int state = 0; // State. 0 = get_titleid, 1 = get_region, 2 = get_language, 3 = process entry
+        while(1) {
+          eof = IFile_Read(&file, &total, &c, 1); // Read character.
 
-        if(!R_SUCCEEDED(ret) || total < 6) return -1;
+          if (c == ' ' || c == '\n' || c == '\r' || c == '\t') // Skip space characters.
+            continue;
 
-		// TODO - Split by nl/spaces strtok style. This is not acceptable code.
-		// Entries should be of the format:
-		//   <tid> <region> <lang>
-		// No attempt will be made to fix dumbass use of CRLF or CR-only, but newline
-		// characters should be treated as spaces.
-
-        for(u32 i = 0; i < 7; ++i)
-        {
-			// TODO - Permit alternative names. They're using fixed strings for ease of use;
-			// we need to permit names like 'Japan', 'Europe', etc
-			// Maybe read locale data from the FS? http://cldr.unicode.org/
-            static const char *regions[] = {"JPN", "USA", "EUR", "AUS", "CHN", "KOR", "TWN"};
-
-            if(memcmp(buf, regions[i], 3) == 0)
-            {
-                *regionId = (u8)i;
-                break;
+          if (c == '#') { // Comment! Skip until a \n or \r.
+            while(c != '\n' && c != '\r') {
+              eof = IFile_Read(&file, &total, &c, 1); // Read character.
             }
-        }
+            continue; // Resume loop.
+          }
 
-        for(u32 i = 0; i < 12; ++i)
-        {
-			// TODO - Same as above.
-            static const char *languages[] = {"JP", "EN", "FR", "DE", "IT", "ES", "ZH", "KO", "NL", "PT", "RU", "TW"};
+          switch(state) {
+            case 0:
+              // Read titleID.
+              for(i = 0; i < 16; i++) {
+                buf_prog[i] = c;
+                if (i != 15)
+                  eof = IFile_Read(&file, &total, &c, 1); // Read character.
+              }
+              state = 1;
+              break;
+            case 1:
+              // Read country name. Must be <16 chars, past that is ignored.
+              i = 0;
+              while (c != ' ' && c != '\n' && c != '\r' && c != '\t') { // While we're not reading a space...
+                if (i < 15) {
+                  country_tmp[i] = c;
+                  i++;
+                }
+                eof = IFile_Read(&file, &total, &c, 1); // Read character unless last one.
+              }
+              state = 2;
+              break;
+            case 2:
+              // Read language name. See country name, code is basically identical.
+              i = 0;
+              while (c != ' ' && c != '\n' && c != '\r' && c != '\t') { // While we're not reading a space...
+                if (i < 15) { // Only read in if <16.
+                  lang_tmp[i] = c;
+                  i++;
+                }
+                eof = IFile_Read(&file, &total, &c, 1); // Read character unless last one.
+              }
+              state = 3;
+              break;
+            case 3:
+              // Process entry, return and apply if matched.
+              if(!memcmp(progid_str, buf_prog, 16)) {
+                // TitleID matched. Apply language emulation; but first, process language and country.
+                for(i = 0; i < 7; i++) {
+                  if(!memcmp(country_tmp, regions[i], 3)) {
+                    *regionId = (u8)i;
+                  }
+                }
 
-            if(memcmp(buf + 4, languages[i], 2) == 0)
-            {
-                *languageId = (u8)i;
+                for(u32 i = 0; i < 12; i++) {
+                  if(!memcmp(lang_tmp, languages[i], 2)) {
+                    *languageId = (u8)i;
+                  }
+                }
+                state = 4; // Processed. Go on.
                 break;
-            }
+              }
+              state = 0; // Nope. Move onto the next one.
+              break;
+          }
+
+          if(!R_SUCCEEDED(eof) || total == 0 || state == 4)
+            break;
         }
     }
 
-    return ret;
+    IFile_Close(&file); // Read to memory.
+    return eof;
 }
 
 static u8 *getCfgOffsets(u8 *code, u32 size, u32 *CFGUHandleOffset)

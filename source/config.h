@@ -8,6 +8,7 @@ _UNUSED static unsigned int config_version = 1;
 // Structure of config file
 struct config_file {
     char magic[4];              // "OVAN" for shits and giggles again.
+
     uint32_t config_ver;        // Config file version.
 
     uint8_t  options[256];      // Options in the menu - deliberately large to avoid config version bumps.

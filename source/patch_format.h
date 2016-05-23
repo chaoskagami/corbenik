@@ -29,7 +29,7 @@
 
 #define PATH_CONFIG_DIR PATH_CFW "/etc"                   // Config file directory.
 #define PATH_CONFIG     PATH_CONFIG_DIR "/main.conf"      // Config file.
-#define PATH_LOCEMU     PATH_CONFIG_DIR "/locale.conf"    // Locale emulation config
+#define PATH_LOCEMU     PATH_CONFIG_DIR "/langemu.conf"    // Locale emulation config
 #define PATH_CPU_CFG    PATH_CONFIG_DIR "/cpu.conf"       // CPU settings config
 
 #define PATH_PATCHES    PATH_CFW "/bin"            // Patch binary folder.

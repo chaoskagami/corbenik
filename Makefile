@@ -28,7 +28,7 @@ objects_cfw = $(patsubst $(dir_source)/%.s, $(dir_build)/%.o, \
 			  $(call rwildcard, $(dir_source), *.s *.c)))
 
 .PHONY: all
-all: a9lh modules external
+all: a9lh modules external host/langemu.conf
 
 .PHONY: modules
 modules:
@@ -41,10 +41,17 @@ external:
 .PHONY: a9lh
 a9lh: $(dir_out)/arm9loaderhax.bin
 
+host/langemu.conf:
+	echo "Generating langemu.conf - may take a bit"
+	cd host && ./generate_langemu_conf.sh
+	mkdir -p $(dir_out)/corbenik/etc
+	cp host/langemu.conf $(dir_out)/corbenik/etc/langemu.conf
+
 .PHONY: clean
 clean:
 	make -C modules clean
 	make -C external clean
+	rm host/langemu.conf
 	rm -rf $(dir_out) $(dir_build)
 
 .PHONY: $(dir_out)/arm9loaderhax.bin

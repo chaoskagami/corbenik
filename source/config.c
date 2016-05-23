@@ -6,12 +6,7 @@ struct config_file config;
 
 void regenerate_config() {
 	f_mkdir(PATH_CFW);
-	f_mkdir(PATH_CFW "/lib");
-    f_mkdir(PATH_FIRMWARES);
-    f_mkdir(PATH_PATCHES);
-    f_mkdir(PATH_TEMP);
-    f_mkdir(PATH_KEYS);
-    f_mkdir(PATH_EXEFS);
+	f_mkdir(PATH_CONFIG);
 
     fprintf(BOTTOM_SCREEN, "Created directory structure.\n");
 

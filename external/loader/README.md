@@ -16,21 +16,26 @@ There is also support for SDMC reading (not found in original loader implementat
 which  means that patches can be loaded from the SD card. Ultimately, there would be 
 a patch system that supports easy loading of patches from the SD card.
 
-At the moment this copy has support for resizing segments before loading the
-executable. This means that segments can be appended to. Notably, this allows
-ADDING code, not simply changing it.
-
-The text, data, and ro segments are handled separately to streamline segment
-expansion and limit search space.
+## Changes I've made
 
 A lot of the 'disassembled' looking code has been rewritten for readability, and
 many cruft-ish artifacts of it have been cleaned up. Some wrapper functions
-have also been rewritten out of the code, and anything nigh-unreadable has
-been documented when I figure out what it does.
+have also been rewritten out of the code, and anything nigh-unreadable and
+non-rewritable has been documented when I managed to figure out what it does.
 
-It has also been updated to the latest git ctrulib (in which FS_Archive is a u64,
-not a struct.) Thanks, @TuxSH. It required manual conflict merged (my code is different)
-but you provided the information needed to fix it up.
+At the moment there is also experimental support for resizing segments before
+loading the executable. This means that segments can be appended to. Notably,
+this allows tacking on code to the end.
+
+The text, data, and ro segments are handled separately to streamline the new
+segment resizing and limit search space to speed things up a tad. Why search
+text, data and ro when you know it is in text?
+
+## Imported changes from other 3ds_injector forks
+
+I updated it to the latest git ctrulib (in which FS_Archive is a u64,
+not a struct.) @TuxSH did the work before me, it required manual conflict merges
+but he provided the information needed to fix it up for the most part. ;P
 
 ## Build
 You need a working 3DS build environment with a fairly recent copy of devkitARM, 

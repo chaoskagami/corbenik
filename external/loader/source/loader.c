@@ -6,6 +6,7 @@
 #include "fsreg.h"
 #include "pxipm.h"
 #include "srvsys.h"
+#include "lzss.h"
 #include "internal.h"
 
 // TODO - a lot of this is unecessarily verbose and shitty. Clean it up to be tidy.
@@ -30,64 +31,6 @@ static int g_active_handles;
 static u64 g_cached_prog_handle;
 static exheader_header g_exheader;
 static char g_ret_buf[1024];
-
-// TODO - This doesn't belong in loader.c - It's a decompression function, stuff it in its own file.
-// Not to mention, it is nigh unreadable. Replace it with a more readable version of LZSS.
-// This decompresses in-place.
-
-// end should be 'buffer'
-static int lzss_decompress(u8 *buffer)
-{
-  // This WAS originally a decompilation in @yifan_lu's repo; it was rewritten for readability following ctrtool's namings.
-  unsigned int decompSize, v15;
-  u8 *compressEndOff, *index, *stopIndex;
-  char control;
-  int v9, v13, v14, v16;
-  int ret = 0;
-
-  if ( !buffer ) // Return immediately when buffer is invalid.
-    return 0;
-
-  // v1=decompressedSize, v2=compressedSize, v3=index, v4=stopIndex
-  decompSize     = *((u32 *)buffer - 2);
-  compressEndOff = &buffer[*((u32 *)buffer - 1)];
-  index          = &buffer[-(decompSize >> 24)]; // FIXME - This is not correct code. It's optimized, but incorrect here. Fix it.
-  stopIndex      = &buffer[-(decompSize & 0xFFFFFF)];
-
-  while ( index > stopIndex ) // index > stopIndex
-  {
-    control = *(index-- - 1); // control (just scoping though)
-    for (int i=0; i<8; i++)
-    {
-      if ( control & 0x80 ) // control & 0x80
-      {
-        v13 = *(index - 1);
-        v14 = *(index - 2);
-        index -= 2;
-        v15 = ((v14 | (v13 << 8)) & 0xFFFF0FFF) + 2;
-        v16 = v13 + 32;
-        do
-        {
-          ret = compressEndOff[v15];
-          *(compressEndOff-- - 1) = ret;
-          v16 -= 16;
-        }
-        while ( !(v16 < 0) );
-      }
-      else
-      {
-        v9 = *(index-- - 1);
-        ret = v9;
-        *(compressEndOff-- - 1) = v9;
-      }
-      control *= 2;
-      if ( index <= stopIndex )
-        return ret;
-    }
-  }
-
-  return ret;
-}
 
 static Result allocate_shared_mem(prog_addrs_t *shared, prog_addrs_t *vaddr, int flags)
 {

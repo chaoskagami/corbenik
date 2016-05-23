@@ -1,7 +1,9 @@
 BasicInfo:
   Title                   : loader
   CompanyCode             : "00"
-  ProductCode             : 0828builder
+  ProductCode             : injectload
+# The system doesn't actually care about this, 0282builder was
+# likely an artifact of their toolchain. We change it just because.
   ContentType             : Application
   Logo                    : None
 

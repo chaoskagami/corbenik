@@ -458,3 +458,8 @@ u32 get_ro_extend(u64 progId, u32 size_orig) {
 u32 get_data_extend(u64 progId, u32 size_orig) {
 	return 0; // Stub - nothing needs this yet
 }
+
+// Get CPU speed for progId.
+u8 get_cpumode(u64 progId) {
+  return 0xff; // Skip.
+}

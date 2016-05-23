@@ -50,6 +50,8 @@ typedef struct
 	u8 otherattributes;
 } PACKED exheader_storageinfo;
 
+// New3DS speed is flags[1]:1
+
 typedef struct
 {
 	u64 programid;
@@ -75,18 +77,12 @@ typedef struct
 
 typedef struct
 {
-	// systemcontrol info {
-	//   coreinfo {
 	exheader_codesetinfo codesetinfo;
 	exheader_dependencylist deplist;
-	//   }
 	exheader_systeminfo systeminfo;
-	// }
-	// accesscontrolinfo {
 	exheader_arm11systemlocalcaps arm11systemlocalcaps;
 	exheader_arm11kernelcapabilities arm11kernelcaps;
 	exheader_arm9accesscontrol arm9accesscontrol;
-	// }
 	struct {
 		u8 signature[0x100];
 		u8 ncchpubkeymodulus[0x100];

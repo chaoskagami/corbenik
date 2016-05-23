@@ -184,6 +184,16 @@ static Result loader_GetProgramInfo(exheader_header *exheader, u64 prog_handle)
   }
 }
 
+extern void KernelSetState(unsigned int, unsigned int, unsigned int, unsigned int);
+
+static void ConfigureNew3DSCPU(u8 mode) {
+  // 10 -> r0 (Type)
+  // mode -> r1 (Mode)
+  // svc 0x7C
+
+  KernelSetState(10, mode, 0, 0); // Yes, we syscall directly. Problem?
+}
+
 static Result loader_LoadProcess(Handle *process, u64 prog_handle)
 {
   Result res;
@@ -228,6 +238,15 @@ static Result loader_LoadProcess(Handle *process, u64 prog_handle)
   }
 
   load_config(); // First order of business - we need the config file.
+
+  // Check and set the CPU mode. Possible values: 0 - Keep o3ds speed, 1 - n3ds speed, -1 force o3ds
+  // This is A-OK because the CPU speed parameter isn't passed through to any kernel function; meaning it has already been set.
+  u8 n3ds_mode = g_exheader.arm11systemlocalcaps.flags[1] & 0x3;
+  u8 cpu_mode  = get_cpumode(progid);
+  if (cpu_mode != 0xFF) { // Skip?
+    u8 mode = n3ds_mode | cpu_mode; // Keep flags set by exheader.
+    ConfigureNew3DSCPU(mode); // We do not use PXIPM because we are a sysmodule. It doesn't make sense.
+  }
 
   // What the addressing info would be if not for expansion. This is passed to patchCode.
   original_vaddr.text_size = (g_exheader.codesetinfo.text.codesize + 4095) >> 12; // (Text size + one page) >> page size
@@ -554,7 +573,7 @@ int main()
         g_active_handles--;
         reply_target = 0;
       }
-      else 
+      else
       {
         svcBreak(USERBREAK_ASSERT);
       }

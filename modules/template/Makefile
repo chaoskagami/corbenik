@@ -31,7 +31,7 @@ patchbin: tool $(dir_out)/patch.bin
 
 .PHONY: tool
 tool:
-	$(HOST_CC) -o compile_header tool/compile_header.c
+	$(HOST_CC) -o compile_header ../../host/compile_header.c
 
 
 .PHONY: clean

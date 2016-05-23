@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../../../source/patch_format.h"
+#include "../source/patch_format.h"
 
 void read_file_u64(char* name, uint64_t* to) {
 	FILE* hdl = fopen(name, "rb");

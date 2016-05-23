@@ -367,8 +367,8 @@ patchCfgGetLanguage(u8* code, u32 size, u8 languageId,
                             0xE3A00000 | languageId; // mov    r0, sp
                                                      // => mov r0, =languageId
                         *(u32*)instr = 0xE5CD0000;   // bl
-                                                   // CFGU_GetConfigInfoBlk2 =>
-                                                   // strb r0, [sp]
+                        // CFGU_GetConfigInfoBlk2 =>
+                        // strb r0, [sp]
                         *((u32*)instr + 1) =
                             0xE3B00000; // (1 or 2 instructions)         => movs
                                         // r0, 0             (result code)

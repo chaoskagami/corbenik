@@ -852,9 +852,8 @@ chk_lock(         /* Check if the file can be accessed */
     for (i = be = 0; i < _FS_LOCK; i++) {
         if (Files[i].fs) { /* Existing entry */
             if (Files[i].fs ==
-                    dp
-                        ->fs && /* Check if the object matched with an open
-                                   object */
+                    dp->fs && /* Check if the object matched with an open
+                                 object */
                 Files[i].clu == dp->sclust &&
                 Files[i].idx == dp->index)
                 break;
@@ -885,10 +884,9 @@ static int enq_lock(void) /* Check if an entry is available for a new object */
 static UINT
 inc_lock(/* Increment object open counter and returns its index (0:Internal
             error) */
-         DIR*
-             dp, /* Directory object pointing the file to register or increment
-                    */
-         int acc /* Desired access (0:Read, 1:Write, 2:Delete/Rename) */
+         DIR* dp, /* Directory object pointing the file to register or increment
+                     */
+         int acc  /* Desired access (0:Read, 1:Write, 2:Delete/Rename) */
          )
 {
     UINT i;
@@ -1371,9 +1369,8 @@ dir_sdi(DIR* dp, /* Pointer to directory object */
             if (clst == 0xFFFFFFFF)
                 return FR_DISK_ERR; /* Disk error */
             if (clst < 2 ||
-                clst >=
-                    dp->fs->n_fatent) /* Reached to end of table or internal
-                                         error */
+                clst >= dp->fs->n_fatent) /* Reached to end of table or internal
+                                             error */
                 return FR_INT_ERR;
             idx -= ic;
         }
@@ -2076,9 +2073,8 @@ get_fileinfo(             /* No return code */
                     break;
                 } /* No LFN if it could not be converted */
                 if (_DF1S &&
-                    w >=
-                        0x100) /* Put 1st byte if it is a DBC (always false on
-                                  SBCS cfg) */
+                    w >= 0x100) /* Put 1st byte if it is a DBC (always false on
+                                   SBCS cfg) */
                     p[i++] = (TCHAR)(w >> 8);
 #endif
                 if (i >= fno->lfsize - 1) {
@@ -2203,9 +2199,8 @@ create_name(DIR* dp, /* Pointer to the directory object */
             return FR_INVALID_NAME;
 #if !_LFN_UNICODE
         w &= 0xFF;
-        if (IsDBCS1(
-                w)) { /* Check if it is a DBC 1st byte (always false on SBCS
-                         cfg) */
+        if (IsDBCS1(w)) { /* Check if it is a DBC 1st byte (always false on SBCS
+                             cfg) */
             b = (BYTE)p[si++]; /* Get 2nd byte */
             w = (w << 8) + b;  /* Create a DBC */
             if (!IsDBCS2(b))
@@ -2319,9 +2314,8 @@ create_name(DIR* dp, /* Pointer to the directory object */
     }
 
     if (dp->fn[0] == DDEM)
-        dp
-            ->fn[0] = RDDEM; /* If the first character collides with deleted
-                                mark, replace it with RDDEM */
+        dp->fn[0] = RDDEM; /* If the first character collides with deleted
+                              mark, replace it with RDDEM */
 
     if (ni == 8)
         b <<= 2;
@@ -2392,9 +2386,8 @@ create_name(DIR* dp, /* Pointer to the directory object */
 #endif
 #endif
         }
-        if (IsDBCS1(
-                c)) { /* Check if it is a DBC 1st byte (always false on SBCS
-                         cfg) */
+        if (IsDBCS1(c)) { /* Check if it is a DBC 1st byte (always false on SBCS
+                             cfg) */
             d = (BYTE)p[si++];              /* Get 2nd byte */
             if (!IsDBCS2(d) || i >= ni - 1) /* Reject invalid DBC */
                 return FR_INVALID_NAME;
@@ -2536,9 +2529,8 @@ get_ldnumber(/* Returns logical drive number (-1:invalid drive) */
             tp = *path;
             i = *tp++ - '0';
             if (i < 10 && tp == tt) { /* Is there a numeric drive id? */
-                if (i <
-                    _VOLUMES) { /* If a drive id is found, get the value and
-                                   strip it */
+                if (i < _VOLUMES) { /* If a drive id is found, get the value and
+                                       strip it */
                     vol = (int)i;
                     *path = ++tt;
                 }
@@ -2559,10 +2551,9 @@ get_ldnumber(/* Returns logical drive number (-1:invalid drive) */
                 } while (
                     (c || tp != tt) &&
                     ++i <
-                        _VOLUMES); /* Repeat for each id until pattern match */
-                if (i <
-                    _VOLUMES) { /* If a drive id is found, get the value and
-                                   strip it */
+                        _VOLUMES);  /* Repeat for each id until pattern match */
+                if (i < _VOLUMES) { /* If a drive id is found, get the value and
+                                       strip it */
                     vol = (int)i;
                     *path = tt;
                 }
@@ -2587,9 +2578,8 @@ static BYTE
 check_fs(/* 0:FAT boor sector, 1:Valid boor sector but not FAT, 2:Not a boot
             sector, 3:Disk error */
          FATFS* fs, /* File system object */
-         DWORD
-             sect /* Sector# (lba) to check if it is an FAT boot record or not
-                     */
+         DWORD sect /* Sector# (lba) to check if it is an FAT boot record or not
+                       */
          )
 {
     fs->wflag = 0;
@@ -3446,10 +3436,9 @@ f_getcwd(TCHAR* buff, /* Pointer to the directory path */
     res = find_volume(&dj.fs, (const TCHAR**)&buff, 0); /* Get current volume */
     if (res == FR_OK) {
         INIT_BUF(dj);
-        i = len; /* Bottom of buffer (directory stack base) */
-        dj.sclust =
-            dj.fs->cdir; /* Start to follow upper directory from current
-                            directory */
+        i = len;                 /* Bottom of buffer (directory stack base) */
+        dj.sclust = dj.fs->cdir; /* Start to follow upper directory from current
+                                    directory */
         while ((ccl = dj.sclust) !=
                0) { /* Repeat while current directory is a sub-directory */
             res = dir_sdi(&dj, 1); /* Get parent directory */
@@ -3612,9 +3601,8 @@ f_lseek(FIL* fp,  /* Pointer to the file object */
 
     /* Normal Seek */
     {
-        if (ofs >
-                fp->fsize /* In read-only mode, clip offset with the file size
-                             */
+        if (ofs > fp->fsize /* In read-only mode, clip offset with the file size
+                               */
 #if !_FS_READONLY
             && !(fp->flag & FA_WRITE)
 #endif
@@ -3661,9 +3649,8 @@ f_lseek(FIL* fp,  /* Pointer to the file object */
                         }
                     } else
 #endif
-                        clst =
-                            get_fat(fp->fs, clst); /* Follow cluster chain if
-                                                      not in write mode */
+                        clst = get_fat(fp->fs, clst); /* Follow cluster chain if
+                                                         not in write mode */
                     if (clst == 0xFFFFFFFF)
                         ABORT(fp->fs, FR_DISK_ERR);
                     if (clst <= 1 || clst >= fp->fs->n_fatent)

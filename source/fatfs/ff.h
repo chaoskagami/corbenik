@@ -117,7 +117,7 @@ typedef struct
     DWORD fptr;  /* File read/write pointer (Zeroed on file open) */
     DWORD fsize; /* File size */
     DWORD
-        sclust;  /* File start cluster (0:no cluster chain, always 0 when fsize
+    sclust;      /* File start cluster (0:no cluster chain, always 0 when fsize
                     is 0) */
     DWORD clust; /* Current cluster of fpter (not valid when fprt is 0) */
     DWORD dsect; /* Sector number appearing in buf[] (0:invalid) */

@@ -32,7 +32,7 @@ INCLUDES	:=	include
 ARCH	:=	-march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft
 
 ERROR   := -Werror
-CFLAGS	:= -flto -Wall -Os -mword-relocations \
+CFLAGS	:= -flto -Wall -Os -mword-relocations $(ERROR) \
 			-fomit-frame-pointer -ffunction-sections -fdata-sections -fshort-wchar \
 			$(ARCH)
 
@@ -41,7 +41,7 @@ CFLAGS	+=	$(INCLUDE) -DARM11 -D_3DS
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu99
 
 ASFLAGS	:=	$(ARCH)
-LDFLAGS	=	-flto -Xlinker --defsym="__start__=0x14000000" -specs=3dsx.specs $(ARCH) -Wl,-Map,$(notdir $*.map)
+LDFLAGS	=	-flto -Xlinker --defsym="__start__=0x14000000" -specs=3dsx.specs $(ARCH) -Wl,-Map,$(notdir $*.map) -z defs
 
 LIBS	:= -lctru
 

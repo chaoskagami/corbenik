@@ -1,12 +1,6 @@
-#include <stdint.h>
-#include "../std/unused.h"
-#include "../std/memory.h"
-#include "../firm/firm.h"
-#include "../firm/fcram.h"
-#include "../config.h"
-#include "../common.h"
+#include "patch_file.h"
 
-int patch_modules() {
+PATCH(modules) {
 	// TODO - load module cxi here
 	FILE* f = fopen(PATH_MODULES "/loader.cxi", "r");
 	if (!f) {

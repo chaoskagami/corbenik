@@ -1,7 +1,7 @@
 #include <3ds.h>
-#include "memory.h"
 #include "patcher.h"
 #include "ifile.h"
+#include "internal.h"
 
 #ifndef PATH_MAX
 #define PATH_MAX 255
@@ -87,36 +87,18 @@ static inline size_t strnlen(const char *string, size_t maxlen)
 
 static int fileOpen(IFile *file, FS_ArchiveID id, const char *path, int flags)
 {
-    FS_Archive archive;
+    FS_Path apath;
     FS_Path ppath;
 
     size_t len = strnlen(path, PATH_MAX);
-    archive.id = id;
-    archive.lowPath.type = PATH_EMPTY;
-    archive.lowPath.size = 1;
-    archive.lowPath.data = (u8 *)"";
+    apath.type = PATH_EMPTY;
+    apath.size = 1;
+    apath.data = (u8 *)"";
     ppath.type = PATH_ASCII;
     ppath.data = path;
     ppath.size = len + 1;
 
-    return IFile_Open(file, archive, ppath, flags);
-}
-
-static u32 secureInfoExists(void)
-{
-    static u32 secureInfoExists = 0;
-
-    if(!secureInfoExists)
-    {
-        IFile file;
-        if(!fileOpen(&file, ARCHIVE_NAND_RW, "/sys/SecureInfo_C", FS_OPEN_READ))
-        {
-            secureInfoExists = 1;
-            IFile_Close(&file);
-        }
-    }
-
-    return secureInfoExists;
+	return IFile_Open(file, id, apath, ppath, flags);
 }
 
 static struct config_file config;
@@ -175,8 +157,8 @@ static int loadTitleLocaleConfig(u64 progId, u8 *regionId, u8 *languageId)
 	// Hexdump progId
 	for(int i=0; i < 8; i++) {
         static const char hexDigits[] = "0123456789ABCDEF";
-        progIdStr[i*2]   = hexDigits[(((uint8_t*)progId)[i] >> 4) & 0xf];
-        progIdStr[i*2+1] = hexDigits[ ((uint8_t*)progId)[i] & 0xf];
+        progIdStr[i*2]   = hexDigits[(((uint8_t*)&progId)[i] >> 4) & 0xf];
+        progIdStr[i*2+1] = hexDigits[ ((uint8_t*)&progId)[i] & 0xf];
     }
 
     IFile file;

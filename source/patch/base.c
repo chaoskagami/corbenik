@@ -1,13 +1,8 @@
-#include <stdint.h>
-#include "../std/unused.h"
-#include "../std/memory.h"
-#include "../firm/firm.h"
-#include "../config.h"
-#include "../common.h"
+#include "patch_file.h"
 
 // Do you like examples?
 
-int patch_test() {
+PATCH(example) {
 	fprintf(stderr, "Testing, testing, 1, 2, 3, 4..\n");
 
 	return 0;

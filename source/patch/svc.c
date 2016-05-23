@@ -1,9 +1,4 @@
-#include <stdint.h>
-#include "../std/unused.h"
-#include "../std/memory.h"
-#include "../firm/firm.h"
-#include "../config.h"
-#include "../common.h"
+#include "patch_file.h"
 
 // This patch handles replacement of services. This includes backdoor, but not just backdoor.
 // Any service can be replaced provided there's enough space within the exception page.
@@ -24,7 +19,7 @@ uint32_t *getSvcAndExceptions(uint8_t *pos, uint32_t size, uint32_t **exceptions
 
 uint32_t *freeSpace = NULL;
 
-int patch_services() {
+PATCH(services) {
     // Make sure svcBackdoor is there.
     uint8_t* arm11Section1 = (uint8_t*)firm_loc + firm_loc->section[1].offset;
     uint32_t *exceptionsPage;

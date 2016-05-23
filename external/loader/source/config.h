@@ -1,7 +1,7 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
-static unsigned int config_version = 1;
+__attribute__((unused)) static unsigned int config_version = 1;
 
 #define CONFIG_MAGIC "OVAN"
 

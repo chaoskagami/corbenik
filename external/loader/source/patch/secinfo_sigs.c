@@ -1,5 +1,4 @@
 #include <3ds.h>
-#include "../memory.h"
 #include "../patcher.h"
 #include "../ifile.h"
 

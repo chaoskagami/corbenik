@@ -1,13 +1,8 @@
-#include <stdint.h>
-#include "../std/unused.h"
-#include "../std/memory.h"
-#include "../firm/firm.h"
-#include "../config.h"
-#include "../common.h"
+#include "patch_file.h"
 
 // This patch is responsible for fixing signature checks for the firmware.
 
-int patch_signatures() {
+PATCH(signatures) {
     //Look for signature checks
 
 	uint8_t pat1[] = {0xC0, 0x1C, 0x76, 0xE7};

@@ -1,5 +1,4 @@
 #include <3ds.h>
-#include "memory.h"
 #include "patcher.h"
 #include "exheader.h"
 #include "ifile.h"
@@ -7,6 +6,9 @@
 #include "fsreg.h"
 #include "pxipm.h"
 #include "srvsys.h"
+#include "internal.h"
+
+// TODO - a lot of this is unecessarily verbose and shitty. Clean it up to be tidy.
 
 #define MAX_SESSIONS 1
 
@@ -29,69 +31,61 @@ static u64 g_cached_prog_handle;
 static exheader_header g_exheader;
 static char g_ret_buf[1024];
 
-static int lzss_decompress(u8 *end)
-{
-  unsigned int v1; // r1@2
-  u8 *v2; // r2@2
-  u8 *v3; // r3@2
-  u8 *v4; // r1@2
-  char v5; // r5@4
-  char v6; // t1@4
-  signed int v7; // r6@4
-  int v9; // t1@7
-  u8 *v11; // r3@8
-  int v12; // r12@8
-  int v13; // t1@8
-  int v14; // t1@8
-  unsigned int v15; // r7@8
-  int v16; // r12@8
-  int ret;
+// TODO - This doesn't belong in loader.c - It's a decompression function, stuff it in its own file.
+// Not to mention, it is nigh unreadable. Replace it with a more readable version of LZSS.
+// This decompresses in-place.
 
-  ret = 0;
-  if ( end )
+// end should be 'buffer'
+static int lzss_decompress(u8 *buffer)
+{
+  // This WAS originally a decompilation in @yifan_lu's repo; it was rewritten for readability following ctrtool's namings.
+  unsigned int decompSize, v15;
+  u8 *compressEndOff, *index, *stopIndex;
+  char control;
+  int v9, v13, v14, v16;
+  int ret = 0;
+
+  if ( !buffer ) // Return immediately when buffer is invalid.
+    return 0;
+
+  // v1=decompressedSize, v2=compressedSize, v3=index, v4=stopIndex
+  decompSize     = *((u32 *)buffer - 2);
+  compressEndOff = &buffer[*((u32 *)buffer - 1)];
+  index          = &buffer[-(decompSize >> 24)]; // FIXME - This is not correct code. It's optimized, but incorrect here. Fix it.
+  stopIndex      = &buffer[-(decompSize & 0xFFFFFF)];
+
+  while ( index > stopIndex ) // index > stopIndex
   {
-    v1 = *((u32 *)end - 2);
-    v2 = &end[*((u32 *)end - 1)];
-    v3 = &end[-(v1 >> 24)];
-    v4 = &end[-(v1 & 0xFFFFFF)];
-    while ( v3 > v4 )
+    control = *(index-- - 1); // control (just scoping though)
+    for (int i=0; i<8; i++)
     {
-      v6 = *(v3-- - 1);
-      v5 = v6;
-      v7 = 8;
-      while ( 1 )
+      if ( control & 0x80 ) // control & 0x80
       {
-        if ( (v7-- < 1) )
-          break;
-        if ( v5 & 0x80 )
+        v13 = *(index - 1);
+        v14 = *(index - 2);
+        index -= 2;
+        v15 = ((v14 | (v13 << 8)) & 0xFFFF0FFF) + 2;
+        v16 = v13 + 32;
+        do
         {
-          v13 = *(v3 - 1);
-          v11 = v3 - 1;
-          v12 = v13;
-          v14 = *(v11 - 1);
-          v3 = v11 - 1;
-          v15 = ((v14 | (v12 << 8)) & 0xFFFF0FFF) + 2;
-          v16 = v12 + 32;
-          do
-          {
-            ret = v2[v15];
-            *(v2-- - 1) = ret;
-            v16 -= 16;
-          }
-          while ( !(v16 < 0) );
+          ret = compressEndOff[v15];
+          *(compressEndOff-- - 1) = ret;
+          v16 -= 16;
         }
-        else
-        {
-          v9 = *(v3-- - 1);
-          ret = v9;
-          *(v2-- - 1) = v9;
-        }
-        v5 *= 2;
-        if ( v3 <= v4 )
-          return ret;
+        while ( !(v16 < 0) );
       }
+      else
+      {
+        v9 = *(index-- - 1);
+        ret = v9;
+        *(compressEndOff-- - 1) = v9;
+      }
+      control *= 2;
+      if ( index <= stopIndex )
+        return ret;
     }
   }
+
   return ret;
 }
 
@@ -111,21 +105,20 @@ static Result allocate_shared_mem(prog_addrs_t *shared, prog_addrs_t *vaddr, int
 static Result load_code(u64 progid, prog_addrs_t *shared, prog_addrs_t *original, u64 prog_handle, int is_compressed)
 {
   IFile file;
-  FS_Archive archive;
+  FS_Path archivePath;
   FS_Path path;
   Result res;
   u64 size;
   u64 total;
 
-  archive.id = ARCHIVE_SAVEDATA_AND_CONTENT2;
-  archive.lowPath.type = PATH_BINARY;
-  archive.lowPath.data = &prog_handle;
-  archive.lowPath.size = 8;
-  //archive.handle = prog_handle; // not needed
+  archivePath.type = PATH_BINARY;
+  archivePath.data = &prog_handle;
+  archivePath.size = 8;
+
   path.type = PATH_BINARY;
   path.data = CODE_PATH;
   path.size = sizeof(CODE_PATH);
-  if (R_FAILED(IFile_Open(&file, archive, path, FS_OPEN_READ)))
+  if (R_FAILED(IFile_Open(&file, ARCHIVE_SAVEDATA_AND_CONTENT2, archivePath, path, FS_OPEN_READ))) svcBreak(USERBREAK_ASSERT);
   {
     svcBreak(USERBREAK_ASSERT);
   }
@@ -152,7 +145,7 @@ static Result load_code(u64 progid, prog_addrs_t *shared, prog_addrs_t *original
     svcBreak(USERBREAK_ASSERT);
   }
 
-  // decompress
+  // decompress in place
   if (is_compressed)
   {
     lzss_decompress((u8 *)shared->text_addr + size);
@@ -482,14 +475,14 @@ void __appExit()
 void __sync_init();
 void __sync_fini();
 void __system_initSyscalls();
- 
+
 void __ctru_exit()
 {
   __appExit();
   __sync_fini();
   svcExitProcess();
 }
- 
+
 void initSystem()
 {
   __sync_init();

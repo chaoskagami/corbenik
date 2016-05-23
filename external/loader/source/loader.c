@@ -118,7 +118,8 @@ static Result load_code(u64 progid, prog_addrs_t *shared, prog_addrs_t *original
   path.type = PATH_BINARY;
   path.data = CODE_PATH;
   path.size = sizeof(CODE_PATH);
-  if (R_FAILED(IFile_Open(&file, ARCHIVE_SAVEDATA_AND_CONTENT2, archivePath, path, FS_OPEN_READ))) svcBreak(USERBREAK_ASSERT);
+
+  if (R_FAILED(IFile_Open(&file, ARCHIVE_SAVEDATA_AND_CONTENT2, archivePath, path, FS_OPEN_READ)))
   {
     svcBreak(USERBREAK_ASSERT);
   }

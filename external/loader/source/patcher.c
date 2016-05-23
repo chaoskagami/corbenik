@@ -90,13 +90,13 @@ static int fileOpen(IFile *file, FS_ArchiveID id, const char *path, int flags)
     FS_Path apath;
     FS_Path ppath;
 
-    size_t len = strnlen(path, PATH_MAX);
     apath.type = PATH_EMPTY;
     apath.size = 1;
     apath.data = (u8 *)"";
+
     ppath.type = PATH_ASCII;
     ppath.data = path;
-    ppath.size = len + 1;
+    ppath.size = strnlen(path, PATH_MAX) + 1;
 
 	return IFile_Open(file, id, apath, ppath, flags);
 }

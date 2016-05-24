@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __FSREG_H
+#define __FSREG_H
 
 #include <3ds/types.h>
 #include "exheader.h"
@@ -13,3 +14,5 @@ Result FSREG_UnloadProgram(u64 prog_handle);
 Result FSREG_Unregister(u32 pid);
 Result FSREG_Register(u32 pid, u64 prog_handle, FS_ProgramInfo* info,
                       void* storageinfo);
+
+#endif

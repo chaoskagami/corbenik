@@ -30,7 +30,7 @@ memcmp(const void* buf1, const void* buf2, u32 size)
 // Quick Search algorithm, adapted from
 // http://igm.univ-mlv.fr/~lecroq/string/node19.html#SECTION00190
 static u8*
-memsearch(u8* startPos, const void* pattern, u32 size, u32 patternSize)
+memfind(u8* startPos, u32 size, const void* pattern, u32 patternSize)
 {
     const u8* patternc = (const u8*)pattern;
 
@@ -61,7 +61,7 @@ patchMemory(u8* start, u32 size, const void* pattern, u32 patSize, int offset,
     u32 i;
 
     for (i = 0; i < count; i++) {
-        u8* found = memsearch(start, pattern, size, patSize);
+        u8* found = memfind(start, size, pattern, patSize);
 
         if (found == NULL)
             break;
@@ -423,8 +423,8 @@ adjust_cpu_settings(u64 progId, u8* code, u32 size)
             static const u8 cfgN3dsCpuPattern[] = { 0x00, 0x40, 0xA0,
                                                     0xE1, 0x07, 0x00 };
 
-            u32* cfgN3dsCpuLoc = (u32*)memsearch(code, cfgN3dsCpuPattern, size,
-                                                 sizeof(cfgN3dsCpuPattern));
+            u32* cfgN3dsCpuLoc = (u32*)memfind(code, size, cfgN3dsCpuPattern,
+                                               sizeof(cfgN3dsCpuPattern));
 
             // Patch N3DS CPU Clock and L2 cache setting
             if (cfgN3dsCpuLoc != NULL) {

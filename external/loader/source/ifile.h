@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __IFILE_H
+#define __IFILE_H
 
 #include <3ds/types.h>
 
@@ -15,3 +16,5 @@ Result IFile_Close(IFile* file);
 Result IFile_GetSize(IFile* file, u64* size);
 Result IFile_Read(IFile* file, u64* total, void* buffer, u32 len);
 Result IFile_Write(IFile* file, u64* total, void* buffer, u32 len);
+
+#endif

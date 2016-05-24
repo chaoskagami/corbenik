@@ -2,7 +2,8 @@
  * @file srv.h
  * @brief Service API.
  */
-#pragma once
+#ifndef __SRVSYS_H
+#define __SRVSYS_H
 
 /// Initializes the service API.
 Result srvSysInit(void);
@@ -47,3 +48,5 @@ Result srvSysRegisterService(Handle* out, const char* name, int maxSessions);
  * @param name Name of the service.
  */
 Result srvSysUnregisterService(const char* name);
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __EXHEADER_H
+#define __EXHEADER_H
 
 #include <3ds/types.h>
 
@@ -92,3 +93,5 @@ typedef struct
         exheader_arm9accesscontrol arm9accesscontrol;
     } PACKED accessdesc;
 } PACKED exheader_header;
+
+#endif

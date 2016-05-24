@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __PATCHER_H
+#define __PATCHER_H
 
 #include <3ds/types.h>
 
@@ -16,3 +17,5 @@ u32 patchMemory(u8* start, u32 size, const void* pattern, u32 patSize,
                 int offset, const void* replace, u32 repSize, u32 count);
 
 u8 get_cpumode(u64 progId);
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef __INPUT_H
+#define __INPUT_H
+
 #define BUTTON_A (1 << 0)
 #define BUTTON_B (1 << 1)
 #define BUTTON_SEL (1 << 2)
@@ -16,3 +19,5 @@
 #define BUTTON_ANY 0xFFF
 
 #define HID_PAD ((*(volatile uint32_t*)0x10146000) ^ BUTTON_ANY)
+
+#endif

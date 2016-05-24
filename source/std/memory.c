@@ -170,7 +170,8 @@ atoi(const char* str)
 // Quick Search algorithm, adapted from
 // http://igm.univ-mlv.fr/~lecroq/string/node19.html#SECTION00190
 uint8_t*
-memfind(uint8_t* startPos, uint32_t size, const void* pattern, uint32_t patternSize)
+memfind(uint8_t* startPos, uint32_t size, const void* pattern,
+        uint32_t patternSize)
 {
     const uint8_t* patternc = (const uint8_t*)pattern;
 
@@ -193,4 +194,3 @@ memfind(uint8_t* startPos, uint32_t size, const void* pattern, uint32_t patternS
 
     return NULL;
 }
-

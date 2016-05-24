@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __I2C_H
+#define __I2C_H
 
 #include "common.h"
 
@@ -34,3 +35,5 @@ int i2cWriteRegister(uint8_t dev_id, uint8_t reg, uint8_t data);
 
 int i2cReadRegisterBuffer(unsigned int dev_id, int reg, uint8_t* buffer,
                           size_t buf_size);
+
+#endif

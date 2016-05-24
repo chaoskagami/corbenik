@@ -167,91 +167,30 @@ atoi(const char* str)
 #define NOT_FOUND patlen
 #define max(a, b) ((a < b) ? b : a)
 
-void
-make_delta1(int* delta1, uint8_t* pat, int32_t patlen)
-{
-    int i;
-    for (i = 0; i < ALPHABET_LEN; i++) {
-        delta1[i] = NOT_FOUND;
-    }
-    for (i = 0; i < patlen - 1; i++) {
-        delta1[pat[i]] = patlen - 1 - i;
-    }
-}
-
-int
-is_prefix(uint8_t* word, int wordlen, int pos)
-{
-    int i;
-    int suffixlen = wordlen - pos;
-    // could also use the strncmp() library function here
-    for (i = 0; i < suffixlen; i++) {
-        if (word[i] != word[pos + i]) {
-            return 0;
-        }
-    }
-    return 1;
-}
-
-int
-suffix_length(uint8_t* word, int wordlen, int pos)
-{
-    int i;
-    // increment suffix length i to the first mismatch or beginning
-    // of the word
-    for (i = 0; (word[pos - i] == word[wordlen - 1 - i]) && (i < pos); i++)
-        ;
-    return i;
-}
-
-void
-make_delta2(int* delta2, uint8_t* pat, int32_t patlen)
-{
-    int p;
-    int last_prefix_index = patlen - 1;
-
-    // first loop
-    for (p = patlen - 1; p >= 0; p--) {
-        if (is_prefix(pat, patlen, p + 1)) {
-            last_prefix_index = p + 1;
-        }
-        delta2[p] = last_prefix_index + (patlen - 1 - p);
-    }
-
-    // second loop
-    for (p = 0; p < patlen - 1; p++) {
-        int slen = suffix_length(pat, patlen, p);
-        if (pat[p - slen] != pat[patlen - 1 - slen]) {
-            delta2[patlen - 1 - slen] = patlen - 1 - p + slen;
-        }
-    }
-}
-
+// Quick Search algorithm, adapted from
+// http://igm.univ-mlv.fr/~lecroq/string/node19.html#SECTION00190
 uint8_t*
-memfind(uint8_t* string, uint32_t stringlen, uint8_t* pat, uint32_t patlen)
+memfind(uint8_t* startPos, uint32_t size, const void* pattern, uint32_t patternSize)
 {
-    uint32_t i;
-    int delta1[ALPHABET_LEN];
-    int delta2[ALPHABET_LEN]; // Max search length is 256.
-    make_delta1(delta1, pat, patlen);
-    make_delta2(delta2, pat, patlen);
+    const uint8_t* patternc = (const uint8_t*)pattern;
 
-    // The empty pattern must be considered specially
-    if (patlen == 0)
-        return string;
+    // Preprocessing
+    uint32_t table[ALPHABET_LEN];
 
-    i = patlen - 1;
-    while (i < stringlen) {
-        int j = patlen - 1;
-        while (j >= 0 && (string[i] == pat[j])) {
-            --i;
-            --j;
-        }
-        if (j < 0) {
-            return (string + i + 1);
-        }
+    for (uint32_t i = 0; i < ALPHABET_LEN; ++i)
+        table[i] = patternSize + 1;
+    for (uint32_t i = 0; i < patternSize; ++i)
+        table[patternc[i]] = patternSize - i;
 
-        i += max(delta1[string[i]], delta2[j]);
+    // Searching
+    uint32_t j = 0;
+
+    while (j <= size - patternSize) {
+        if (memcmp(patternc, startPos + j, patternSize) == 0)
+            return startPos + j;
+        j += table[startPos[j + patternSize]];
     }
+
     return NULL;
 }
+

@@ -55,7 +55,7 @@ host/langemu.conf:
 clean:
 	make -C modules clean
 	make -C external clean
-	rm host/langemu.conf
+	rm -f host/langemu.conf
 	rm -rf $(dir_out) $(dir_build)
 
 .PHONY: $(dir_out)/arm9loaderhax.bin

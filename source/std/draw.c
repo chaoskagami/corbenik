@@ -241,6 +241,9 @@ putc(void* buf, const int c)
 void
 puts(void* buf, const char* string)
 {
+    if ((buf == stdout || buf == stderr) && kill_output)
+        return;
+
     char* ref = (char*)string;
 
     while (*ref != '\0') {
@@ -331,6 +334,9 @@ void
 fflush(void* channel)
 {
     if (channel == TOP_SCREEN) {
+        if (kill_output)
+            return;
+
         for (int y = 0; y < TEXT_TOP_HEIGHT; y++) {
             for (int x = 0; x < TEXT_TOP_WIDTH; x++) {
                 char c = text_buffer_top[y * TEXT_TOP_WIDTH + x];
@@ -345,6 +351,9 @@ fflush(void* channel)
             }
         }
     } else if (channel == BOTTOM_SCREEN) {
+        if (kill_output)
+            return;
+
         for (int y = 0; y < TEXT_BOTTOM_HEIGHT; y++) {
             for (int x = 0; x < TEXT_BOTTOM_WIDTH; x++) {
                 char c = text_buffer_bottom[y * TEXT_BOTTOM_WIDTH + x];
@@ -367,6 +376,9 @@ fflush(void* channel)
 void
 vfprintf(void* channel, const char* format, va_list ap)
 {
+    if ((channel == stdout || channel == stderr) && kill_output)
+        return;
+
     char* ref = (char*)format;
 
     unsigned char* color;
@@ -479,6 +491,12 @@ vfprintf(void* channel, const char* format, va_list ap)
 void
 fprintf(void* channel, const char* format, ...)
 {
+    // The output suppression is in all the functions to minimize overhead.
+    // Function calls and format conversions take time and we don't just want
+    // to stop at putc
+    if ((channel == stdout || channel == stderr) && kill_output)
+        return;
+
     va_list ap;
     va_start(ap, format);
 

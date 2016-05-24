@@ -22,7 +22,7 @@ main()
     // Autoboot. Non-standard code path.
     if (config.options[OPTION_AUTOBOOT] && !(HID_PAD & BUTTON_R)) {
         if (config.options[OPTION_SILENCE])
-            shut_up();
+            shut_up(); // This does exactly what it sounds like.
         load_firms();
         doing_autoboot = 1;
         boot_cfw(); // Just boot shit.

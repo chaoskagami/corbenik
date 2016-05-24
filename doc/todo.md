@@ -1,11 +1,23 @@
- * Attempt to create a replacement handler for Service 0x3D, AKA OutputDebugString(void const, int) to log to a file on SD.
-   * Might be a pipe dream. It still would be cool to capture debug logs from games.
-     * Pretty sure this goes over JTAG on PARTNER units and anything else >/dev/null.
+Next
+-------------
+
+ * Make config file for corbenik plaintext. Nobody likes binary configs. They suck.
+
+Shortterm
+-------------
+
  * Implement some kind of curses-like backend and replace terrible printf rewind on top screen.
    * Alternatively, implement a monochrome GUI.
    * We also need UTF8 support. I want translation support.
      * Dragging in freetype or a bitmap font tool.
        * Ugh, VWF. Not like I haven't done it before...
+   * Kconfig?
+
+Longterm
+-------------
+ * Attempt to create a replacement handler for Service 0x3D, AKA OutputDebugString(void const, int) to log to a file on SD.
+   * Might be a pipe dream. It still would be cool to capture debug logs from games.
+     * Pretty sure this goes over JTAG on PARTNER units and anything else >/dev/null.
  * Config fragments for modules; and these need to be part of the modules, not corbenik's options menu.
    * Oppa Kconfig style.
      * Busybox may be helpful.

@@ -262,10 +262,14 @@ exit_error:
     return status;
 }
 
-void __attribute__((naked)) disable_lcds()
+// FAIR WARNING; This function is arm11 code, not ARM9.
+// They share enough in common that this isn't a problem,
+// but still worth documenting.
+void __attribute__((naked)) arm11_preboot_halt()
 {
     *a11_entry = 0; // Don't wait for us
 
+    // Disables the LCD.
     *(volatile uint32_t*)0x10202A44 = 0;
     *(volatile uint32_t*)0x10202244 = 0;
     *(volatile uint32_t*)0x1020200C = 0;
@@ -322,7 +326,7 @@ boot_firm()
 
     // No fprintf will work from here on out.
 
-    *a11_entry = (uint32_t)disable_lcds;
+    *a11_entry = (uint32_t)arm11_preboot_halt;
     while (*a11_entry)
         ; // Make sure it jumped there correctly before changing it.
     *a11_entry = (uint32_t)firm_loc->a11Entry;

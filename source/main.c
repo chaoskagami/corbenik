@@ -23,20 +23,14 @@ main()
     if (config.options[OPTION_AUTOBOOT] && !(HID_PAD & BUTTON_R)) {
         if (config.options[OPTION_SILENCE])
             shut_up(); // This does exactly what it sounds like.
-        load_firms();
         doing_autoboot = 1;
         boot_cfw(); // Just boot shit.
     }
 
     int in_menu = 1;
-
-    load_firms();
-
     while (in_menu) {
         in_menu = menu_handler();
     }
-
-    fprintf(BOTTOM_SCREEN, "Booting CFW\n");
 
     save_config(); // Save config file.
 

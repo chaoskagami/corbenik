@@ -398,7 +398,10 @@ load_firms()
 void
 boot_cfw()
 {
-    fprintf(BOTTOM_SCREEN, "Applying patches...\n");
+    fprintf(BOTTOM_SCREEN, "Loading firmware...\n");
+	load_firms();
+
+    fprintf(BOTTOM_SCREEN, "Patching firmware...\n");
     if (patch_firm_all() != 0)
         return;
 

@@ -156,9 +156,15 @@ menu_options()
     return 0;
 }
 
+extern int firm_loaded;
+
 int
 menu_info()
 {
+	// This menu requres firm to be loaded. Unfortunately.
+	if (!firm_loaded)
+		load_firms();
+
     clear_screen(TOP_SCREEN);
 
     set_cursor(TOP_SCREEN, 0, 0);

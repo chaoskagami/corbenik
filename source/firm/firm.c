@@ -367,6 +367,8 @@ find_proc9(firm_h* firm, firm_section_h* process9, exefs_h** p9exefs)
     return 1;
 }
 
+int firm_loaded = 0;
+
 int
 load_firms()
 {
@@ -391,6 +393,8 @@ load_firms()
         fprintf(BOTTOM_SCREEN, "  AGB_FIRM failed to load.\n");
     else
         find_proc9(agb_firm_loc, &agb_firm_proc9, &agb_firm_p9_exefs);
+
+	firm_loaded = 1; // Loaded.
 
     return 0;
 }

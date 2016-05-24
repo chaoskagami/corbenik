@@ -40,6 +40,7 @@ static struct options_s options[] = {
 };
 
 static int cursor_y = 0;
+static int cursor_max = 0;
 static int which_menu = 1;
 static int need_redraw = 1;
 
@@ -83,6 +84,13 @@ menu_options()
 {
     set_cursor(TOP_SCREEN, 0, 0);
 
+    // Figure out the max if unset.
+    if (cursor_max == 0) {
+        cursor_max=0;
+        while(options[cursor_max].index != -1)
+            ++cursor_max;
+    }
+
     header("A:Enter B:Back DPAD:Nav");
 
     int i = 0;
@@ -115,13 +123,15 @@ menu_options()
     switch (key) {
         case BUTTON_UP:
             cursor_y -= 1;
-            if (cursor_y < 0)
-                cursor_y = 0;
             break;
         case BUTTON_DOWN:
             cursor_y += 1;
-            if (options[cursor_y].index == -1)
-                cursor_y -= 1;
+            break;
+        case BUTTON_LEFT:
+            cursor_y -= 5;
+            break;
+        case BUTTON_RIGHT:
+            cursor_y += 5;
             break;
         case BUTTON_A:
             // TODO - Value options
@@ -134,6 +144,13 @@ menu_options()
             cursor_y = 0;
             return MENU_MAIN;
             break;
+    }
+
+    if (cursor_y < 0) {
+        cursor_y = cursor_max - 1;
+    }
+    else if (cursor_y > cursor_max - 1) {
+        cursor_y = 0;
     }
 
     return 0;

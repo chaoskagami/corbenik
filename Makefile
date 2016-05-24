@@ -8,7 +8,8 @@ LD := arm-none-eabi-ld
 OC := arm-none-eabi-objcopy
 
 name := Corbenik
-cons ?= n3ds
+
+# If unset, the primary folder is /corbenik.
 fw_folder ?= corbenik
 
 dir_source := source
@@ -28,7 +29,7 @@ objects_cfw = $(patsubst $(dir_source)/%.s, $(dir_build)/%.o, \
 			  $(call rwildcard, $(dir_source), *.s *.c)))
 
 .PHONY: all
-all: a9lh modules external host/langemu.conf
+all: host/langemu.conf a9lh modules external
 
 .PHONY: modules
 modules:
@@ -53,9 +54,9 @@ host/langemu.conf:
 
 .PHONY: clean
 clean:
+	rm -f host/langemu.conf
 	make -C modules clean
 	make -C external clean
-	rm -f host/langemu.conf
 	rm -rf $(dir_out) $(dir_build)
 
 .PHONY: $(dir_out)/arm9loaderhax.bin

@@ -51,7 +51,7 @@ decrypt_firm_title(firm_h* dest, ncch_h* ncch, uint32_t* size, void* key)
     uint8_t exefs_key[16] = { 0 };
     uint8_t exefs_iv[16] = { 0 };
 
-    fprintf(BOTTOM_SCREEN, "  Decrypting the NCCH\n");
+    fprintf(BOTTOM_SCREEN, "n");
     aes_setkey(0x16, key, AES_KEYNORMAL, AES_INPUT_BE | AES_INPUT_NORMAL);
     aes_use_keyslot(0x16);
     aes(ncch, ncch, *size / AES_BLOCK_SIZE, firm_iv, AES_CBC_DECRYPT_MODE,
@@ -67,7 +67,7 @@ decrypt_firm_title(firm_h* dest, ncch_h* ncch, uint32_t* size, void* key)
     exefs_h* exefs = (exefs_h*)((void*)ncch + ncch->exeFSOffset * MEDIA_UNITS);
     uint32_t exefs_size = ncch->exeFSSize * MEDIA_UNITS;
 
-    fprintf(BOTTOM_SCREEN, "  Decrypting the exefs\n");
+    fprintf(BOTTOM_SCREEN, "e");
     aes_setkey(0x2C, exefs_key, AES_KEYY, AES_INPUT_BE | AES_INPUT_NORMAL);
     aes_use_keyslot(0x2C);
     aes(exefs, exefs, exefs_size / AES_BLOCK_SIZE, exefs_iv, AES_CTR_MODE,
@@ -92,7 +92,7 @@ decrypt_arm9bin(arm9bin_h* header, uint64_t firm_title, uint8_t version)
 {
     uint8_t slot = 0x15;
 
-    fprintf(BOTTOM_SCREEN, "  Decrypting ARM9 FIRM binary\n");
+    fprintf(BOTTOM_SCREEN, "9");
 
     if (firm_title == NATIVE_FIRM_TITLEID && version > 0x0F) {
         uint8_t decrypted_keyx[AES_BLOCK_SIZE];
@@ -132,15 +132,15 @@ decrypt_firm(firm_h* dest, char* path_firmkey, uint32_t* size)
 
     // Firmware is likely encrypted. Decrypt.
     if (!read_file(firm_key, path_firmkey, AES_BLOCK_SIZE)) {
-        fprintf(BOTTOM_SCREEN, "  Failed to load FIRM key\n");
+        fprintf(BOTTOM_SCREEN, "!");
         return 1;
     } else {
-        fprintf(BOTTOM_SCREEN, "  Loaded FIRM key\n");
+        fprintf(BOTTOM_SCREEN, "k");
     }
 
-    fprintf(BOTTOM_SCREEN, "  Decrypting FIRM\n");
+    fprintf(BOTTOM_SCREEN, "d");
     if (decrypt_firm_title(dest, (void*)dest, size, firm_key) != 0) {
-        fprintf(BOTTOM_SCREEN, "Failed to decrypt the firmware\n");
+        fprintf(BOTTOM_SCREEN, "!");
         return 1;
     }
     return 0;
@@ -156,11 +156,11 @@ load_firm(firm_h* dest, char* path, char* path_firmkey, uint32_t* size,
     int firmware_changed = 0;
 
     if (read_file(dest, path, *size)) {
-        fprintf(BOTTOM_SCREEN, "  Failed to read FIRM.\n");
+        fprintf(BOTTOM_SCREEN, "!");
 
         // Only whine about this if it's NATIVE_FIRM, which is important.
         if (firm_title == NATIVE_FIRM_TITLEID) {
-            fprintf(BOTTOM_SCREEN, "Failed to load NATIVE_FIRM from:\n"
+            fprintf(BOTTOM_SCREEN, "\nFailed to load NATIVE_FIRM from:\n"
                                    "  " PATH_NATIVE_F "\n"
                                    "This is fatal. Aborting.\n");
         }
@@ -174,7 +174,7 @@ load_firm(firm_h* dest, char* path, char* path_firmkey, uint32_t* size,
         status = decrypt_firm(dest, path_firmkey, size);
         if (status != 0) {
             if (firm_title == NATIVE_FIRM_TITLEID) {
-                fprintf(BOTTOM_SCREEN, "Failed to decrypt firmware.\n"
+                fprintf(BOTTOM_SCREEN, "\nFailed to decrypt firmware.\n"
                                        "This is fatal. Aborting.\n");
                 status = 1;
                 goto exit_error;
@@ -182,12 +182,10 @@ load_firm(firm_h* dest, char* path, char* path_firmkey, uint32_t* size,
         }
         firmware_changed = 1; // Decryption performed.
     } else {
-        fprintf(BOTTOM_SCREEN, "  FIRM not encrypted\n");
+        fprintf(BOTTOM_SCREEN, "_");
     }
 
     struct firm_signature* fsig = get_firm_info(dest);
-
-    fprintf(BOTTOM_SCREEN, "  FIRM version: %s\n", fsig->version_string);
 
     // The N3DS firm has an additional encryption layer for ARM9
     if (fsig->console == console_n3ds) {
@@ -211,7 +209,7 @@ load_firm(firm_h* dest, char* path, char* path_firmkey, uint32_t* size,
                             (arm9bin_h*)((uintptr_t)dest + section->offset),
                             firm_title, fsig->version)) {
                         fprintf(BOTTOM_SCREEN,
-                                "Couldn't decrypt ARM9 FIRM binary.\n"
+                                "\nCouldn't decrypt ARM9 FIRM binary.\n"
                                 "Check if you have the needed key at:\n"
                                 "  " PATH_SLOT0X11KEY96 "\n");
                         status = 1;
@@ -220,7 +218,7 @@ load_firm(firm_h* dest, char* path, char* path_firmkey, uint32_t* size,
                     firmware_changed = 1; // Decryption of arm9bin performed.
                 } else {
                     fprintf(BOTTOM_SCREEN,
-                            "  ARM9 FIRM binary not encrypted\n");
+                            "_");
                     if (firm_title == NATIVE_FIRM_TITLEID &&
                         fsig->version > 0x0F) {
                         slot0x11key96_init(); // This has to be loaded
@@ -237,12 +235,12 @@ load_firm(firm_h* dest, char* path, char* path_firmkey, uint32_t* size,
 
     // Save firmware.bin if decryption was done.
     if (firmware_changed) {
-        fprintf(BOTTOM_SCREEN, "  Saving decrypted FIRM\n");
+        fprintf(BOTTOM_SCREEN, "s");
         write_file(dest, path, *size);
     }
 
     if (fsig->console == console_n3ds) {
-        fprintf(BOTTOM_SCREEN, "  Fixing arm9 entrypoint\n");
+        fprintf(BOTTOM_SCREEN, "f");
 
         // Patch the entrypoint to skip arm9loader
         if (firm_title == NATIVE_FIRM_TITLEID) {
@@ -355,7 +353,7 @@ find_proc9(firm_h* firm, firm_section_h* process9, exefs_h** p9exefs)
                         process9->size = (*p9exefs)->fileHeaders[0].size;
                         process9->offset =
                             (void*)((*p9exefs) + 1) - (void*)firm;
-                        fprintf(BOTTOM_SCREEN, "  Found Process9 for FIRM.\n");
+                        fprintf(BOTTOM_SCREEN, "p");
                         return 0;
                     }
                 }
@@ -363,7 +361,7 @@ find_proc9(firm_h* firm, firm_section_h* process9, exefs_h** p9exefs)
             }
         }
     }
-    fprintf(BOTTOM_SCREEN, "  Couldn't find Process9?\n");
+    fprintf(BOTTOM_SCREEN, "\n  Couldn't find Process9?\n");
     return 1;
 }
 
@@ -372,27 +370,32 @@ int firm_loaded = 0;
 int
 load_firms()
 {
-    fprintf(BOTTOM_SCREEN, "Loading FIRM...\n");
+	if (firm_loaded)
+		return 0;
 
-    fprintf(BOTTOM_SCREEN, "Loading NATIVE_FIRM\n");
+    fprintf(BOTTOM_SCREEN, "FIRM load triggered.\n");
+
+    fprintf(BOTTOM_SCREEN, "NATIVE_FIRM\n  [");
     if (load_firm(firm_loc, PATH_NATIVE_F, PATH_NATIVE_FIRMKEY, &firm_size,
                   NATIVE_FIRM_TITLEID) != 0)
         return 1;
     find_proc9(firm_loc, &firm_proc9, &firm_p9_exefs);
 
-    fprintf(BOTTOM_SCREEN, "Loading TWL_FIRM\n");
+    fprintf(BOTTOM_SCREEN, "]\nTWL_FIRM\n  [");
     if (load_firm(twl_firm_loc, PATH_TWL_F, PATH_TWL_FIRMKEY, &twl_firm_size,
                   TWL_FIRM_TITLEID))
-        fprintf(BOTTOM_SCREEN, "  TWL_FIRM failed to load.\n");
+        fprintf(BOTTOM_SCREEN, "  \nTWL_FIRM failed to load.\n");
     else
         find_proc9(twl_firm_loc, &twl_firm_proc9, &twl_firm_p9_exefs);
 
-    fprintf(BOTTOM_SCREEN, "Loading AGB_FIRM\n");
+    fprintf(BOTTOM_SCREEN, "]\nAGB_FIRM\n  [");
     if (load_firm(agb_firm_loc, PATH_AGB_F, PATH_AGB_FIRMKEY, &agb_firm_size,
                   AGB_FIRM_TITLEID))
-        fprintf(BOTTOM_SCREEN, "  AGB_FIRM failed to load.\n");
+        fprintf(BOTTOM_SCREEN, "  \nAGB_FIRM failed to load.\n");
     else
         find_proc9(agb_firm_loc, &agb_firm_proc9, &agb_firm_p9_exefs);
+
+	fprintf(BOTTOM_SCREEN, "]\n");
 
 	firm_loaded = 1; // Loaded.
 

@@ -156,14 +156,11 @@ menu_options()
     return 0;
 }
 
-extern int firm_loaded;
-
 int
 menu_info()
 {
 	// This menu requres firm to be loaded. Unfortunately.
-	if (!firm_loaded)
-		load_firms();
+	load_firms(); // Lazy load!
 
     clear_screen(TOP_SCREEN);
 

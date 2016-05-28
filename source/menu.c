@@ -11,31 +11,39 @@
 #define MENU_POWER 7
 #define MENU_BOOTME 8
 
+#define OPTION_AADOWNGRADE 16 // Anti-anti-downgrade.
+
 static struct options_s options[] = {
-    { 0, "Signature Patch", boolean_val, 0, 0 },
-    { 1, "FIRM Protection", boolean_val, 0, 0 },
-    { 2, "SysModule Replacement", boolean_val, 0, 0 },
-    { 3, "Service Replacement", boolean_val, 0, 0 },
-    { 4, "ARM9 Thread", boolean_val, 0, 0 },
 
-    { 5, "Autoboot", boolean_val, 0, 0 },
-    { 6, "Silence w/ Autoboot", boolean_val, 0, 0 },
-    { 7, "Step through with button", boolean_val, 0, 0 },
+    { OPTION_SIGPATCH,          "Signature Patch", boolean_val, 0, 0 },
 
-    { 8, "Don't draw background color", boolean_val, 0, 0 },
-    { 9, "Preserve framebuffer data", boolean_val, 0, 0 },
+    { OPTION_FIRMPROT,          "FIRM Protection", boolean_val, 0, 0 },
 
-    { 10, "Hide Help from menu", boolean_val, 0, 0 },
+    { OPTION_LOADER,            "System Modules (loader)", boolean_val, 0, 0 },
+    { OPTION_LOADER_CPU_L2,     "  CPU - L2 cache", boolean_val, 0, 0 },
+    { OPTION_LOADER_CPU_800MHZ, "  CPU - 800Mhz", boolean_val, 0, 0 },
+    { OPTION_LOADER_LANGEMU,    "  Language Emulation", boolean_val, 0, 0 },
 
-    { 11, "Loader: CPU L2 enable", boolean_val, 0, 0 },
-    { 12, "Loader: CPU 800Mhz mode", boolean_val, 0, 0 },
-    { 13, "Loader: Language Emulation", boolean_val, 0, 0 },
+    { OPTION_SERVICES,              "Service Replacement", boolean_val, 0, 0 },
+    { OPTION_REPLACE_ALLOCATED_SVC, "  Force replacement (unsafe)", boolean_val, 0, 0 },
 
-    { 14, "Svc: Force replace allocated", boolean_val, 0, 0 },
+    { OPTION_AADOWNGRADE,       "Anti-anti-downgrade", boolean_val, 0, 0 },
 
-    { 15, "No dependency tracking", boolean_val, 0, 0 },
-    { 16, "Allow unsafe options", boolean_val, 0, 0 },
+    { OPTION_ARM9THREAD,        "ARM9 Thread", boolean_val, 0, 0 },
 
+    { OPTION_AUTOBOOT,          "Autoboot", boolean_val, 0, 0 },
+    { OPTION_SILENCE,           "Silence w/ Autoboot", boolean_val, 0, 0 },
+    { OPTION_TRACE,             "Step through with button", boolean_val, 0, 0 },
+
+    { OPTION_TRANSP_BG,         "Don't draw background color", boolean_val, 0, 0 },
+    { OPTION_NO_CLEAR_BG,       "Preserve framebuffer data", boolean_val, 0, 0 },
+
+    { OPTION_READ_ME,           "Hide Help from menu", boolean_val, 0, 0 },
+
+    { IGNORE_PATCH_DEPS,   "No dependency tracking", boolean_val, 0, 0 },
+    { IGNORE_BROKEN_SHIT,  "Allow unsafe options", boolean_val, 0, 0 },
+
+    // Sentinel.
     { -1, "", 0, 0, 0 },
 };
 

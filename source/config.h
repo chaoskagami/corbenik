@@ -52,21 +52,23 @@ struct options_s
 #define OPTION_TRACE 7    // Pause for A key on each step.
 
 #define OPTION_TRANSP_BG 8 // Background color is not drawn under text.
-#define OPTION_NO_CLEAR_BG                                                     \
-    9 // Framebuffer is preserved from whatever ran before us.
+#define OPTION_NO_CLEAR_BG 9
+    // Framebuffer is preserved from whatever ran before us.
 #define OPTION_READ_ME 10 // Remove Help/Readme from menu.
 
 #define OPTION_LOADER_CPU_L2 11     // Enable L2 cache.
 #define OPTION_LOADER_CPU_800MHZ 12 // Enable 800Mhz mode.
 #define OPTION_LOADER_LANGEMU 13    // Enable 800Mhz mode.
 
-#define OPTION_REPLACE_ALLOCATED_SVC                                           \
-    14 // Replace allocated services. Normally you don't want this.
+#define OPTION_REPLACE_ALLOCATED_SVC 14
+    // Replace allocated services. Normally you don't want this.
 
 #define IGNORE_PATCH_DEPS 14 // Ignore patch UUID dependencies. Not recommended.
-#define IGNORE_BROKEN_SHIT                                                     \
-    15 // Allow enabling patches which are marked as 'incompatible'. Chances are
+#define IGNORE_BROKEN_SHIT 15
+       // Allow enabling patches which are marked as 'incompatible'. Chances are
        // there's a reason.
+
+#define OPTION_AADOWNGRADE 16 // Anti-anti-downgrade.
 
 //#define HEADER_COLOR        12 // Color of header text.
 //#define BG_COLOR            13 // Color of background.

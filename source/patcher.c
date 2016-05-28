@@ -14,6 +14,7 @@ extern int patch_signatures();
 extern int patch_firmprot();
 extern int patch_services();
 extern int patch_modules();
+extern int patch_aadowngrade();
 
 extern int doing_autoboot;
 
@@ -37,25 +38,23 @@ patch_firm_all()
 
     // Use builtin signature patcher?
 
-    wait();
-
     if (config.options[OPTION_SIGPATCH]) {
         // TODO - Patch menu. This is okay-ish for now.
         //		if(execp(PATH_PATCHES "/signatures.vco")) {
         if (patch_signatures()) {
             abort("Fatal. Sigpatch has failed.");
         }
-    }
 
-    wait();
+	    wait();
+    }
 
     if (config.options[OPTION_FIRMPROT]) {
         if (patch_firmprot()) {
             abort("Fatal. Firmprot has failed.");
         }
-    }
 
-    wait();
+	    wait();
+    }
 
     // Replace loader?
     if (config.options[OPTION_LOADER]) {
@@ -63,15 +62,15 @@ patch_firm_all()
             abort("Fatal. Service patch has failed.");
         }
         // This requires OPTION_SIGPATCH.
+	    wait();
     }
-
-    wait();
 
     // Inject services?
     if (config.options[OPTION_SERVICES]) {
         if (patch_services()) {
             abort("Fatal. Service patch has failed.");
         }
+	    wait();
     }
 
     // Use ARM9 hook thread?
@@ -79,9 +78,16 @@ patch_firm_all()
         // Yes.
 
         // FIXME - NYI
+		wait();
     }
 
-    wait();
+	if (config.options[OPTION_AADOWNGRADE]) {
+        if (patch_aadowngrade()) {
+            abort("Anti-anti-downgrade patch failed.");
+        }
+
+		wait();
+	}
 
     return 0;
 }

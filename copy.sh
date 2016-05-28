@@ -4,7 +4,9 @@
 # You don't and shouldn't need to use it.
 
 mnt=/media/sd
-dev=/dev/sdc
+dev=/dev/sdd
+
+mnt=/mnt/ext1
 
 mount ${dev}1 $mnt || exit 0
 cp out/arm9loaderhax.bin $mnt/anim/boot/none.bin || exit 0

@@ -41,8 +41,8 @@ static struct options_s options[] = {
     { 0, "Options", not_option, 0, 0 },
 
     { OPTION_AUTOBOOT,          "Autoboot", boolean_val, 0, 0 },
-    { OPTION_SILENCE,           "Silent autoboot", boolean_val, 0, 0 },
-    { OPTION_TRACE,             "Debug pausing during operations", boolean_val, 0, 0 },
+    { OPTION_SILENCE,           "  Stealth mode", boolean_val, 0, 0 },
+    { OPTION_TRACE,             "Debug pauses during operation", boolean_val, 0, 0 },
 
     { OPTION_TRANSP_BG,         "Black -> transparent", boolean_val, 0, 0 },
     { OPTION_NO_CLEAR_BG,       "Preserve framebuffer", boolean_val, 0, 0 },
@@ -359,6 +359,7 @@ menu_handler()
             to_menu = menu_main();
             break;
         case MENU_OPTIONS:
+			cursor_y = cursor_min; // Fixup positions
             to_menu = menu_options();
             break;
         case MENU_PATCHES:

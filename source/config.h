@@ -23,9 +23,10 @@ extern struct config_file config;
 
 enum type
 {
-    boolean_val, // Toggle
-    ranged_val,  // N1 - N2, left and right to pick.
-    mask_val     // Bitmask allowed values.
+    boolean_val,  // Toggle
+    ranged_val,   // N1 - N2, left and right to pick.
+    mask_val,     // Bitmask allowed values.
+	not_option    // Skip over this.
 };
 
 struct range_str

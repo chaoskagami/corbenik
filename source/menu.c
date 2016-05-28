@@ -14,6 +14,10 @@
 #define OPTION_AADOWNGRADE 16 // Anti-anti-downgrade.
 
 static struct options_s options[] = {
+    // space
+    { 0, "", not_option, 0, 0 },
+    // Patches.
+    { 0, "Patches", not_option, 0, 0 },
 
     { OPTION_SIGPATCH,          "Signature Patch", boolean_val, 0, 0 },
 
@@ -31,16 +35,21 @@ static struct options_s options[] = {
 
     { OPTION_ARM9THREAD,        "ARM9 Thread", boolean_val, 0, 0 },
 
+    // space
+    { 0, "", not_option, 0, 0 },
+    // Patches.
+    { 0, "Options", not_option, 0, 0 },
+
     { OPTION_AUTOBOOT,          "Autoboot", boolean_val, 0, 0 },
-    { OPTION_SILENCE,           "Silence w/ Autoboot", boolean_val, 0, 0 },
-    { OPTION_TRACE,             "Step through with button", boolean_val, 0, 0 },
+    { OPTION_SILENCE,           "Silent autoboot", boolean_val, 0, 0 },
+    { OPTION_TRACE,             "Debug pausing during operations", boolean_val, 0, 0 },
 
-    { OPTION_TRANSP_BG,         "Don't draw background color", boolean_val, 0, 0 },
-    { OPTION_NO_CLEAR_BG,       "Preserve framebuffer data", boolean_val, 0, 0 },
+    { OPTION_TRANSP_BG,         "Black -> transparent", boolean_val, 0, 0 },
+    { OPTION_NO_CLEAR_BG,       "Preserve framebuffer", boolean_val, 0, 0 },
 
-    { OPTION_READ_ME,           "Hide Help from menu", boolean_val, 0, 0 },
+    { OPTION_READ_ME,           "Hide `Help`", boolean_val, 0, 0 },
 
-    { IGNORE_PATCH_DEPS,   "No dependency tracking", boolean_val, 0, 0 },
+    { IGNORE_PATCH_DEPS,   "Ignore dependencies", boolean_val, 0, 0 },
     { IGNORE_BROKEN_SHIT,  "Allow unsafe options", boolean_val, 0, 0 },
 
     // Sentinel.
@@ -48,7 +57,8 @@ static struct options_s options[] = {
 };
 
 static int cursor_y = 0;
-static int cursor_max = 0;
+static int cursor_max = -1;
+static int cursor_min = -1;
 static int which_menu = 1;
 static int need_redraw = 1;
 
@@ -93,34 +103,49 @@ menu_options()
     set_cursor(TOP_SCREEN, 0, 0);
 
     // Figure out the max if unset.
-    if (cursor_max == 0) {
+    if (cursor_max == -1) {
         cursor_max=0;
         while(options[cursor_max].index != -1)
             ++cursor_max;
+
+		while(options[cursor_max].allowed == not_option)
+			--cursor_max;
+    }
+
+    // Figure out the max if unset.
+    if (cursor_min == -1) {
+        cursor_min=0;
+        while(options[cursor_min].allowed == not_option)
+            ++cursor_min;
+		cursor_y = cursor_min;
     }
 
     header("A:Enter B:Back DPAD:Nav");
 
     int i = 0;
     while (options[i].index != -1) { // -1 Sentinel.
-        if (cursor_y == i)
-            fprintf(TOP_SCREEN, "\x1b[32m>>\x1b[0m ");
-        else
-            fprintf(TOP_SCREEN, "   ");
+		if (options[i].allowed == boolean_val) {
+	        if (cursor_y == i)
+	            fprintf(TOP_SCREEN, "\x1b[32m>>\x1b[0m ");
+	        else
+	            fprintf(TOP_SCREEN, "   ");
 
-        if (need_redraw)
-            fprintf(TOP_SCREEN, "[%c]  %s\n",
-                    (config.options[options[i].index] ? 'X' : ' '),
-                    options[i].name);
-        else {
-            // Yes, this is weird. printf does a large number of extra things we
-            // don't
-            // want computed at the moment; this is faster.
-            putc(TOP_SCREEN, '[');
-            putc(TOP_SCREEN, (config.options[options[i].index] ? 'X' : ' '));
-            putc(TOP_SCREEN, ']');
-            putc(TOP_SCREEN, '\n');
-        }
+	        if (need_redraw)
+	            fprintf(TOP_SCREEN, "[%c]  %s\n",
+    	                (config.options[options[i].index] ? 'X' : ' '),
+	                    options[i].name);
+        	else {
+            	// Yes, this is weird. printf does a large number of extra things we
+            	// don't
+            	// want computed at the moment; this is faster.
+            	putc(TOP_SCREEN, '[');
+            	putc(TOP_SCREEN, (config.options[options[i].index] ? 'X' : ' '));
+            	putc(TOP_SCREEN, ']');
+            	putc(TOP_SCREEN, '\n');
+        	}
+		} else if (options[i].allowed == not_option) {
+	        fprintf(TOP_SCREEN, "%s\n", options[i].name);
+		}
         ++i;
     }
 
@@ -131,15 +156,23 @@ menu_options()
     switch (key) {
         case BUTTON_UP:
             cursor_y -= 1;
+			while(options[cursor_y].allowed == not_option && cursor_y >= cursor_min)
+				cursor_y--;
             break;
         case BUTTON_DOWN:
             cursor_y += 1;
+			while(options[cursor_y].allowed == not_option && cursor_y < cursor_max)
+				cursor_y++;
             break;
         case BUTTON_LEFT:
             cursor_y -= 5;
+			while(options[cursor_y].allowed == not_option && cursor_y >= cursor_min)
+				cursor_y--;
             break;
         case BUTTON_RIGHT:
             cursor_y += 5;
+			while(options[cursor_y].allowed == not_option && cursor_y < cursor_max)
+				cursor_y++;
             break;
         case BUTTON_A:
             // TODO - Value options
@@ -149,17 +182,15 @@ menu_options()
         case BUTTON_B:
             need_redraw = 1;
             clear_screen(TOP_SCREEN);
-            cursor_y = 0;
+            cursor_y = cursor_min;
             return MENU_MAIN;
             break;
     }
 
-    if (cursor_y < 0) {
+    if (cursor_y < cursor_min)
         cursor_y = cursor_max - 1;
-    }
-    else if (cursor_y > cursor_max - 1) {
-        cursor_y = 0;
-    }
+    else if (cursor_y > cursor_max - 1)
+        cursor_y = cursor_min;
 
     return 0;
 }
@@ -306,6 +337,7 @@ menu_main()
             cursor_y = 0;
             if (ret == MENU_BOOTME)
                 return MENU_BOOTME; // Boot meh, damnit!
+		    clear_screen(TOP_SCREEN);
             return ret;
     }
 

@@ -53,12 +53,12 @@ static struct options_s options[] = {
     { IGNORE_BROKEN_SHIT,  "Allow unsafe options", boolean_val, 0, 0 },
 
     // Sentinel.
-    { -1, "", 0, 0, 0 },
+    { -1, "", 0, -1, -1 }, // cursor_min and cursor_max are stored in the last two.
 };
 
 static int cursor_y = 0;
-static int cursor_max = -1;
 static int cursor_min = -1;
+static int cursor_max = -1;
 static int which_menu = 1;
 static int need_redraw = 1;
 
@@ -338,6 +338,8 @@ menu_main()
             if (ret == MENU_BOOTME)
                 return MENU_BOOTME; // Boot meh, damnit!
 		    clear_screen(TOP_SCREEN);
+			if (ret == MENU_OPTIONS)
+				cursor_y = cursor_min; // Fixup positions
             return ret;
     }
 
@@ -359,7 +361,6 @@ menu_handler()
             to_menu = menu_main();
             break;
         case MENU_OPTIONS:
-			cursor_y = cursor_min; // Fixup positions
             to_menu = menu_options();
             break;
         case MENU_PATCHES:

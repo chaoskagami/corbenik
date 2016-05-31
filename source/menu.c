@@ -17,7 +17,7 @@ static struct options_s options[] = {
     // space
     { 0, "", not_option, 0, 0 },
     // Patches.
-    { 0, "Patches", not_option, 0, 0 },
+    { 0, "\x1b[32;40mPatches\x1b[0m", not_option, 0, 0 },
 
     { OPTION_SIGPATCH,          "Signature Patch", boolean_val, 0, 0 },
 
@@ -33,24 +33,24 @@ static struct options_s options[] = {
 
     { OPTION_AADOWNGRADE,       "Anti-anti-downgrade", boolean_val, 0, 0 },
 
-    { OPTION_ARM9THREAD,        "ARM9 Thread", boolean_val, 0, 0 },
+//    { OPTION_ARM9THREAD,        "ARM9 Thread", boolean_val, 0, 0 },
 
     // space
     { 0, "", not_option, 0, 0 },
     // Patches.
-    { 0, "Options", not_option, 0, 0 },
+    { 0, "\x1b[32;40mOptions\x1b[0m", not_option, 0, 0 },
 
     { OPTION_AUTOBOOT,          "Autoboot", boolean_val, 0, 0 },
     { OPTION_SILENCE,           "  Stealth mode", boolean_val, 0, 0 },
     { OPTION_TRACE,             "Debug pauses during operation", boolean_val, 0, 0 },
 
-    { OPTION_TRANSP_BG,         "Black -> transparent", boolean_val, 0, 0 },
-    { OPTION_NO_CLEAR_BG,       "Preserve framebuffer", boolean_val, 0, 0 },
+//    { OPTION_TRANSP_BG,         "Black -> transparent", boolean_val, 0, 0 },
+//    { OPTION_NO_CLEAR_BG,       "Preserve framebuffer", boolean_val, 0, 0 },
 
     { OPTION_READ_ME,           "Hide `Help`", boolean_val, 0, 0 },
 
-    { IGNORE_PATCH_DEPS,   "Ignore dependencies", boolean_val, 0, 0 },
-    { IGNORE_BROKEN_SHIT,  "Allow unsafe options", boolean_val, 0, 0 },
+//    { IGNORE_PATCH_DEPS,   "Ignore dependencies", boolean_val, 0, 0 },
+//    { IGNORE_BROKEN_SHIT,  "Allow unsafe options", boolean_val, 0, 0 },
 
     // Sentinel.
     { -1, "", 0, -1, -1 }, // cursor_min and cursor_max are stored in the last two.
@@ -88,7 +88,7 @@ wait_key()
 void
 header(char* append)
 {
-    fprintf(stdout, "\x1b[33;40m[.corbenik//%s] %s\x1b[0m\n", VERSION, append);
+    fprintf(stdout, "\x1b[30;42m.corbenik//%s %s\x1b[0m\n", VERSION, append);
 }
 
 int

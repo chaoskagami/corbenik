@@ -9,3 +9,4 @@ build
 *.elf
 *.bat
 input
+modules/template/src/symtab.h

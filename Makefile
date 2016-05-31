@@ -29,14 +29,10 @@ objects_cfw = $(patsubst $(dir_source)/%.s, $(dir_build)/%.o, \
 			  $(call rwildcard, $(dir_source), *.s *.c)))
 
 .PHONY: all
-all: a9lh modules external
+all: a9lh external
 
 .PHONY: full
 full: host/langemu.conf all
-
-.PHONY: modules
-modules:
-	make -C modules
 
 .PHONY: external
 external:
@@ -44,8 +40,6 @@ external:
 
 .PHONY: a9lh
 a9lh: $(dir_out)/arm9loaderhax.bin
-	echo "Generating symbol table"
-	./host/symtab.sh > modules/template/src/symtab.h
 
 .PHONY: reformat
 reformat:
@@ -60,7 +54,6 @@ host/langemu.conf:
 .PHONY: clean
 clean:
 	rm -f host/langemu.conf
-	make -C modules clean
 	make -C external clean
 	rm -rf $(dir_out) $(dir_build)
 

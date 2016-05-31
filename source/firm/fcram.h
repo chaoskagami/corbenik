@@ -17,13 +17,18 @@ extern void* fcram_temp;
 #define FCRAM_START 0x24000000
 
 // firm.c
+// 24
 #define FCRAM_FIRM_LOC FCRAM_START
+// 241
 #define FCRAM_TWL_FIRM_LOC (FCRAM_START + FCRAM_SPACING) // Double size
+// 242
 #define FCRAM_AGB_FIRM_LOC (FCRAM_START + FCRAM_SPACING * 3)
 
+// 243
 // patch.c
 #define FCRAM_PATCHBIN_EXEC_LOC (FCRAM_START + FCRAM_SPACING * 4)
 
+// 244
 // Throwaway temporary space. Don't expect it to stay sane.
 #define FCRAM_JUNK_LOCATION (FCRAM_START + FCRAM_SPACING * 5)
 

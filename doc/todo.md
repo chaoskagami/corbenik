@@ -2,6 +2,7 @@ Next
 -------------
 
  * Make config file for corbenik plaintext. Nobody likes binary configs. They suck. Massively. Especially when you fuck up a setting and need to change it on something that isn't a 3ds.
+ * In place firmware loading/patching.
 
 Shortterm
 -------------

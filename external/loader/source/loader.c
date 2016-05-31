@@ -185,7 +185,11 @@ loader_LoadProcess(Handle* process, u64 prog_handle)
         return MAKERESULT(RL_PERMANENT, RS_INVALIDARG, 1, 2);
     }
 
-	logstr("validated params\n");
+    // load code
+    progid = g_exheader.arm11systemlocalcaps.programid;
+
+	logu64(progid);
+	logstr("  validated params\n");
 
     load_config(); // First order of business - we need the config file.
 
@@ -241,8 +245,6 @@ loader_LoadProcess(Handle* process, u64 prog_handle)
         return res;
     }
 
-    // load code
-    progid = g_exheader.arm11systemlocalcaps.programid;
     if ((res = load_code(progid, &shared_addr, &original_vaddr, prog_handle,
                          g_exheader.codesetinfo.flags.flag & 1)) >= 0) {
         memcpy(&codesetinfo.name, g_exheader.codesetinfo.name, 8);

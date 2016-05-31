@@ -13,5 +13,5 @@ disable_eshop_updates(u64 progId, u8* code, u32 size)
                 skipEshopUpdateCheckPatch, sizeof(skipEshopUpdateCheckPatch),
                 1);
 
-	logstr("disable_eshop_updates\n");
+	logstr("  disable_eshop_updates\n");
 }

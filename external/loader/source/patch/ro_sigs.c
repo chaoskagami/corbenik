@@ -24,5 +24,5 @@ ro_sigpatch(u64 progId, u8* code, u32 size)
     patchMemory(code, size, sha256ChecksPattern2, sizeof(sha256ChecksPattern2),
                 0, stub, sizeof(stub), 1);
 
-	logstr("ro_sigpatch\n");
+	logstr("  ro_sigpatch\n");
 }

@@ -11,5 +11,5 @@ disable_cart_updates(u64 progId, u8* code, u32 size)
                 sizeof(stopCartUpdatesPattern), 0, stopCartUpdatesPatch,
                 sizeof(stopCartUpdatesPatch), 2);
 
-	logstr("disable_cart_updates\n");
+	logstr("  disable_cart_updates\n");
 }

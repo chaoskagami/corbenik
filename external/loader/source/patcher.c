@@ -71,7 +71,7 @@ load_config()
 
     failed_load_config = 0;
 
-	logstr("loaded config file\n");
+	logstr("  loaded config file\n");
 
     return;
 }
@@ -135,7 +135,7 @@ static int loadTitleLocaleConfig(u64 progId, u8 *regionId, u8 *languageId)
 			}
 		}
 
-		logstr("langemu cfg applied\n");
+		logstr("  langemu cfg applied\n  ");
 		logstr(path);
 		logstr("\n");
 	}
@@ -236,7 +236,7 @@ patchCfgGetLanguage(u8* code, u32 size, u8 languageId,
                             0xE3B00000; // (1 or 2 instructions)         => movs
                                         // r0, 0             (result code)
 
-						logstr("patched language\n");
+						logstr("  patched language\n");
 
                         // We're done
                         return;
@@ -273,7 +273,7 @@ patchCfgGetRegion(u8* code, u32 size, u8 regionId, u32 CFGUHandleOffset)
         }
     }
 
-	logstr("patched region\n");
+	logstr("  patched region\n");
 }
 
 static void
@@ -331,8 +331,6 @@ language_emu(u64 progId, u8* code, u32 size)
             }
         }
     }
-
-	logstr("set up langemu\n");
 }
 
 void

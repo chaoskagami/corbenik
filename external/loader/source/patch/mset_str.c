@@ -10,5 +10,5 @@ settings_string(u64 progId, u8* code, u32 size)
     patchMemory(code, size, verPattern, sizeof(verPattern) - sizeof(u16), 0,
                 verPatch, sizeof(verPatch) - sizeof(u16), 1);
 
-	logstr("settings_string\n");
+	logstr("  settings_string\n");
 }

@@ -11,5 +11,5 @@ disable_nim_updates(u64 progId, u8* code, u32 size)
                 sizeof(blockAutoUpdatesPattern), 0, blockAutoUpdatesPatch,
                 sizeof(blockAutoUpdatesPatch), 1);
 
-	logstr("disable_nim_updates\n");
+	logstr("  disable_nim_updates\n");
 }

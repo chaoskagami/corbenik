@@ -54,6 +54,18 @@ void logstr(const char* str) {
 	FSFILE_Write(log_file_hdl, &wrote, size, str, len, 0);
 }
 
+void logu64(u64 progId) {
+	char str[] = "Title: 0000000000000000\n";
+	u32 i = 22;
+	while(progId) {
+		static const char hexDigits[] = "0123456789ABCDEF";
+		str[i--] = hexDigits[(u32)(progId & 0xF)];
+		progId >>= 4;
+	}
+
+	logstr(str);
+}
+
 void closeLogger() {
 	FSFILE_Close(log_file_hdl);
 	logger_is_initd = 0;

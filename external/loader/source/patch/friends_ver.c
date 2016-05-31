@@ -11,5 +11,5 @@ fake_friends_version(u64 progId, u8* code, u32 size)
     patchMemory(code, size, fpdVerPattern, sizeof(fpdVerPattern), 9,
                 &fpdVerPatch, sizeof(fpdVerPatch), 1);
 
-	logstr("fake_friends_version\n");
+	logstr("  fake_friends_version\n");
 }

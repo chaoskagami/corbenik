@@ -2,6 +2,34 @@
 
 // Do you like examples?
 
+/* In bytecode assembly:
+
+  aadowngrade:
+    rel firm_mem
+    mov4 r1, pattern
+    mov4 r2, 6
+    call memfind
+    jmpz notfound
+
+  found:
+    add r1, 5
+    mov1 [r1], 0xE0
+    mov4 r1, 0
+    return
+
+  notfound:
+    mov4 r1, 1
+    return
+
+  pattern:
+    .byte 0x89
+    .byte 0x0A
+    .byte 0x81
+    .byte 0x42
+    .byte 0x02
+    .byte 0xD2
+ */
+
 PATCH(aadowngrade)
 {
 	exefs_h* firm_p9_exefs = get_firm_proc9_exefs();

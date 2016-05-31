@@ -188,13 +188,15 @@ loader_LoadProcess(Handle* process, u64 prog_handle)
     // n3ds speed, -1 force o3ds
     // This is A-OK because the CPU speed parameter isn't passed through to any
     // kernel function; meaning it has already been set.
-    u8 n3ds_mode = g_exheader.arm11systemlocalcaps.flags[1] & 0x3;
+    u8 n3ds_mode = g_exheader.arm11systemlocalcaps.flags[1] & 0x3; // 0x3 -> L2+800Mhz
     u8 cpu_mode = get_cpumode(progid);
     if (cpu_mode != 0xFF) {             // Skip?
         u8 mode = n3ds_mode | cpu_mode; // Keep flags set by exheader.
         ConfigureNew3DSCPU(mode);       // We do not use PXIPM because we are a
                                         // sysmodule. It doesn't make sense.
     }
+
+	// TODO - clean up this shit below. Not only is it unoptimized but it reads like garbage.
 
     // What the addressing info would be if not for expansion. This is passed to
     // patchCode.

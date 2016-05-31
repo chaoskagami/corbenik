@@ -1,5 +1,7 @@
 #include <3ds.h>
 
+// TODO - In the future, why not ADD code compression modes? Like, zlib, for example. Or lzss+zlib.
+
 int
 lzss_decompress(u8* buffer)
 {

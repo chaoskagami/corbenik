@@ -468,7 +468,7 @@ language_emu(u64 progId, u8* code, u32 size)
 void
 overlay_patch(u64 progId, u8* code, u32 size)
 {
-    // TODO - Implement.
+    // TODO - Implement. Needs some thought. This should allow usage of files off SD rather than RomFS.
 }
 
 // This is only for the .data segment.

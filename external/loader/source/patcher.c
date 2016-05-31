@@ -1,6 +1,6 @@
 #include <3ds.h>
 #include "patcher.h"
-#include "ifile.h"
+#include "fsldr.h"
 #include "internal.h"
 
 #ifndef PATH_MAX
@@ -93,7 +93,7 @@ strnlen(const char* string, size_t maxlen)
 }
 
 static int
-fileOpen(IFile* file, FS_ArchiveID id, const char* path, int flags)
+fileOpen(Handle* file, FS_ArchiveID id, const char* path, int flags)
 {
     FS_Path apath;
     FS_Path ppath;
@@ -106,7 +106,7 @@ fileOpen(IFile* file, FS_ArchiveID id, const char* path, int flags)
     ppath.data = path;
     ppath.size = strnlen(path, PATH_MAX) + 1;
 
-    return IFile_Open(file, id, apath, ppath, flags);
+    return FSLDR_OpenFileDirectly(file, id, apath, ppath, flags, 0);
 }
 
 static struct config_file config;
@@ -115,26 +115,25 @@ static int failed_load_config = 1;
 void
 load_config()
 {
-    static IFile file;
-    static u64 total;
+    static Handle file;
+    static u32 total;
 
     // Open file.
-    if (!R_SUCCEEDED(
-            fileOpen(&file, ARCHIVE_SDMC, PATH_CONFIG, FS_OPEN_READ))) {
+    if (!R_SUCCEEDED(fileOpen(&file, ARCHIVE_SDMC, PATH_CONFIG, FS_OPEN_READ))) {
         // Failed to open.
         return;
     }
 
     // Read file.
     if (!R_SUCCEEDED(
-            IFile_Read(&file, &total, &config, sizeof(struct config_file)))) {
-        IFile_Close(&file); // Read to memory.
+            FSFILE_Read(file, &total, 0, &config, sizeof(struct config_file)))) {
+        FSFILE_Close(file); // Read to memory.
 
         // Failed to read.
         return;
     }
 
-    IFile_Close(&file); // Read to memory.
+    FSFILE_Close(file); // Read to memory.
 
     if (config.magic[0] != 'O' || config.magic[1] != 'V' ||
         config.magic[2] != 'A' || config.magic[3] != 'N') {
@@ -152,7 +151,7 @@ load_config()
 
     return;
 }
-
+/*
 static int
 loadTitleLocaleConfig(u64 progId, u8* regionId, u8* languageId)
 {
@@ -282,10 +281,10 @@ loadTitleLocaleConfig(u64 progId, u8* regionId, u8* languageId)
 static u8*
 getCfgOffsets(u8* code, u32 size, u32* CFGUHandleOffset)
 {
-    /* HANS:
-       Look for error code which is known to be stored near cfg:u handle
-       this way we can find the right candidate
-       (handle should also be stored right after end of candidate function) */
+    // HANS:
+    // Look for error code which is known to be stored near cfg:u handle
+    // this way we can find the right candidate
+    // (handle should also be stored right after end of candidate function)
 
     u32 n = 0, possible[24];
 
@@ -408,7 +407,7 @@ patchCfgGetRegion(u8* code, u32 size, u8 regionId, u32 CFGUHandleOffset)
         }
     }
 }
-
+*/
 static void
 adjust_cpu_settings(u64 progId, u8* code, u32 size)
 {
@@ -435,6 +434,7 @@ adjust_cpu_settings(u64 progId, u8* code, u32 size)
     }
 }
 
+/*
 void
 language_emu(u64 progId, u8* code, u32 size)
 {
@@ -464,7 +464,7 @@ language_emu(u64 progId, u8* code, u32 size)
         }
     }
 }
-
+*/
 void
 overlay_patch(u64 progId, u8* code, u32 size)
 {
@@ -541,7 +541,7 @@ patch_text(u64 progId, u8* text, u32 size, u32 orig_size)
         }
         default: // Anything else.
         {
-            language_emu(progId, text, orig_size);
+            // language_emu(progId, text, orig_size);
             break;
         }
     }

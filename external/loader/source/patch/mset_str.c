@@ -1,13 +1,4 @@
-#include <3ds.h>
-#include "../patcher.h"
-#include "../ifile.h"
-
-#ifndef PATH_MAX
-#define PATH_MAX 255
-#define _MAX_LFN 255
-#endif
-#include "../config.h"
-#include "../../../../source/patch_format.h"
+#include "patch.h"
 
 void
 settings_string(u64 progId, u8* code, u32 size)

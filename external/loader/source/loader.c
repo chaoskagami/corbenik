@@ -1,7 +1,6 @@
 #include <3ds.h>
 #include "patcher.h"
 #include "exheader.h"
-#include "ifile.h"
 #include "fsldr.h"
 #include "fsreg.h"
 #include "pxipm.h"
@@ -55,12 +54,12 @@ static Result
 load_code(u64 progid, prog_addrs_t* shared, prog_addrs_t* original,
           u64 prog_handle, int is_compressed)
 {
-    IFile file;
+	Handle handle;
     FS_Path archivePath;
     FS_Path path;
     Result res;
     u64 size;
-    u64 total;
+    u32 total;
 
     archivePath.type = PATH_BINARY;
     archivePath.data = &prog_handle;
@@ -70,26 +69,26 @@ load_code(u64 progid, prog_addrs_t* shared, prog_addrs_t* original,
     path.data = CODE_PATH;
     path.size = sizeof(CODE_PATH);
 
-    if (R_FAILED(IFile_Open(&file, ARCHIVE_SAVEDATA_AND_CONTENT2, archivePath,
-                            path, FS_OPEN_READ))) {
+    if (R_FAILED(FSLDR_OpenFileDirectly(&handle, ARCHIVE_SAVEDATA_AND_CONTENT2, archivePath,
+                            path, FS_OPEN_READ, 0))) {
         svcBreak(USERBREAK_ASSERT);
     }
 
     // get file size
-    if (R_FAILED(IFile_GetSize(&file, &size))) {
-        IFile_Close(&file);
+    if (R_FAILED(FSFILE_GetSize(handle, &size))) {
+        FSFILE_Close(handle);
         svcBreak(USERBREAK_ASSERT);
     }
 
     // check size
     if (size > (u64)shared->total_size << 12) {
-        IFile_Close(&file);
+        FSFILE_Close(handle);
         return 0xC900464F;
     }
 
     // read code
-    res = IFile_Read(&file, &total, (void*)shared->text_addr, size);
-    IFile_Close(&file); // done reading
+    res = FSFILE_Read(handle, &total, 0, (void*)shared->text_addr, size);
+    FSFILE_Close(handle); // done reading
     if (R_FAILED(res)) {
         svcBreak(USERBREAK_ASSERT);
     }

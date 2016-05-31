@@ -6,15 +6,19 @@ additional features. The current aim of the project is to provide a nice
 entry point for patching 3DS modules.
 
 ## Roadmap
-Right now, this can serve as an open-source replacement for the built in loader. 
+Right now, this can serve as an open-source replacement for the built in loader,
+and then some.
 
-There is additional support for patching any executable after it's loaded but 
+There is support for patching any executable after it's loaded but 
 before it starts. For example, you can patch `menu` to skip region checks and 
 have region free game launching directly from the home menu.
 
-There is also support for SDMC reading (not found in original loader implementation)
-which  means that patches can be loaded from the SD card. Ultimately, there would be 
-a patch system that supports easy loading of patches from the SD card.
+This currently requires recompilation which makes it less than ideal.
+
+There is also support for SDMC reading (not found in original loader
+implementation) which  means that patches can be loaded from the SD card.
+Ultimately, there will be a patch system that supports easy loading of
+patches from the SD card.
 
 ## Changes I've made
 
@@ -29,19 +33,20 @@ this allows tacking on code to the end.
 
 The text, data, and ro segments are handled separately to streamline the new
 segment resizing and limit search space to speed things up a tad. Why search
-text, data and ro when you know it is in text?
+text, data and ro (big) when you know it is in text?
 
 ## Imported changes from other 3ds_injector forks
 
 I updated it to the latest git ctrulib (in which FS_Archive is a u64,
-not a struct.) @TuxSH did the work before me, it required manual conflict merges
-but he provided the information needed to fix it up for the most part. ;P
+not a struct.) @TuxSH did the work before me, although it required manual
+conflict merges since my tree differs a LOT from both @yifanlu and his
+version.
 
 ## Build
 You need a working 3DS build environment with a fairly recent copy of devkitARM, 
 ctrulib, and makerom.
 
-Currently, there is no support for FIRM building in toolchain; whatever method
-you use to inject this is up to you, but the software must have support for
-resizing the sysmodule segment, or you must make sure the module size matches
-the original.
+This is not intended to be used with anything but corbenik, so please don't use
+binaries of this with any other CFW. For devs - message me if there's any changes
+you want help merging. I'll be glad to help. I'm not into anti-competitive
+behavior. ;P

@@ -151,131 +151,67 @@ load_config()
 
     return;
 }
-/*
-static int
-loadTitleLocaleConfig(u64 progId, u8* regionId, u8* languageId)
+
+static int loadTitleLocaleConfig(u64 progId, u8 *regionId, u8 *languageId)
 {
-    // FIXME - Rewrite this function to use a single line-based config
+    // FIXME - Rewrite this function to use a single line-based config of
+	// the grammar:
+
+	// lang := "ja" | "en" | "fr" | "de" | "it" | "es" | "zh" | "ko" | "nl" | "pt" | "ru" | "tw"
+	// region := "JP" | "US" | "EU" | "AU" | "CN" | "KO" | "TW"
+	// title := (0123456789abcdef)16
+	// langcode := lang . "_" . country
+	// line := title langcode
+
+	// So this would be valid as an example file:
+	// 0040000000012300 en_US
+	// 0040000000032100 ja_JP
 
     // Directory seeks have severe issues on FAT and
     // dumping configs based on 3dsdb (more than 1000) causes things
     // to kinda choke. FAT is not meant for large numbers of files per
-    // directory due to linear seeks rather than tree or hash-based indexes
+    // directory due to linear seeks rather than tree or hash-based indexes.
 
-    char path[] = "/corbenik/etc/locale.conf"; // The locale config file.
+	// This really does need a rewrite.
 
-    char progid_str[16];
+	char path[] = "/corbenik/etc/locale/0000000000000000";
+	u32 i = 36;
+	while(progId) {
+		static const char hexDigits[] = "0123456789ABCDEF";
+		path[i--] = hexDigits[(u32)(progId & 0xF)];
+		progId >>= 4;
+	}
 
-    // Hexdump.
-    for (int i = 0; i < 16; i += 2) {
-        progid_str[i] = ("0123456789ABCDEF")[(((u8*)&progId)[0] >> 4) & 0xf];
-        progid_str[i + 1] = ("0123456789ABCDEF")[((u8*)&progId)[0] & 0xf];
-    }
-
-    static const char* regions[] = { "JPN", "USA", "EUR", "AUS",
+	static const char* regions[] = { "JPN", "USA", "EUR", "AUS",
                                      "CHN", "KOR", "TWN" };
-    static const char* languages[] = { "JA", "EN", "FR", "DE", "IT", "ES",
+	static const char* languages[] = { "JA", "EN", "FR", "DE", "IT", "ES",
                                        "ZH", "KO", "NL", "PT", "RU", "TW" };
+	Handle file;
+	Result ret = fileOpen(&file, ARCHIVE_SDMC, path, FS_OPEN_READ);
+	if(R_SUCCEEDED(ret)) {
+		char buf[6];
+		u32 total;
+		ret = FSFILE_Read(file, &total, 0, buf, 6);
+		FSFILE_Close(file);
 
-    IFile file;
-    Result eof = fileOpen(&file, ARCHIVE_SDMC, path, FS_OPEN_READ);
-    if (R_SUCCEEDED(eof)) {
-        char c;
-        char buf_prog[16];
-        char country_tmp[16];
-        char lang_tmp[16];
-        u64 total;
+		if(!R_SUCCEEDED(ret) || total < 6)
+			return -1;
 
-        // TODO - Open and seek file properly
+		for(u32 i = 0; i < 7; i++) {
+			if(memcmp(buf, regions[i], 3) == 0) {
+				*regionId = (u8)i;
+				break;
+			}
+		}
 
-        int i = 0;
-        int state = 0; // State. 0 = get_titleid, 1 = get_region, 2 =
-                       // get_language, 3 = process entry
-        while (1) {
-            eof = IFile_Read(&file, &total, &c, 1); // Read character.
-
-            if (c == ' ' || c == '\n' || c == '\r' ||
-                c == '\t') // Skip space characters.
-                continue;
-
-            if (c == '#') { // Comment! Skip until a \n or \r.
-                while (c != '\n' && c != '\r') {
-                    eof = IFile_Read(&file, &total, &c, 1); // Read character.
-                }
-                continue; // Resume loop.
-            }
-
-            switch (state) {
-                case 0:
-                    // Read titleID.
-                    for (i = 0; i < 16; i++) {
-                        buf_prog[i] = c;
-                        if (i != 15)
-                            eof = IFile_Read(&file, &total, &c,
-                                             1); // Read character.
-                    }
-                    state = 1;
-                    break;
-                case 1:
-                    // Read country name. Must be <16 chars, past that is
-                    // ignored.
-                    i = 0;
-                    while (c != ' ' && c != '\n' && c != '\r' &&
-                           c != '\t') { // While we're not reading a space...
-                        if (i < 15) {
-                            country_tmp[i] = c;
-                            i++;
-                        }
-                        eof = IFile_Read(&file, &total, &c,
-                                         1); // Read character unless last one.
-                    }
-                    state = 2;
-                    break;
-                case 2:
-                    // Read language name. See country name, code is basically
-                    // identical.
-                    i = 0;
-                    while (c != ' ' && c != '\n' && c != '\r' &&
-                           c != '\t') { // While we're not reading a space...
-                        if (i < 15) {   // Only read in if <16.
-                            lang_tmp[i] = c;
-                            i++;
-                        }
-                        eof = IFile_Read(&file, &total, &c,
-                                         1); // Read character unless last one.
-                    }
-                    state = 3;
-                    break;
-                case 3:
-                    // Process entry, return and apply if matched.
-                    if (!memcmp(progid_str, buf_prog, 16)) {
-                        // TitleID matched. Apply language emulation; but first,
-                        // process language and country.
-                        for (i = 0; i < 7; i++) {
-                            if (!memcmp(country_tmp, regions[i], 3)) {
-                                *regionId = (u8)i;
-                            }
-                        }
-
-                        for (u32 i = 0; i < 12; i++) {
-                            if (!memcmp(lang_tmp, languages[i], 2)) {
-                                *languageId = (u8)i;
-                            }
-                        }
-                        state = 4; // Processed. Go on.
-                        break;
-                    }
-                    state = 0; // Nope. Move onto the next one.
-                    break;
-            }
-
-            if (!R_SUCCEEDED(eof) || total == 0 || state == 4)
-                break;
-        }
-    }
-
-    IFile_Close(&file); // Read to memory.
-    return eof;
+		for(u32 i = 0; i < 12; i++) {
+			if(memcmp(buf + 4, languages[i], 2) == 0) {
+				*languageId = (u8)i;
+				break;
+			}
+		}
+	}
+	return ret;
 }
 
 static u8*
@@ -407,7 +343,7 @@ patchCfgGetRegion(u8* code, u32 size, u8 regionId, u32 CFGUHandleOffset)
         }
     }
 }
-*/
+
 static void
 adjust_cpu_settings(u64 progId, u8* code, u32 size)
 {
@@ -434,7 +370,7 @@ adjust_cpu_settings(u64 progId, u8* code, u32 size)
     }
 }
 
-/*
+
 void
 language_emu(u64 progId, u8* code, u32 size)
 {
@@ -464,7 +400,7 @@ language_emu(u64 progId, u8* code, u32 size)
         }
     }
 }
-*/
+
 void
 overlay_patch(u64 progId, u8* code, u32 size)
 {
@@ -541,7 +477,7 @@ patch_text(u64 progId, u8* text, u32 size, u32 orig_size)
         }
         default: // Anything else.
         {
-            // language_emu(progId, text, orig_size);
+            language_emu(progId, text, orig_size);
             break;
         }
     }

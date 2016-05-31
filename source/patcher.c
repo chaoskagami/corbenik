@@ -32,7 +32,7 @@ int
 patch_firm_all()
 {
     // FIXME - Linker is bork at the moment.
-    //	execp(PATH_PATCHES "/example.vco");
+    execp(PATH_PATCHES "/example.vco");
 
     //	wait();
 

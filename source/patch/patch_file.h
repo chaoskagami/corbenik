@@ -15,13 +15,17 @@
 #include "../config.h"
 #include "../common.h"
 
+exefs_h* get_firm_proc9_exefs();
+exefs_h* get_twl_proc9_exefs();
+exefs_h* get_agb_proc9_exefs();
+
 #define PATCH(name) int patch_##name()
 #elif MODULE
 // Build patch as loadable executable.
 
 // TODO - Includes.
 
-#define PATCH(name) int main()
+#define PATCH(name) int patch()
 #else
 #define PATCH(name) (void)
 

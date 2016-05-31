@@ -3,8 +3,7 @@
 #include "exported.h"
 
 int main() {
-	// Your patch goes here.
-	fprintf(stderr, "Hi, I'm a patch!\n");
+	fprintf(stderr, "Hi!\n");
 
 	return 0;
 }

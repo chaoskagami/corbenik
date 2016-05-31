@@ -4,6 +4,8 @@
 
 PATCH(signatures)
 {
+	exefs_h* firm_p9_exefs = get_firm_proc9_exefs();
+
     // Look for signature checks
 
     uint8_t pat1[] = { 0xC0, 0x1C, 0x76, 0xE7 };

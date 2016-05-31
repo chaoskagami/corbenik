@@ -43,8 +43,8 @@ PATCH(services)
     char* at = str + (strlen(str) - 6);
     for (uint32_t i = 0; i <= 0xff; i++) {
         // Get string for svc.
-        at[0] = ("0123456789abcdef")[(
-            (i >> 4) & 0xf)]; // This is just hexdump. Nothing complicated.
+        at[0] = ("0123456789abcdef")[((i >> 4) & 0xf)];
+		// This is just hexdump. Nothing complicated.
         at[1] = ("0123456789abcdef")[(i & 0xf)];
 
         FILE* data = fopen(str, "r");

@@ -57,38 +57,6 @@ execp(char* path)
 
     fclose(f);
 
-    fprintf(stderr, "[s]");
-
-    uint32_t* link_table = (uint32_t*)(FCRAM_PATCHBIN_EXEC_LOC + 4);
-
-    fprintf(stderr, "[r]");
-
-    // 0 - magic
-
-    // memory.c
-    link_table[2] = (uint32_t)strlen;
-    link_table[4] = (uint32_t)isprint;
-    link_table[6] = (uint32_t)memcpy;
-    link_table[8] = (uint32_t)memmove;
-    link_table[10] = (uint32_t)memset;
-    link_table[12] = (uint32_t)memcmp;
-    link_table[14] = (uint32_t)strncpy;
-    link_table[16] = (uint32_t)strncmp;
-    link_table[18] = (uint32_t)atoi;
-    link_table[20] = (uint32_t)memfind;
-
-    // draw.c
-    link_table[22] = (uint32_t)putc;
-    link_table[24] = (uint32_t)puts;
-    link_table[26] = (uint32_t)fprintf;
-
-    // Get functions
-    link_table[28] = (uint32_t)get_firm_proc9_exefs;
-
-    link_table[30] = (uint32_t)get_agb_proc9_exefs;
-
-    link_table[32] = (uint32_t)get_twl_proc9_exefs;
-
     fprintf(stderr, "[b]\n");
 
     int (*patch_loc)() = (void*)FCRAM_PATCHBIN_EXEC_LOC;

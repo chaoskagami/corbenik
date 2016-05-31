@@ -20,16 +20,19 @@ dir_out    := out
 REVISION := r$(shell git rev-list --count HEAD):$(shell git rev-parse HEAD | head -c8)
 
 ASFLAGS := -mlittle-endian -mcpu=arm946e-s -march=armv5te
-CFLAGS  := -MMD -MP -Wall -Wextra -Werror -Os $(ASFLAGS) -fno-builtin -std=c11 -DVERSION=\"$(REVISION)\"
+CFLAGS  := -MMD -MP -Wall -Wextra -Werror -fno-omit-frame-pointer -Os $(ASFLAGS) -fno-builtin -std=c11 -DVERSION=\"$(REVISION)\"
 FLAGS   := dir_out=$(abspath $(dir_out)) --no-print-directory
-LDFLAGS := -nostdlib -Wl,-z,defs -lgcc
+LDFLAGS := -nostdlib -Wl,-z,defs -lgcc -Wl,-Map,$(dir_build)/link.map
 
 objects_cfw = $(patsubst $(dir_source)/%.s, $(dir_build)/%.o, \
 			  $(patsubst $(dir_source)/%.c, $(dir_build)/%.o, \
 			  $(call rwildcard, $(dir_source), *.s *.c)))
 
 .PHONY: all
-all: host/langemu.conf a9lh modules external
+all: a9lh modules external
+
+.PHONY: full
+full: host/langemu.conf all
 
 .PHONY: modules
 modules:
@@ -41,6 +44,8 @@ external:
 
 .PHONY: a9lh
 a9lh: $(dir_out)/arm9loaderhax.bin
+	echo "Generating symbol table"
+	./host/symtab.sh > modules/template/src/symtab.h
 
 .PHONY: reformat
 reformat:
@@ -101,7 +106,6 @@ $(dir_build)/firm/%.o: $(dir_source)/firm/%.c
 $(dir_build)/firm/%.o: $(dir_source)/firm/%.s
 	@mkdir -p "$(@D)"
 	$(COMPILE.s) $(OUTPUT_OPTION) $<
-
 
 $(dir_build)/patch/%.o: $(dir_source)/patch/%.c
 	@mkdir -p "$(@D)"

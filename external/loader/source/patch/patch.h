@@ -3,6 +3,8 @@
 
 #include <3ds.h>
 #include "../patcher.h"
+#include "../memory.h"
+#include "../logger.h"
 
 #ifndef PATH_MAX
 #define PATH_MAX 255

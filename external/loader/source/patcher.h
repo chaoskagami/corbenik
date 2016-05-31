@@ -13,8 +13,7 @@ u32 get_data_extend(u64 progId, u32 size_orig);
 
 void load_config();
 
-u32 patchMemory(u8* start, u32 size, const void* pattern, u32 patSize,
-                int offset, const void* replace, u32 repSize, u32 count);
+int fileOpen(Handle* file, FS_ArchiveID id, const char* path, int flags);
 
 u8 get_cpumode(u64 progId);
 

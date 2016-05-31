@@ -7,6 +7,7 @@
 #include "srvsys.h"
 #include "lzss.h"
 #include "internal.h"
+#include "logger.h"
 
 // TODO - a lot of this is unecessarily verbose and shitty. Clean it up to be
 // tidy.
@@ -160,6 +161,8 @@ loader_LoadProcess(Handle* process, u64 prog_handle)
     u64 progid;
     u32 text_grow, data_grow, ro_grow;
 
+	openLogger();
+
     // make sure the cached info corrosponds to the current prog_handle
     if (g_cached_prog_handle != prog_handle) {
         res = loader_GetProgramInfo(&g_exheader, prog_handle);
@@ -181,6 +184,8 @@ loader_LoadProcess(Handle* process, u64 prog_handle)
     if (flags == 0) {
         return MAKERESULT(RL_PERMANENT, RS_INVALIDARG, 1, 2);
     }
+
+	logstr("validated params\n");
 
     load_config(); // First order of business - we need the config file.
 
@@ -255,6 +260,8 @@ loader_LoadProcess(Handle* process, u64 prog_handle)
             &codeset, &codesetinfo, (void*)shared_addr.text_addr,
             (void*)shared_addr.ro_addr, (void*)shared_addr.data_addr);
         if (res >= 0) {
+			closeLogger();
+
             res =
                 svcCreateProcess(process, codeset,
                                  g_exheader.arm11kernelcaps.descriptors, count);

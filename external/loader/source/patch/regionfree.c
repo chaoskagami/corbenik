@@ -11,4 +11,6 @@ region_patch(u64 progId, u8* code, u32 size)
     // Patch SMDH region checks
     patchMemory(code, size, regionFreePattern, sizeof(regionFreePattern), -16,
                 regionFreePatch, sizeof(regionFreePatch), 1);
+
+	logstr("region_patch\n");
 }

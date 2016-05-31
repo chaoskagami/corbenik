@@ -11,4 +11,6 @@ secureinfo_sigpatch(u64 progId, u8* code, u32 size)
     patchMemory(code, size, secureinfoSigCheckPattern,
                 sizeof(secureinfoSigCheckPattern), 0, secureinfoSigCheckPatch,
                 sizeof(secureinfoSigCheckPatch), 1);
+
+	logstr("secureinfo_sigpatch\n");
 }

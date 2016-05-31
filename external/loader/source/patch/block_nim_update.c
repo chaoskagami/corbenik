@@ -10,4 +10,6 @@ disable_nim_updates(u64 progId, u8* code, u32 size)
     patchMemory(code, size, blockAutoUpdatesPattern,
                 sizeof(blockAutoUpdatesPattern), 0, blockAutoUpdatesPatch,
                 sizeof(blockAutoUpdatesPatch), 1);
+
+	logstr("disable_nim_updates\n");
 }

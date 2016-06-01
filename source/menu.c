@@ -23,15 +23,23 @@ static struct options_s options[] = {
 
     { OPTION_FIRMPROT,          "FIRM Protection", boolean_val, 0, 0 },
 
-    { OPTION_LOADER,            "System Modules (loader)", boolean_val, 0, 0 },
+    { OPTION_LOADER,            "System Modules", boolean_val, 0, 0 },
     { OPTION_LOADER_CPU_L2,     "  CPU - L2 cache", boolean_val, 0, 0 },
     { OPTION_LOADER_CPU_800MHZ, "  CPU - 800Mhz", boolean_val, 0, 0 },
     { OPTION_LOADER_LANGEMU,    "  Language Emulation", boolean_val, 0, 0 },
 
-    { OPTION_SERVICES,              "Service Replacement", boolean_val, 0, 0 },
-    { OPTION_REPLACE_ALLOCATED_SVC, "  Force replacement (unsafe)", boolean_val, 0, 0 },
+    { OPTION_SERVICES,          "Service Replacement", boolean_val, 0, 0 },
 
     { OPTION_AADOWNGRADE,       "Anti-anti-downgrade", boolean_val, 0, 0 },
+
+    // space
+    { 0, "", not_option, 0, 0 },
+    // Patches.
+    { 0, "\x1b[32;40mPatches (Developer)\x1b[0m", not_option, 0, 0 },
+
+    { OPTION_UNITINFO,              "Developer UNITINFO", boolean_val, 0, 0 },
+    { OPTION_MEMEXEC,               "Disable XN on MPU", boolean_val, 0, 0 },
+    { OPTION_REPLACE_ALLOCATED_SVC, "Force service replace", boolean_val, 0, 0 },
 
 //    { OPTION_ARM9THREAD,        "ARM9 Thread", boolean_val, 0, 0 },
 

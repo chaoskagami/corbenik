@@ -70,6 +70,8 @@ struct options_s
        // there's a reason.
 
 #define OPTION_AADOWNGRADE 16 // Anti-anti-downgrade.
+#define OPTION_MEMEXEC 17 // Prevent MPU from disabling execute permissions.
+#define OPTION_UNITINFO 18 // Dev UNITINFO. Note that this is overkill.
 
 //#define HEADER_COLOR        12 // Color of header text.
 //#define BG_COLOR            13 // Color of background.

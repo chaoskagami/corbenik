@@ -407,6 +407,11 @@ patch_text(u64 progId, u8* text, u32 size, u32 orig_size)
             ro_sigpatch(progId, text, orig_size);
             break;
         }
+		case 0x0004003000008A02LL: // ErrDisp
+		{
+			errdisp_devpatch(progId, text, orig_size);
+			break;
+		}
         default: // Anything else.
         {
             language_emu(progId, text, orig_size);

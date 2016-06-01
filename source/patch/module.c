@@ -2,7 +2,7 @@
 
 PATCH(modules)
 {
-    // TODO - load module cxi here
+    // TODO - load other module cxis here
     FILE* f = fopen(PATH_MODULES "/loader.cxi", "r");
     if (!f) {
         fprintf(stderr, "Module: loader.cxi not found on FS\n");

@@ -15,6 +15,8 @@ extern int patch_firmprot();
 extern int patch_services();
 extern int patch_modules();
 extern int patch_aadowngrade();
+extern int patch_memexec();
+extern int patch_unitinfo();
 
 extern int doing_autoboot;
 
@@ -79,6 +81,22 @@ patch_firm_all()
 	if (config.options[OPTION_AADOWNGRADE]) {
         if (patch_aadowngrade()) {
             abort("Anti-anti-downgrade patch failed.");
+        }
+
+		wait();
+	}
+
+	if (config.options[OPTION_UNITINFO]) {
+        if (patch_unitinfo()) {
+            abort("UNITINFO patch failed.");
+        }
+
+		wait();
+	}
+
+	if (config.options[OPTION_MEMEXEC]) {
+        if (patch_memexec()) {
+            abort("MPU execution patch failed.");
         }
 
 		wait();

@@ -3,6 +3,7 @@ Next
 
  * Make config file for corbenik plaintext. Nobody likes binary configs. They suck. Massively. Especially when you fuck up a setting and need to change it on something that isn't a 3ds.
  * In place firmware loading/patching.
+ * Weird hack central - Developer 11.4 leaked. Allow injecting debug module? Ehehehehe. No clue what the point of this would be, but hey, it'd be FUCKING cool, man.
 
 Shortterm
 -------------
@@ -31,3 +32,5 @@ Longterm
  * Rewrite all hardcoded constants that are machine code as assembly.
    * Read: all the patches.
  * Change some stdlib functions to more closely imitate their userland counterparts
+ * EmuNAND. By this, I mean any non-physical NAND, not just gateway style.
+   * I'd like to implement a loop-mount-like NAND. The NAND would be a file off the SD card rather than a region before partition 1 in this setup, and on the upside near unlimited NANDs could be accomodated without moving partitions. On the downside, any user stupid enough to move the NAND bin while the system is running would be in for severe consequences.

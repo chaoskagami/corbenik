@@ -373,6 +373,8 @@ fflush(void* channel)
     }
 }
 
+int disable_format = 0;
+
 void
 vfprintf(void* channel, const char* format, va_list ap)
 {
@@ -425,7 +427,7 @@ vfprintf(void* channel, const char* format, va_list ap)
             // terminates an ANSI sequence
             while (!(*ref >= 0x40 && *ref <= 0x7E))
                 ref++;
-        } else if (*ref == '%') {
+        } else if (*ref == '%' && !disable_format) {
             int type_size = 0;
             int length = -1;
         check_format:
@@ -453,7 +455,10 @@ vfprintf(void* channel, const char* format, va_list ap)
                     }
                     break;
                 case 's':
-                    puts(channel, va_arg(ap, char*));
+                    // Using puts isn't correct here...
+					disable_format = 1; // Disable format strings.
+                    fprintf(channel, va_arg(ap, char*));
+					disable_format = 0; // Reenable.
                     break;
                 case 'c':
                     putc(channel, va_arg(ap, int));

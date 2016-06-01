@@ -15,4 +15,5 @@ cp out/arm9loaderhax.bin $mnt/anim/boot/l.bin || exit 0
 cp -r out/corbenik $mnt/ || exit 0
 cp -r input/corbenik $mnt/ || exit 0
 umount $mnt || exit 0
+sync || exit 0
 eject ${dev} || exit 0

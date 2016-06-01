@@ -2,6 +2,15 @@
 
 // This patch is responsible for fixing signature checks for the firmware.
 
+/*
+  rel  p9_exefs
+  find 4, 0xc0, 0x1c, 0x76, 0xe7
+  set  2, 0x00, 0x20
+  rewind
+  find 4, 0xb5, 0x22, 0x4d, 0x0c
+  set  4, 0x00, 0x20, 0x70, 0x47
+ */
+
 PATCH(signatures)
 {
 	exefs_h* firm_p9_exefs = get_firm_proc9_exefs();

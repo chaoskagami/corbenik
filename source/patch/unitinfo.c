@@ -5,6 +5,13 @@
 // usually the ErrDisp patch in loader should be good enough for
 // debugging crashes.
 
+/*
+  rel native_arm9
+  find 4, 0x01, 0x10, 0xA0, 0x13
+  fwd 3
+  set 1, 0xE3
+ */
+
 PATCH(unitinfo)
 {
 	firm_section_h* arm9_section;

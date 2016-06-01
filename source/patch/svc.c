@@ -1,5 +1,7 @@
 #include "patch_file.h"
 
+/* Not possible to do bytecode here, sadly. */
+
 // This patch handles replacement of services. This includes backdoor, but not
 // just backdoor.
 // Any service can be replaced provided there's enough space within the

@@ -6,6 +6,16 @@
 // behavioral change that can be used maliciously and/or to
 // detect CFW use rather easily.
 
+/*
+  rel native_s1
+  find 8, 0x97, 0x05, 0x00, 0x00, 0x15, 0xE4, 0x00, 0x00
+  back 1
+  test 4, 0x00016416
+  jmp 7
+  jmp 3
+  and ~(1<<4)
+ */
+
 PATCH(memexec)
 {
 	firm_section_h* arm11_section = & firm_loc->section[1]; // Section 1, please.

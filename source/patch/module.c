@@ -1,5 +1,7 @@
 #include "patch_file.h"
 
+/* Not possible to be implemented as bytecode. Hey, can't win em all. */
+
 PATCH(modules)
 {
     // TODO - load other module cxis here

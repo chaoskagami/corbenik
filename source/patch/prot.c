@@ -2,40 +2,13 @@
 
 // This patch applies the FIRM protection code needed for safe a9lh usage.
 
-/* Bytecode assembly:
-
-   firmprot:
-     rel firm_mem
-     mov r1, exe_str
-     mov r2, 4
-     call memfind
-     jmpz nostr
-
-     mov r3, r1
-     mov r1, 2
-     mov r2, str_atoff
-     call fprintf
-
-     
-
-   nostr:
-     mov r1, 2
-     mov r2, noexe_str_str
-     call fprintf
-     mov r1, 0
-     return
-
-   exe_str:
-     .str "exe:"
-   noexe_str_str:
-     .str "Couldn't find 'exe' string.\n"
-   str_atoff:
-     .str "Firmprot: 'exe:' string @ %x\n"
-   firmprot_code:
-     .byte 0x00
-     .byte 0x28
-     .byte 0x01
-     .byte 0xDA
+/*
+  rel p9_exefs
+  find 4, "exe:"
+  back 0x1
+  back 0xff
+  find 4, 0x00, 0x28, 0x01, 0xDA
+  set 4, 0x00, 0x20, 0xC0, 0x46
  */
 
 PATCH(firmprot)

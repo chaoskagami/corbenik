@@ -1,5 +1,10 @@
 #include "patch.h"
 
+/*
+  find 5, 0x06, 0x46, 0x10, 0x48, 0xFC
+  set  2, 0x00, 0x26
+ */
+
 void
 secureinfo_sigpatch(u64 progId, u8* code, u32 size)
 {

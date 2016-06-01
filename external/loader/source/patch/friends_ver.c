@@ -1,5 +1,11 @@
 #include "patch.h"
 
+/*
+  find 8, 0xE0, 0x1E, 0xFF, 0x2F, 0xE1, 0x01, 0x01, 0x01
+  fwd 9
+  set 1, 0x06
+ */
+
 void
 fake_friends_version(u64 progId, u8* code, u32 size)
 {

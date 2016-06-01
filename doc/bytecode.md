@@ -5,6 +5,10 @@ Instructions are one byte and have a variable number of bytes afterwards.
 
 Unless otherwise noted, if an instruction doesn't succeed, it will abort.
 
+nop : 1 byte : Opcode 0x00
+	Does nothing. Not actually treated as an instruction,
+    rather just skipped over. This is mainly just for compatibility.
+
 rel <mode> : 2 bytes : Opcode 0x01
 	Chooses firmware relativity.
 
@@ -75,10 +79,11 @@ test <size> <data...> : 2 bytes : opcode 0x06
 		Pattern to test.
 
 jmp <offset> : 3 bytes : opcode 0x07
-	Jumps to <offset> within the bytecode, and resumes execution from there.
+	Jumps to the Nth instruction within the bytecode, and
+    resumes execution from there.
 
 	<offset> : 2 bytes
-		Offset to jump to.
+		Index to jump to.
 
 rewind : 1 byte : opcode 0x08
 	Resets the location to the beginning of the space we're working off.

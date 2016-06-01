@@ -1,5 +1,10 @@
 #include "patch.h"
 
+/*
+  find 8, u"Ver."
+  set  8, u".hax"
+ */
+
 void
 settings_string(u64 progId, u8* code, u32 size)
 {

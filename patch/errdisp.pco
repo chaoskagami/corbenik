@@ -5,6 +5,8 @@
 # $uuid  04
 # $flags devmode
 
+# Status: needs loader
+
 find 1400D0E5DB9A9FED
 set  0000A0E3
 

@@ -7,6 +7,6 @@ build
 *.o
 *.d
 *.elf
-*.bat
+*.vco
 input
 modules/template/src/symtab.h

@@ -4,6 +4,8 @@
 # $uuid 06
 # $flags devmode
 
+# Status: needs assembler to be fixed
+
 # Relative to NATIVE_FIRM, section index [1]
 rel native_s1
 

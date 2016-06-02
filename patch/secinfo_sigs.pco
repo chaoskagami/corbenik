@@ -4,5 +4,7 @@
 # $ver   01
 # $uuid  0b
 
+# Status: needs loader
+
 find 06461048FC
 set  0026

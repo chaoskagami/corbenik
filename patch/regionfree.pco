@@ -4,6 +4,8 @@
 # $ver   01
 # $uuid  09
 
+# Status: needs loader
+
 find 000055E30110A0E3
 # 16
 back 11

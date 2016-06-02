@@ -5,6 +5,8 @@
 # $uuid  05
 # $flags noabort
 
+# Status: needs loader
+
 find E01EFF2FE1010101
 fwd  09
 set  06

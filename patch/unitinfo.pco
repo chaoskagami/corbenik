@@ -4,6 +4,8 @@
 # $uuid 0d
 # $flags devmode
 
+# Status: untested, but should work
+
 rel  native_s2
 find 0110A013
 fwd  03

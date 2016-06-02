@@ -4,6 +4,8 @@
 # $ver   01
 # $uuid  01
 
+# Status: needs loader
+
 find 0C18E1D8
 set  0B1821C8
 

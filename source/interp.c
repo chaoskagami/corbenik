@@ -380,6 +380,8 @@ int execb(char* filename) {
 		// We should generate a cache for loader in a file intended for titleid.
 		uint8_t* title_buf = (uint8_t*)patch + sizeof(struct system_patch);
 
+		fprintf(stderr, "patch: %s\n", patch->name);
+
 		for(uint32_t i=0; i < patch->titles; i++, title_buf += 8) {
 			// FIXME - This is outputting once per boot. We need to detect and nuke the cache.
 			char cache_path[] = PATH_LOADER_CACHE "/0000000000000000";
@@ -389,6 +391,8 @@ int execb(char* filename) {
 				cache_path[len+(j*2)] =   ("0123456789ABCDEF")[(title_buf[j] >> 4) & 0x0f];
 				cache_path[len+(j*2)+1] = ("0123456789ABCDEF")[ title_buf[j] & 0x0f];
 			}
+
+			fprintf(stderr, "  cache: %s\n", &cache_path[len]);
 
 			char reset = 0xFF;
 

@@ -79,30 +79,32 @@
 // Structure of a patch file.
 struct system_patch
 {
-    char magic[4]; // "AIDA" for shits and giggles and because we like .hack.
-    uint32_t patch_ver; // Version of the patch itself.
-    uint32_t load_ver;  // Version of the CFW the patch is intended for.
+    char     magic[4];     // "AIDA" for shits and giggles and because we like .hack.
+    uint32_t version;      // Version of the patch itself.
 
-    char name[64];     // User-readable name for patch in menu.
-    char desc[256];    // User-readable description for patch in menu.
-    uint64_t patch_id; // Unique ID for patch. Each unique patch should provide
-                       // a unique ID.
+    char     name[64];     // User-readable name for patch in menu.
+    char     desc[256];    // User-readable description for patch in menu.
+    uint64_t uuid;         // Unique ID for patch. Each unique patch should provide
+                           // a unique ID.
 
-    uint64_t tid; // What title this patch is intended for. Certain values are
-                  // specially handled.
+    uint8_t  flags;        // Extra flags for patch.
 
-    uint8_t extra_flags; // Extra flags for patch.
+	#define PATCH_FLAG_REQUIRE (1 << 0) // Force enable patch unless 'Unsafe Options' is checked.
+	#define PATCH_FLAG_DEVMODE (1 << 1) // Require 'Developer Options' to be checked.
+	#define PATCH_FLAG_NOABORT (1 << 2) // Don't abort on error.
 
-    uint64_t depends[16]; // What patches need to be applied for this patch to
-                          // be applied; as unique IDs
+    uint32_t titles;       // What title this patch is intended for. Certain values are
+                           // specially handled.
 
-    uint32_t patch_size; // Size of the following patch data.
-    //    uint8_t patch_data[];     // The data for the patch. This is a
-    //    compiled binary for ARM9/11.
-} __attribute__((packed));
+    uint32_t depends;      // How many deps there are.
 
-struct patch_opcode
-{
+    uint32_t size;         // Size of the patch bytecode in bytes.
+
+	// This stuff needs to be read not as part of the struct, but is technically part of it.
+
+    // uint64_t tids[titles]     // TitleIDs.
+    // uint64_t deps[depends]    // Dependencies as uuid refs.
+    // uint8_t  patch_data[size] // Patch data.
 } __attribute__((packed));
 
 #endif

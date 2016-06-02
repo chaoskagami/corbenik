@@ -3,6 +3,16 @@ Bytecode format
 
 Instructions are one byte and have a variable number of bytes afterwards.
 
+Note that this file describes the instruction set AS THE VM INTERPRETS IT,
+e.g. not as you'd write it for the assembler.
+
+Any integers of greater than one byte are not re-ordered to fit endianness.
+If you specify 0001 as a value, the vm will read this as:
+
+   uint16_t val = *((uint16_t*){0x00, 0x01})
+
+Be aware of this.
+
 Unless otherwise noted, if an instruction doesn't succeed, it will abort.
 
 nop : 1 byte : Opcode 0x00
@@ -36,6 +46,8 @@ rel <mode> : 2 bytes : Opcode 0x01
 		16: TWL Section 2
 		17: TWL Section 3
 
+		18: Loader title (see info)
+
 find <size> <pattern...> : 2 + size bytes : opcode 0x02
 	Finds a pattern in memory. On success, operations
 	will be performed relative to the beginning of the found pattern.
@@ -45,16 +57,16 @@ find <size> <pattern...> : 2 + size bytes : opcode 0x02
 	<pattern> : <size> bytes
 		data to find
 
-back <count> : 5 bytes : opcode 0x03
+back <count> : 2 bytes : opcode 0x03
 	Moves back <count> bytes from current position.
 
-	<count> : 4 bytes
+	<count> : 1 byte
 		How many bytes to rewind.
 
-fwd <count> : 5 bytes : opcode 0x04
+fwd <count> : 2 bytes : opcode 0x04
 	Moves forward <count> bytes from current position.
 
-	<count> : 4 bytes
+	<count> : 1 byte
 		How many bytes to rewind.
 
 set <size> <data...> : 2 + size bytes : opcode 0x05
@@ -66,7 +78,7 @@ set <size> <data...> : 2 + size bytes : opcode 0x05
 	<data> : <size> bytes
 		Data to copy.
 
-test <size> <data...> : 2 bytes : opcode 0x06
+test <size> <data...> : 2 + size bytes : opcode 0x06
 	Tests if the current location's data is equivalent to <data>.
 	If equivalent, goes to the next instruction. If not, skips
 	one operation.
@@ -96,3 +108,18 @@ and <size> <data...> : 2 + <size> bytes : opcode 0x09
 
 	<data> : <size> bytes
 		Data to bitwise and with relative data.
+
+title <count> <title> : 2 + <count> * 8 bytes : 0x0A
+	Specifies that the following code is applicable only when being applied to
+	a list of titles.
+
+	This allows the creation of generic patches which can be used with multiple
+	titles and share common parts.
+
+	The default state is to apply code on any titleID matches within the header,
+	so unless you have specialized needs you'll almost never need this.
+
+	<count> : 1 byte
+		How many titleIDs to read.
+	<title> : 8 * <count> bytes
+		List of titleIDs as u64.

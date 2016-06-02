@@ -1,0 +1,8 @@
+# $name  Block eShop Updates
+# $desc  Prevents eShop from checking for system updates.
+# $title 0004013000002C02
+# $ver   01
+# $uuid  02
+
+find 30B5F1B0
+set  002008607047

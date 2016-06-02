@@ -1,0 +1,13 @@
+# $name FIRM Protect
+# $desc Prevents writing FIRM to the NAND during updates.
+# $ver  01
+# $uuid 08
+# $flags require
+
+rel native_p9
+# String: 'exe:'
+find 6578653a
+back 01
+back ff
+find 002801DA
+set  0020C046

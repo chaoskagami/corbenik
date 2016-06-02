@@ -1,0 +1,16 @@
+# $name  ErrDisp devmode
+# $desc  Forces ErrDisp into displaying developer info without developer UNITINFO. Doesn't break eShop.
+# $title 0004003000008A02
+# $ver   01
+# $uuid  04
+# $flags devmode
+
+find 1400D0E5DB9A9FED
+set  0000A0E3
+
+find 1400D0E5010010E3
+set  0000A0E3
+find 1400D0E5010010E3
+set  0000A0E3
+find 1400D0E5010010E3
+set  0000A0E3

@@ -1,0 +1,8 @@
+# $name  SecureInfo_A Signature Fix
+# $desc  Allows using unsigned or improperly signed SecureInfo_A files. Useful for region changes.
+# $title 0004013000001702
+# $ver   01
+# $uuid  0b
+
+find 06461048FC
+set  0026

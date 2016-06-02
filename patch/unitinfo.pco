@@ -1,0 +1,10 @@
+# $name Developer UNITINFO
+# $desc Imitates a panda's configuration. For the average user, loader ErrDisp is enough.
+# $ver  01
+# $uuid 0d
+# $flags devmode
+
+rel  native_s2
+find 0110A013
+fwd  03
+set  E3

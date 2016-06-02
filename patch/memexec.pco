@@ -1,0 +1,21 @@
+# $name ARM11 XN Disable
+# $desc Disables the XN bit on the ARM11 kernel to allow executing code from all memory. May be unsafe.
+# $ver  01
+# $uuid 06
+# $flags devmode
+
+# Relative to NATIVE_FIRM, section index [1]
+rel native_s1
+
+# Find this byte string.
+find 9705000015E40000
+
+# Move backwards until we find what we want.
+# LOOP: (3)
+	back 01
+	test 00016416
+	jmp  0007
+	jmp  0003
+
+# END LOOP: (7)
+	and efff

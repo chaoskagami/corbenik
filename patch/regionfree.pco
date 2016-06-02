@@ -1,0 +1,10 @@
+# $name  Region free HOME
+# $desc  Allows launching installed software from any region.
+# $title 0004003000008F02 0004003000008202 0004003000009802 000400300000A102 000400300000A902 000400300000B102
+# $ver   01
+# $uuid  09
+
+find 000055E30110A0E3
+# 16
+back 11
+set  0100A0E31EFF2FE1

@@ -1,0 +1,14 @@
+# $name  RO signature fix
+# $desc  Allows usage of unsigned CRO files. This is useful for romhacks.
+# $title 0004013000003702
+# $ver   01
+# $uuid  0a
+
+find 30402DE90250A0E1
+set  0000A0E31EFF2FE1
+
+find 30402DE924D04DE2
+set  0000A0E31EFF2FE1
+
+find F84F2DE90170A0E1
+set  0000A0E31EFF2FE1

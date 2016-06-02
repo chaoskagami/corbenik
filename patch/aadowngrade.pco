@@ -1,0 +1,15 @@
+# $name Title Downgrade Fix
+# $desc Removes added checks to prevent downgrade (in 11.0)
+# $ver  01
+# $uuid 00
+# $flags require
+
+# Anti-anti-downgrade fix.
+
+# Relative to process9.
+rel  native_p9
+
+# We want to patch the fifth byte of this pattern.
+find 890a814202D2
+fwd  05
+set  E0

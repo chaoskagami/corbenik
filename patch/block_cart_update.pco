@@ -1,0 +1,11 @@
+# $name  Block Cart Updates
+# $desc  Blocks update checks on cartridges (and also allows region free carts, as a byproduct.)
+# $title 0004013000008002
+# $ver   01
+# $uuid  01
+
+find 0C18E1D8
+set  0B1821C8
+
+find 0C18E1D8
+set  0B1821C8

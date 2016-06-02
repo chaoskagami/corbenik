@@ -1,0 +1,8 @@
+# $name  Block NIM updates
+# $desc  Prevents NIM from downloading system updates.
+# $title 0004013000002C02
+# $ver   01
+# $uuid  03
+
+find 25790B99
+set  E3A0

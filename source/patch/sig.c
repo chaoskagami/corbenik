@@ -15,7 +15,7 @@ extern exefs_h* firm_p9_exefs;
 
 PATCH(signatures)
 {
-
+/*
     // Look for signature checks
 
     uint8_t pat1[] = { 0xC0, 0x1C, 0x76, 0xE7 };
@@ -52,6 +52,8 @@ PATCH(signatures)
     memcpy(off2, sigpatch, 4);
 
     fprintf(stderr, "Signature patch succeded.\n");
+*/
+	execb(PATH_PATCHES "/sig.vco");
 
     return 0;
 }

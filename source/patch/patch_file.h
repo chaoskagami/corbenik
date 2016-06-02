@@ -14,6 +14,7 @@
 #include "../firm/fcram.h"
 #include "../config.h"
 #include "../common.h"
+#include "../interp.h"
 
 exefs_h* get_firm_proc9_exefs();
 exefs_h* get_twl_proc9_exefs();

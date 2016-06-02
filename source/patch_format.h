@@ -76,25 +76,24 @@
     "/slot0x11key96.bin" // Hey, your perrogative, buddy. I like cleaned up
                          // paths.
 
+#define PATCH_FLAG_REQUIRE (1 << 0) // Force enable patch unless 'Unsafe Options' is checked.
+#define PATCH_FLAG_DEVMODE (1 << 1) // Require 'Developer Options' to be checked.
+#define PATCH_FLAG_NOABORT (1 << 2) // Don't abort on error.
+
 // Structure of a patch file.
 struct system_patch
 {
     char     magic[4];     // "AIDA" for shits and giggles and because we like .hack.
-    uint32_t version;      // Version of the patch itself.
+    uint8_t  version;      // Version of the patch itself.
 
     char     name[64];     // User-readable name for patch in menu.
     char     desc[256];    // User-readable description for patch in menu.
     uint64_t uuid;         // Unique ID for patch. Each unique patch should provide
                            // a unique ID.
 
-    uint8_t  flags;        // Extra flags for patch.
+    uint32_t flags;       // Extra flags for patch.
 
-	#define PATCH_FLAG_REQUIRE (1 << 0) // Force enable patch unless 'Unsafe Options' is checked.
-	#define PATCH_FLAG_DEVMODE (1 << 1) // Require 'Developer Options' to be checked.
-	#define PATCH_FLAG_NOABORT (1 << 2) // Don't abort on error.
-
-    uint32_t titles;       // What title this patch is intended for. Certain values are
-                           // specially handled.
+    uint32_t titles;       // How many titles this patch should be applied to (listed later)
 
     uint32_t depends;      // How many deps there are.
 

@@ -20,7 +20,7 @@ dir_out    := out
 REVISION := r$(shell git rev-list --count HEAD):$(shell git rev-parse HEAD | head -c8)
 
 ASFLAGS := -mlittle-endian -mcpu=arm946e-s -march=armv5te
-CFLAGS  := -MMD -MP -Wall -Wextra -Werror -fno-omit-frame-pointer -Os $(ASFLAGS) -fno-builtin -std=c11 -DVERSION=\"$(REVISION)\"
+CFLAGS  := -MMD -MP -Wall -Wextra -Werror -fno-omit-frame-pointer -Os $(ASFLAGS) -fno-builtin -std=c11 -DVERSION=\"$(REVISION)\" -DBUFFER=1
 FLAGS   := dir_out=$(abspath $(dir_out)) --no-print-directory
 LDFLAGS := -nostdlib -Wl,-z,defs -lgcc -Wl,-Map,$(dir_build)/link.map
 
@@ -29,7 +29,7 @@ objects_cfw = $(patsubst $(dir_source)/%.s, $(dir_build)/%.o, \
 			  $(call rwildcard, $(dir_source), *.s *.c)))
 
 .PHONY: all
-all: a9lh external
+all: a9lh patch external
 
 .PHONY: full
 full: host/langemu.conf all
@@ -37,6 +37,10 @@ full: host/langemu.conf all
 .PHONY: external
 external:
 	make -C external
+
+.PHONY: patch
+patch:
+	make -C patch
 
 .PHONY: a9lh
 a9lh: $(dir_out)/arm9loaderhax.bin
@@ -55,6 +59,7 @@ host/langemu.conf:
 clean:
 	rm -f host/langemu.conf
 	make -C external clean
+	make -C patch clean
 	rm -rf $(dir_out) $(dir_build)
 
 .PHONY: $(dir_out)/arm9loaderhax.bin

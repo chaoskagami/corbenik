@@ -3,12 +3,14 @@
 
 #include "draw.h"
 
+int menu_poweroff();
+uint32_t wait_key();
+
 #define abort(x...)                                                            \
     {                                                                          \
-        fprintf(stderr, x);                                                    \
-        fumount();                                                             \
-        while (1)                                                              \
-            ;                                                                  \
+        fprintf(stderr, x);                                      \
+		wait_key(); \
+		menu_poweroff(); \
     }
 
 #endif

@@ -205,10 +205,12 @@ with open(in_file, "r") as ins:
 		data += struct.pack('I', len(title))
 		data += struct.pack('I', len(deps))
 		data += struct.pack('I', size)
-		for f in title:
-			data += bytearray.fromhex(f)
-		for f in deps:
-			data += pad_zero_r(bytearray.fromhex(f), 8)
+		if title:
+			for f in title:
+				data += bytearray.fromhex(f)
+		if deps:
+			for f in deps:
+				data += pad_zero_r(bytearray.fromhex(f), 8)
 		data += bytecode
 		writ.write(data)
 

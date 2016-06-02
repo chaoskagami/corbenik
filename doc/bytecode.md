@@ -91,11 +91,14 @@ test <size> <data...> : 2 + size bytes : opcode 0x06
 		Pattern to test.
 
 jmp <offset> : 3 bytes : opcode 0x07
-	Jumps to the Nth instruction within the bytecode, and
+	Jumps to offset instruction within the bytecode, and
     resumes execution from there.
 
+	Note that the assembler should be passed the number of instrcution
+	and will automatically calculate the offset needed.
+
 	<offset> : 2 bytes
-		Index to jump to.
+		Offset to jump to.
 
 rewind : 1 byte : opcode 0x08
 	Resets the location to the beginning of the space we're working off.

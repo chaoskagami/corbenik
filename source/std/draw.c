@@ -223,6 +223,8 @@ putc(void* buf, const int c)
             memset(&colorbuf[(height - 1) * width], 0, width);
 
             clear_disp(buf); // Clear screen.
+
+            cursor_y[0]--;
 #else
 			clear_disp(buf);
 			cursor_x[0] = 0;
@@ -233,7 +235,6 @@ putc(void* buf, const int c)
 				memmove(&screen[x * col + one_c], &screen[x * col + one_c], col - one_c);
 			} */
 #endif
-            cursor_y[0]--;
         }
 
         switch (c) {

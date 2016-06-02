@@ -57,7 +57,7 @@ def cat_list(list):
 		retstr += str + " "
 	return retstr
 
-def parse_op(token_list):
+def parse_op(token_list, instr_offs):
 	global title
 	global desc
 	global name
@@ -134,10 +134,12 @@ def parse_op(token_list):
 		if s != 2:
 			syn_err("invalid number of arguments")
 
-		if len(token_list[1] == 2):
-			token_list[1] = "00" + token_list[1]
-
-		return bytearray.fromhex("07" + token_list[1])
+		if instr_offs == None:
+			return bytearray.fromhex("070000")
+		else:
+			tok = bytearray.fromhex(token_list[1])
+			num = struct.unpack(">H", tok)[0]
+			return bytearray.fromhex("07") + struct.pack(">H", instr_offs[num])
 	elif token_list[0] == "rewind":
 		return bytearray.fromhex("08")
 	elif token_list[0] == "and":
@@ -184,16 +186,33 @@ except:
 
 size = 0
 
+offsets = []
+
 with open(in_file, "r") as ins:
 	with open(out_file, "wb") as writ:
 		bytecode = bytearray()
 
+		# We have to do two passes because of JMP.
+		# One to figure out the opcode offsets, one
+		# to actually parse everything.
+
 		for line in ins:
 			lines += 1
 			tokens = re.split("\s+", line.strip("\n")) # Split by whitespace.
-			bytes = parse_op(tokens) # Parse.
+			bytes = parse_op(tokens, None) # Parse.
 			if bytes:
+				offsets += [size]
 				size += len(bytes)
+
+		print(offsets)
+
+		ins.seek(0)
+
+		for line in ins:
+			lines += 1
+			tokens = re.split("\s+", line.strip("\n")) # Split by whitespace.
+			bytes = parse_op(tokens, offsets) # Parse.
+			if bytes:
 				bytecode += bytes
 
 		data  = bytearray("AIDA")

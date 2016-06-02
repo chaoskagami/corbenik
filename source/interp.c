@@ -185,18 +185,23 @@ int exec_bytecode(uint8_t* bytecode, uint32_t len, int debug) {
 				code += 2;
 				if(memcmp(current_mode->memory+offset, code, *(code-1))) {
 					test_was_false = 1;
+					fprintf(stderr, "false\n");
+				} else {
+					fprintf(stderr, "true\n");
 				}
-				offset += *(code-1);
 				code   += *(code-1);
 				break;
 			case OP_JMP: // Jump to offset.
 				if (debug)
 					fprintf(stderr, "jmp\n");
 				code++;
-				if (!test_was_false)
-					code = bytecode + *((uint16_t*)code);
-				else
+				if (!test_was_false) {
+					fprintf(stderr, "jmp to %hu,%hu\n", code[0], code[1]);
+					code = bytecode + code[1] + ( code[0] * 0x100 );
+				} else {
+					code += 2;
 					test_was_false = 0;
+				}
 				break;
 			case OP_REWIND:
 				if (debug)

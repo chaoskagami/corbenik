@@ -10,8 +10,6 @@
 #include "config.h"
 #include "../../../source/patch_format.h"
 
-#include "patch/patch.h"
-
 int
 memcmp(const void* buf1, const void* buf2, u32 size)
 {

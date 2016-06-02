@@ -204,8 +204,6 @@ with open(in_file, "r") as ins:
 				offsets += [size]
 				size += len(bytes)
 
-		print(offsets)
-
 		ins.seek(0)
 
 		for line in ins:
@@ -226,7 +224,11 @@ with open(in_file, "r") as ins:
 		data += struct.pack('I', size)
 		if title:
 			for f in title:
-				data += bytearray.fromhex(f)
+				tid = bytearray.fromhex(f) # Endianness.
+				print([tid])
+				tid.reverse()
+				print([tid])
+				data += tid
 		if deps:
 			for f in deps:
 				data += pad_zero_r(bytearray.fromhex(f), 8)

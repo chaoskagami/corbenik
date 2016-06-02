@@ -11,8 +11,6 @@
 #include "config.h"
 #include "../../../source/patch_format.h"
 
-#include "patch/patch.h"
-
 Handle log_file_hdl;
 int logger_is_initd = 0;
 
@@ -51,7 +49,7 @@ void logstr(const char* str) {
 		return;
 
 	// Write data.
-	FSFILE_Write(log_file_hdl, &wrote, size, str, len, 0);
+	FSFILE_Write(log_file_hdl, &wrote, size, str, len, FS_WRITE_FLUSH);
 }
 
 void logu64(u64 progId) {

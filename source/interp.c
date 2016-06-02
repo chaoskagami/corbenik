@@ -21,8 +21,10 @@
 #define OP_TITLE  0x0A
 
 #ifdef LOADER
-  #define fprintf(a...)
-  #define abort(a...)
+  #define log(a) logstr(a)
+  #define abort(a) { logstr(a) ; svcBreak(USERBREAK_ASSERT) ; }
+#else
+  #define log(a) fprintf(stderr, a)
 #endif
 
 struct mode {
@@ -119,7 +121,7 @@ int exec_bytecode(uint8_t* bytecode, uint32_t len, int debug) {
 		switch(*code) {
 			case OP_NOP:
 				if (debug)
-					fprintf(stderr, "nop\n");
+					log("nop\n");
 				code++;
 				test_was_false = 0;
 				break;
@@ -129,7 +131,7 @@ int exec_bytecode(uint8_t* bytecode, uint32_t len, int debug) {
 				code += 2;
 #else
 				if (debug)
-					fprintf(stderr, "rel\n");
+					log("rel\n");
 				code++;
 				if (!test_was_false)
 					current_mode = &modes[*code];
@@ -141,15 +143,13 @@ int exec_bytecode(uint8_t* bytecode, uint32_t len, int debug) {
 				break;
 			case OP_FIND: // Find pattern.
 				if (debug)
-					fprintf(stderr, "find\n");
+					log("find\n");
 				code += 2;
 				if (!test_was_false) {
 					offset = (uint32_t)memfind(current_mode->memory+offset, current_mode->size - offset, code, *(code-1));
 					if ((uint8_t*)offset == NULL) {
 						// Error. Abort.
 						abort("Find opcode failed.\n");
-					} else if (debug) {
-						fprintf(stderr, "Match @ %x\n", offset);
 					}
 					offset = offset - (uint32_t)current_mode->memory;
 				} else {
@@ -159,7 +159,7 @@ int exec_bytecode(uint8_t* bytecode, uint32_t len, int debug) {
 				break;
 			case OP_BACK:
 				if (debug)
-					fprintf(stderr, "back\n");
+					log("back\n");
 				code++;
 				if (!test_was_false) {
 					if (offset < *code) {
@@ -174,7 +174,7 @@ int exec_bytecode(uint8_t* bytecode, uint32_t len, int debug) {
 				break;
 			case OP_FWD:
 				if (debug)
-					fprintf(stderr, "fwd\n");
+					log("fwd\n");
 				code++;
 				if (!test_was_false) {
 					offset += *code;
@@ -189,7 +189,7 @@ int exec_bytecode(uint8_t* bytecode, uint32_t len, int debug) {
 				break;
 			case OP_SET: // Set data.
 				if (debug)
-					fprintf(stderr, "set\n");
+					log("set\n");
 				code += 2;
 				if (!test_was_false)
 					memcpy(current_mode->memory+offset, code, *(code-1));
@@ -200,24 +200,22 @@ int exec_bytecode(uint8_t* bytecode, uint32_t len, int debug) {
 				break;
 			case OP_TEST: // Test data.
 				if (debug)
-					fprintf(stderr, "test\n");
+					log("test\n");
 				code += 2;
 				if(memcmp(current_mode->memory+offset, code, *(code-1))) {
 					test_was_false = 1;
 					if (debug)
-						fprintf(stderr, "false\n");
+						log("false\n");
 				} else if (debug) {
-					fprintf(stderr, "true\n");
+					log("true\n");
 				}
 				code   += *(code-1);
 				break;
 			case OP_JMP: // Jump to offset.
 				if (debug)
-					fprintf(stderr, "jmp\n");
+					log("jmp\n");
 				code++;
 				if (!test_was_false) {
-					if (debug)
-						fprintf(stderr, "jmp to %hu,%hu\n", code[0], code[1]);
 					code = bytecode + code[1] + ( code[0] * 0x100 );
 				} else {
 					code += 2;
@@ -226,7 +224,7 @@ int exec_bytecode(uint8_t* bytecode, uint32_t len, int debug) {
 				break;
 			case OP_REWIND:
 				if (debug)
-					fprintf(stderr, "rewind\n");
+					log("rewind\n");
 				code++;
 				if (!test_was_false)
 					offset = 0;
@@ -235,7 +233,7 @@ int exec_bytecode(uint8_t* bytecode, uint32_t len, int debug) {
 				break;
 			case OP_AND:
 				if (debug)
-					fprintf(stderr, "and\n");
+					log("and\n");
 				code += 2;
 				if (!test_was_false) {
 					for(i=0; i < *(code-1); i++) {
@@ -249,9 +247,10 @@ int exec_bytecode(uint8_t* bytecode, uint32_t len, int debug) {
 				break;
 			case OP_TITLE:
 				if (debug)
-					fprintf(stderr, "title\n");
+					log("title\n");
 				// FIXME - NYI
 			default:
+#ifndef LOADER
 				// Panic; not proper opcode.
 				fprintf(stderr, "Invalid opcode. State:\n"
 								"  Relative:  %u\n"
@@ -268,6 +267,7 @@ int exec_bytecode(uint8_t* bytecode, uint32_t len, int debug) {
 								code - bytecode,
 								code,
 								*code);
+#endif
 				abort("Halting startup.\n");
 				break;
 		}
@@ -281,24 +281,97 @@ int execb(char* filename, uint64_t tid, uint8_t* search_mem, uint32_t search_len
 #else
 int execb(char* filename) {
 #endif
-	uint8_t* patch_mem;
 	uint32_t patch_len;
 	struct system_patch* patch;
 #ifdef LOADER
-	// Loader can use actual allocation functions, so this isn't as much of an issue
+	log("  check ");
+	log(filename);
+	log("\n");
+
+	uint8_t  patch_dat2[MAX_PATCHSIZE];
+	uint8_t *patch_dat = patch_dat2;
+
+	patch = (struct system_patch*)patch_dat;
+
+	Handle file;
+	u32 total;
+
+    // Open file.
+    if (!R_SUCCEEDED(fileOpen(&file, ARCHIVE_SDMC, filename, FS_OPEN_READ))) {
+        // Failed to open.
+        return 1;
+    }
+
+	u64 file_size;
+
+	if (!R_SUCCEEDED(FSFILE_GetSize(file, &file_size))) {
+        FSFILE_Close(file); // Read to memory.
+
+		return 1;
+	}
+
+	if (file_size > MAX_PATCHSIZE) {
+		log("  too large (please report)\n");
+
+        FSFILE_Close(file); // Read to memory.
+
+		return 1;
+	}
+
+    // Read file.
+    if (!R_SUCCEEDED(FSFILE_Read(file, &total, 0, patch_dat, file_size))) {
+        FSFILE_Close(file); // Read to memory.
+
+        // Failed to read.
+        return 1;
+    }
+
+    FSFILE_Close(file); // Done reading in.
 
 	// Set memory.
 	modes[18].memory = search_mem;
 	modes[18].size   = search_len;
 
-	// Load patch. We need memory, so...
-	// svcControlMemory(&tmp, __loader_prog_heap, 0x0, __ctru_heap_size, MEMOP_ALLOC, MEMPERM_READ | MEMPERM_WRITE);
-
 	// Check magic.
+	if (memcmp(patch->magic, "AIDA", 4)) {
+		log("  magic wrong\n");
+
+		return 1; // Incorrect patch magic.
+	}
 
 	// Check TID supported.
+	if (patch->titles == 0) {
+		return 0; // Not an error - this patch isn't meant for us.
+	}
 
+	log("  checking tid\n");
+
+	uint8_t* title_buf = patch_dat + sizeof(struct system_patch);
+
+	int apply = 0;
+
+	for(uint32_t i=0; i < patch->titles; i++, title_buf += 8) {
+		if(!memcmp(title_buf, (uint8_t*)&tid, 8)) {
+			// Applicable patch found.
+			log("  applicable\n");
+			apply = 1;
+			break;
+		}
+	}
+
+	if (!apply) {
+		// Not meant for us. Not an error, though.
+		return 0;
+	}
+
+	// Patch is relevant to us, so we'll apply it.
+
+	log("  exec\n");
+
+	uint8_t* patch_mem = (uint8_t*)patch + sizeof(struct system_patch) + (patch->depends * 8) + (patch->titles * 8);
+	patch_len = patch->size;
 #else
+	uint8_t* patch_mem;
 	// Read patch to scrap memory.
 
 	FILE* f = fopen(filename, "r");
@@ -325,5 +398,5 @@ int execb(char* filename) {
 	patch_mem = (uint8_t*)patch + sizeof(struct system_patch) + (patch->depends * 8) + (patch->titles * 8);
 	patch_len = patch->size;
 #endif
-	return exec_bytecode(patch_mem, patch_len, 0);
+	return exec_bytecode(patch_mem, patch_len, 1);
 }

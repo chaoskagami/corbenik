@@ -4,15 +4,14 @@
 #include "internal.h"
 #include "memory.h"
 #include "logger.h"
+#include "../../../source/patch_format.h"
+#include "interp.h"
 
 #ifndef PATH_MAX
 #define PATH_MAX 255
 #define _MAX_LFN 255
 #endif
 #include "config.h"
-#include "../../../source/patch_format.h"
-
-#include "patch/patch.h"
 
 int
 fileOpen(Handle* file, FS_ArchiveID id, const char* path, int flags)
@@ -57,8 +56,7 @@ load_config()
 
     FSFILE_Close(file); // Read to memory.
 
-    if (config.magic[0] != 'O' || config.magic[1] != 'V' ||
-        config.magic[2] != 'A' || config.magic[3] != 'N') {
+    if (memcmp(config.magic, "OVAN", 4)) {
         // Incorrect magic.
         // Failed to read.
         return;
@@ -355,69 +353,21 @@ patch_ro(u64 progId, u8* ro, u32 size, u32 orig_size)
 void
 patch_text(u64 progId, u8* text, u32 size, u32 orig_size)
 {
-    switch (progId) {
-        case 0x0004003000008F02LL: // USA Menu
-        case 0x0004003000008202LL: // EUR Menu
-        case 0x0004003000009802LL: // JPN Menu
-        case 0x000400300000A102LL: // CHN Menu
-        case 0x000400300000A902LL: // KOR Menu
-        case 0x000400300000B102LL: // TWN Menu
-        {
-            region_patch(progId, text, orig_size);
-            break;
-        }
+	if (progId == 0x0004013000008002LL)
+        adjust_cpu_settings(progId, text, orig_size);
 
-        case 0x0004013000002C02LL: // NIM
-        {
-            disable_nim_updates(progId, text, orig_size);
-            disable_eshop_updates(progId, text, orig_size);
-            break;
-        }
+	execb(PATH_PATCHES "/block_nim_update.vco", progId, text, orig_size);
+	execb(PATH_PATCHES "/block_eshop_update.vco", progId, text, orig_size);
+	execb(PATH_PATCHES "/block_cart_update.vco", progId, text, orig_size);
+	execb(PATH_PATCHES "/errdisp.vco", progId, text, orig_size);
+	execb(PATH_PATCHES "/friends_ver.vco", progId, text, orig_size);
+	execb(PATH_PATCHES "/mset_str.vco", progId, text, orig_size);
+	execb(PATH_PATCHES "/ns_force_menu.vco", progId, text, orig_size);
+	execb(PATH_PATCHES "/regionfree.vco", progId, text, orig_size);
+	execb(PATH_PATCHES "/secinfo_sigs.vco", progId, text, orig_size);
+	execb(PATH_PATCHES "/ro_sigs.vco", progId, text, orig_size);
 
-        case 0x0004013000003202LL: // FRIENDS
-        {
-            fake_friends_version(progId, text, orig_size);
-            break;
-        }
-
-        case 0x0004001000021000LL: // USA MSET
-        case 0x0004001000020000LL: // JPN MSET
-        case 0x0004001000022000LL: // EUR MSET
-        case 0x0004001000026000LL: // CHN MSET
-        case 0x0004001000027000LL: // KOR MSET
-        case 0x0004001000028000LL: // TWN MSET
-        {
-            settings_string(progId, text, size);
-            break;
-        }
-        case 0x0004013000008002LL: // NS
-        {
-            disable_cart_updates(progId, text, orig_size);
-            adjust_cpu_settings(progId, text, orig_size);
-            break;
-        }
-
-        case 0x0004013000001702LL: // CFG
-        {
-            secureinfo_sigpatch(progId, text, orig_size);
-            break;
-        }
-        case 0x0004013000003702LL: // RO
-        {
-            ro_sigpatch(progId, text, orig_size);
-            break;
-        }
-		case 0x0004003000008A02LL: // ErrDisp
-		{
-			errdisp_devpatch(progId, text, orig_size);
-			break;
-		}
-        default: // Anything else.
-        {
-            language_emu(progId, text, orig_size);
-            break;
-        }
-    }
+    language_emu(progId, text, orig_size);
 }
 
 // Gets how many bytes .text must be extended by for patches to fit.

@@ -20,7 +20,7 @@ dir_out    := out
 REVISION := r$(shell git rev-list --count HEAD):$(shell git rev-parse HEAD | head -c8)
 
 ASFLAGS := -mlittle-endian -mcpu=arm946e-s -march=armv5te
-CFLAGS  := -MMD -MP -Wall -Wextra -Werror -fno-omit-frame-pointer -Os $(ASFLAGS) -fno-builtin -std=c11 -DVERSION=\"$(REVISION)\" -DBUFFER=1
+CFLAGS  := -MMD -MP -Wall -Wextra -Werror -fno-omit-frame-pointer -Os $(ASFLAGS) -fno-builtin -std=c11 -DVERSION=\"$(REVISION)\"
 FLAGS   := dir_out=$(abspath $(dir_out)) --no-print-directory
 LDFLAGS := -nostdlib -Wl,-z,defs -lgcc -Wl,-Map,$(dir_build)/link.map
 

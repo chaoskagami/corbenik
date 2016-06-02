@@ -3,18 +3,9 @@ Corbenik
 
 This is (yet another) CFW for the 3DS. Unlike other CFWs, this was mostly written from scratch and for fun. I'm a control freak, and this carries quite a bit of my mindset being a LFS/Gentoo user.
 
-Some parts are inherited from other CFWs - e.g. the firmware loading code in src/firm is mostly based on Cakes, and the signature patch bytecode is roughly based on the implementation in Luma3DS.
+Some parts are inherited from other CFWs - e.g. the firmware loading code in src/firm is mostly based on Cakes, and the patch bytecode is based on Luma3DS' implementation in C (though, it isn't really derived from it)
 
-Out of the bunch, corbenik is most similar to cakes of the bunch, in that it uses external patches. Unlike cakes, patches consist of a headered bytecode file. See `doc/bytecode.md`, `host/bytecode_asm.py`  and `patch/*` for more on this.
-
-## Oh god yet another rebrand of--
-
-No. This is >75% original code. If you notice, there's a large amount of history because I didn't just dump the code on github; it's been in a repo all along while I worked on it and before it was made public.
-
-I also am not claiming to have written everything. See `doc/credits.md`.
-
-It shares close to zero of the actual architecture with other CFWs, only trivially implemented parts that look the same no matter who coded them.
-
+Out of the bunch of CFWs in existence, Corbenik is most similar to cakes of the bunch, in that it uses external patches. External patches are headered, can have dependencies, and consist of a lightweight and specialized bytecode/assembly which is intended for patching. See `doc/bytecode.md`, `host/bytecode_asm.py`  and `patch/*` for more on this. The assembler is a bit crappy at the moment, and I *do* plan to improve it. However, it outputs the correct code which gets the job done.
 ## Rationale
 
 I was initially going to make dynamic cakes, but I quickly realized a fatal flaw in any "patch" format: what you can do from a patch is limited to what the parser handles. This exact problem is why sempatches are used sometimes instead of classic diffs on the LKML, and it isn't a problem that will be solved without code. In my opinion, the best way to fix it is to simply externalize patches as programs. I also had a number of mad science experiments which would be very hard to perform in the context of ReiNAND based firmwares, and Cakes wouldn't make it easy either.

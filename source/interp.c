@@ -1,9 +1,12 @@
 #include <stdint.h>
-#include "std/unused.h"
-#include "std/memory.h"
-#include "firm/firm.h"
-#include "config.h"
-#include "common.h"
+#include <stddef.h>
+#ifndef LOADER
+  #include "std/unused.h"
+  #include "std/memory.h"
+  #include "firm/firm.h"
+  #include "config.h"
+  #include "common.h"
+#endif
 
 #define OP_NOP    0x00
 #define OP_REL    0x01
@@ -17,6 +20,11 @@
 #define OP_AND    0x09
 #define OP_TITLE  0x0A
 
+#ifdef LOADER
+  #define fprintf(a...)
+  #define abort(a...)
+#endif
+
 struct mode {
 	uint8_t* memory;
 	uint32_t size;
@@ -27,6 +35,7 @@ int init_bytecode = 0;
 
 int exec_bytecode(uint8_t* bytecode, uint32_t len, int debug) {
 	if (!init_bytecode) {
+#ifndef LOADER
 		modes[0].memory = (uint8_t*)firm_loc;
 		modes[0].size   = FCRAM_SPACING; // NATIVE_FIRM
 
@@ -84,6 +93,7 @@ int exec_bytecode(uint8_t* bytecode, uint32_t len, int debug) {
 		// TWL_FIRM Sect 3
 		modes[17].memory = (uint8_t*)&twl_firm_loc->section[3] + twl_firm_loc->section[3].offset;
 		modes[17].size   = twl_firm_loc->section[3].size;
+#endif
 
 		// Loader (not valid in bootmode)
 		// modes[18] = { 0, 0 };
@@ -91,11 +101,15 @@ int exec_bytecode(uint8_t* bytecode, uint32_t len, int debug) {
 		init_bytecode = 1;
 	}
 
-	struct   mode* current_mode = &modes[3];
+#ifdef LOADER
+	uint32_t set_mode = 18;
+#else
+	uint32_t set_mode = 3;
+#endif
+	struct   mode* current_mode = &modes[set_mode];
+
 	uint32_t offset = 0;
 	uint8_t  test_was_false = 0;
-
-	uint32_t set_mode = 0;
 
 	uint32_t i;
 
@@ -110,6 +124,10 @@ int exec_bytecode(uint8_t* bytecode, uint32_t len, int debug) {
 				test_was_false = 0;
 				break;
 			case OP_REL: // Change relativity.
+#ifdef LOADER
+				// Loader doesn't support this. Just treat it like a two-byte NOP.
+				code += 2;
+#else
 				if (debug)
 					fprintf(stderr, "rel\n");
 				code++;
@@ -119,6 +137,7 @@ int exec_bytecode(uint8_t* bytecode, uint32_t len, int debug) {
 					test_was_false = 0;
 				set_mode = *code;
 				code++;
+#endif
 				break;
 			case OP_FIND: // Find pattern.
 				if (debug)
@@ -185,8 +204,9 @@ int exec_bytecode(uint8_t* bytecode, uint32_t len, int debug) {
 				code += 2;
 				if(memcmp(current_mode->memory+offset, code, *(code-1))) {
 					test_was_false = 1;
-					fprintf(stderr, "false\n");
-				} else {
+					if (debug)
+						fprintf(stderr, "false\n");
+				} else if (debug) {
 					fprintf(stderr, "true\n");
 				}
 				code   += *(code-1);
@@ -196,7 +216,8 @@ int exec_bytecode(uint8_t* bytecode, uint32_t len, int debug) {
 					fprintf(stderr, "jmp\n");
 				code++;
 				if (!test_was_false) {
-					fprintf(stderr, "jmp to %hu,%hu\n", code[0], code[1]);
+					if (debug)
+						fprintf(stderr, "jmp to %hu,%hu\n", code[0], code[1]);
 					code = bytecode + code[1] + ( code[0] * 0x100 );
 				} else {
 					code += 2;
@@ -255,16 +276,54 @@ int exec_bytecode(uint8_t* bytecode, uint32_t len, int debug) {
 	return 0;
 }
 
+#ifdef LOADER
+int execb(char* filename, uint64_t tid, uint8_t* search_mem, uint32_t search_len) {
+#else
 int execb(char* filename) {
+#endif
+	uint8_t* patch_mem;
+	uint32_t patch_len;
+	struct system_patch* patch;
+#ifdef LOADER
+	// Loader can use actual allocation functions, so this isn't as much of an issue
+
+	// Set memory.
+	modes[18].memory = search_mem;
+	modes[18].size   = search_len;
+
+	// Load patch. We need memory, so...
+	// svcControlMemory(&tmp, __loader_prog_heap, 0x0, __ctru_heap_size, MEMOP_ALLOC, MEMPERM_READ | MEMPERM_WRITE);
+
+	// Check magic.
+
+	// Check TID supported.
+
+#else
+	// Read patch to scrap memory.
+
 	FILE* f = fopen(filename, "r");
 	size_t len = fsize(f);
 	fread((uint8_t*)FCRAM_PATCH_LOC, 1, len, f);
 	fclose(f);
 
-	struct system_patch* patch = (struct system_patch*)FCRAM_PATCH_LOC;
-	fprintf(stderr, "Name: %s\nDesc: %s\n", patch->name, patch->desc);
-	uint8_t* patch_mem = (uint8_t*)patch + sizeof(struct system_patch) + (patch->depends * 8) + (patch->titles * 8);
-	uint32_t patch_len = patch->size;
+	patch = (struct system_patch*)FCRAM_PATCH_LOC;
 
-	return exec_bytecode(patch_mem, patch_len, 1);
+	// Make sure various bits are correct.
+	if (memcmp(patch->magic, "AIDA", 4)) {
+		// Incorrect magic.
+		return 1;
+	}
+
+	if (patch->titles != 0) {
+		// Not an error, per se, but it means this patch is meant for loader, not us.
+		// Patches intended for use during boot will always be applied to zero titles.
+		return 0;
+	}
+
+	fprintf(stderr, "Patch: %s\n", patch->name);
+
+	patch_mem = (uint8_t*)patch + sizeof(struct system_patch) + (patch->depends * 8) + (patch->titles * 8);
+	patch_len = patch->size;
+#endif
+	return exec_bytecode(patch_mem, patch_len, 0);
 }

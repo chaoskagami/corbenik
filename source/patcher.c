@@ -8,7 +8,6 @@
 // TODO - Basically all this needs to move to patcher programs.
 
 uint32_t wait_key();
-int execp(char* path);
 
 extern int patch_signatures();
 extern int patch_firmprot();

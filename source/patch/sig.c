@@ -11,9 +11,10 @@
   set  4, 0x00, 0x20, 0x70, 0x47
  */
 
+extern exefs_h* firm_p9_exefs;
+
 PATCH(signatures)
 {
-	exefs_h* firm_p9_exefs = get_firm_proc9_exefs();
 
     // Look for signature checks
 

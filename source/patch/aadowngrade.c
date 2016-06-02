@@ -7,10 +7,10 @@
    set 1, 0xE0
  */
 
+extern exefs_h* firm_p9_exefs;
+
 PATCH(aadowngrade)
 {
-	exefs_h* firm_p9_exefs = get_firm_proc9_exefs();
-
     uint8_t* firm_mem = (uint8_t*)firm_p9_exefs + sizeof(exefs_h) +
                         firm_p9_exefs->fileHeaders[0].offset;
     uint32_t size = firm_p9_exefs->fileHeaders[0].size;

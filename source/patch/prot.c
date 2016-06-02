@@ -11,10 +11,10 @@
   set 4, 0x00, 0x20, 0xC0, 0x46
  */
 
+extern exefs_h* firm_p9_exefs;
+
 PATCH(firmprot)
 {
-	exefs_h* firm_p9_exefs = get_firm_proc9_exefs();
-
     uint8_t* firm_mem = (uint8_t*)firm_p9_exefs + sizeof(exefs_h) +
                         firm_p9_exefs->fileHeaders[0].offset;
     uint32_t size = firm_p9_exefs->fileHeaders[0].size;

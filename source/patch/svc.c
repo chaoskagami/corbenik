@@ -43,49 +43,54 @@ PATCH(services)
 
     char str[] = PATH_SERVICES "/00.bin";
     char* at = str + (strlen(str) - 6);
-    for (uint32_t i = 0; i <= 0xff; i++) {
-        // Get string for svc.
-        at[0] = ("0123456789abcdef")[((i >> 4) & 0xf)];
-		// This is just hexdump. Nothing complicated.
-        at[1] = ("0123456789abcdef")[(i & 0xf)];
+	// FIXME - This is really slow. Some way to optimize it?
+    for (uint32_t i = 0; i <= 0xf; i++) {
+	    // Get string for svc.
+	    at[0] = ("0123456789abcdef")[i];
 
-        FILE* data = fopen(str, "r");
-        if (!data) {
-            continue; // No file for svc. Move on.
-        }
+		for (uint32_t j = 0; j < 0xf; j++) {
+			// This is just hexdump. Nothing complicated.
+	        at[1] = ("0123456789abcdef")[j];
 
-        // Refuse to replace non-NULL services unless the user says to.
-        if (svcTable[i] && !config.options[OPTION_REPLACE_ALLOCATED_SVC]) {
-            fclose(data);
-            fprintf(stderr, "Svc: %x non-null, moving on\n", i);
-            continue;
-        }
+	        FILE* data = fopen(str, "r");
+	        if (!data)
+	            continue; // No file for svc. Move on.
 
-        uint32_t size = fsize(data);
-        uint8_t* read_to = (void*)FCRAM_JUNK_LOCATION;
+			uint32_t svc = (i << 4) & j;
 
-        fprintf(stderr, "Svc: %s, %d bytes\n", at, size);
+	        // Refuse to replace non-NULL services unless the user says to.
+	        if (svcTable[svc] && !config.options[OPTION_REPLACE_ALLOCATED_SVC]) {
+	            fclose(data);
+	            fprintf(stderr, "Svc: %x non-null, moving on\n", i);
+	            continue;
+	        }
 
-        fread(read_to, 1, size, data);
+    	    uint32_t size = fsize(data);
+        	uint8_t* read_to = (void*)FCRAM_JUNK_LOCATION;
 
-        fclose(data);
+        	fprintf(stderr, "Svc: %s, %d bytes\n", at, size);
 
-        if (!freeSpace) {
-            for (freeSpace = exceptionsPage; *freeSpace != 0xFFFFFFFF;
-                 freeSpace++)
-                ;
-        }
+        	fread(read_to, 1, size, data);
 
-        fprintf(stderr, "Svc: Copy code to %x\n", (uint32_t)freeSpace);
+        	fclose(data);
 
-        memcpy(freeSpace, read_to, size);
-        svcTable[i] =
-            0xFFFF0000 + ((uint8_t*)freeSpace - (uint8_t*)exceptionsPage);
+        	if (!freeSpace) {
+            	for (freeSpace = exceptionsPage; *freeSpace != 0xFFFFFFFF;
+            	     freeSpace++)
+            	    ;
+        	}
 
-        freeSpace +=
-            size; // We keep track of this because there's more than 7B free.
+			fprintf(stderr, "Svc: Copy code to %x\n", (uint32_t)freeSpace);
 
-        fprintf(stderr, "Svc: entry set as %x\n", svcTable[0x7B]);
+        	memcpy(freeSpace, read_to, size);
+        	svcTable[svc] =
+            	0xFFFF0000 + ((uint8_t*)freeSpace - (uint8_t*)exceptionsPage);
+
+        	freeSpace +=
+            	size; // We keep track of this because there's more than 7B free.
+
+        	fprintf(stderr, "Svc: entry set as %x\n", svcTable[svc]);
+		}
     }
 
     return 0;

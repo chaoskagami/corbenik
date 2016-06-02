@@ -4,6 +4,7 @@ Next
  * Make config file for corbenik plaintext. Nobody likes binary configs. They suck. Massively. Especially when you fuck up a setting and need to change it on something that isn't a 3ds.
  * In place firmware loading/patching.
  * Weird hack central - Developer 11.4 leaked. Allow injecting debug module? Ehehehehe. No clue what the point of this would be, but hey, it'd be FUCKING cool, man.
+ * Optimize the code in svc. It's slow, because it checks the filesystem for 0xff files that don't exist. It should list the dir instead.
 
 Shortterm
 -------------

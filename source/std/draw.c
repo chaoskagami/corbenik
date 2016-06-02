@@ -12,11 +12,13 @@
 static unsigned int top_cursor_x = 0, top_cursor_y = 0;
 static unsigned int bottom_cursor_x = 0, bottom_cursor_y = 0;
 
+#ifdef BUFFER
 static char text_buffer_top[TEXT_TOP_HEIGHT * TEXT_TOP_WIDTH + 1];
 static char text_buffer_bottom[TEXT_BOTTOM_HEIGHT * TEXT_BOTTOM_WIDTH + 1];
 
 static char color_buffer_top[TEXT_TOP_HEIGHT * TEXT_TOP_WIDTH + 1];
 static char color_buffer_bottom[TEXT_BOTTOM_HEIGHT * TEXT_BOTTOM_WIDTH + 1];
+#endif
 
 static uint32_t colors[16] = {
     0x000000, // Black
@@ -52,6 +54,7 @@ clear_disp(uint8_t* screen)
     }
 }
 
+#ifdef BUFFER
 void
 clear_text(uint8_t* screen)
 {
@@ -72,12 +75,15 @@ clear_text(uint8_t* screen)
         }
     }
 }
+#endif
 
 void
 clear_screen(uint8_t* screen)
 {
     clear_disp(screen);
+#ifdef BUFFER
     clear_text(screen);
+#endif
 }
 
 void
@@ -164,24 +170,35 @@ putc(void* buf, const int c)
         _UNUSED unsigned int height = 0;
         unsigned int* cursor_x = NULL;
         unsigned int* cursor_y = NULL;
+#ifdef BUFFER
         char* colorbuf = NULL;
         char* strbuf = NULL;
-
+#else
+        uint8_t* screen = NULL;
+#endif
         unsigned char* color = NULL;
 
         if (buf == TOP_SCREEN) {
             width = TEXT_TOP_WIDTH;
             height = TEXT_TOP_HEIGHT;
+#ifdef BUFFER
             colorbuf = color_buffer_top;
             strbuf = text_buffer_top;
+#else
+            screen = framebuffers->top_left;
+#endif
             cursor_x = &top_cursor_x;
             cursor_y = &top_cursor_y;
             color = &color_top;
         } else if (buf == BOTTOM_SCREEN) {
             width = TEXT_BOTTOM_WIDTH;
             height = TEXT_BOTTOM_HEIGHT;
+#ifdef BUFFER
             colorbuf = color_buffer_bottom;
             strbuf = text_buffer_bottom;
+#else
+            screen = framebuffers->bottom;
+#endif
             cursor_x = &bottom_cursor_x;
             cursor_y = &bottom_cursor_y;
             color = &color_bottom;
@@ -193,6 +210,7 @@ putc(void* buf, const int c)
         }
 
         while (cursor_y[0] >= height) {
+#ifdef BUFFER
             // Scroll.
             for (unsigned int y = 0; y < height - 1; y++) {
                 memset(&strbuf[y * width], 0, width);
@@ -204,21 +222,33 @@ putc(void* buf, const int c)
             memset(&strbuf[(height - 1) * width], 0, width);
             memset(&colorbuf[(height - 1) * width], 0, width);
 
-            cursor_y[0]--;
-
             clear_disp(buf); // Clear screen.
+#else
+			clear_disp(buf);
+			cursor_x[0] = 0;
+			cursor_y[0] = 0;
+/*			uint32_t col = SCREEN_TOP_HEIGHT * SCREEN_DEPTH;
+			uint32_t one_c = 8 * SCREEN_DEPTH;
+			for (unsigned int x = 0; x < width * 8; x++) {
+				memmove(&screen[x * col + one_c], &screen[x * col + one_c], col - one_c);
+			} */
+#endif
+            cursor_y[0]--;
         }
 
         switch (c) {
             case '\n':
+#ifdef BUFFER
                 strbuf[cursor_y[0] * width + cursor_x[0]] = 0;
                 colorbuf[cursor_y[0] * width + cursor_x[0]] = 0;
+#endif
                 cursor_y[0]++;
             // Fall through intentional.
             case '\r':
                 cursor_x[0] = 0; // Reset to beginning of line.
                 break;
             default:
+#ifdef BUFFER
                 strbuf[cursor_y[0] * width + cursor_x[0]] = c;
                 colorbuf[cursor_y[0] * width + cursor_x[0]] = *color;
 
@@ -227,6 +257,10 @@ putc(void* buf, const int c)
                         0; // Terminate.
                     colorbuf[cursor_y[0] * width + cursor_x[0] + 1] = 0;
                 }
+
+#else
+				draw_character(screen, c, cursor_x[0], cursor_y[0], colors[(*color >> 4) & 0xF], colors[*color & 0xF]);
+#endif
 
                 cursor_x[0]++;
 
@@ -334,6 +368,7 @@ void
 fflush(void* channel)
 {
     if (channel == TOP_SCREEN) {
+#ifdef BUFFER
         if (kill_output)
             return;
 
@@ -350,7 +385,9 @@ fflush(void* channel)
                                color_bg);
             }
         }
+#endif
     } else if (channel == BOTTOM_SCREEN) {
+#ifdef BUFFER
         if (kill_output)
             return;
 
@@ -368,6 +405,7 @@ fflush(void* channel)
                                color_bg);
             }
         }
+#endif
     } else {
         f_sync(&(((FILE*)channel)->handle)); // Sync to disk.
     }

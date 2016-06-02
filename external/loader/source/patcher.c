@@ -362,7 +362,7 @@ patch_text(u64 progId, u8* text, u32 size, u32 orig_size)
 	execb(PATH_PATCHES "/errdisp.vco", progId, text, orig_size);
 	execb(PATH_PATCHES "/friends_ver.vco", progId, text, orig_size);
 	execb(PATH_PATCHES "/mset_str.vco", progId, text, orig_size);
-	execb(PATH_PATCHES "/ns_force_menu.vco", progId, text, orig_size);
+//	execb(PATH_PATCHES "/ns_force_menu.vco", progId, text, orig_size);
 	execb(PATH_PATCHES "/regionfree.vco", progId, text, orig_size);
 	execb(PATH_PATCHES "/secinfo_sigs.vco", progId, text, orig_size);
 	execb(PATH_PATCHES "/ro_sigs.vco", progId, text, orig_size);

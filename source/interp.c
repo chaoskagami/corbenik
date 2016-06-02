@@ -19,6 +19,7 @@
 #define OP_REWIND 0x08
 #define OP_AND    0x09
 #define OP_TITLE  0x0A
+#define OP_NEXT   0xFF
 
 #ifdef LOADER
   #define log(a) logstr(a)
@@ -245,6 +246,14 @@ int exec_bytecode(uint8_t* bytecode, uint32_t len, int debug) {
 				}
 				code   += *(code-1);
 				break;
+			case OP_NEXT:
+				bytecode = code + 1;
+				set_mode = 3;
+				current_mode = &modes[set_mode];
+				offset = 0;
+				test_was_false = 0;
+				code = bytecode;
+				break;
 			case OP_TITLE:
 				if (debug)
 					log("title\n");
@@ -360,7 +369,7 @@ int execb(char* filename) {
 	}
 
 	if (!apply) {
-		// Not meant for us. Not an error, though.
+		// Not meant for us.
 		return 0;
 	}
 
@@ -390,6 +399,7 @@ int execb(char* filename) {
 	if (patch->titles != 0) {
 		// Not an error, per se, but it means this patch is meant for loader, not us.
 		// Patches intended for use during boot will always be applied to zero titles.
+		// We should generate a cache for loader in a file intended for titleid.
 		return 0;
 	}
 
@@ -398,5 +408,5 @@ int execb(char* filename) {
 	patch_mem = (uint8_t*)patch + sizeof(struct system_patch) + (patch->depends * 8) + (patch->titles * 8);
 	patch_len = patch->size;
 #endif
-	return exec_bytecode(patch_mem, patch_len, 1);
+	return exec_bytecode(patch_mem, patch_len, 0);
 }

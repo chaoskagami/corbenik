@@ -126,3 +126,8 @@ title <count> <title> : 2 + <count> * 8 bytes : 0x0A
 		How many titleIDs to read.
 	<title> : 8 * <count> bytes
 		List of titleIDs as u64.
+
+next : 1 byte : 0xFF
+	Resets state to default, and changes the base of code to the next instruction.
+	This opcode is not meant to be used directly - it's emitted when generating
+	caches.

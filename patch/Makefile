@@ -1,5 +1,5 @@
 .PHONY: all
-all: $(patsubst %.pco, %.vco, $(wildcard *.pco))
+all: clean $(patsubst %.pco, %.vco, $(wildcard *.pco))
 	mkdir -p ../out/corbenik/bin
 	cp *.vco ../out/corbenik/bin/
 

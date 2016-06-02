@@ -47,7 +47,7 @@ a9lh: $(dir_out)/arm9loaderhax.bin
 
 .PHONY: reformat
 reformat:
-	clang-format -i $(dir_source)/*.{c,h} $(dir_source)/*/*.{c,h} external/loader/source/*.{c,h} external/loader/source/*/*.{c,h} host/*.c
+	clang-format -i $(dir_source)/*.{c,h} $(dir_source)/*/*.{c,h} external/loader/source/*.{c,h}
 
 host/langemu.conf:
 	echo "Generating langemu.conf - may take a bit"

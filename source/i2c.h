@@ -19,8 +19,8 @@
 uint8_t i2cGetDeviceBusId(uint8_t device_id);
 uint8_t i2cGetDeviceRegAddr(uint8_t device_id);
 
-volatile uint8_t* i2cGetDataReg(uint8_t bus_id);
-volatile uint8_t* i2cGetCntReg(uint8_t bus_id);
+volatile uint8_t *i2cGetDataReg(uint8_t bus_id);
+volatile uint8_t *i2cGetCntReg(uint8_t bus_id);
 
 void i2cWaitBusy(uint8_t bus_id);
 int i2cGetResult(uint8_t bus_id);
@@ -33,7 +33,6 @@ int i2cSelectRegister(uint8_t bus_id, uint8_t reg);
 uint8_t i2cReadRegister(uint8_t dev_id, uint8_t reg);
 int i2cWriteRegister(uint8_t dev_id, uint8_t reg, uint8_t data);
 
-int i2cReadRegisterBuffer(unsigned int dev_id, int reg, uint8_t* buffer,
-                          size_t buf_size);
+int i2cReadRegisterBuffer(unsigned int dev_id, int reg, uint8_t *buffer, size_t buf_size);
 
 #endif

@@ -13,8 +13,7 @@ main()
 {
     if (fmount()) {
         // Failed to mount SD. Bomb out.
-        fprintf(BOTTOM_SCREEN, "%pFailed to mount SD card.\n",
-                COLOR(RED, BLACK));
+        fprintf(BOTTOM_SCREEN, "%pFailed to mount SD card.\n", COLOR(RED, BLACK));
     }
 
     load_config(); // Load configuration.

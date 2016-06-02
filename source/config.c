@@ -1,6 +1,6 @@
 #include "common.h"
 
-FILE* conf_handle;
+FILE *conf_handle;
 
 struct config_file config;
 
@@ -45,8 +45,7 @@ load_config()
                                    "has incorrect magic:\n"
                                    "  '%c%c%c%c'\n"
                                    "Regenerating with defaults.\n",
-                    PATH_CONFIG, config.magic[0], config.magic[1],
-                    config.magic[2], config.magic[3]);
+                    PATH_CONFIG, config.magic[0], config.magic[1], config.magic[2], config.magic[3]);
             f_unlink(PATH_CONFIG);
             regenerate_config();
         }

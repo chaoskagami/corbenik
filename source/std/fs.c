@@ -33,13 +33,13 @@ fumount(void)
     return 0;
 }
 
-FILE*
-fopen(const char* filename, const char* mode)
+FILE *
+fopen(const char *filename, const char *mode)
 {
     if (*mode != 'r' && *mode != 'w' && *mode != 'a')
         return NULL; // Mode not valid.
 
-    FILE* fp;
+    FILE *fp;
     int i;
     for (i = 0; i < MAX_FILES_OPEN; i++) {
         if (!files[i].is_open) {
@@ -62,7 +62,7 @@ fopen(const char* filename, const char* mode)
 }
 
 void
-fclose(FILE* fp)
+fclose(FILE *fp)
 {
     f_close(&(fp->handle));
 
@@ -70,7 +70,7 @@ fclose(FILE* fp)
 }
 
 void
-fseek(FILE* fp, int64_t offset, int whence)
+fseek(FILE *fp, int64_t offset, int whence)
 {
     uint32_t fixed_offset;
     switch (whence) {
@@ -91,25 +91,25 @@ fseek(FILE* fp, int64_t offset, int whence)
 }
 
 size_t
-ftell(FILE* fp)
+ftell(FILE *fp)
 {
     return f_tell(&(fp->handle));
 }
 
 int
-feof(FILE* fp)
+feof(FILE *fp)
 {
     return f_eof(&(fp->handle));
 }
 
 size_t
-fsize(FILE* fp)
+fsize(FILE *fp)
 {
     return f_size(&(fp->handle));
 }
 
 size_t
-fwrite(const void* buffer, size_t elementSize, size_t elementCnt, FILE* fp)
+fwrite(const void *buffer, size_t elementSize, size_t elementCnt, FILE *fp)
 {
     UINT br;
     if (f_write(&(fp->handle), buffer, elementSize * elementCnt, &br))
@@ -122,7 +122,7 @@ fwrite(const void* buffer, size_t elementSize, size_t elementCnt, FILE* fp)
 }
 
 size_t
-fread(void* buffer, size_t elementSize, size_t elementCnt, FILE* fp)
+fread(void *buffer, size_t elementSize, size_t elementCnt, FILE *fp)
 {
     UINT br;
     if (f_read(&(fp->handle), buffer, elementSize * elementCnt, &br))
@@ -135,9 +135,9 @@ fread(void* buffer, size_t elementSize, size_t elementCnt, FILE* fp)
 }
 
 size_t
-write_file(void* data, char* path, size_t size)
+write_file(void *data, char *path, size_t size)
 {
-    FILE* temp = fopen(path, "w");
+    FILE *temp = fopen(path, "w");
 
     if (!temp)
         return 0;
@@ -150,9 +150,9 @@ write_file(void* data, char* path, size_t size)
 }
 
 size_t
-read_file(void* data, char* path, size_t size)
+read_file(void *data, char *path, size_t size)
 {
-    FILE* temp = fopen(path, "r");
+    FILE *temp = fopen(path, "r");
 
     if (!temp)
         return 0;

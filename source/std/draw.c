@@ -40,7 +40,7 @@ static uint32_t colors[16] = {
 };
 
 void
-clear_disp(uint8_t* screen)
+clear_disp(uint8_t *screen)
 {
     if (screen == TOP_SCREEN)
         screen = framebuffers->top_left;
@@ -56,7 +56,7 @@ clear_disp(uint8_t* screen)
 
 #ifdef BUFFER
 void
-clear_text(uint8_t* screen)
+clear_text(uint8_t *screen)
 {
     if (screen == TOP_SCREEN)
         screen = framebuffers->top_left;
@@ -78,7 +78,7 @@ clear_text(uint8_t* screen)
 #endif
 
 void
-clear_screen(uint8_t* screen)
+clear_screen(uint8_t *screen)
 {
     clear_disp(screen);
 #ifdef BUFFER
@@ -87,7 +87,7 @@ clear_screen(uint8_t* screen)
 }
 
 void
-set_cursor(void* channel, unsigned int x, unsigned int y)
+set_cursor(void *channel, unsigned int x, unsigned int y)
 {
     if (channel == TOP_SCREEN) {
         top_cursor_x = x;
@@ -106,9 +106,7 @@ clear_screens()
 }
 
 void
-draw_character(uint8_t* screen, const char character, const unsigned int buf_x,
-               const unsigned int buf_y, const uint32_t color_fg,
-               const uint32_t color_bg)
+draw_character(uint8_t *screen, const char character, const unsigned int buf_x, const unsigned int buf_y, const uint32_t color_fg, const uint32_t color_bg)
 {
     if (!isprint(character))
         return; // Don't output non-printables.
@@ -132,9 +130,7 @@ draw_character(uint8_t* screen, const char character, const unsigned int buf_x,
         unsigned char char_pos = font[character * 8 + y];
 
         for (int x = 7; x >= 0; x--) {
-            int screen_pos =
-                (pos_x * height * 3 + (height - y - pos_y - 1) * 3) +
-                (7 - x) * 3 * height;
+            int screen_pos = (pos_x * height * 3 + (height - y - pos_y - 1) * 3) + (7 - x) * 3 * height;
 
             screen[screen_pos] = color_bg >> 16;
             screen[screen_pos + 1] = color_bg >> 8;
@@ -160,7 +156,7 @@ shut_up()
 }
 
 void
-putc(void* buf, const int c)
+putc(void *buf, const int c)
 {
     if (buf == stdout || buf == stderr) {
         if (kill_output)
@@ -168,15 +164,15 @@ putc(void* buf, const int c)
 
         unsigned int width = 0;
         _UNUSED unsigned int height = 0;
-        unsigned int* cursor_x = NULL;
-        unsigned int* cursor_y = NULL;
+        unsigned int *cursor_x = NULL;
+        unsigned int *cursor_y = NULL;
 #ifdef BUFFER
-        char* colorbuf = NULL;
-        char* strbuf = NULL;
+        char *colorbuf = NULL;
+        char *strbuf = NULL;
 #else
-        uint8_t* screen = NULL;
+        uint8_t *screen = NULL;
 #endif
-        unsigned char* color = NULL;
+        unsigned char *color = NULL;
 
         if (buf == TOP_SCREEN) {
             width = TEXT_TOP_WIDTH;
@@ -216,8 +212,7 @@ putc(void* buf, const int c)
                 memset(&strbuf[y * width], 0, width);
                 memset(&colorbuf[y * width], 0, width);
                 strncpy(&strbuf[y * width], &strbuf[(y + 1) * width], width);
-                strncpy(&colorbuf[y * width], &colorbuf[(y + 1) * width],
-                        width);
+                strncpy(&colorbuf[y * width], &colorbuf[(y + 1) * width], width);
             }
             memset(&strbuf[(height - 1) * width], 0, width);
             memset(&colorbuf[(height - 1) * width], 0, width);
@@ -226,14 +221,14 @@ putc(void* buf, const int c)
 
             cursor_y[0]--;
 #else
-			clear_disp(buf);
-			cursor_x[0] = 0;
-			cursor_y[0] = 0;
+            clear_disp(buf);
+            cursor_x[0] = 0;
+            cursor_y[0] = 0;
 /*			uint32_t col = SCREEN_TOP_HEIGHT * SCREEN_DEPTH;
-			uint32_t one_c = 8 * SCREEN_DEPTH;
-			for (unsigned int x = 0; x < width * 8; x++) {
-				memmove(&screen[x * col + one_c], &screen[x * col + one_c], col - one_c);
-			} */
+            uint32_t one_c = 8 * SCREEN_DEPTH;
+            for (unsigned int x = 0; x < width * 8; x++) {
+                memmove(&screen[x * col + one_c], &screen[x * col + one_c], col - one_c);
+            } */
 #endif
         }
 
@@ -254,13 +249,12 @@ putc(void* buf, const int c)
                 colorbuf[cursor_y[0] * width + cursor_x[0]] = *color;
 
                 if (cursor_x[0] + 1 < width) {
-                    strbuf[cursor_y[0] * width + cursor_x[0] + 1] =
-                        0; // Terminate.
+                    strbuf[cursor_y[0] * width + cursor_x[0] + 1] = 0; // Terminate.
                     colorbuf[cursor_y[0] * width + cursor_x[0] + 1] = 0;
                 }
 
 #else
-				draw_character(screen, c, cursor_x[0], cursor_y[0], colors[(*color >> 4) & 0xF], colors[*color & 0xF]);
+                draw_character(screen, c, cursor_x[0], cursor_y[0], colors[(*color >> 4) & 0xF], colors[*color & 0xF]);
 #endif
 
                 cursor_x[0]++;
@@ -269,17 +263,17 @@ putc(void* buf, const int c)
         }
     } else {
         // FILE*, not stdin or stdout.
-        fwrite(&c, 1, 1, (FILE*)buf);
+        fwrite(&c, 1, 1, (FILE *)buf);
     }
 }
 
 void
-puts(void* buf, const char* string)
+puts(void *buf, const char *string)
 {
     if ((buf == stdout || buf == stderr) && kill_output)
         return;
 
-    char* ref = (char*)string;
+    char *ref = (char *)string;
 
     while (*ref != '\0') {
         putc(buf, *ref);
@@ -288,7 +282,7 @@ puts(void* buf, const char* string)
 }
 
 void
-put_int64(void* channel, int64_t n, int length)
+put_int64(void *channel, int64_t n, int length)
 {
     char conv[32], out[32];
     memset(conv, 0, 32);
@@ -319,7 +313,7 @@ put_int64(void* channel, int64_t n, int length)
 }
 
 void
-put_uint64(void* channel, uint64_t n, int length)
+put_uint64(void *channel, uint64_t n, int length)
 {
     char conv[32], out[32];
     memset(conv, 0, 32);
@@ -341,9 +335,9 @@ put_uint64(void* channel, uint64_t n, int length)
 }
 
 void
-put_hexdump(void* channel, unsigned int num)
+put_hexdump(void *channel, unsigned int num)
 {
-    uint8_t* num_8 = (uint8_t*)&num;
+    uint8_t *num_8 = (uint8_t *)&num;
     for (int i = 3; i >= 0; i--) {
         uint8_t high = (num_8[i] >> 4) & 0xf;
         uint8_t low = num_8[i] & 0xf;
@@ -354,19 +348,19 @@ put_hexdump(void* channel, unsigned int num)
 }
 
 void
-put_uint(void* channel, unsigned int n, int length)
+put_uint(void *channel, unsigned int n, int length)
 {
     put_uint64(channel, n, length);
 }
 
 void
-put_int(void* channel, int n, int length)
+put_int(void *channel, int n, int length)
 {
     put_int64(channel, n, length);
 }
 
 void
-fflush(void* channel)
+fflush(void *channel)
 {
     if (channel == TOP_SCREEN) {
 #ifdef BUFFER
@@ -378,12 +372,9 @@ fflush(void* channel)
                 char c = text_buffer_top[y * TEXT_TOP_WIDTH + x];
                 if (c == 0)
                     break;
-                uint32_t color_fg = colors[(
-                    (color_buffer_top[y * TEXT_TOP_WIDTH + x] >> 4) & 0x0f)];
-                uint32_t color_bg =
-                    colors[(color_buffer_top[y * TEXT_TOP_WIDTH + x] & 0x0f)];
-                draw_character(framebuffers->top_left, c, x, y, color_fg,
-                               color_bg);
+                uint32_t color_fg = colors[((color_buffer_top[y * TEXT_TOP_WIDTH + x] >> 4) & 0x0f)];
+                uint32_t color_bg = colors[(color_buffer_top[y * TEXT_TOP_WIDTH + x] & 0x0f)];
+                draw_character(framebuffers->top_left, c, x, y, color_fg, color_bg);
             }
         }
 #endif
@@ -397,40 +388,35 @@ fflush(void* channel)
                 char c = text_buffer_bottom[y * TEXT_BOTTOM_WIDTH + x];
                 if (c == 0)
                     break;
-                uint32_t color_fg = colors[(
-                    (color_buffer_bottom[y * TEXT_BOTTOM_WIDTH + x] >> 4) &
-                    0x0f)];
-                uint32_t color_bg = colors[(
-                    color_buffer_bottom[y * TEXT_BOTTOM_WIDTH + x] & 0x0f)];
-                draw_character(framebuffers->bottom, c, x, y, color_fg,
-                               color_bg);
+                uint32_t color_fg = colors[((color_buffer_bottom[y * TEXT_BOTTOM_WIDTH + x] >> 4) & 0x0f)];
+                uint32_t color_bg = colors[(color_buffer_bottom[y * TEXT_BOTTOM_WIDTH + x] & 0x0f)];
+                draw_character(framebuffers->bottom, c, x, y, color_fg, color_bg);
             }
         }
 #endif
     } else {
-        f_sync(&(((FILE*)channel)->handle)); // Sync to disk.
+        f_sync(&(((FILE *)channel)->handle)); // Sync to disk.
     }
 }
 
 int disable_format = 0;
 
 void
-vfprintf(void* channel, const char* format, va_list ap)
+vfprintf(void *channel, const char *format, va_list ap)
 {
     if ((channel == stdout || channel == stderr) && kill_output)
         return;
 
-    char* ref = (char*)format;
+    char *ref = (char *)format;
 
-    unsigned char* color;
+    unsigned char *color;
     if (channel == TOP_SCREEN)
         color = &color_top;
     else if (channel == TOP_SCREEN)
         color = &color_bottom;
 
     while (*ref != '\0') {
-        if (*ref == 0x1B && *(++ref) == '[' &&
-            (channel == stdout || channel == stderr)) {
+        if (*ref == 0x1B && *(++ref) == '[' && (channel == stdout || channel == stderr)) {
         ansi_codes:
             // Ansi escape code.
             ++ref;
@@ -495,15 +481,15 @@ vfprintf(void* channel, const char* format, va_list ap)
                     break;
                 case 's':
                     // Using puts isn't correct here...
-					disable_format = 1; // Disable format strings.
-                    fprintf(channel, va_arg(ap, char*));
-					disable_format = 0; // Reenable.
+                    disable_format = 1; // Disable format strings.
+                    fprintf(channel, va_arg(ap, char *));
+                    disable_format = 0; // Reenable.
                     break;
                 case 'c':
                     putc(channel, va_arg(ap, int));
                     break;
                 case 'p':
-                    puts(channel, va_arg(ap, char*));
+                    puts(channel, va_arg(ap, char *));
                     break;
                 case '%':
                     putc(channel, '%');
@@ -533,7 +519,7 @@ vfprintf(void* channel, const char* format, va_list ap)
 }
 
 void
-fprintf(void* channel, const char* format, ...)
+fprintf(void *channel, const char *format, ...)
 {
     // The output suppression is in all the functions to minimize overhead.
     // Function calls and format conversions take time and we don't just want

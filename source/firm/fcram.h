@@ -8,7 +8,7 @@
 
 #include "../std/unused.h"
 
-extern void* fcram_temp;
+extern void *fcram_temp;
 
 // Space between most of the locations
 #define FCRAM_SPACING 0x100000

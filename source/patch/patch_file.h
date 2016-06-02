@@ -16,9 +16,9 @@
 #include "../common.h"
 #include "../interp.h"
 
-exefs_h* get_firm_proc9_exefs();
-exefs_h* get_twl_proc9_exefs();
-exefs_h* get_agb_proc9_exefs();
+exefs_h *get_firm_proc9_exefs();
+exefs_h *get_twl_proc9_exefs();
+exefs_h *get_agb_proc9_exefs();
 
 #define PATCH(name) int patch_##name()
 #elif MODULE

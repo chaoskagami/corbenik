@@ -4,9 +4,9 @@
 #include <stddef.h>
 
 int
-strlen(const char* string)
+strlen(const char *string)
 {
-    char* string_end = (char*)string;
+    char *string_end = (char *)string;
     while (*string_end)
         string_end++;
     return string_end - string;
@@ -21,10 +21,10 @@ isprint(char c)
 }
 
 void
-memcpy(void* dest, const void* src, size_t size)
+memcpy(void *dest, const void *src, size_t size)
 {
-    char* destc = (char*)dest;
-    const char* srcc = (const char*)src;
+    char *destc = (char *)dest;
+    const char *srcc = (const char *)src;
 
     // If we can align both dest and src together...
     if ((uintptr_t)srcc % sizeof(size_t) == (uintptr_t)destc % sizeof(size_t)) {
@@ -33,10 +33,8 @@ memcpy(void* dest, const void* src, size_t size)
             *destc++ = *srcc++;
         }
 
-        for (; size >= sizeof(size_t); size -= sizeof(size_t),
-                                       destc += sizeof(size_t),
-                                       srcc += sizeof(size_t)) {
-            *(size_t*)destc = *(size_t*)srcc;
+        for (; size >= sizeof(size_t); size -= sizeof(size_t), destc += sizeof(size_t), srcc += sizeof(size_t)) {
+            *(size_t *)destc = *(size_t *)srcc;
         }
     }
 
@@ -47,7 +45,7 @@ memcpy(void* dest, const void* src, size_t size)
 }
 
 void
-memmove(void* dest, const void* src, size_t size)
+memmove(void *dest, const void *src, size_t size)
 {
     // memcpy does the job of moving backwards just fine
     if (dest < src || src + size <= dest) {
@@ -55,8 +53,8 @@ memmove(void* dest, const void* src, size_t size)
     }
 
     // Moving forward is just a reverse memcpy
-    char* destc = (char*)dest;
-    const char* srcc = (const char*)src;
+    char *destc = (char *)dest;
+    const char *srcc = (const char *)src;
 
     // If we can align both dest and src together...
     if ((uintptr_t)srcc % sizeof(size_t) == (uintptr_t)destc % sizeof(size_t)) {
@@ -67,7 +65,7 @@ memmove(void* dest, const void* src, size_t size)
 
         while (size >= sizeof(size_t)) {
             size -= sizeof(size_t);
-            *(size_t*)(destc + size) = *(size_t*)(srcc + size);
+            *(size_t *)(destc + size) = *(size_t *)(srcc + size);
         }
     }
 
@@ -78,9 +76,9 @@ memmove(void* dest, const void* src, size_t size)
 }
 
 void
-memset(void* dest, const int filler, size_t size)
+memset(void *dest, const int filler, size_t size)
 {
-    char* destc = (char*)dest;
+    char *destc = (char *)dest;
 
     // Align dest to 4 bytes
     while ((uintptr_t)destc % sizeof(size_t) && size--) {
@@ -88,9 +86,8 @@ memset(void* dest, const int filler, size_t size)
     }
 
     // Set 32 bytes at a time
-    for (; size >= sizeof(size_t);
-         size -= sizeof(size_t), destc += sizeof(size_t)) {
-        *(size_t*)destc = filler;
+    for (; size >= sizeof(size_t); size -= sizeof(size_t), destc += sizeof(size_t)) {
+        *(size_t *)destc = filler;
     }
 
     // Finish
@@ -100,10 +97,10 @@ memset(void* dest, const int filler, size_t size)
 }
 
 int
-memcmp(const void* buf1, const void* buf2, const size_t size)
+memcmp(const void *buf1, const void *buf2, const size_t size)
 {
-    const char* buf1c = (const char*)buf1;
-    const char* buf2c = (const char*)buf2;
+    const char *buf1c = (const char *)buf1;
+    const char *buf2c = (const char *)buf2;
     for (size_t i = 0; i < size; i++) {
         int cmp = buf1c[i] - buf2c[i];
         if (cmp) {
@@ -115,10 +112,10 @@ memcmp(const void* buf1, const void* buf2, const size_t size)
 }
 
 void
-strncpy(void* dest, const void* src, const size_t size)
+strncpy(void *dest, const void *src, const size_t size)
 {
-    char* destc = (char*)dest;
-    const char* srcc = (const char*)src;
+    char *destc = (char *)dest;
+    const char *srcc = (const char *)src;
 
     size_t i;
     for (i = 0; i < size && srcc[i] != 0; i++) {
@@ -130,10 +127,10 @@ strncpy(void* dest, const void* src, const size_t size)
 }
 
 int
-strncmp(const void* buf1, const void* buf2, const size_t size)
+strncmp(const void *buf1, const void *buf2, const size_t size)
 {
-    const char* buf1c = (const char*)buf1;
-    const char* buf2c = (const char*)buf2;
+    const char *buf1c = (const char *)buf1;
+    const char *buf2c = (const char *)buf2;
 
     size_t i;
     for (i = 0; i < size && buf1c[i] != 0 && buf2c[i] != 0; i++) {
@@ -152,7 +149,7 @@ strncmp(const void* buf1, const void* buf2, const size_t size)
 }
 
 int
-atoi(const char* str)
+atoi(const char *str)
 {
     int res = 0;
     while (*str && *str >= '0' && *str <= '9') {
@@ -169,11 +166,10 @@ atoi(const char* str)
 
 // Quick Search algorithm, adapted from
 // http://igm.univ-mlv.fr/~lecroq/string/node19.html#SECTION00190
-uint8_t*
-memfind(uint8_t* startPos, uint32_t size, const void* pattern,
-        uint32_t patternSize)
+uint8_t *
+memfind(uint8_t *startPos, uint32_t size, const void *pattern, uint32_t patternSize)
 {
-    const uint8_t* patternc = (const uint8_t*)pattern;
+    const uint8_t *patternc = (const uint8_t *)pattern;
 
     // Preprocessing
     uint32_t table[ALPHABET_LEN];

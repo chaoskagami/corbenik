@@ -86,8 +86,8 @@ typedef struct ncch_ex_h
 // http://3dbrew.org/wiki/NCCH
 typedef struct ncch_h
 {
-    uint8_t sig[0x100]; // RSA-2048 signature of the NCCH header, using SHA-256.
-    uint32_t magic;     // NCCH
+    uint8_t sig[0x100];   // RSA-2048 signature of the NCCH header, using SHA-256.
+    uint32_t magic;       // NCCH
     uint32_t contentSize; // Content size, in media units (1 media unit = 0x200
                           // bytes)
     uint8_t partitionID[8];
@@ -149,8 +149,7 @@ typedef struct exefs_file_hash
 
 typedef struct exefs_h
 {
-    exefs_file_h
-        fileHeaders[10]; // File headers (10 headers maximum, 16 bytes each)
+    exefs_file_h fileHeaders[10]; // File headers (10 headers maximum, 16 bytes each)
     uint8_t reserved[0x20];
     exefs_file_hash fileHashes[10]; // File hashes (10 hashes maximum, 32 bytes
                                     // each, one for each header), SHA256 over
@@ -168,14 +167,13 @@ typedef struct ncsd_h
 {
     uint8_t sig[0x100]; // RSA-2048 signature of the NCSD header, using SHA-256.
     uint32_t magic;     // NCSD
-    uint32_t size; // Size of the NCSD image, in media units (1 media unit =
-                   // 0x200 bytes)
+    uint32_t size;      // Size of the NCSD image, in media units (1 media unit =
+                        // 0x200 bytes)
     uint8_t mediaID[8];
-    uint8_t fsType[8];    // Partitions FS type (0=None, 1=Normal, 3=FIRM,
-                          // 4=AGB_FIRM save)
-    uint8_t cryptType[8]; // Partitions crypt type
-    ncsd_partition_table
-        ptable[8]; // Offset & Length partition table, in media units
+    uint8_t fsType[8];              // Partitions FS type (0=None, 1=Normal, 3=FIRM,
+                                    // 4=AGB_FIRM save)
+    uint8_t cryptType[8];           // Partitions crypt type
+    ncsd_partition_table ptable[8]; // Offset & Length partition table, in media units
     uint8_t spec[0xA0];
 } ncsd_h;
 

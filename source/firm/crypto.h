@@ -7,17 +7,17 @@
 #include "headers.h"
 
 /**************************AES****************************/
-#define REG_AESCNT ((volatile uint32_t*)0x10009000)
-#define REG_AESBLKCNT ((volatile uint32_t*)0x10009004)
-#define REG_AESWRFIFO ((volatile uint32_t*)0x10009008)
-#define REG_AESRDFIFO ((volatile uint32_t*)0x1000900C)
-#define REG_AESKEYSEL ((volatile uint8_t*)0x10009010)
-#define REG_AESKEYCNT ((volatile uint8_t*)0x10009011)
-#define REG_AESCTR ((volatile uint32_t*)0x10009020)
+#define REG_AESCNT ((volatile uint32_t *)0x10009000)
+#define REG_AESBLKCNT ((volatile uint32_t *)0x10009004)
+#define REG_AESWRFIFO ((volatile uint32_t *)0x10009008)
+#define REG_AESRDFIFO ((volatile uint32_t *)0x1000900C)
+#define REG_AESKEYSEL ((volatile uint8_t *)0x10009010)
+#define REG_AESKEYCNT ((volatile uint8_t *)0x10009011)
+#define REG_AESCTR ((volatile uint32_t *)0x10009020)
 
-#define REG_AESKEYFIFO ((volatile uint32_t*)0x10009100)
-#define REG_AESKEYXFIFO ((volatile uint32_t*)0x10009104)
-#define REG_AESKEYYFIFO ((volatile uint32_t*)0x10009108)
+#define REG_AESKEYFIFO ((volatile uint32_t *)0x10009100)
+#define REG_AESKEYXFIFO ((volatile uint32_t *)0x10009104)
+#define REG_AESKEYYFIFO ((volatile uint32_t *)0x10009108)
 
 #define AES_CCM_DECRYPT_MODE (0u << 27)
 #define AES_CCM_ENCRYPT_MODE (1u << 27)
@@ -52,10 +52,10 @@
 #define AES_KEYY 2
 
 /**************************SHA****************************/
-#define REG_SHA_CNT ((volatile uint32_t*)0x1000A000)
-#define REG_SHA_BLKCNT ((volatile uint32_t*)0x1000A004)
-#define REG_SHA_HASH ((volatile uint32_t*)0x1000A040)
-#define REG_SHA_INFIFO ((volatile uint32_t*)0x1000A080)
+#define REG_SHA_CNT ((volatile uint32_t *)0x1000A000)
+#define REG_SHA_BLKCNT ((volatile uint32_t *)0x1000A004)
+#define REG_SHA_HASH ((volatile uint32_t *)0x1000A040)
+#define REG_SHA_INFIFO ((volatile uint32_t *)0x1000A080)
 
 #define SHA_CNT_STATE 0x00000003
 #define SHA_CNT_UNK2 0x00000004
@@ -80,14 +80,14 @@
 #define SHA_1_HASH_SIZE (160 / 8)
 
 /**************************RSA****************************/
-#define REG_RSA_CNT ((volatile uint32_t*)0x1000B000)
-#define REG_RSA_SLOT0 ((volatile uint32_t*)0x1000B100)
-#define REG_RSA_SLOT1 ((volatile uint32_t*)0x1000B110)
-#define REG_RSA_SLOT2 ((volatile uint32_t*)0x1000B120)
-#define REG_RSA_SLOT3 ((volatile uint32_t*)0x1000B130)
-#define REG_RSA_EXPFIFO ((volatile uint32_t*)0x1000B200)
-#define REG_RSA_MOD_END ((volatile uint32_t*)0x1000B500)
-#define REG_RSA_TXT_END ((volatile uint32_t*)0x1000B900)
+#define REG_RSA_CNT ((volatile uint32_t *)0x1000B000)
+#define REG_RSA_SLOT0 ((volatile uint32_t *)0x1000B100)
+#define REG_RSA_SLOT1 ((volatile uint32_t *)0x1000B110)
+#define REG_RSA_SLOT2 ((volatile uint32_t *)0x1000B120)
+#define REG_RSA_SLOT3 ((volatile uint32_t *)0x1000B130)
+#define REG_RSA_EXPFIFO ((volatile uint32_t *)0x1000B200)
+#define REG_RSA_MOD_END ((volatile uint32_t *)0x1000B500)
+#define REG_RSA_TXT_END ((volatile uint32_t *)0x1000B900)
 
 #define RSA_CNT_START 0x00000001
 #define RSA_CNT_KEYSLOTS 0x000000F0
@@ -107,26 +107,23 @@
 #define RSA_1024_MODE 0x20
 #define RSA_2048_MODE 0x40
 
-void aes_setkey(uint8_t keyslot, const void* key, uint32_t keyType,
-                uint32_t mode);
+void aes_setkey(uint8_t keyslot, const void *key, uint32_t keyType, uint32_t mode);
 void aes_use_keyslot(uint8_t keyslot);
 
-void aes(void* dst, const void* src, uint32_t blockCount, void* iv,
-         uint32_t mode, uint32_t ivMode);
+void aes(void *dst, const void *src, uint32_t blockCount, void *iv, uint32_t mode, uint32_t ivMode);
 
-void aes_setiv(const void* iv, uint32_t mode);
-void aes_advctr(void* ctr, uint32_t val, uint32_t mode);
-void aes_change_ctrmode(void* ctr, uint32_t fromMode, uint32_t toMode);
+void aes_setiv(const void *iv, uint32_t mode);
+void aes_advctr(void *ctr, uint32_t val, uint32_t mode);
+void aes_change_ctrmode(void *ctr, uint32_t fromMode, uint32_t toMode);
 
-void aes_batch(void* dst, const void* src, uint32_t blockCount);
+void aes_batch(void *dst, const void *src, uint32_t blockCount);
 
-void sha(void* res, const void* src, uint32_t size, uint32_t mode);
+void sha(void *res, const void *src, uint32_t size, uint32_t mode);
 
-void rsa_setkey(uint32_t keyslot, const void* mod, const void* exp,
-                uint32_t mode);
+void rsa_setkey(uint32_t keyslot, const void *mod, const void *exp, uint32_t mode);
 void rsa_use_keyslot(uint32_t keyslot);
 
-int rsa_verify(const void* data, uint32_t size, const void* sig, uint32_t mode);
+int rsa_verify(const void *data, uint32_t size, const void *sig, uint32_t mode);
 
 typedef enum {
     NCCHTYPE_EXHEADER = 1,
@@ -134,6 +131,6 @@ typedef enum {
     NCCHTYPE_ROMFS = 3,
 } ctr_ncchtypes;
 
-void ncch_getctr(const ncch_h* ncch, uint8_t* ctr, uint8_t type);
+void ncch_getctr(const ncch_h *ncch, uint8_t *ctr, uint8_t type);
 
 #endif

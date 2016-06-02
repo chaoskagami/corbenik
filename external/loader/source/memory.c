@@ -11,10 +11,10 @@
 #include "../../../source/patch_format.h"
 
 int
-memcmp(const void* buf1, const void* buf2, u32 size)
+memcmp(const void *buf1, const void *buf2, u32 size)
 {
-    const u8* buf1c = (const u8*)buf1;
-    const u8* buf2c = (const u8*)buf2;
+    const u8 *buf1c = (const u8 *)buf1;
+    const u8 *buf2c = (const u8 *)buf2;
 
     for (u32 i = 0; i < size; i++) {
         int cmp = buf1c[i] - buf2c[i];
@@ -27,10 +27,10 @@ memcmp(const void* buf1, const void* buf2, u32 size)
 
 // Quick Search algorithm, adapted from
 // http://igm.univ-mlv.fr/~lecroq/string/node19.html#SECTION00190
-u8*
-memfind(u8* startPos, u32 size, const void* pattern, u32 patternSize)
+u8 *
+memfind(u8 *startPos, u32 size, const void *pattern, u32 patternSize)
 {
-    const u8* patternc = (const u8*)pattern;
+    const u8 *patternc = (const u8 *)pattern;
 
     // Preprocessing
     u32 table[256];
@@ -53,13 +53,12 @@ memfind(u8* startPos, u32 size, const void* pattern, u32 patternSize)
 }
 
 u32
-patchMemory(u8* start, u32 size, const void* pattern, u32 patSize, int offset,
-            const void* replace, u32 repSize, u32 count)
+patchMemory(u8 *start, u32 size, const void *pattern, u32 patSize, int offset, const void *replace, u32 repSize, u32 count)
 {
     u32 i;
 
     for (i = 0; i < count; i++) {
-        u8* found = memfind(start, size, pattern, patSize);
+        u8 *found = memfind(start, size, pattern, patSize);
 
         if (found == NULL)
             break;
@@ -80,11 +79,12 @@ patchMemory(u8* start, u32 size, const void* pattern, u32 patSize, int offset,
 }
 
 size_t
-strnlen(const char* string, size_t maxlen)
+strnlen(const char *string, size_t maxlen)
 {
     size_t size;
 
-    for (size = 0; *string && size < maxlen; string++, size++);
+    for (size = 0; *string && size < maxlen; string++, size++)
+        ;
 
     return size;
 }

@@ -14,8 +14,7 @@
 
 #define MAX_SESSIONS 1
 
-const char CODE_PATH[] = { 0x01, 0x00, 0x00, 0x00, 0x2E, 0x63,
-                           0x6F, 0x64, 0x65, 0x00, 0x00, 0x00 };
+const char CODE_PATH[] = { 0x01, 0x00, 0x00, 0x00, 0x2E, 0x63, 0x6F, 0x64, 0x65, 0x00, 0x00, 0x00 };
 
 typedef struct
 {
@@ -35,7 +34,7 @@ static exheader_header g_exheader;
 static char g_ret_buf[1024];
 
 static Result
-allocate_shared_mem(prog_addrs_t* shared, prog_addrs_t* vaddr, int flags)
+allocate_shared_mem(prog_addrs_t *shared, prog_addrs_t *vaddr, int flags)
 {
     // Somehow, we need to allow reallocating.
 
@@ -46,16 +45,13 @@ allocate_shared_mem(prog_addrs_t* shared, prog_addrs_t* vaddr, int flags)
                                     // address to kill ASLR (I believe.)
     shared->ro_addr = shared->text_addr + (shared->text_size << 12);
     shared->data_addr = shared->ro_addr + (shared->ro_size << 12);
-    return svcControlMemory(
-        &dummy, shared->text_addr, 0, shared->total_size << 12,
-        (flags & 0xF00) | MEMOP_ALLOC, MEMPERM_READ | MEMPERM_WRITE);
+    return svcControlMemory(&dummy, shared->text_addr, 0, shared->total_size << 12, (flags & 0xF00) | MEMOP_ALLOC, MEMPERM_READ | MEMPERM_WRITE);
 }
 
 static Result
-load_code(u64 progid, prog_addrs_t* shared, prog_addrs_t* original,
-          u64 prog_handle, int is_compressed)
+load_code(u64 progid, prog_addrs_t *shared, prog_addrs_t *original, u64 prog_handle, int is_compressed)
 {
-	Handle handle;
+    Handle handle;
     FS_Path archivePath;
     FS_Path path;
     Result res;
@@ -70,8 +66,7 @@ load_code(u64 progid, prog_addrs_t* shared, prog_addrs_t* original,
     path.data = CODE_PATH;
     path.size = sizeof(CODE_PATH);
 
-    if (R_FAILED(FSLDR_OpenFileDirectly(&handle, ARCHIVE_SAVEDATA_AND_CONTENT2, archivePath,
-                            path, FS_OPEN_READ, 0))) {
+    if (R_FAILED(FSLDR_OpenFileDirectly(&handle, ARCHIVE_SAVEDATA_AND_CONTENT2, archivePath, path, FS_OPEN_READ, 0))) {
         svcBreak(USERBREAK_ASSERT);
     }
 
@@ -88,7 +83,7 @@ load_code(u64 progid, prog_addrs_t* shared, prog_addrs_t* original,
     }
 
     // read code
-    res = FSFILE_Read(handle, &total, 0, (void*)shared->text_addr, size);
+    res = FSFILE_Read(handle, &total, 0, (void *)shared->text_addr, size);
     FSFILE_Close(handle); // done reading
     if (R_FAILED(res)) {
         svcBreak(USERBREAK_ASSERT);
@@ -96,22 +91,19 @@ load_code(u64 progid, prog_addrs_t* shared, prog_addrs_t* original,
 
     // decompress in place
     if (is_compressed) {
-        lzss_decompress((u8*)shared->text_addr + size);
+        lzss_decompress((u8 *)shared->text_addr + size);
     }
 
     // Patch segments
-    patch_text(progid, (u8*)shared->text_addr, shared->text_size << 12,
-               original->text_size << 12);
-    patch_data(progid, (u8*)shared->data_addr, shared->data_size << 12,
-               original->data_size << 12);
-    patch_ro(progid, (u8*)shared->ro_addr, shared->ro_size << 12,
-             original->ro_size << 12);
+    patch_text(progid, (u8 *)shared->text_addr, shared->text_size << 12, original->text_size << 12);
+    patch_data(progid, (u8 *)shared->data_addr, shared->data_size << 12, original->data_size << 12);
+    patch_ro(progid, (u8 *)shared->ro_addr, shared->ro_size << 12, original->ro_size << 12);
 
     return 0;
 }
 
 static Result
-loader_GetProgramInfo(exheader_header* exheader, u64 prog_handle)
+loader_GetProgramInfo(exheader_header *exheader, u64 prog_handle)
 {
     Result res;
 
@@ -131,8 +123,7 @@ loader_GetProgramInfo(exheader_header* exheader, u64 prog_handle)
     }
 }
 
-extern void KernelSetState(unsigned int, unsigned int, unsigned int,
-                           unsigned int);
+extern void KernelSetState(unsigned int, unsigned int, unsigned int, unsigned int);
 
 static void
 ConfigureNew3DSCPU(u8 mode)
@@ -145,7 +136,7 @@ ConfigureNew3DSCPU(u8 mode)
 }
 
 static Result
-loader_LoadProcess(Handle* process, u64 prog_handle)
+loader_LoadProcess(Handle *process, u64 prog_handle)
 {
     Result res;
     int count;
@@ -161,7 +152,7 @@ loader_LoadProcess(Handle* process, u64 prog_handle)
     u64 progid;
     u32 text_grow, data_grow, ro_grow;
 
-	openLogger();
+    openLogger();
 
     // make sure the cached info corrosponds to the current prog_handle
     if (g_cached_prog_handle != prog_handle) {
@@ -188,8 +179,8 @@ loader_LoadProcess(Handle* process, u64 prog_handle)
     // load code
     progid = g_exheader.arm11systemlocalcaps.programid;
 
-	logu64(progid);
-	logstr("  validated params\n");
+    logu64(progid);
+    logstr("  validated params\n");
 
     load_config(); // First order of business - we need the config file.
 
@@ -205,18 +196,14 @@ loader_LoadProcess(Handle* process, u64 prog_handle)
                                         // sysmodule. It doesn't make sense.
     }
 
-	// TODO - clean up this shit below. Not only is it unoptimized but it reads like garbage.
+    // TODO - clean up this shit below. Not only is it unoptimized but it reads like garbage.
 
     // What the addressing info would be if not for expansion. This is passed to
     // patchCode.
-    original_vaddr.text_size = (g_exheader.codesetinfo.text.codesize + 4095) >>
-                               12; // (Text size + one page) >> page size
+    original_vaddr.text_size = (g_exheader.codesetinfo.text.codesize + 4095) >> 12; // (Text size + one page) >> page size
     original_vaddr.ro_size = (g_exheader.codesetinfo.ro.codesize + 4095) >> 12;
-    original_vaddr.data_size =
-        (g_exheader.codesetinfo.data.codesize + 4095) >> 12;
-    original_vaddr.total_size = original_vaddr.text_size +
-                                original_vaddr.ro_size +
-                                original_vaddr.data_size;
+    original_vaddr.data_size = (g_exheader.codesetinfo.data.codesize + 4095) >> 12;
+    original_vaddr.total_size = original_vaddr.text_size + original_vaddr.ro_size + original_vaddr.data_size;
 
     // Allow changing code, ro, data sizes to allow adding code
     text_grow = get_text_extend(progid, g_exheader.codesetinfo.text.codesize);
@@ -227,26 +214,19 @@ loader_LoadProcess(Handle* process, u64 prog_handle)
 
     // Allocate process memory, growing as needed for extra patches
     vaddr.text_addr = g_exheader.codesetinfo.text.address;
-    vaddr.text_size =
-        (g_exheader.codesetinfo.text.codesize + text_grow + 4095) >>
-        12; // (Text size + one page) >> page size
+    vaddr.text_size = (g_exheader.codesetinfo.text.codesize + text_grow + 4095) >> 12; // (Text size + one page) >> page size
     vaddr.ro_addr = g_exheader.codesetinfo.ro.address;
     vaddr.ro_size = (g_exheader.codesetinfo.ro.codesize + ro_grow + 4095) >> 12;
     vaddr.data_addr = g_exheader.codesetinfo.data.address;
-    vaddr.data_size =
-        (g_exheader.codesetinfo.data.codesize + data_grow + 4095) >> 12;
-    data_mem_size = (g_exheader.codesetinfo.data.codesize + text_grow +
-                     g_exheader.codesetinfo.bsssize + 4095) >>
-                    12;
-    vaddr.total_size = vaddr.text_size + vaddr.ro_size + vaddr.data_size +
-                       text_grow + ro_grow + data_grow;
+    vaddr.data_size = (g_exheader.codesetinfo.data.codesize + data_grow + 4095) >> 12;
+    data_mem_size = (g_exheader.codesetinfo.data.codesize + text_grow + g_exheader.codesetinfo.bsssize + 4095) >> 12;
+    vaddr.total_size = vaddr.text_size + vaddr.ro_size + vaddr.data_size + text_grow + ro_grow + data_grow;
 
     if ((res = allocate_shared_mem(&shared_addr, &vaddr, flags)) < 0) {
         return res;
     }
 
-    if ((res = load_code(progid, &shared_addr, &original_vaddr, prog_handle,
-                         g_exheader.codesetinfo.flags.flag & 1)) >= 0) {
+    if ((res = load_code(progid, &shared_addr, &original_vaddr, prog_handle, g_exheader.codesetinfo.flags.flag & 1)) >= 0) {
         memcpy(&codesetinfo.name, g_exheader.codesetinfo.name, 8);
         codesetinfo.program_id = progid;
         codesetinfo.text_addr = vaddr.text_addr;
@@ -258,15 +238,11 @@ loader_LoadProcess(Handle* process, u64 prog_handle)
         codesetinfo.rw_addr = vaddr.data_addr;
         codesetinfo.rw_size = vaddr.data_size;
         codesetinfo.rw_size_total = data_mem_size;
-        res = svcCreateCodeSet(
-            &codeset, &codesetinfo, (void*)shared_addr.text_addr,
-            (void*)shared_addr.ro_addr, (void*)shared_addr.data_addr);
+        res = svcCreateCodeSet(&codeset, &codesetinfo, (void *)shared_addr.text_addr, (void *)shared_addr.ro_addr, (void *)shared_addr.data_addr);
         if (res >= 0) {
-			closeLogger();
+            closeLogger();
 
-            res =
-                svcCreateProcess(process, codeset,
-                                 g_exheader.arm11kernelcaps.descriptors, count);
+            res = svcCreateProcess(process, codeset, g_exheader.arm11kernelcaps.descriptors, count);
             svcCloseHandle(codeset);
             if (res >= 0) {
                 return 0;
@@ -274,14 +250,12 @@ loader_LoadProcess(Handle* process, u64 prog_handle)
         }
     }
 
-    svcControlMemory(&dummy, shared_addr.text_addr, 0,
-                     shared_addr.total_size << 12, MEMOP_FREE, 0);
+    svcControlMemory(&dummy, shared_addr.text_addr, 0, shared_addr.total_size << 12, MEMOP_FREE, 0);
     return res;
 }
 
 static Result
-loader_RegisterProgram(u64* prog_handle, FS_ProgramInfo* title,
-                       FS_ProgramInfo* update)
+loader_RegisterProgram(u64 *prog_handle, FS_ProgramInfo *title, FS_ProgramInfo *update)
 {
     Result res;
     u64 prog_id;
@@ -300,8 +274,7 @@ loader_RegisterProgram(u64* prog_handle, FS_ProgramInfo* title,
                 res = FSREG_CheckHostLoadId(*prog_handle);
                 // if ((res >= 0 && (unsigned)res >> 27) || (res < 0 &&
                 // ((unsigned)res >> 27)-32))
-                if (R_FAILED(res) ||
-                    (R_SUCCEEDED(res) && R_LEVEL(res) != RL_SUCCESS)) {
+                if (R_FAILED(res) || (R_SUCCEEDED(res) && R_LEVEL(res) != RL_SUCCESS)) {
                     return 0;
                 }
             }
@@ -309,8 +282,7 @@ loader_RegisterProgram(u64* prog_handle, FS_ProgramInfo* title,
         }
     }
 
-    if ((title->mediaType != update->mediaType) ||
-        (prog_id != update->programId)) {
+    if ((title->mediaType != update->mediaType) || (prog_id != update->programId)) {
         svcBreak(USERBREAK_ASSERT);
     }
     res = FSREG_LoadProgram(prog_handle, title);
@@ -352,7 +324,7 @@ handle_commands(void)
 {
     FS_ProgramInfo title;
     FS_ProgramInfo update;
-    u32* cmdbuf;
+    u32 *cmdbuf;
     u16 cmdid;
     int res;
     Handle handle;
@@ -364,7 +336,7 @@ handle_commands(void)
     switch (cmdid) {
         case 1: // LoadProcess
         {
-            res = loader_LoadProcess(&handle, *(u64*)&cmdbuf[1]);
+            res = loader_LoadProcess(&handle, *(u64 *)&cmdbuf[1]);
             cmdbuf[0] = 0x10042;
             cmdbuf[1] = res;
             cmdbuf[2] = 16;
@@ -378,7 +350,7 @@ handle_commands(void)
             res = loader_RegisterProgram(&prog_handle, &title, &update);
             cmdbuf[0] = 0x200C0;
             cmdbuf[1] = res;
-            *(u64*)&cmdbuf[2] = prog_handle;
+            *(u64 *)&cmdbuf[2] = prog_handle;
             break;
         }
         case 3: // UnregisterProgram
@@ -387,12 +359,12 @@ handle_commands(void)
                 g_cached_prog_handle = 0;
             }
             cmdbuf[0] = 0x30040;
-            cmdbuf[1] = loader_UnregisterProgram(*(u64*)&cmdbuf[1]);
+            cmdbuf[1] = loader_UnregisterProgram(*(u64 *)&cmdbuf[1]);
             break;
         }
         case 4: // GetProgramInfo
         {
-            prog_handle = *(u64*)&cmdbuf[1];
+            prog_handle = *(u64 *)&cmdbuf[1];
             if (prog_handle != g_cached_prog_handle) {
                 res = loader_GetProgramInfo(&g_exheader, prog_handle);
                 if (res >= 0) {
@@ -418,7 +390,7 @@ handle_commands(void)
 }
 
 static Result
-should_terminate(int* term_request)
+should_terminate(int *term_request)
 {
     u32 notid;
     Result ret;
@@ -481,12 +453,12 @@ main()
     Result ret;
     Handle handle;
     Handle reply_target;
-    Handle* srv_handle;
-    Handle* notification_handle;
+    Handle *srv_handle;
+    Handle *notification_handle;
     s32 index;
     int i;
     int term_request;
-    u32* cmdbuf;
+    u32 *cmdbuf;
 
     ret = 0;
 
@@ -512,8 +484,7 @@ main()
             cmdbuf = getThreadCommandBuffer();
             cmdbuf[0] = 0xFFFF0000;
         }
-        ret = svcReplyAndReceive(&index, g_handles, g_active_handles,
-                                 reply_target);
+        ret = svcReplyAndReceive(&index, g_handles, g_active_handles, reply_target);
 
         if (R_FAILED(ret)) {
             // check if any handle has been closed

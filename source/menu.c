@@ -19,46 +19,46 @@ static struct options_s options[] = {
     // Patches.
     { 0, "\x1b[32;40mPatches\x1b[0m", not_option, 0, 0 },
 
-    { OPTION_SIGPATCH,          "Signature Patch", boolean_val, 0, 0 },
+    { OPTION_SIGPATCH, "Signature Patch", boolean_val, 0, 0 },
 
-    { OPTION_FIRMPROT,          "FIRM Protection", boolean_val, 0, 0 },
+    { OPTION_FIRMPROT, "FIRM Protection", boolean_val, 0, 0 },
 
-    { OPTION_LOADER,            "System Modules", boolean_val, 0, 0 },
-    { OPTION_LOADER_CPU_L2,     "  CPU - L2 cache", boolean_val, 0, 0 },
+    { OPTION_LOADER, "System Modules", boolean_val, 0, 0 },
+    { OPTION_LOADER_CPU_L2, "  CPU - L2 cache", boolean_val, 0, 0 },
     { OPTION_LOADER_CPU_800MHZ, "  CPU - 800Mhz", boolean_val, 0, 0 },
-    { OPTION_LOADER_LANGEMU,    "  Language Emulation", boolean_val, 0, 0 },
+    { OPTION_LOADER_LANGEMU, "  Language Emulation", boolean_val, 0, 0 },
 
-    { OPTION_SERVICES,          "Service Replacement", boolean_val, 0, 0 },
+    { OPTION_SERVICES, "Service Replacement", boolean_val, 0, 0 },
 
-    { OPTION_AADOWNGRADE,       "Anti-anti-downgrade", boolean_val, 0, 0 },
+    { OPTION_AADOWNGRADE, "Anti-anti-downgrade", boolean_val, 0, 0 },
 
     // space
     { 0, "", not_option, 0, 0 },
     // Patches.
     { 0, "\x1b[32;40mPatches (Developer)\x1b[0m", not_option, 0, 0 },
 
-    { OPTION_UNITINFO,              "Developer UNITINFO", boolean_val, 0, 0 },
-    { OPTION_MEMEXEC,               "Disable XN on MPU", boolean_val, 0, 0 },
+    { OPTION_UNITINFO, "Developer UNITINFO", boolean_val, 0, 0 },
+    { OPTION_MEMEXEC, "Disable XN on MPU", boolean_val, 0, 0 },
     { OPTION_REPLACE_ALLOCATED_SVC, "Force service replace", boolean_val, 0, 0 },
 
-//    { OPTION_ARM9THREAD,        "ARM9 Thread", boolean_val, 0, 0 },
+    //    { OPTION_ARM9THREAD,        "ARM9 Thread", boolean_val, 0, 0 },
 
     // space
     { 0, "", not_option, 0, 0 },
     // Patches.
     { 0, "\x1b[32;40mOptions\x1b[0m", not_option, 0, 0 },
 
-    { OPTION_AUTOBOOT,          "Autoboot", boolean_val, 0, 0 },
-    { OPTION_SILENCE,           "  Stealth mode", boolean_val, 0, 0 },
-    { OPTION_TRACE,             "Debug pauses during operation", boolean_val, 0, 0 },
+    { OPTION_AUTOBOOT, "Autoboot", boolean_val, 0, 0 },
+    { OPTION_SILENCE, "  Stealth mode", boolean_val, 0, 0 },
+    { OPTION_TRACE, "Debug pauses during operation", boolean_val, 0, 0 },
 
-//    { OPTION_TRANSP_BG,         "Black -> transparent", boolean_val, 0, 0 },
-//    { OPTION_NO_CLEAR_BG,       "Preserve framebuffer", boolean_val, 0, 0 },
+    //    { OPTION_TRANSP_BG,         "Black -> transparent", boolean_val, 0, 0 },
+    //    { OPTION_NO_CLEAR_BG,       "Preserve framebuffer", boolean_val, 0, 0 },
 
-    { OPTION_READ_ME,           "Hide `Help`", boolean_val, 0, 0 },
+    { OPTION_READ_ME, "Hide `Help`", boolean_val, 0, 0 },
 
-//    { IGNORE_PATCH_DEPS,   "Ignore dependencies", boolean_val, 0, 0 },
-//    { IGNORE_BROKEN_SHIT,  "Allow unsafe options", boolean_val, 0, 0 },
+    //    { IGNORE_PATCH_DEPS,   "Ignore dependencies", boolean_val, 0, 0 },
+    //    { IGNORE_BROKEN_SHIT,  "Allow unsafe options", boolean_val, 0, 0 },
 
     // Sentinel.
     { -1, "", 0, -1, -1 }, // cursor_min and cursor_max are stored in the last two.
@@ -94,7 +94,7 @@ wait_key()
 }
 
 void
-header(char* append)
+header(char *append)
 {
     fprintf(stdout, "\x1b[30;42m.corbenik//%s %s\x1b[0m\n", VERSION, append);
 }
@@ -112,48 +112,46 @@ menu_options()
 
     // Figure out the max if unset.
     if (cursor_max == -1) {
-        cursor_max=0;
-        while(options[cursor_max].index != -1)
+        cursor_max = 0;
+        while (options[cursor_max].index != -1)
             ++cursor_max;
 
-		while(options[cursor_max].allowed == not_option)
-			--cursor_max;
+        while (options[cursor_max].allowed == not_option)
+            --cursor_max;
     }
 
     // Figure out the max if unset.
     if (cursor_min == -1) {
-        cursor_min=0;
-        while(options[cursor_min].allowed == not_option)
+        cursor_min = 0;
+        while (options[cursor_min].allowed == not_option)
             ++cursor_min;
-		cursor_y = cursor_min;
+        cursor_y = cursor_min;
     }
 
     header("A:Enter B:Back DPAD:Nav");
 
     int i = 0;
     while (options[i].index != -1) { // -1 Sentinel.
-		if (options[i].allowed == boolean_val) {
-	        if (cursor_y == i)
-	            fprintf(TOP_SCREEN, "\x1b[32m>>\x1b[0m ");
-	        else
-	            fprintf(TOP_SCREEN, "   ");
+        if (options[i].allowed == boolean_val) {
+            if (cursor_y == i)
+                fprintf(TOP_SCREEN, "\x1b[32m>>\x1b[0m ");
+            else
+                fprintf(TOP_SCREEN, "   ");
 
-	        if (need_redraw)
-	            fprintf(TOP_SCREEN, "[%c]  %s\n",
-    	                (config.options[options[i].index] ? 'X' : ' '),
-	                    options[i].name);
-        	else {
-            	// Yes, this is weird. printf does a large number of extra things we
-            	// don't
-            	// want computed at the moment; this is faster.
-            	putc(TOP_SCREEN, '[');
-            	putc(TOP_SCREEN, (config.options[options[i].index] ? 'X' : ' '));
-            	putc(TOP_SCREEN, ']');
-            	putc(TOP_SCREEN, '\n');
-        	}
-		} else if (options[i].allowed == not_option) {
-	        fprintf(TOP_SCREEN, "%s\n", options[i].name);
-		}
+            if (need_redraw)
+                fprintf(TOP_SCREEN, "[%c]  %s\n", (config.options[options[i].index] ? 'X' : ' '), options[i].name);
+            else {
+                // Yes, this is weird. printf does a large number of extra things we
+                // don't
+                // want computed at the moment; this is faster.
+                putc(TOP_SCREEN, '[');
+                putc(TOP_SCREEN, (config.options[options[i].index] ? 'X' : ' '));
+                putc(TOP_SCREEN, ']');
+                putc(TOP_SCREEN, '\n');
+            }
+        } else if (options[i].allowed == not_option) {
+            fprintf(TOP_SCREEN, "%s\n", options[i].name);
+        }
         ++i;
     }
 
@@ -164,28 +162,27 @@ menu_options()
     switch (key) {
         case BUTTON_UP:
             cursor_y -= 1;
-			while(options[cursor_y].allowed == not_option && cursor_y >= cursor_min)
-				cursor_y--;
+            while (options[cursor_y].allowed == not_option && cursor_y >= cursor_min)
+                cursor_y--;
             break;
         case BUTTON_DOWN:
             cursor_y += 1;
-			while(options[cursor_y].allowed == not_option && cursor_y < cursor_max)
-				cursor_y++;
+            while (options[cursor_y].allowed == not_option && cursor_y < cursor_max)
+                cursor_y++;
             break;
         case BUTTON_LEFT:
             cursor_y -= 5;
-			while(options[cursor_y].allowed == not_option && cursor_y >= cursor_min)
-				cursor_y--;
+            while (options[cursor_y].allowed == not_option && cursor_y >= cursor_min)
+                cursor_y--;
             break;
         case BUTTON_RIGHT:
             cursor_y += 5;
-			while(options[cursor_y].allowed == not_option && cursor_y < cursor_max)
-				cursor_y++;
+            while (options[cursor_y].allowed == not_option && cursor_y < cursor_max)
+                cursor_y++;
             break;
         case BUTTON_A:
             // TODO - Value options
-            config.options[options[cursor_y].index] =
-                !config.options[options[cursor_y].index];
+            config.options[options[cursor_y].index] = !config.options[options[cursor_y].index];
             break;
         case BUTTON_B:
             need_redraw = 1;
@@ -206,17 +203,17 @@ menu_options()
 int
 menu_info()
 {
-	// This menu requres firm to be loaded. Unfortunately.
-	load_firms(); // Lazy load!
+    // This menu requres firm to be loaded. Unfortunately.
+    load_firms(); // Lazy load!
 
     clear_screen(TOP_SCREEN);
 
     set_cursor(TOP_SCREEN, 0, 0);
 
     header("Any:Back");
-    struct firm_signature* native = get_firm_info(firm_loc);
-    struct firm_signature* agb = get_firm_info(agb_firm_loc);
-    struct firm_signature* twl = get_firm_info(twl_firm_loc);
+    struct firm_signature *native = get_firm_info(firm_loc);
+    struct firm_signature *agb = get_firm_info(agb_firm_loc);
+    struct firm_signature *twl = get_firm_info(twl_firm_loc);
 
     fprintf(stdout, "\nNATIVE_FIRM / Firmware:\n"
                     "  Version: %s (%x)\n"
@@ -224,8 +221,7 @@ menu_info()
                     "  Version: %s (%x)\n"
                     "TWL_FIRM / DSi Firmware:\n"
                     "  Version: %s (%x)\n",
-            native->version_string, native->version, agb->version_string,
-            agb->version, twl->version_string, twl->version);
+            native->version_string, native->version, agb->version_string, agb->version, twl->version_string, twl->version);
     while (1) {
         if (wait_key() & BUTTON_ANY)
             break;
@@ -302,9 +298,7 @@ menu_main()
 {
     set_cursor(TOP_SCREEN, 0, 0);
 
-    const char* list[] = { "Options",      "Patches", "Info",
-                           "Help/Readme",  "Reset",   "Power off",
-                           "Boot firmware" };
+    const char *list[] = { "Options", "Patches", "Info", "Help/Readme", "Reset", "Power off", "Boot firmware" };
     int menu_max = 7;
 
     header("A:Enter DPAD:Nav");
@@ -345,9 +339,9 @@ menu_main()
             cursor_y = 0;
             if (ret == MENU_BOOTME)
                 return MENU_BOOTME; // Boot meh, damnit!
-		    clear_screen(TOP_SCREEN);
-			if (ret == MENU_OPTIONS)
-				cursor_y = cursor_min; // Fixup positions
+            clear_screen(TOP_SCREEN);
+            if (ret == MENU_OPTIONS)
+                cursor_y = cursor_min; // Fixup positions
             return ret;
     }
 

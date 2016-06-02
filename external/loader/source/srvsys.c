@@ -25,8 +25,7 @@ srvSysInit()
 
     while (1) {
         rc = svcConnectToPort(&srvHandle, "srv:");
-        if (R_LEVEL(rc) != RL_PERMANENT || R_SUMMARY(rc) != RS_NOTFOUND ||
-            R_DESCRIPTION(rc) != RD_NOT_FOUND)
+        if (R_LEVEL(rc) != RL_PERMANENT || R_SUMMARY(rc) != RS_NOTFOUND || R_DESCRIPTION(rc) != RD_NOT_FOUND)
             break;
         svcSleepThread(500000);
     }
@@ -43,7 +42,7 @@ Result
 srvSysRegisterClient(void)
 {
     Result rc = 0;
-    u32* cmdbuf = getThreadCommandBuffer();
+    u32 *cmdbuf = getThreadCommandBuffer();
 
     cmdbuf[0] = IPC_MakeHeader(0x1, 0, 2); // 0x10002
     cmdbuf[1] = IPC_Desc_CurProcessHandle();
@@ -78,13 +77,13 @@ srvSysExit()
 }
 
 Result
-srvSysGetServiceHandle(Handle* out, const char* name)
+srvSysGetServiceHandle(Handle *out, const char *name)
 {
     Result rc = 0;
-    u32* cmdbuf = getThreadCommandBuffer();
+    u32 *cmdbuf = getThreadCommandBuffer();
 
     cmdbuf[0] = IPC_MakeHeader(0x5, 4, 0); // 0x50100
-    strncpy((char*)&cmdbuf[1], name, 8);
+    strncpy((char *)&cmdbuf[1], name, 8);
     cmdbuf[3] = strlen(name);
     cmdbuf[4] = 0x0;
 
@@ -98,10 +97,10 @@ srvSysGetServiceHandle(Handle* out, const char* name)
 }
 
 Result
-srvSysEnableNotification(Handle* semaphoreOut)
+srvSysEnableNotification(Handle *semaphoreOut)
 {
     Result rc = 0;
-    u32* cmdbuf = getThreadCommandBuffer();
+    u32 *cmdbuf = getThreadCommandBuffer();
 
     cmdbuf[0] = IPC_MakeHeader(0x2, 0, 0);
 
@@ -115,10 +114,10 @@ srvSysEnableNotification(Handle* semaphoreOut)
 }
 
 Result
-srvSysReceiveNotification(u32* notificationIdOut)
+srvSysReceiveNotification(u32 *notificationIdOut)
 {
     Result rc = 0;
-    u32* cmdbuf = getThreadCommandBuffer();
+    u32 *cmdbuf = getThreadCommandBuffer();
 
     cmdbuf[0] = IPC_MakeHeader(0xB, 0, 0); // 0xB0000
 
@@ -132,13 +131,13 @@ srvSysReceiveNotification(u32* notificationIdOut)
 }
 
 Result
-srvSysRegisterService(Handle* out, const char* name, int maxSessions)
+srvSysRegisterService(Handle *out, const char *name, int maxSessions)
 {
     Result rc = 0;
-    u32* cmdbuf = getThreadCommandBuffer();
+    u32 *cmdbuf = getThreadCommandBuffer();
 
     cmdbuf[0] = IPC_MakeHeader(0x3, 4, 0); // 0x30100
-    strncpy((char*)&cmdbuf[1], name, 8);
+    strncpy((char *)&cmdbuf[1], name, 8);
     cmdbuf[3] = strlen(name);
     cmdbuf[4] = maxSessions;
 
@@ -152,13 +151,13 @@ srvSysRegisterService(Handle* out, const char* name, int maxSessions)
 }
 
 Result
-srvSysUnregisterService(const char* name)
+srvSysUnregisterService(const char *name)
 {
     Result rc = 0;
-    u32* cmdbuf = getThreadCommandBuffer();
+    u32 *cmdbuf = getThreadCommandBuffer();
 
     cmdbuf[0] = IPC_MakeHeader(0x4, 3, 0); // 0x400C0
-    strncpy((char*)&cmdbuf[1], name, 8);
+    strncpy((char *)&cmdbuf[1], name, 8);
     cmdbuf[3] = strlen(name);
 
     if (R_FAILED(rc = svcSendSyncRequest(srvHandle)))

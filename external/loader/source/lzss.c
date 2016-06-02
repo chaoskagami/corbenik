@@ -3,7 +3,7 @@
 // TODO - In the future, why not ADD code compression modes? Like, zlib, for example. Or lzss+zlib.
 
 int
-lzss_decompress(u8* buffer)
+lzss_decompress(u8 *buffer)
 {
     // This WAS originally a decompilation in @yifan_lu's repo; it was rewritten
     // for readability following ctrtool's namings.
@@ -19,8 +19,8 @@ lzss_decompress(u8* buffer)
         return 0;
 
     // v1=decompressedSize, v2=compressedSize, v3=index, v4=stopIndex
-    decompSize = *((u32*)buffer - 2);
-    compressEndOff = &buffer[*((u32*)buffer - 1)];
+    decompSize = *((u32 *)buffer - 2);
+    compressEndOff = &buffer[*((u32 *)buffer - 1)];
     index = &buffer[-(decompSize >> 24)]; // FIXME - The integer negation is due
                                           // to a compiler optimization. It's
                                           // probably okay, but...

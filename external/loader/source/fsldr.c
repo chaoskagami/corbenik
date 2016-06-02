@@ -22,7 +22,7 @@ fsldrPatchPermissions(void)
     info.mediaType = MEDIATYPE_NAND;
     res = svcGetProcessId(&pid, 0xFFFF8001);
     if (R_SUCCEEDED(res)) {
-        res = FSREG_Register(pid, 0xFFFF000000000000LL, &info, (u8*)storage);
+        res = FSREG_Register(pid, 0xFFFF000000000000LL, &info, (u8 *)storage);
     }
     return res;
 }
@@ -60,7 +60,7 @@ fsldrExit(void)
 Result
 FSLDR_InitializeWithSdkVersion(Handle session, u32 version)
 {
-    u32* cmdbuf = getThreadCommandBuffer();
+    u32 *cmdbuf = getThreadCommandBuffer();
 
     cmdbuf[0] = IPC_MakeHeader(0x861, 1, 2); // 0x8610042
     cmdbuf[1] = version;
@@ -76,7 +76,7 @@ FSLDR_InitializeWithSdkVersion(Handle session, u32 version)
 Result
 FSLDR_SetPriority(u32 priority)
 {
-    u32* cmdbuf = getThreadCommandBuffer();
+    u32 *cmdbuf = getThreadCommandBuffer();
 
     cmdbuf[0] = IPC_MakeHeader(0x862, 1, 0); // 0x8620040
     cmdbuf[1] = priority;
@@ -89,10 +89,9 @@ FSLDR_SetPriority(u32 priority)
 }
 
 Result
-FSLDR_OpenFileDirectly(Handle* out, FS_ArchiveID archiveId, FS_Path archivePath,
-                       FS_Path filePath, u32 openFlags, u32 attributes)
+FSLDR_OpenFileDirectly(Handle *out, FS_ArchiveID archiveId, FS_Path archivePath, FS_Path filePath, u32 openFlags, u32 attributes)
 {
-    u32* cmdbuf = getThreadCommandBuffer();
+    u32 *cmdbuf = getThreadCommandBuffer();
 
     cmdbuf[0] = IPC_MakeHeader(0x803, 8, 4); // 0x8030204
     cmdbuf[1] = 0;

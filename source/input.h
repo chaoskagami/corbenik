@@ -18,6 +18,6 @@
 
 #define BUTTON_ANY 0xFFF
 
-#define HID_PAD ((*(volatile uint32_t*)0x10146000) ^ BUTTON_ANY)
+#define HID_PAD ((*(volatile uint32_t *)0x10146000) ^ BUTTON_ANY)
 
 #endif

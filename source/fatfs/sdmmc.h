@@ -96,9 +96,8 @@
 
 #define TMIO_MASK_ALL 0x837f031d
 
-#define TMIO_MASK_GW                                                           \
-    (TMIO_STAT1_ILL_ACCESS | TMIO_STAT1_CMDTIMEOUT | TMIO_STAT1_TXUNDERRUN |   \
-     TMIO_STAT1_RXOVERFLOW | TMIO_STAT1_DATATIMEOUT | TMIO_STAT1_STOPBIT_ERR | \
+#define TMIO_MASK_GW                                                                                                                                           \
+    (TMIO_STAT1_ILL_ACCESS | TMIO_STAT1_CMDTIMEOUT | TMIO_STAT1_TXUNDERRUN | TMIO_STAT1_RXOVERFLOW | TMIO_STAT1_DATATIMEOUT | TMIO_STAT1_STOPBIT_ERR |         \
      TMIO_STAT1_CRCFAIL | TMIO_STAT1_CMD_IDX_ERR)
 
 #define TMIO_MASK_READOP (TMIO_STAT1_RXRDY | TMIO_STAT1_DATAEND)
@@ -110,7 +109,7 @@ extern "C" {
 
 typedef struct mmcdevice
 {
-    uint8_t* data;
+    uint8_t *data;
     uint32_t size;
     uint32_t error;
     uint16_t stat0;
@@ -126,21 +125,17 @@ typedef struct mmcdevice
 } mmcdevice;
 
 int sdmmc_sdcard_init();
-int sdmmc_sdcard_readsector(uint32_t sector_no, uint8_t* out);
-int sdmmc_sdcard_readsectors(uint32_t sector_no, uint32_t numsectors,
-                             uint8_t* out);
-int sdmmc_sdcard_writesector(uint32_t sector_no, uint8_t* in);
-int sdmmc_sdcard_writesectors(uint32_t sector_no, uint32_t numsectors,
-                              uint8_t* in);
+int sdmmc_sdcard_readsector(uint32_t sector_no, uint8_t *out);
+int sdmmc_sdcard_readsectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out);
+int sdmmc_sdcard_writesector(uint32_t sector_no, uint8_t *in);
+int sdmmc_sdcard_writesectors(uint32_t sector_no, uint32_t numsectors, uint8_t *in);
 
-int sdmmc_nand_readsectors(uint32_t sector_no, uint32_t numsectors,
-                           uint8_t* out);
-int sdmmc_nand_writesectors(uint32_t sector_no, uint32_t numsectors,
-                            uint8_t* in);
+int sdmmc_nand_readsectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out);
+int sdmmc_nand_writesectors(uint32_t sector_no, uint32_t numsectors, uint8_t *in);
 
-int sdmmc_get_cid(int isNand, uint32_t* info);
+int sdmmc_get_cid(int isNand, uint32_t *info);
 
-mmcdevice* getMMCDevice(int drive);
+mmcdevice *getMMCDevice(int drive);
 
 void InitSD();
 int Nand_Init();
@@ -155,7 +150,7 @@ static inline uint16_t
 sdmmc_read16(uint16_t reg)
 {
     //---------------------------------------------------------------------------------
-    return *(volatile uint16_t*)(SDMMC_BASE + reg);
+    return *(volatile uint16_t *)(SDMMC_BASE + reg);
 }
 
 //---------------------------------------------------------------------------------
@@ -163,7 +158,7 @@ static inline void
 sdmmc_write16(uint16_t reg, uint16_t val)
 {
     //---------------------------------------------------------------------------------
-    *(volatile uint16_t*)(SDMMC_BASE + reg) = val;
+    *(volatile uint16_t *)(SDMMC_BASE + reg) = val;
 }
 
 //---------------------------------------------------------------------------------
@@ -171,7 +166,7 @@ static inline uint32_t
 sdmmc_read32(uint16_t reg)
 {
     //---------------------------------------------------------------------------------
-    return *(volatile uint32_t*)(SDMMC_BASE + reg);
+    return *(volatile uint32_t *)(SDMMC_BASE + reg);
 }
 
 //---------------------------------------------------------------------------------
@@ -179,7 +174,7 @@ static inline void
 sdmmc_write32(uint16_t reg, uint32_t val)
 {
     //---------------------------------------------------------------------------------
-    *(volatile uint32_t*)(SDMMC_BASE + reg) = val;
+    *(volatile uint32_t *)(SDMMC_BASE + reg) = val;
 }
 
 //---------------------------------------------------------------------------------

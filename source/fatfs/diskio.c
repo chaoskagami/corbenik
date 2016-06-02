@@ -15,8 +15,7 @@
 /*-----------------------------------------------------------------------*/
 
 DSTATUS
-disk_status(__attribute__((unused))
-            BYTE pdrv /* Physical drive nmuber to identify the drive */
+disk_status(__attribute__((unused)) BYTE pdrv /* Physical drive nmuber to identify the drive */
             )
 {
     return RES_OK;
@@ -27,8 +26,7 @@ disk_status(__attribute__((unused))
 /*-----------------------------------------------------------------------*/
 
 DSTATUS
-disk_initialize(__attribute__((unused))
-                BYTE pdrv /* Physical drive nmuber to identify the drive */
+disk_initialize(__attribute__((unused)) BYTE pdrv /* Physical drive nmuber to identify the drive */
                 )
 {
     if (!sdmmc_sdcard_init())
@@ -41,11 +39,10 @@ disk_initialize(__attribute__((unused))
 /*-----------------------------------------------------------------------*/
 
 DRESULT
-disk_read(__attribute__((unused))
-          BYTE pdrv,    /* Physical drive nmuber to identify the drive */
-          BYTE* buff,   /* Data buffer to store read data */
-          DWORD sector, /* Sector address in LBA */
-          UINT count    /* Number of sectors to read */
+disk_read(__attribute__((unused)) BYTE pdrv, /* Physical drive nmuber to identify the drive */
+          BYTE *buff,                        /* Data buffer to store read data */
+          DWORD sector,                      /* Sector address in LBA */
+          UINT count                         /* Number of sectors to read */
           )
 {
     if (sdmmc_sdcard_readsectors(sector, count, buff)) {
@@ -61,14 +58,13 @@ disk_read(__attribute__((unused))
 
 #if _USE_WRITE
 DRESULT
-disk_write(__attribute__((unused))
-           BYTE pdrv,        /* Physical drive nmuber to identify the drive */
-           const BYTE* buff, /* Data to be written */
-           DWORD sector,     /* Sector address in LBA */
-           UINT count        /* Number of sectors to write */
+disk_write(__attribute__((unused)) BYTE pdrv, /* Physical drive nmuber to identify the drive */
+           const BYTE *buff,                  /* Data to be written */
+           DWORD sector,                      /* Sector address in LBA */
+           UINT count                         /* Number of sectors to write */
            )
 {
-    if (sdmmc_sdcard_writesectors(sector, count, (BYTE*)buff)) {
+    if (sdmmc_sdcard_writesectors(sector, count, (BYTE *)buff)) {
         return RES_PARERR;
     }
 
@@ -82,21 +78,20 @@ disk_write(__attribute__((unused))
 
 #if _USE_IOCTL
 DRESULT
-disk_ioctl(
-    __attribute__((unused)) BYTE pdrv, /* Physical drive nmuber (0..) */
-    __attribute__((unused)) BYTE cmd,  /* Control code */
-    __attribute__((unused)) void* buff /* Buffer to send/receive control data */
-    )
+disk_ioctl(__attribute__((unused)) BYTE pdrv, /* Physical drive nmuber (0..) */
+           __attribute__((unused)) BYTE cmd,  /* Control code */
+           __attribute__((unused)) void *buff /* Buffer to send/receive control data */
+           )
 {
     switch (cmd) {
         case GET_SECTOR_SIZE:
-            *((DWORD*)buff) = 0x200;
+            *((DWORD *)buff) = 0x200;
             return RES_OK;
         case GET_SECTOR_COUNT:
-            *((DWORD*)buff) = getMMCDevice(1)->total_size;
+            *((DWORD *)buff) = getMMCDevice(1)->total_size;
             return RES_OK;
         case GET_BLOCK_SIZE:
-            *((DWORD*)buff) = 0x2000;
+            *((DWORD *)buff) = 0x2000;
             return RES_OK;
         case CTRL_SYNC:
             // nothing to do here - the disk_write function handles that

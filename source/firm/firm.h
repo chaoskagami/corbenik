@@ -17,22 +17,22 @@ struct firm_signature
     enum consoles console;
 };
 
-extern firm_h* firm_loc;
-extern struct firm_signature* current_firm;
+extern firm_h *firm_loc;
+extern struct firm_signature *current_firm;
 extern firm_section_h firm_proc9;
-extern exefs_h* firm_p9_exefs;
+extern exefs_h *firm_p9_exefs;
 
-extern firm_h* twl_firm_loc;
-extern struct firm_signature* current_twl_firm;
+extern firm_h *twl_firm_loc;
+extern struct firm_signature *current_twl_firm;
 extern firm_section_h twl_firm_proc9;
-extern exefs_h* twl_firm_p9_exefs;
+extern exefs_h *twl_firm_p9_exefs;
 
-extern firm_h* agb_firm_loc;
-extern struct firm_signature* current_agb_firm;
+extern firm_h *agb_firm_loc;
+extern struct firm_signature *current_agb_firm;
 extern firm_section_h agb_firm_proc9;
-extern exefs_h* agb_firm_p9_exefs;
+extern exefs_h *agb_firm_p9_exefs;
 
-struct firm_signature* get_firm_info(firm_h* firm);
+struct firm_signature *get_firm_info(firm_h *firm);
 void slot0x11key96_init();
 
 int load_firms();

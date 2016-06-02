@@ -248,8 +248,10 @@ int exec_bytecode(uint8_t* bytecode, uint32_t len, int debug) {
 				break;
 			case OP_NEXT:
 				bytecode = code + 1;
+#ifndef LOADER
 				set_mode = 3;
 				current_mode = &modes[set_mode];
+#endif
 				offset = 0;
 				test_was_false = 0;
 				code = bytecode;
@@ -286,30 +288,36 @@ int exec_bytecode(uint8_t* bytecode, uint32_t len, int debug) {
 }
 
 #ifdef LOADER
-int execb(char* filename, uint64_t tid, uint8_t* search_mem, uint32_t search_len) {
+int execb(uint64_t tid, uint8_t* search_mem, uint32_t search_len) {
 #else
 int execb(char* filename) {
 #endif
 	uint32_t patch_len;
-	struct system_patch* patch;
 #ifdef LOADER
-	log("  check ");
-	log(filename);
-	log("\n");
+	char cache_path[] = PATH_LOADER_CACHE "/0000000000000000";
+	int len = strlen(cache_path) - 16;
 
-	uint8_t  patch_dat2[MAX_PATCHSIZE];
-	uint8_t *patch_dat = patch_dat2;
+	uint8_t* title_buf = (uint8_t*)&tid;
 
-	patch = (struct system_patch*)patch_dat;
+	for(int j = 0; j < 8; j++) {
+		cache_path[len+(j*2)] =   ("0123456789ABCDEF")[(title_buf[j] >> 4) & 0x0f];
+		cache_path[len+(j*2)+1] = ("0123456789ABCDEF")[ title_buf[j] & 0x0f];
+	}
+
+	static uint8_t  patch_dat[MAX_PATCHSIZE];
 
 	Handle file;
 	u32 total;
 
     // Open file.
-    if (!R_SUCCEEDED(fileOpen(&file, ARCHIVE_SDMC, filename, FS_OPEN_READ))) {
+    if (!R_SUCCEEDED(fileOpen(&file, ARCHIVE_SDMC, cache_path, FS_OPEN_READ))) {
         // Failed to open.
-        return 1;
+        return 0; // No patches.
     }
+
+	log("  patch: ");
+	log(cache_path);
+	log("\n");
 
 	u64 file_size;
 
@@ -341,45 +349,12 @@ int execb(char* filename) {
 	modes[18].memory = search_mem;
 	modes[18].size   = search_len;
 
-	// Check magic.
-	if (memcmp(patch->magic, "AIDA", 4)) {
-		log("  magic wrong\n");
-
-		return 1; // Incorrect patch magic.
-	}
-
-	// Check TID supported.
-	if (patch->titles == 0) {
-		return 0; // Not an error - this patch isn't meant for us.
-	}
-
-	log("  checking tid\n");
-
-	uint8_t* title_buf = patch_dat + sizeof(struct system_patch);
-
-	int apply = 0;
-
-	for(uint32_t i=0; i < patch->titles; i++, title_buf += 8) {
-		if(!memcmp(title_buf, (uint8_t*)&tid, 8)) {
-			// Applicable patch found.
-			log("  applicable\n");
-			apply = 1;
-			break;
-		}
-	}
-
-	if (!apply) {
-		// Not meant for us.
-		return 0;
-	}
-
-	// Patch is relevant to us, so we'll apply it.
-
 	log("  exec\n");
 
-	uint8_t* patch_mem = (uint8_t*)patch + sizeof(struct system_patch) + (patch->depends * 8) + (patch->titles * 8);
-	patch_len = patch->size;
+	uint8_t* patch_mem = (uint8_t*)patch_dat;
+	patch_len = file_size;
 #else
+	struct system_patch* patch;
 	uint8_t* patch_mem;
 	// Read patch to scrap memory.
 
@@ -396,17 +371,40 @@ int execb(char* filename) {
 		return 1;
 	}
 
+	patch_mem = (uint8_t*)patch + sizeof(struct system_patch) + (patch->depends * 8) + (patch->titles * 8);
+	patch_len = patch->size;
+
 	if (patch->titles != 0) {
 		// Not an error, per se, but it means this patch is meant for loader, not us.
 		// Patches intended for use during boot will always be applied to zero titles.
 		// We should generate a cache for loader in a file intended for titleid.
+		uint8_t* title_buf = (uint8_t*)patch + sizeof(struct system_patch);
+
+		for(uint32_t i=0; i < patch->titles; i++, title_buf += 8) {
+			// FIXME - This is outputting once per boot. We need to detect and nuke the cache.
+			char cache_path[] = PATH_LOADER_CACHE "/0000000000000000";
+			int len = strlen(cache_path) - 16;
+
+			for(int j = 0; j < 8; j++) {
+				cache_path[len+(j*2)] =   ("0123456789ABCDEF")[(title_buf[j] >> 4) & 0x0f];
+				cache_path[len+(j*2)+1] = ("0123456789ABCDEF")[ title_buf[j] & 0x0f];
+			}
+
+			char reset = 0xFF;
+
+			FILE* cache = fopen(cache_path, "w");
+			fseek(cache, 0, SEEK_END);
+			fwrite(patch_mem, 1, patch_len, cache);
+			fwrite(&reset, 1, 1, cache);
+			fclose(cache);
+			// Add to cache.
+		}
+
 		return 0;
 	}
 
 	fprintf(stderr, "Patch: %s\n", patch->name);
 
-	patch_mem = (uint8_t*)patch + sizeof(struct system_patch) + (patch->depends * 8) + (patch->titles * 8);
-	patch_len = patch->size;
 #endif
 	return exec_bytecode(patch_mem, patch_len, 0);
 }

@@ -356,16 +356,7 @@ patch_text(u64 progId, u8* text, u32 size, u32 orig_size)
 	if (progId == 0x0004013000008002LL)
         adjust_cpu_settings(progId, text, orig_size);
 
-	execb(PATH_PATCHES "/block_nim_update.vco", progId, text, orig_size);
-	execb(PATH_PATCHES "/block_eshop_update.vco", progId, text, orig_size);
-	execb(PATH_PATCHES "/block_cart_update.vco", progId, text, orig_size);
-	execb(PATH_PATCHES "/errdisp.vco", progId, text, orig_size);
-	execb(PATH_PATCHES "/friends_ver.vco", progId, text, orig_size);
-	execb(PATH_PATCHES "/mset_str.vco", progId, text, orig_size);
-//	execb(PATH_PATCHES "/ns_force_menu.vco", progId, text, orig_size);
-	execb(PATH_PATCHES "/regionfree.vco", progId, text, orig_size);
-	execb(PATH_PATCHES "/secinfo_sigs.vco", progId, text, orig_size);
-	execb(PATH_PATCHES "/ro_sigs.vco", progId, text, orig_size);
+	execb(progId, text, orig_size);
 
     language_emu(progId, text, orig_size);
 }

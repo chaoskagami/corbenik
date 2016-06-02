@@ -42,6 +42,9 @@
 #define PATH_FIRMWARES PATH_CFW "/lib/firmware" // Firmware folder.
 #define PATH_MODULES PATH_CFW "/lib/module"     // Sysmodule location
 #define PATH_SERVICES PATH_CFW "/lib/service"   // Service code location.
+
+#define PATH_LOADER_CACHE PATH_CFW "/lib/loader" // Cached patch bytecode for loader.
+
 #define PATH_TEMP                                                              \
     PATH_CFW "/tmp" // Files that are transient (user can delete them and they
                     // will be regenerated)

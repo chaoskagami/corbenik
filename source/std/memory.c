@@ -3,13 +3,23 @@
 #include <stdint.h>
 #include <stddef.h>
 
-int
+size_t
 strlen(const char *string)
 {
     char *string_end = (char *)string;
     while (*string_end)
         string_end++;
     return string_end - string;
+}
+
+size_t
+strnlen(const char *string, size_t maxlen)
+{
+    size_t size;
+
+    for (size = 0; *string && size < maxlen; string++, size++);
+
+    return size;
 }
 
 int

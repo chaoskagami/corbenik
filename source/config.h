@@ -73,6 +73,10 @@ struct options_s
 #define OPTION_MEMEXEC 17     // Prevent MPU from disabling execute permissions.
 #define OPTION_UNITINFO 18    // Dev UNITINFO. Note that this is overkill.
 
+#define OPTION_OVERLY_VERBOSE 254 // So much debugging info, it'd make your head spin.
+#define OPTION_RECONFIGURED 255 // This is for internal use only. It's set when any options
+								// change and causes caches to be regenerated.
+
 //#define HEADER_COLOR        12 // Color of header text.
 //#define BG_COLOR            13 // Color of background.
 //#define TEXT_COLOR          14 // Color of most text.

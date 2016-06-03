@@ -29,7 +29,8 @@
         svcBreak(USERBREAK_ASSERT);                                                                                                                            \
     }
 #else
-#define log(a) fprintf(stderr, a)
+  #define log(a) fprintf(stderr, a)
+  int wait();
 #endif
 
 struct mode
@@ -254,6 +255,8 @@ exec_bytecode(uint8_t *bytecode, uint32_t len, int debug)
                 code += *(code - 1);
                 break;
             case OP_NEXT:
+                if (debug)
+                    log("next\n");
                 bytecode = code + 1;
 #ifndef LOADER
                 set_mode = 3;
@@ -263,10 +266,6 @@ exec_bytecode(uint8_t *bytecode, uint32_t len, int debug)
                 test_was_false = 0;
                 code = bytecode;
                 break;
-            case OP_TITLE:
-                if (debug)
-                    log("title\n");
-            // FIXME - NYI
             default:
 #ifndef LOADER
                 // Panic; not proper opcode.
@@ -283,6 +282,10 @@ exec_bytecode(uint8_t *bytecode, uint32_t len, int debug)
                 abort("Halting startup.\n");
                 break;
         }
+#ifndef LOADER
+		if (debug)
+			wait();
+#endif
     }
 
     return 0;
@@ -294,7 +297,7 @@ execb(uint64_t tid, uint8_t *search_mem, uint32_t search_len)
 {
 #else
 int
-execb(char *filename)
+execb(char *filename, int build_cache)
 {
 #endif
     uint32_t patch_len;
@@ -368,37 +371,53 @@ execb(char *filename)
     fread((uint8_t *)FCRAM_PATCH_LOC, 1, len, f);
     fclose(f);
 
-    patch = (struct system_patch *)FCRAM_PATCH_LOC;
+	if (build_cache == 1) {
+	    patch = (struct system_patch *)FCRAM_PATCH_LOC;
 
-    // Make sure various bits are correct.
-    if (memcmp(patch->magic, "AIDA", 4)) {
-        // Incorrect magic.
-        return 1;
-    }
+    	// Make sure various bits are correct.
+    	if (memcmp(patch->magic, "AIDA", 4)) {
+    	    // Incorrect magic.
+    	    return 1;
+    	}
 
-    patch_mem = (uint8_t *)patch + sizeof(struct system_patch) + (patch->depends * 8) + (patch->titles * 8);
-    patch_len = patch->size;
+	    fprintf(stderr, "Cache: %s\n", patch->name);
 
-    if (patch->titles != 0) {
-        // Not an error, per se, but it means this patch is meant for loader, not us.
-        // Patches intended for use during boot will always be applied to zero titles.
-        // We should generate a cache for loader in a file intended for titleid.
-        uint8_t *title_buf = (uint8_t *)patch + sizeof(struct system_patch);
+		patch_mem = (uint8_t*)patch + sizeof(struct system_patch) + (patch->depends * 8) + (patch->titles * 8);
+		patch_len = patch->size;
 
-        fprintf(stderr, "patch: %s\n", patch->name);
+    	if (patch->titles != 0) {
+        	// Not an error, per se, but it means this patch is meant for loader, not us.
+        	// Patches intended for use during boot will always be applied to zero titles.
+        	// We should generate a cache for loader in a file intended for titleid.
+        	uint8_t *title_buf = (uint8_t *)patch + sizeof(struct system_patch);
 
-        for (uint32_t i = 0; i < patch->titles; i++, title_buf += 8) {
+        	fprintf(stderr, "patch: %s\n", patch->name);
+
+        	for (uint32_t i = 0; i < patch->titles; i++, title_buf += 8) {
+            	// FIXME - This is outputting once per boot. We need to detect and nuke the cache.
+            	char cache_path[] = PATH_LOADER_CACHE "/0000000000000000";
+            	int len = strlen(cache_path) - 16;
+
+            	for (int j = 0; j < 8; j++) {
+            		cache_path[len + (j * 2)] = ("0123456789ABCDEF")[(title_buf[j] >> 4) & 0x0f];
+            	    cache_path[len + (j * 2) + 1] = ("0123456789ABCDEF")[title_buf[j] & 0x0f];
+            	}
+
+            	fprintf(stderr, "  cache: %s\n", &cache_path[len]);
+
+            	char reset = 0xFF;
+
+            	FILE *cache = fopen(cache_path, "w");
+            	fseek(cache, 0, SEEK_END);
+            	fwrite(patch_mem, 1, patch_len, cache);
+            	fwrite(&reset, 1, 1, cache);
+            	fclose(cache);
+            	// Add to cache.
+        	}
+		} else {
+			// BOOT patch
             // FIXME - This is outputting once per boot. We need to detect and nuke the cache.
-            char cache_path[] = PATH_LOADER_CACHE "/0000000000000000";
-            int len = strlen(cache_path) - 16;
-
-            for (int j = 0; j < 8; j++) {
-                cache_path[len + (j * 2)] = ("0123456789ABCDEF")[(title_buf[j] >> 4) & 0x0f];
-                cache_path[len + (j * 2) + 1] = ("0123456789ABCDEF")[title_buf[j] & 0x0f];
-            }
-
-            fprintf(stderr, "  cache: %s\n", &cache_path[len]);
-
+            char cache_path[] = PATH_LOADER_CACHE "/BOOT";
             char reset = 0xFF;
 
             FILE *cache = fopen(cache_path, "w");
@@ -406,14 +425,22 @@ execb(char *filename)
             fwrite(patch_mem, 1, patch_len, cache);
             fwrite(&reset, 1, 1, cache);
             fclose(cache);
-            // Add to cache.
-        }
+		}
 
-        return 0;
-    }
-
-    fprintf(stderr, "Patch: %s\n", patch->name);
+		return 0;
+	} else {
+    	patch_mem = (uint8_t *)FCRAM_PATCH_LOC;
+    	patch_len = len;
+	}
 
 #endif
-    return exec_bytecode(patch_mem, patch_len, 0);
+
+	int debug = 0;
+#ifndef LOADER
+	if (config.options[OPTION_OVERLY_VERBOSE]) {
+		debug = 1;
+	}
+#endif
+
+    return exec_bytecode(patch_mem, patch_len, debug);
 }

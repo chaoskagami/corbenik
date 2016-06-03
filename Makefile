@@ -53,7 +53,7 @@ host/langemu.conf:
 	echo "Generating langemu.conf - may take a bit"
 	cd host && ./generate_langemu_conf.sh
 	mkdir -p $(dir_out)/corbenik/etc
-	cp host/langemu.conf $(dir_out)/corbenik/etc/langemu.conf
+	cp host/langemu.conf $(dir_out)/corbenik/config/langemu.conf
 
 .PHONY: clean
 clean:

@@ -30,33 +30,29 @@
 #define PATH_CFW "/corbenik" // CFW root directory.
 #endif
 
-#define PATH_CONFIG_DIR PATH_CFW "/etc"             // Config file directory.
+#define PATH_CONFIG_DIR PATH_CFW "/config"          // Config file directory.
 #define PATH_CONFIG PATH_CONFIG_DIR "/main.conf"    // Config file.
 #define PATH_LOCEMU PATH_CONFIG_DIR "/langemu.conf" // Locale emulation config
 #define PATH_CPU_CFG PATH_CONFIG_DIR "/cpu.conf"    // CPU settings config
 
-#define PATH_PATCHES PATH_CFW "/bin"            // Patch binary folder.
-#define PATH_FIRMWARES PATH_CFW "/lib/firmware" // Firmware folder.
-#define PATH_MODULES PATH_CFW "/lib/module"     // Sysmodule location
-#define PATH_SERVICES PATH_CFW "/lib/service"   // Service code location.
+#define PATH_PATCHES PATH_CFW "/patch"      // Patch binary folder.
+#define PATH_FIRMWARES PATH_CFW "/firmware" // Firmware folder.
+#define PATH_MODULES PATH_CFW "/module"     // Sysmodule location
+#define PATH_SERVICES PATH_CFW "/service"   // Service code location.
 
-#define PATH_LOADER_CACHE PATH_CFW "/lib/loader" // Cached patch bytecode for loader.
-
-#define PATH_TEMP PATH_CFW "/tmp"        // Files that are transient (user can delete them and they
-                                         // will be regenerated)
-#define PATH_KEYS PATH_CFW "/share/keys" // Keyfiles will be loaded from this dir, and
+#define PATH_TEMP PATH_CFW "/cache"        // Files that are transient and used to speed operation
+#define PATH_LOADER_CACHE PATH_TEMP "/loader" // Cached patch bytecode for loader.
+#define PATH_KEYS PATH_CFW "/keys" // Keyfiles will be loaded from this dir, and
                                          // additionally the root if not found.
-#define PATH_EXEFS PATH_CFW "/lib/exe"   // ExeFS overrides, named like '<titleid>.exefs'
+#define PATH_EXEFS PATH_CFW "/exe"   // ExeFS overrides, named like '<titleid>.exefs'
 
 #define PATH_NATIVE_F PATH_FIRMWARES "/native"
 #define PATH_AGB_F PATH_FIRMWARES "/agb"
 #define PATH_TWL_F PATH_FIRMWARES "/twl"
 
-#define PATH_NATIVE_CETK PATH_FIRMWARES "/native.cetk"
-
-#define PATH_TWL_CETK PATH_FIRMWARES "/twl.cetk"
-
-#define PATH_AGB_CETK PATH_FIRMWARES "/agb.cetk"
+//#define PATH_NATIVE_CETK PATH_FIRMWARES "/native.cetk"
+//#define PATH_TWL_CETK PATH_FIRMWARES "/twl.cetk"
+//#define PATH_AGB_CETK PATH_FIRMWARES "/agb.cetk"
 
 #define PATH_NATIVE_FIRMKEY PATH_KEYS "/native.key"
 #define PATH_TWL_FIRMKEY PATH_KEYS "/twl.key"

@@ -31,8 +31,6 @@ main()
         in_menu = menu_handler();
     }
 
-    save_config(); // Save config file.
-
     boot_cfw();
     // Under ideal conditions, we never get here.
 }

@@ -51,6 +51,7 @@ static struct options_s options[] = {
     { OPTION_AUTOBOOT, "Autoboot", boolean_val, 0, 0 },
     { OPTION_SILENCE, "  Stealth mode", boolean_val, 0, 0 },
     { OPTION_TRACE, "Debug pauses during operation", boolean_val, 0, 0 },
+    { OPTION_OVERLY_VERBOSE, "Over-the-top verbosity", boolean_val, 0, 0 },
 
     //    { OPTION_TRANSP_BG,         "Black -> transparent", boolean_val, 0, 0 },
     //    { OPTION_NO_CLEAR_BG,       "Preserve framebuffer", boolean_val, 0, 0 },
@@ -182,6 +183,7 @@ menu_options()
             break;
         case BUTTON_A:
             // TODO - Value options
+			config.options[OPTION_RECONFIGURED] = 1;
             config.options[options[cursor_y].index] = !config.options[options[cursor_y].index];
             break;
         case BUTTON_B:

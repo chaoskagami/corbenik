@@ -7,11 +7,6 @@ struct config_file config;
 void
 regenerate_config()
 {
-    f_mkdir(PATH_CFW);
-    f_mkdir(PATH_CONFIG);
-
-    fprintf(BOTTOM_SCREEN, "Created directory structure.\n");
-
     memset(&config, 0, sizeof(config));
     memcpy(&(config.magic), CONFIG_MAGIC, 4);
     config.config_ver = config_version;
@@ -23,11 +18,29 @@ regenerate_config()
     fclose(conf_handle);
 
     fprintf(BOTTOM_SCREEN, "Config file written.\n");
+
+	config.options[OPTION_RECONFIGURED] = 1;
+}
+
+void
+mk_structure() {
+    f_mkdir(PATH_CFW);
+    f_mkdir(PATH_CONFIG_DIR);
+    f_mkdir(PATH_PATCHES);
+    f_mkdir(PATH_FIRMWARES);
+    f_mkdir(PATH_MODULES);
+    f_mkdir(PATH_SERVICES);
+    f_mkdir(PATH_KEYS);
+    f_mkdir(PATH_EXEFS);
+    f_mkdir(PATH_TEMP);
+    f_mkdir(PATH_LOADER_CACHE);
 }
 
 void
 load_config()
 {
+	mk_structure(); // Make directory structure if needed.
+
     // Zero on success.
     if (!(conf_handle = fopen(PATH_CONFIG, "r"))) {
         fprintf(BOTTOM_SCREEN, "Config file is missing:\n"

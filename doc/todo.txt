@@ -1,14 +1,12 @@
 Next
 -------------
 
- * Fix the append to cache issue with loader. It causes failure to boot.
  * Optimize the code in svc. It's slow, because it checks the filesystem for 0xfe files that don't exist. It should list the dir instead.
 
 Shortterm
 -------------
 
  * Make config file for corbenik plaintext. Nobody likes binary configs. They suck. Massively. Especially when you fuck up a setting and need to change it on something that isn't a 3ds.
-   * On the contrary, they're easier for say, loader, to read so keep the current format as a memory format and cache.
  * In place firmware loading/patching.
  * Weird hack central - Developer 11.4 leaked. Allow injecting debug module? Ehehehehe. No clue what the point of this would be, but hey, it'd be FUCKING cool, man.
 

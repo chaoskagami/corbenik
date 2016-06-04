@@ -22,8 +22,16 @@ show_menu(struct options_s *options, uint8_t* toggles)
 	int cursor_max  = -1;
 	int exit = 0;
 
+	if (options[0].index == -1) {
+		set_cursor(TOP_SCREEN, 0, 0);
+    	header("Any:Back");
+		fprintf(stdout, "No entries.\n");
+		wait_key();
+		return 0;
+	}
+
 	while(!exit) {
-	    set_cursor(TOP_SCREEN, 0, 0);
+		set_cursor(TOP_SCREEN, 0, 0);
 
     	// Figure out the max if unset.
     	if (cursor_max == -1) {

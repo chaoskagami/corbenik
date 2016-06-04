@@ -1,8 +1,6 @@
 #include "patch_file.h"
 
-/* Not possible to do bytecode here, sadly. */
-
-// This patch handles replacement of services. This includes backdoor, but not
+// This code handles replacement of services. This includes backdoor, but not
 // just backdoor.
 // Any service can be replaced provided there's enough space within the
 // exception page.
@@ -59,8 +57,10 @@ PATCH(services)
                 continue;
             }
 
+			// TODO - We can just fread directly to freeSpace with a little reordering.
+
             uint32_t size = fsize(data);
-            uint8_t *read_to = (void *)FCRAM_JUNK_LOCATION;
+            uint8_t *read_to = (void *)FCRAM_JUNK_LOC;
 
             fprintf(stderr, "Svc: %s, %d bytes\n", at, size);
 

@@ -15,6 +15,8 @@ extern int patch_modules();
 
 extern int doing_autoboot;
 
+extern uint8_t* enable_list;
+
 void
 wait()
 {
@@ -25,68 +27,27 @@ wait()
     fprintf(stderr, "\r                                       \r");
 }
 
+void list_patches_build(char* name, int desc_is_fname);
+
 int generate_patch_cache() {
     // Remove cache
 	rrmdir(PATH_LOADER_CACHE);
 	f_mkdir(PATH_LOADER_CACHE);
 
-	wait();
+	list_patches_build(PATH_PATCHES, 1);
 
-    // Loader only uses TID cache bytecode, so run through these.
-    execb(PATH_PATCHES "/block_nim_update.vco", 1);
-    execb(PATH_PATCHES "/block_eshop_update.vco", 1);
-    execb(PATH_PATCHES "/block_cart_update.vco", 1);
-    execb(PATH_PATCHES "/errdisp.vco", 1);
-    execb(PATH_PATCHES "/friends_ver.vco", 1);
-    execb(PATH_PATCHES "/mset_str.vco", 1);
-    //	execb(PATH_PATCHES "/ns_force_menu.vco");
-    execb(PATH_PATCHES "/regionfree.vco", 1);
-    execb(PATH_PATCHES "/secinfo_sigs.vco", 1);
-    execb(PATH_PATCHES "/ro_sigs.vco", 1);
+	struct options_s *patches = (struct options_s*)FCRAM_MENU_LOC;
 
-	wait();
+	for(int i=0; patches[i].index != -1; i++) {
+		if (enable_list[patches[i].index]) {
+			// Patch is enabled. Cache it.
+		    if(execb(patches[i].desc, 1)) {
+                abort("Failed to apply:\n  %s\n", patches[i].name);
+            }
 
-    // Use builtin signature patcher?
-    if (config.options[OPTION_SIGPATCH]) {
-        // TODO - Patch menu. This is okay-ish for now.
-        if (execb(PATH_PATCHES "/sig.vco", 1)) {
-            abort("Fatal. Sigpatch has failed.");
-        }
-
-        wait();
-    }
-
-    if (config.options[OPTION_FIRMPROT]) {
-        if (execb(PATH_PATCHES "/prot.vco", 1)) {
-            abort("Fatal. Firmprot has failed.");
-        }
-
-        wait();
-    }
-
-    if (config.options[OPTION_AADOWNGRADE]) {
-        if (execb(PATH_PATCHES "/aadowngrade.vco", 1)) {
-            abort("Anti-anti-downgrade patch failed.");
-        }
-
-        wait();
-    }
-
-    if (config.options[OPTION_UNITINFO]) {
-        if (execb(PATH_PATCHES "/unitinfo.vco", 1)) {
-            abort("UNITINFO patch failed.");
-        }
-
-        wait();
-    }
-
-    if (config.options[OPTION_MEMEXEC]) {
-        if (execb(PATH_PATCHES "/memexec.vco", 1)) {
-            abort("MPU execution patch failed.");
-        }
-
-        wait();
-    }
+			wait();
+		}
+	}
 
 	return 0;
 }

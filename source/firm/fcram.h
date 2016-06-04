@@ -17,19 +17,20 @@ extern void *fcram_temp;
 #define FCRAM_START 0x24000000
 
 // firm.c
-// 24
-#define FCRAM_FIRM_LOC FCRAM_START
-// 241
-#define FCRAM_TWL_FIRM_LOC (FCRAM_START + FCRAM_SPACING) // Double size
-// 242
-#define FCRAM_AGB_FIRM_LOC (FCRAM_START + FCRAM_SPACING * 3)
+#define FCRAM_FIRM_LOC      FCRAM_START
+#define FCRAM_TWL_FIRM_LOC  (FCRAM_FIRM_LOC + FCRAM_SPACING) // Double size
+#define FCRAM_AGB_FIRM_LOC  (FCRAM_TWL_FIRM_LOC + FCRAM_SPACING * 2)
 
-// 243
-// patch.c
-#define FCRAM_PATCH_LOC (FCRAM_START + FCRAM_SPACING * 4)
+// Location patches get loaded to.
+#define FCRAM_PATCH_LOC     (FCRAM_AGB_FIRM_LOC + FCRAM_SPACING * 2)
 
-// 244
 // Throwaway temporary space. Don't expect it to stay sane.
-#define FCRAM_JUNK_LOCATION (FCRAM_START + FCRAM_SPACING * 5)
+#define FCRAM_JUNK_LOC      (FCRAM_PATCH_LOC    + FCRAM_SPACING)
+
+// Path that the patch menu is created at.
+#define FCRAM_MENU_LOC      (FCRAM_JUNK_LOC     + FCRAM_SPACING)
+
+// Path that the patch enable list is located at.
+#define FCRAM_PATCHLIST_LOC (FCRAM_MENU_LOC + (FCRAM_SPACING / 2))
 
 #endif

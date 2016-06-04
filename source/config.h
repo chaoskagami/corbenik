@@ -22,7 +22,7 @@ struct config_file
 
 struct patch_state
 {
-	char filename[255];
+	char filename[256];
 
 	uint8_t state;
 } __attribute__((packed));
@@ -45,8 +45,9 @@ struct range_str
 
 struct options_s
 {
-    int index;
+    int64_t index;
     char name[64];
+    char desc[256];
     enum type allowed;
     uint32_t a, b;
 } __attribute__((packed));

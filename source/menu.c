@@ -11,56 +11,49 @@
 #define MENU_POWER 7
 #define MENU_BOOTME 8
 
+#define MAX_PATCHES ( ( FCRAM_SPACING / 2) / sizeof(struct options_s) )
+struct options_s *patches = (struct options_s*)FCRAM_MENU_LOC;
+uint8_t* enable_list = (uint8_t*)FCRAM_PATCHLIST_LOC;
+
 static struct options_s options[] = {
     // space
-    { 0, "", not_option, 0, 0 },
+    { 0, "", "", not_option, 0, 0 },
     // Patches.
-    { 0, "\x1b[32;40mPatches\x1b[0m", not_option, 0, 0 },
+    { 0, "\x1b[32;40mOptions\x1b[0m", "", not_option, 0, 0 },
 
-    { OPTION_SIGPATCH, "Signature Patch", boolean_val, 0, 0 },
+    { OPTION_LOADER, "System Modules", "Replaces system modules (including loader)", boolean_val, 0, 0 },
+    { OPTION_LOADER_CPU_L2, "  CPU - L2 cache", "Forces the system to use the L2 cache. Ignored if not a N3DS.", boolean_val, 0, 0 },
+    { OPTION_LOADER_CPU_800MHZ, "  CPU - 800Mhz", "Forces the system to run in 800Mhz mode. Ignored if not a N3DS.", boolean_val, 0, 0 },
+    { OPTION_LOADER_LANGEMU, "  Language Emulation", "Reads language emulation configuration and imitates the region/language.", boolean_val, 0, 0 },
 
-    { OPTION_FIRMPROT, "FIRM Protection", boolean_val, 0, 0 },
+    { 0, "", "", not_option, 0, 0 },
 
-    { OPTION_LOADER, "System Modules", boolean_val, 0, 0 },
-    { OPTION_LOADER_CPU_L2, "  CPU - L2 cache", boolean_val, 0, 0 },
-    { OPTION_LOADER_CPU_800MHZ, "  CPU - 800Mhz", boolean_val, 0, 0 },
-    { OPTION_LOADER_LANGEMU, "  Language Emulation", boolean_val, 0, 0 },
+    { OPTION_SERVICES, "Service Replacement", "Replaces ARM11 services, including svcBackdoor. With 11.0 NATIVE_FIRM, you need this.", boolean_val, 0, 0 },
 
-    { OPTION_SERVICES, "Service Replacement", boolean_val, 0, 0 },
+    { 0, "", "", not_option, 0, 0 },
 
-    { OPTION_AADOWNGRADE, "Anti-anti-downgrade", boolean_val, 0, 0 },
+    { OPTION_AUTOBOOT, "Autoboot", "Boot the system automatically, unless the R key is held.", boolean_val, 0, 0 },
+    { OPTION_SILENCE, "  Silent mode", "Suppress all debug output during autoboot. You'll see the screen turn on, then off.", boolean_val, 0, 0 },
+
+    { 0, "", "", not_option, 0, 0 },
+
+    { OPTION_READ_ME, "Hide `Help`", "Hides the help option from the main menu.", boolean_val, 0, 0 },
 
     // space
-    { 0, "", not_option, 0, 0 },
+    { 0, "", "", not_option, 0, 0 },
     // Patches.
-    { 0, "\x1b[32;40mPatches (Developer)\x1b[0m", not_option, 0, 0 },
+    { 0, "\x1b[32;40mDeveloper Options\x1b[0m", "", not_option, 0, 0 },
 
-    { OPTION_UNITINFO, "Developer UNITINFO", boolean_val, 0, 0 },
-    { OPTION_MEMEXEC, "Disable XN on MPU", boolean_val, 0, 0 },
-    { OPTION_REPLACE_ALLOCATED_SVC, "Force service replace", boolean_val, 0, 0 },
+    { OPTION_REPLACE_ALLOCATED_SVC, "Force service replace", "Replace ARM11 services even if they exist. Don't use unless you know what you're doing.", boolean_val, 0, 0 },
+    { OPTION_TRACE, "Debug Pauses", "After each important step, [WAIT] will be shown and you'll need to press a key. Debug.", boolean_val, 0, 0 },
+    { OPTION_OVERLY_VERBOSE, "Verbose", "Output more debug information than the average user needs.", boolean_val, 0, 0 },
 
     //    { OPTION_ARM9THREAD,        "ARM9 Thread", boolean_val, 0, 0 },
-
-    // space
-    { 0, "", not_option, 0, 0 },
-    // Patches.
-    { 0, "\x1b[32;40mOptions\x1b[0m", not_option, 0, 0 },
-
-    { OPTION_AUTOBOOT, "Autoboot", boolean_val, 0, 0 },
-    { OPTION_SILENCE, "  Stealth mode", boolean_val, 0, 0 },
-    { OPTION_TRACE, "Debug pauses during operation", boolean_val, 0, 0 },
-    { OPTION_OVERLY_VERBOSE, "Over-the-top verbosity", boolean_val, 0, 0 },
-
-    //    { OPTION_TRANSP_BG,         "Black -> transparent", boolean_val, 0, 0 },
-    //    { OPTION_NO_CLEAR_BG,       "Preserve framebuffer", boolean_val, 0, 0 },
-
-    { OPTION_READ_ME, "Hide `Help`", boolean_val, 0, 0 },
-
     //    { IGNORE_PATCH_DEPS,   "Ignore dependencies", boolean_val, 0, 0 },
     //    { IGNORE_BROKEN_SHIT,  "Allow unsafe options", boolean_val, 0, 0 },
 
     // Sentinel.
-    { -1, "", 0, -1, -1 }, // cursor_min and cursor_max are stored in the last two.
+    { -1, "", "", 0, -1, -1 }, // cursor_min and cursor_max are stored in the last two.
 };
 
 static int cursor_y = 0;
@@ -96,13 +89,94 @@ header(char *append)
     fprintf(stdout, "\x1b[30;42m.corbenik//%s %s\x1b[0m\n", VERSION, append);
 }
 
-int
-menu_patches()
-{
-    return MENU_MAIN;
+static int current_menu_index_patches = 0;
+
+// This function is based on PathDeleteWorker from GodMode9.
+// It was easier to just import it.
+int list_patches_build_back(char* fpath, int desc_is_path) {
+	FILINFO fno = {.lfname = NULL};
+
+	// this code handles directory content deletion
+	if (f_stat(fpath, &fno) != FR_OK)
+		return 1; // fpath does not exist
+
+	if (fno.fattrib & AM_DIR) { // process folder contents
+		DIR pdir;
+		char* fname = fpath + strnlen(fpath, 255);
+		if (f_opendir(&pdir, fpath) != FR_OK)
+			return 1;
+
+		*(fname++) = '/';
+		fno.lfname = fname;
+		fno.lfsize = fpath + 255 - fname;
+
+		while (f_readdir(&pdir, &fno) == FR_OK) {
+			if ((strncmp(fno.fname, ".", 2) == 0) || (strncmp(fno.fname, "..", 3) == 0))
+				continue; // filter out virtual entries
+			if (fname[0] == 0)
+				strncpy(fname, fno.fname, fpath + 255 - fname);
+			if (fno.fname[0] == 0)
+				break;
+			else // return value won't matter
+				list_patches_build_back(fpath, desc_is_path);
+		}
+
+		f_closedir(&pdir);
+		*(--fname) = '\0';
+	} else {
+        struct system_patch p;
+		read_file(&p, fpath, sizeof(struct system_patch));
+
+		if (memcmp(p.magic, "AIDA", 4))
+			return 0;
+
+		strncpy(patches[current_menu_index_patches].name, p.name, 64);
+		if (desc_is_path)
+			strncpy(patches[current_menu_index_patches].desc, fpath,  255);
+		else
+			strncpy(patches[current_menu_index_patches].desc, p.desc, 255);
+		patches[current_menu_index_patches].index   = p.uuid;
+		patches[current_menu_index_patches].allowed = boolean_val;
+		patches[current_menu_index_patches].a = 0;
+		patches[current_menu_index_patches].b = 0;
+		if (desc_is_path)
+			enable_list[p.uuid] = 0;
+
+		current_menu_index_patches++;
+	}
+
+	return 0;
+}
+
+void list_patches_build(char* name, int desc_is_fname) {
+	current_menu_index_patches = 0;
+
+	char fpath[256];
+	strncpy(fpath, name, 256);
+	list_patches_build_back(fpath, desc_is_fname);
+	patches[current_menu_index_patches].index   = -1;
+
+	read_file(enable_list, PATH_TEMP "/PATCHENABLE", FCRAM_SPACING / 2);
 }
 
 int show_menu(struct options_s *options, uint8_t* toggles);
+
+int
+menu_patches()
+{
+	list_patches_build(PATH_PATCHES, 0);
+
+	show_menu(patches, enable_list);
+
+	// Remove old settings, save new
+	f_unlink(PATH_TEMP "/PATCHENABLE");
+	write_file(enable_list, PATH_TEMP "/PATCHENABLE", FCRAM_SPACING / 2);
+
+	// TODO - Determine whether it actually changed.
+	config.options[OPTION_RECONFIGURED] = 1;
+
+    return MENU_MAIN;
+}
 
 int
 menu_options()

@@ -1,41 +1,127 @@
-Corbenik
-==============================
+About
+-------------------------
 
-This is (yet another) CFW for the 3DS. Unlike other CFWs, this was mostly written from scratch and for fun. I'm a control freak, and this carries quite a bit of my mindset being a LFS/Gentoo user.
+Corbenik is another CFW for the 3DS somewhat like cakes, but using
+bytecode-based patches. This allows for much greater flexibility.
 
-Some parts are inherited from other CFWs - e.g. the firmware loading code in src/firm is mostly based on Cakes, and the patch bytecode is based on Luma3DS' implementation in C (though, it isn't really derived from it)
+It's mainly intended for developers; so if you don't know your way
+around the 3DS, chances are this isn't for you.
 
-Out of the bunch of CFWs in existence, Corbenik is most similar to cakes of the bunch, in that it uses external patches. External patches are headered, can have dependencies, and consist of a lightweight and specialized bytecode/assembly which is intended soley for effiecient patching.
+Not every feature has been implemented/tested yet, but at the moment
+it offers a rather comprehensive SysNAND experience for N3DS users.
 
-See `doc/bytecode.md`, `host/bytecode_asm.py`  and `patch/*` for more on this. The assembler is a bit crappy at the moment, and I *do* plan to improve it. However, it outputs the correct code and gets the job done.
+Corbenik is licensed under the terms of the GPLv3. Please obey it.
+You should have recieved a copy either as part of the git repository,
+or as part of the tarball/zipfile you downloaded. If not, get a copy
+here: `http://www.gnu.org/licenses/gpl-3.0.txt`
 
-## Rationale
+Installing
+-------------------------
 
-I was initially going to make cakes dynamic, but I quickly realized a fatal flaw in any "patch" format: what you can do from a patch is limited to what the parser handles. With Cakes, converting to a dynamic method isn't terribly difficult, but what about the patches that have a 'find, then seek backwards until' type of logic? Cakes would need have another construct to decribe that, and at that point, the .cake format has become a kludge.
+Copy the files to the root of your SD (and optionally, rename
+arm9loaderhax.bin and set it up with a bootloader.)
 
-In my opinion, the best way to fix this was to externalize patches as programs - arm binaries or bytecode. The former didn't go so well (look back in the history of this repo. Fun times) and I ended up going with the latter.
+Without the FIRMs, it cannot boot up your system. You'll need to
+fetch the following at minimum, and put it at `/corbenik/firmware/native`:
 
-I also had a number of mad science experiments which would be very hard to perform in the context of ReiNAND based firmwares, and Cakes wouldn't make it easy either due to its limited patch format.
+Old 3DS (Native FIRM, 11.0):
+  http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000002/00000052
+New 3DS (Native FIRM, 11.0):
+  http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000002/00000021
 
-## Comparison
+You'll need the firmkey for it as well unless you have decrypted it, which should
+be placed at `/corbenik/keys/native.key`. I can't tell you how to get it
+obviously, but a good place to start may be an older version of Plailect's guide
+when it still had a section on Cakes.
 
-If you want to know how Corbenik sizes up to other CFWs as of NOW - see `doc/features.md`. I don't intend to sugarcoat - Corbenik is under development and is incomplete. There will be no stable release until a number of common features are implemented, such as emunand.
+On New3DS units, there's additional crypto on arm9loader which requires the 9.6
+key to decrypt. It usually is named ``Slot0x11Key96.bin`, and I also can't tell
+you where to find this, aside from "check Plailect's guide." Corbenik will
+attempt to read this from the root as well as `/corbenik/keys/11.key`.
 
-However! It does have a few legs up on other CFWs, namely:
- * Injection of arbitrary ARM11 services, including svcBackdoor.
- * Bytecode patches? Bytecode patches.
-   * Not only corbenik, but the loader replacement uses them too.
- * Loader can resize titles in memory and append code to segments. This isn't well tested, and it isn't enabled.
- * Pretty much every simple patch that Luma3DS has, and most every patch for loader.
-   * All of the common bits aside from EmuNand, Reboot, and the exception vector hook, basically.
- * Loader is STILL smaller than Nintendo's by two units.
+Setup
+-------------------------
 
-That said, feedback is welcome, but don't report anything obvious. Chances are I know, since Corbenik is my day-to-day CFW now, and I'll run into the same bugs as you.
+For starters, you'll want to go into options and enable `System Modules` to get
+loader to run patches as well.
 
-For compilation instructions, see `doc/compiling.md`.
+If you're using 11.0 NATIVE_FIRM like I suggested, you'll want to tick
+`Service Replacement` to fix the broken svcBackdoor. Without this, Retroarch
+won't work - and other applications that do JIT also won't work.
 
-Unless otherwise noted, everything original in this repo can be used under the terms of the GNU GPLv3 or later. This includes situations where there's no copyright header within a source file. I get lazy with those; assume everything can be used under the GPL, or files were from software licensed GPLv2 or later (and thus are upgraded.) No source files within this repo bear questionable licenses.
+While you're there, you can enable `Autoboot` if you'd like, including
+`silent mode` if you're using something like BootAnim9.
 
-## Quote of the Day
+You'll also want to go into `Patches` and enable the usual bits, which includes:
 
-Welcome to "The World."
+ * Signature Fix
+ * FIRM Protect
+
+You'll also want these patches, which are done by loader and therefore require it:
+
+ * Block Cart Updates
+ * Block eShop Updates
+ * Block NIM updates
+ * Region free HOME
+ * RO signature fix
+
+If you're on 11.0, you also want these:
+
+ * Title Downgrade Fix
+
+If you're deliberately still running 10.4 or something, you'll want these:
+
+ * Fake Friends Version
+
+If you region changed your console and replaced SecureInfo_A, you want:
+
+ * SecureInfo_A Signature Fix
+
+Optional, but recommended patches are:
+
+ * MSET Version
+ * ErrDisp devmode
+
+And these YOU SHOULD NOT ENABLE unless you have specialized needs:
+
+ * Developer UNITINFO
+ * ARM11 XN Disable
+ * Force TestMenu
+
+Credits
+-------------------------
+
+This software contains code from multiple other open source projects, including:
+
+ @mid-kid/CakesForeveryWan - FIRM Decryptor
+
+ @AuroraWright/Luma3DS     - Used as reference for patcher bytecode (and in earlier
+                             versions, the patch code itself) The version of loader
+                             in use also originated from the code here.
+
+ @d0k3/GodMode9            - FatFS version originates from here, start.s too.
+                             Additionally, recursive directory removal and listing
+                             patches is partially based on GodMode9.
+
+ @yifanlu                  - Loader.
+
+The complete "Thanks cool people" list:
+
+ @yifanlu        For the absolutely insane and wonderful idea to use bytecode,
+                 as well as the loader replacement.
+
+ @mid-kid        General inspiration from Cakes.
+
+ @Wolfvak        Go use BootAnim9.
+
+ @AuroraWright   Luma made chunks of this possible.
+
+ @Reisyukaku     You can thank him for the 'Force TestMenu' patch.
+
+ @d0k3           Mostly code. Oh, and Decrypt9WIP/GodMode9 too.
+
+ @smealum        HANS code, and pioneering the open source hax frontier.
+
+ @TuxSH          Lots of RE work and important commits to Luma that I rely on.
+
+ CyberConnect2   Because the name originates from .hack, which you should go play.

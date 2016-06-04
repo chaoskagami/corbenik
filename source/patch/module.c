@@ -12,7 +12,7 @@ PATCH(modules)
     }
 
     uint32_t size = fsize(f);
-    fread((uint8_t *)FCRAM_JUNK_LOCATION, 1, size, f);
+    fread((uint8_t *)FCRAM_JUNK_LOC, 1, size, f);
     fclose(f);
 
     // Look for the section that holds all the sysmodules
@@ -29,7 +29,7 @@ PATCH(modules)
         return 1;
     }
 
-    ncch_h *module = (ncch_h *)FCRAM_JUNK_LOCATION;
+    ncch_h *module = (ncch_h *)FCRAM_JUNK_LOC;
     ncch_h *sysmodule = (ncch_h *)((uint32_t)firm_loc + sysmodule_section->offset);
 
     // Check if we want to replace an existing sysmodule

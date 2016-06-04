@@ -71,16 +71,20 @@ struct firm_signature firm_signatures[] = {
      .version = 0x00,
      .version_string = "9.0.0_AGB",
      .console = console_n3ds },
-    {.version = 0xFF } // Terminate list
+    {.version = 0xFF,
+	 .version_string = "Not found" } // Terminate list
 };
 
 struct firm_signature *
 get_firm_info(firm_h *firm)
 {
-    for (struct firm_signature *signature = firm_signatures; signature->version != 0xFF; signature++) {
+    for (struct firm_signature *signature = firm_signatures; ; signature++) {
         if (memcmp(signature->sig, firm->section[0].hash, 0x10) == 0) {
             return signature;
         }
+		if (signature->version == 0xFF) {
+			return signature; // Error. Not found, invalid, etc.
+		}
     }
 
     return NULL;

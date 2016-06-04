@@ -30,7 +30,7 @@ slot0x11key96_init()
     // 9.6 crypto may need us to get the key from somewhere else.
     // Unless the console already has the key initialized, that is.
     uint8_t key[AES_BLOCK_SIZE];
-    if (read_file(key, PATH_SLOT0X11KEY96, AES_BLOCK_SIZE) || read_file(key, PATH_ALT_SLOT0X11KEY96, AES_BLOCK_SIZE)) {
+    if (read_file(key, PATH_SLOT0X11KEY96, AES_BLOCK_SIZE) != 0 || read_file(key, PATH_ALT_SLOT0X11KEY96, AES_BLOCK_SIZE) != 0) {
         // Read key successfully.
         aes_setkey(0x11, key, AES_KEYNORMAL, AES_INPUT_BE | AES_INPUT_NORMAL);
 
@@ -148,7 +148,7 @@ load_firm(firm_h *dest, char *path, char *path_firmkey, uint32_t *size, uint64_t
     int status = 0;
     int firmware_changed = 0;
 
-    if (read_file(dest, path, *size)) {
+    if (read_file(dest, path, *size) == 0) {
         fprintf(BOTTOM_SCREEN, "!");
 
         // Only whine about this if it's NATIVE_FIRM, which is important.
@@ -158,9 +158,10 @@ load_firm(firm_h *dest, char *path, char *path_firmkey, uint32_t *size, uint64_t
                                    "This is fatal. Aborting.\n");
         }
 
-        status = 1;
-        goto exit_error;
-    }
+        return 1;
+    } else {
+        fprintf(BOTTOM_SCREEN, "l");
+	}
 
     // Check and decrypt FIRM if it is encrypted.
     if (dest->magic != FIRM_MAGIC) {
@@ -169,8 +170,7 @@ load_firm(firm_h *dest, char *path, char *path_firmkey, uint32_t *size, uint64_t
             if (firm_title == NATIVE_FIRM_TITLEID) {
                 fprintf(BOTTOM_SCREEN, "\nFailed to decrypt firmware.\n"
                                        "This is fatal. Aborting.\n");
-                status = 1;
-                goto exit_error;
+				return 1;
             }
         }
         firmware_changed = 1; // Decryption performed.
@@ -199,8 +199,7 @@ load_firm(firm_h *dest, char *path, char *path_firmkey, uint32_t *size, uint64_t
                         fprintf(BOTTOM_SCREEN, "\nCouldn't decrypt ARM9 FIRM binary.\n"
                                                "Check if you have the needed key at:\n"
                                                "  " PATH_SLOT0X11KEY96 "\n");
-                        status = 1;
-                        goto exit_error;
+                        return 1;
                     }
                     firmware_changed = 1; // Decryption of arm9bin performed.
                 } else {
@@ -238,10 +237,6 @@ load_firm(firm_h *dest, char *path, char *path_firmkey, uint32_t *size, uint64_t
     }
 
     return 0;
-
-exit_error:
-
-    return status;
 }
 
 // FAIR WARNING; This function is arm11 code, not ARM9.
@@ -347,33 +342,40 @@ int firm_loaded = 0;
 int
 load_firms()
 {
+	int state = 0;
+
     if (firm_loaded)
         return 0;
 
     fprintf(BOTTOM_SCREEN, "FIRM load triggered.\n");
 
     fprintf(BOTTOM_SCREEN, "NATIVE_FIRM\n  [");
-    if (load_firm(firm_loc, PATH_NATIVE_F, PATH_NATIVE_FIRMKEY, &firm_size, NATIVE_FIRM_TITLEID) != 0)
-        return 1;
+    if (load_firm(firm_loc, PATH_NATIVE_F, PATH_NATIVE_FIRMKEY, &firm_size, NATIVE_FIRM_TITLEID) != 0) {
+        abort("]\n  Failed to load NATIVE_FIRM.\n");
+	}
     find_proc9(firm_loc, &firm_proc9, &firm_p9_exefs);
 
     fprintf(BOTTOM_SCREEN, "]\nTWL_FIRM\n  [");
-    if (load_firm(twl_firm_loc, PATH_TWL_F, PATH_TWL_FIRMKEY, &twl_firm_size, TWL_FIRM_TITLEID))
-        fprintf(BOTTOM_SCREEN, "  \nTWL_FIRM failed to load.\n");
-    else
+    if (load_firm(twl_firm_loc, PATH_TWL_F, PATH_TWL_FIRMKEY, &twl_firm_size, TWL_FIRM_TITLEID) != 0) {
+        fprintf(BOTTOM_SCREEN, "]\n  TWL_FIRM failed to load.\n");
+		state =1;
+	} else {
+		fprintf(stderr, "]\n");
         find_proc9(twl_firm_loc, &twl_firm_proc9, &twl_firm_p9_exefs);
+	}
 
-    fprintf(BOTTOM_SCREEN, "]\nAGB_FIRM\n  [");
-    if (load_firm(agb_firm_loc, PATH_AGB_F, PATH_AGB_FIRMKEY, &agb_firm_size, AGB_FIRM_TITLEID))
-        fprintf(BOTTOM_SCREEN, "  \nAGB_FIRM failed to load.\n");
-    else
+    fprintf(BOTTOM_SCREEN, "AGB_FIRM\n  [");
+    if (load_firm(agb_firm_loc, PATH_AGB_F, PATH_AGB_FIRMKEY, &agb_firm_size, AGB_FIRM_TITLEID) != 0) {
+        fprintf(BOTTOM_SCREEN, "]\n  AGB_FIRM failed to load.\n");
+		state = 1;
+	} else {
+		fprintf(stderr, "]\n");
         find_proc9(agb_firm_loc, &agb_firm_proc9, &agb_firm_p9_exefs);
-
-    fprintf(BOTTOM_SCREEN, "]\n");
+	}
 
     firm_loaded = 1; // Loaded.
 
-    return 0;
+    return state;
 }
 
 void

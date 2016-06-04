@@ -367,6 +367,10 @@ execb(char *filename, int build_cache)
     // Read patch to scrap memory.
 
     FILE *f = fopen(filename, "r");
+	if (!f) {
+		// File wasn't found. The user didn't enable anything.
+		return 0;
+	}
     size_t len = fsize(f);
     fread((uint8_t *)FCRAM_PATCH_LOC, 1, len, f);
     fclose(f);

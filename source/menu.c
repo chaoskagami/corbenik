@@ -151,12 +151,18 @@ int list_patches_build_back(char* fpath, int desc_is_path) {
 void list_patches_build(char* name, int desc_is_fname) {
 	current_menu_index_patches = 0;
 
+	memset(enable_list, 0, FCRAM_SPACING / 2);
+
 	char fpath[256];
 	strncpy(fpath, name, 256);
 	list_patches_build_back(fpath, desc_is_fname);
 	patches[current_menu_index_patches].index   = -1;
 
-	read_file(enable_list, PATH_TEMP "/PATCHENABLE", FCRAM_SPACING / 2);
+	FILE* f;
+	if ((f = fopen(PATH_TEMP "/PATCHENABLE", "r"))) {
+		fread(enable_list, 1, FCRAM_SPACING / 2, f);
+		fclose(f);
+	}
 }
 
 int show_menu(struct options_s *options, uint8_t* toggles);
@@ -207,7 +213,8 @@ menu_info()
                     "  Version: %s (%x)\n"
                     "TWL_FIRM / DSi Firmware:\n"
                     "  Version: %s (%x)\n",
-            native->version_string, native->version, agb->version_string, agb->version, twl->version_string, twl->version);
+            		native->version_string, native->version, agb->version_string, agb->version, twl->version_string, twl->version);
+
     wait_key();
 
     need_redraw = 1;

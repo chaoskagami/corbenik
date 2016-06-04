@@ -108,6 +108,9 @@ fopen(const char *filename, const char *mode)
 void
 fclose(FILE *fp)
 {
+	if (!fp->is_open)
+		return;
+
     f_close(&(fp->handle));
 
     memset(fp, 0, sizeof(FILE));
@@ -116,6 +119,9 @@ fclose(FILE *fp)
 void
 fseek(FILE *fp, int64_t offset, int whence)
 {
+	if (!fp->is_open)
+		return;
+
     uint32_t fixed_offset;
     switch (whence) {
         case SEEK_SET:
@@ -137,44 +143,56 @@ fseek(FILE *fp, int64_t offset, int whence)
 size_t
 ftell(FILE *fp)
 {
+	if (!fp->is_open)
+		return 0;
+
     return f_tell(&(fp->handle));
 }
 
 int
 feof(FILE *fp)
 {
+	if (!fp->is_open)
+		return 0;
+
     return f_eof(&(fp->handle));
 }
 
 size_t
 fsize(FILE *fp)
 {
+	if (!fp->is_open)
+		return 0;
+
     return f_size(&(fp->handle));
 }
 
 size_t
 fwrite(const void *buffer, size_t elementSize, size_t elementCnt, FILE *fp)
 {
+	if (!fp->is_open)
+		return 0;
+
     UINT br;
     if (f_write(&(fp->handle), buffer, elementSize * elementCnt, &br))
         return 0;
-    if (br == elementSize * elementCnt)
+    if (elementSize != 1)
         br /= elementSize;
-    else
-        return 0;
     return br;
 }
 
 size_t
 fread(void *buffer, size_t elementSize, size_t elementCnt, FILE *fp)
 {
-    UINT br;
+	if (!fp->is_open)
+		return 0;
+
+    size_t br;
     if (f_read(&(fp->handle), buffer, elementSize * elementCnt, &br))
         return 0;
-    if (br == elementSize * elementCnt)
+
+    if (elementSize != 1)
         br /= elementSize;
-    else
-        return 0;
     return br;
 }
 
@@ -183,7 +201,7 @@ write_file(void *data, char *path, size_t size)
 {
     FILE *temp = fopen(path, "w");
 
-    if (!temp)
+    if (!temp || !temp->is_open)
         return 0;
 
     size_t wrote = fwrite(data, 1, size, temp);
@@ -198,7 +216,7 @@ read_file(void *data, char *path, size_t size)
 {
     FILE *temp = fopen(path, "r");
 
-    if (!temp)
+    if (!temp || !temp->is_open)
         return 0;
 
     size_t read = fread(data, 1, size, temp);

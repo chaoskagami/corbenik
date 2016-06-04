@@ -11,8 +11,6 @@
 #define MENU_POWER 7
 #define MENU_BOOTME 8
 
-#define OPTION_AADOWNGRADE 16 // Anti-anti-downgrade.
-
 static struct options_s options[] = {
     // space
     { 0, "", not_option, 0, 0 },
@@ -66,8 +64,6 @@ static struct options_s options[] = {
 };
 
 static int cursor_y = 0;
-static int cursor_min = -1;
-static int cursor_max = -1;
 static int which_menu = 1;
 static int need_redraw = 1;
 
@@ -106,100 +102,14 @@ menu_patches()
     return MENU_MAIN;
 }
 
+int show_menu(struct options_s *options, uint8_t* toggles);
+
 int
 menu_options()
 {
-    set_cursor(TOP_SCREEN, 0, 0);
+	show_menu(options, config.options);
 
-    // Figure out the max if unset.
-    if (cursor_max == -1) {
-        cursor_max = 0;
-        while (options[cursor_max].index != -1)
-            ++cursor_max;
-
-        while (options[cursor_max].allowed == not_option)
-            --cursor_max;
-    }
-
-    // Figure out the max if unset.
-    if (cursor_min == -1) {
-        cursor_min = 0;
-        while (options[cursor_min].allowed == not_option)
-            ++cursor_min;
-        cursor_y = cursor_min;
-    }
-
-    header("A:Enter B:Back DPAD:Nav");
-
-    int i = 0;
-    while (options[i].index != -1) { // -1 Sentinel.
-        if (options[i].allowed == boolean_val) {
-            if (cursor_y == i)
-                fprintf(TOP_SCREEN, "\x1b[32m>>\x1b[0m ");
-            else
-                fprintf(TOP_SCREEN, "   ");
-
-            if (need_redraw)
-                fprintf(TOP_SCREEN, "[%c]  %s\n", (config.options[options[i].index] ? 'X' : ' '), options[i].name);
-            else {
-                // Yes, this is weird. printf does a large number of extra things we
-                // don't
-                // want computed at the moment; this is faster.
-                putc(TOP_SCREEN, '[');
-                putc(TOP_SCREEN, (config.options[options[i].index] ? 'X' : ' '));
-                putc(TOP_SCREEN, ']');
-                putc(TOP_SCREEN, '\n');
-            }
-        } else if (options[i].allowed == not_option) {
-            fprintf(TOP_SCREEN, "%s\n", options[i].name);
-        }
-        ++i;
-    }
-
-    need_redraw = 0;
-
-    uint32_t key = wait_key();
-
-    switch (key) {
-        case BUTTON_UP:
-            cursor_y -= 1;
-            while (options[cursor_y].allowed == not_option && cursor_y >= cursor_min)
-                cursor_y--;
-            break;
-        case BUTTON_DOWN:
-            cursor_y += 1;
-            while (options[cursor_y].allowed == not_option && cursor_y < cursor_max)
-                cursor_y++;
-            break;
-        case BUTTON_LEFT:
-            cursor_y -= 5;
-            while (options[cursor_y].allowed == not_option && cursor_y >= cursor_min)
-                cursor_y--;
-            break;
-        case BUTTON_RIGHT:
-            cursor_y += 5;
-            while (options[cursor_y].allowed == not_option && cursor_y < cursor_max)
-                cursor_y++;
-            break;
-        case BUTTON_A:
-            // TODO - Value options
-			config.options[OPTION_RECONFIGURED] = 1;
-            config.options[options[cursor_y].index] = !config.options[options[cursor_y].index];
-            break;
-        case BUTTON_B:
-            need_redraw = 1;
-            clear_screen(TOP_SCREEN);
-            cursor_y = cursor_min;
-            return MENU_MAIN;
-            break;
-    }
-
-    if (cursor_y < cursor_min)
-        cursor_y = cursor_max - 1;
-    else if (cursor_y > cursor_max - 1)
-        cursor_y = cursor_min;
-
-    return 0;
+    return MENU_MAIN;
 }
 
 int
@@ -224,10 +134,7 @@ menu_info()
                     "TWL_FIRM / DSi Firmware:\n"
                     "  Version: %s (%x)\n",
             native->version_string, native->version, agb->version_string, agb->version, twl->version_string, twl->version);
-    while (1) {
-        if (wait_key() & BUTTON_ANY)
-            break;
-    }
+    wait_key();
 
     need_redraw = 1;
     clear_screen(TOP_SCREEN);
@@ -260,10 +167,7 @@ menu_help()
                     " <https://github.com/chaoskagami/corbenik>\n"
                     "\n");
 
-    while (1) {
-        if (wait_key() & BUTTON_ANY)
-            break;
-    }
+	wait_key();
 
     need_redraw = 1;
     clear_screen(TOP_SCREEN);
@@ -277,7 +181,7 @@ menu_reset()
     fumount(); // Unmount SD.
 
     // Reboot.
-    fprintf(BOTTOM_SCREEN, "Resetting system.\n");
+    fprintf(BOTTOM_SCREEN, "Rebooting system.\n");
     i2cWriteRegister(I2C_DEV_MCU, 0x20, 1 << 2);
     while (1)
         ;
@@ -343,7 +247,7 @@ menu_main()
                 return MENU_BOOTME; // Boot meh, damnit!
             clear_screen(TOP_SCREEN);
             if (ret == MENU_OPTIONS)
-                cursor_y = cursor_min; // Fixup positions
+                cursor_y = 0; // Fixup positions
             return ret;
     }
 

@@ -225,9 +225,7 @@ with open(in_file, "r") as ins:
 		if title:
 			for f in title:
 				tid = bytearray.fromhex(f) # Endianness.
-				print([tid])
 				tid.reverse()
-				print([tid])
 				data += tid
 		if deps:
 			for f in deps:

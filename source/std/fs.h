@@ -23,7 +23,7 @@ typedef struct
 int fmount(void);
 int fumount(void);
 
-int rrmdir(char* dir_path);
+int rrmdir(char *dir_path);
 
 FILE *fopen(const char *filename, const char *mode);
 

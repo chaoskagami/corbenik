@@ -15,7 +15,7 @@ extern int patch_modules();
 
 extern int doing_autoboot;
 
-extern uint8_t* enable_list;
+extern uint8_t *enable_list;
 
 void
 wait()
@@ -27,35 +27,37 @@ wait()
     fprintf(stderr, "\r                                       \r");
 }
 
-void list_patches_build(char* name, int desc_is_fname);
+void list_patches_build(char *name, int desc_is_fname);
 
-int generate_patch_cache() {
+int
+generate_patch_cache()
+{
     // Remove cache
-	rrmdir(PATH_LOADER_CACHE);
-	f_mkdir(PATH_LOADER_CACHE);
+    rrmdir(PATH_LOADER_CACHE);
+    f_mkdir(PATH_LOADER_CACHE);
 
-	list_patches_build(PATH_PATCHES, 1);
+    list_patches_build(PATH_PATCHES, 1);
 
-	struct options_s *patches = (struct options_s*)FCRAM_MENU_LOC;
+    struct options_s *patches = (struct options_s *)FCRAM_MENU_LOC;
 
-	for(int i=0; patches[i].index != -1; i++) {
-		if (enable_list[patches[i].index]) {
-			// Patch is enabled. Cache it.
-		    if(execb(patches[i].desc, 1)) {
+    for (int i = 0; patches[i].index != -1; i++) {
+        if (enable_list[patches[i].index]) {
+            // Patch is enabled. Cache it.
+            if (execb(patches[i].desc, 1)) {
                 abort("Failed to apply:\n  %s\n", patches[i].name);
             }
 
-			wait();
-		}
-	}
+            wait();
+        }
+    }
 
-	return 0;
+    return 0;
 }
 
 int
 patch_firm_all()
 {
-	execb(PATH_LOADER_CACHE "/BOOT", 0);
+    execb(PATH_LOADER_CACHE "/BOOT", 0);
 
     // Replace loader?
     if (config.options[OPTION_LOADER]) {

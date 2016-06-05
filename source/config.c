@@ -19,11 +19,12 @@ regenerate_config()
 
     fprintf(BOTTOM_SCREEN, "Config file written.\n");
 
-	config.options[OPTION_RECONFIGURED] = 1;
+    config.options[OPTION_RECONFIGURED] = 1;
 }
 
 void
-mk_structure() {
+mk_structure()
+{
     f_mkdir(PATH_CFW);
     f_mkdir(PATH_CONFIG_DIR);
     f_mkdir(PATH_PATCHES);
@@ -39,7 +40,7 @@ mk_structure() {
 void
 load_config()
 {
-	mk_structure(); // Make directory structure if needed.
+    mk_structure(); // Make directory structure if needed.
 
     // Zero on success.
     if (!(conf_handle = fopen(PATH_CONFIG, "r"))) {

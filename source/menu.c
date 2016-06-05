@@ -11,9 +11,9 @@
 #define MENU_POWER 7
 #define MENU_BOOTME 8
 
-#define MAX_PATCHES ( ( FCRAM_SPACING / 2) / sizeof(struct options_s) )
-struct options_s *patches = (struct options_s*)FCRAM_MENU_LOC;
-uint8_t* enable_list = (uint8_t*)FCRAM_PATCHLIST_LOC;
+#define MAX_PATCHES ((FCRAM_SPACING / 2) / sizeof(struct options_s))
+struct options_s *patches = (struct options_s *)FCRAM_MENU_LOC;
+uint8_t *enable_list = (uint8_t *)FCRAM_PATCHLIST_LOC;
 
 static struct options_s options[] = {
     // space
@@ -44,7 +44,8 @@ static struct options_s options[] = {
     // Patches.
     { 0, "\x1b[32;40mDeveloper Options\x1b[0m", "", not_option, 0, 0 },
 
-    { OPTION_REPLACE_ALLOCATED_SVC, "Force service replace", "Replace ARM11 services even if they exist. Don't use unless you know what you're doing.", boolean_val, 0, 0 },
+    { OPTION_REPLACE_ALLOCATED_SVC, "Force service replace", "Replace ARM11 services even if they exist. Don't use unless you know what you're doing.",
+      boolean_val, 0, 0 },
     { OPTION_TRACE, "Debug Pauses", "After each important step, [WAIT] will be shown and you'll need to press a key. Debug.", boolean_val, 0, 0 },
     { OPTION_OVERLY_VERBOSE, "Verbose", "Output more debug information than the average user needs.", boolean_val, 0, 0 },
 
@@ -93,93 +94,97 @@ static int current_menu_index_patches = 0;
 
 // This function is based on PathDeleteWorker from GodMode9.
 // It was easier to just import it.
-int list_patches_build_back(char* fpath, int desc_is_path) {
-	FILINFO fno = {.lfname = NULL};
+int
+list_patches_build_back(char *fpath, int desc_is_path)
+{
+    FILINFO fno = {.lfname = NULL };
 
-	// this code handles directory content deletion
-	if (f_stat(fpath, &fno) != FR_OK)
-		return 1; // fpath does not exist
+    // this code handles directory content deletion
+    if (f_stat(fpath, &fno) != FR_OK)
+        return 1; // fpath does not exist
 
-	if (fno.fattrib & AM_DIR) { // process folder contents
-		DIR pdir;
-		char* fname = fpath + strnlen(fpath, 255);
-		if (f_opendir(&pdir, fpath) != FR_OK)
-			return 1;
+    if (fno.fattrib & AM_DIR) { // process folder contents
+        DIR pdir;
+        char *fname = fpath + strnlen(fpath, 255);
+        if (f_opendir(&pdir, fpath) != FR_OK)
+            return 1;
 
-		*(fname++) = '/';
-		fno.lfname = fname;
-		fno.lfsize = fpath + 255 - fname;
+        *(fname++) = '/';
+        fno.lfname = fname;
+        fno.lfsize = fpath + 255 - fname;
 
-		while (f_readdir(&pdir, &fno) == FR_OK) {
-			if ((strncmp(fno.fname, ".", 2) == 0) || (strncmp(fno.fname, "..", 3) == 0))
-				continue; // filter out virtual entries
-			if (fname[0] == 0)
-				strncpy(fname, fno.fname, fpath + 255 - fname);
-			if (fno.fname[0] == 0)
-				break;
-			else // return value won't matter
-				list_patches_build_back(fpath, desc_is_path);
-		}
+        while (f_readdir(&pdir, &fno) == FR_OK) {
+            if ((strncmp(fno.fname, ".", 2) == 0) || (strncmp(fno.fname, "..", 3) == 0))
+                continue; // filter out virtual entries
+            if (fname[0] == 0)
+                strncpy(fname, fno.fname, fpath + 255 - fname);
+            if (fno.fname[0] == 0)
+                break;
+            else // return value won't matter
+                list_patches_build_back(fpath, desc_is_path);
+        }
 
-		f_closedir(&pdir);
-		*(--fname) = '\0';
-	} else {
+        f_closedir(&pdir);
+        *(--fname) = '\0';
+    } else {
         struct system_patch p;
-		read_file(&p, fpath, sizeof(struct system_patch));
+        read_file(&p, fpath, sizeof(struct system_patch));
 
-		if (memcmp(p.magic, "AIDA", 4))
-			return 0;
+        if (memcmp(p.magic, "AIDA", 4))
+            return 0;
 
-		strncpy(patches[current_menu_index_patches].name, p.name, 64);
-		if (desc_is_path)
-			strncpy(patches[current_menu_index_patches].desc, fpath,  255);
-		else
-			strncpy(patches[current_menu_index_patches].desc, p.desc, 255);
-		patches[current_menu_index_patches].index   = p.uuid;
-		patches[current_menu_index_patches].allowed = boolean_val;
-		patches[current_menu_index_patches].a = 0;
-		patches[current_menu_index_patches].b = 0;
-		if (desc_is_path)
-			enable_list[p.uuid] = 0;
+        strncpy(patches[current_menu_index_patches].name, p.name, 64);
+        if (desc_is_path)
+            strncpy(patches[current_menu_index_patches].desc, fpath, 255);
+        else
+            strncpy(patches[current_menu_index_patches].desc, p.desc, 255);
+        patches[current_menu_index_patches].index = p.uuid;
+        patches[current_menu_index_patches].allowed = boolean_val;
+        patches[current_menu_index_patches].a = 0;
+        patches[current_menu_index_patches].b = 0;
+        if (desc_is_path)
+            enable_list[p.uuid] = 0;
 
-		current_menu_index_patches++;
-	}
+        current_menu_index_patches++;
+    }
 
-	return 0;
+    return 0;
 }
 
-void list_patches_build(char* name, int desc_is_fname) {
-	current_menu_index_patches = 0;
+void
+list_patches_build(char *name, int desc_is_fname)
+{
+    current_menu_index_patches = 0;
 
-	memset(enable_list, 0, FCRAM_SPACING / 2);
+    memset(enable_list, 0, FCRAM_SPACING / 2);
 
-	char fpath[256];
-	strncpy(fpath, name, 256);
-	list_patches_build_back(fpath, desc_is_fname);
-	patches[current_menu_index_patches].index   = -1;
+    char fpath[256];
+    strncpy(fpath, name, 256);
+    list_patches_build_back(fpath, desc_is_fname);
+    patches[current_menu_index_patches].index = -1;
 
-	FILE* f;
-	if ((f = fopen(PATH_TEMP "/PATCHENABLE", "r"))) {
-		fread(enable_list, 1, FCRAM_SPACING / 2, f);
-		fclose(f);
-	}
+    FILE *f;
+    if ((f = fopen(PATH_TEMP "/PATCHENABLE", "r"))) {
+        fread(enable_list, 1, FCRAM_SPACING / 2, f);
+        fclose(f);
+    }
 }
 
-int show_menu(struct options_s *options, uint8_t* toggles);
+int show_menu(struct options_s *options, uint8_t *toggles);
 
 int
 menu_patches()
 {
-	list_patches_build(PATH_PATCHES, 0);
+    list_patches_build(PATH_PATCHES, 0);
 
-	show_menu(patches, enable_list);
+    show_menu(patches, enable_list);
 
-	// Remove old settings, save new
-	f_unlink(PATH_TEMP "/PATCHENABLE");
-	write_file(enable_list, PATH_TEMP "/PATCHENABLE", FCRAM_SPACING / 2);
+    // Remove old settings, save new
+    f_unlink(PATH_TEMP "/PATCHENABLE");
+    write_file(enable_list, PATH_TEMP "/PATCHENABLE", FCRAM_SPACING / 2);
 
-	// TODO - Determine whether it actually changed.
-	config.options[OPTION_RECONFIGURED] = 1;
+    // TODO - Determine whether it actually changed.
+    config.options[OPTION_RECONFIGURED] = 1;
 
     return MENU_MAIN;
 }
@@ -187,7 +192,7 @@ menu_patches()
 int
 menu_options()
 {
-	show_menu(options, config.options);
+    show_menu(options, config.options);
 
     return MENU_MAIN;
 }
@@ -213,7 +218,7 @@ menu_info()
                     "  Version: %s (%x)\n"
                     "TWL_FIRM / DSi Firmware:\n"
                     "  Version: %s (%x)\n",
-            		native->version_string, native->version, agb->version_string, agb->version, twl->version_string, twl->version);
+            native->version_string, native->version, agb->version_string, agb->version, twl->version_string, twl->version);
 
     wait_key();
 
@@ -248,7 +253,7 @@ menu_help()
                     " <https://github.com/chaoskagami/corbenik>\n"
                     "\n");
 
-	wait_key();
+    wait_key();
 
     need_redraw = 1;
     clear_screen(TOP_SCREEN);

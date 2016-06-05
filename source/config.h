@@ -19,12 +19,11 @@ struct config_file
                              // arbitrary limit - contact me if you hit it.
 } __attribute__((packed));
 
-
 struct patch_state
 {
-	char filename[256];
+    char filename[256];
 
-	uint8_t state;
+    uint8_t state;
 } __attribute__((packed));
 
 extern struct config_file config;
@@ -32,10 +31,10 @@ extern struct config_file config;
 enum type
 {
     boolean_val = 0, // Toggle
-    ranged_val  = 1, // N1 - N2, left and right to pick.
-    mask_val    = 2, // Bitmask allowed values.
-    not_option  = 3, // Skip over this.
-	call_fun    = 4  // Call a function. Treat (a) as (void)(*)(void).
+    ranged_val = 1,  // N1 - N2, left and right to pick.
+    mask_val = 2,    // Bitmask allowed values.
+    not_option = 3,  // Skip over this.
+    call_fun = 4     // Call a function. Treat (a) as (void)(*)(void).
 };
 
 struct range_str
@@ -111,8 +110,8 @@ struct options_s
 // TODO - Every option beyond here is a patch now, so once I get listing
 // implemented, these shall go.
 
-#define OPTION_SIGPATCH 0   // Use builtin signature patch.
-#define OPTION_FIRMPROT 1   // Protect firmware from writes.
+#define OPTION_SIGPATCH 0 // Use builtin signature patch.
+#define OPTION_FIRMPROT 1 // Protect firmware from writes.
 
 #define OPTION_AADOWNGRADE 16 // Anti-anti-downgrade.
 #define OPTION_MEMEXEC 17     // Prevent MPU from disabling execute permissions.

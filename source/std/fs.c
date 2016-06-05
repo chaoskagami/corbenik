@@ -11,45 +11,49 @@ static FILE files[MAX_FILES_OPEN];
 
 // This function is based on PathDeleteWorker from GodMode9.
 // It was easier to just import it.
-int rrmdir_back(char* fpath) {
-	FILINFO fno = {.lfname = NULL};
+int
+rrmdir_back(char *fpath)
+{
+    FILINFO fno = {.lfname = NULL };
 
-	// this code handles directory content deletion
-	if (f_stat(fpath, &fno) != FR_OK)
-		return 1; // fpath does not exist
+    // this code handles directory content deletion
+    if (f_stat(fpath, &fno) != FR_OK)
+        return 1; // fpath does not exist
 
-	if (fno.fattrib & AM_DIR) { // process folder contents
-		DIR pdir;
-		char* fname = fpath + strnlen(fpath, 255);
-		if (f_opendir(&pdir, fpath) != FR_OK)
-			return 1;
+    if (fno.fattrib & AM_DIR) { // process folder contents
+        DIR pdir;
+        char *fname = fpath + strnlen(fpath, 255);
+        if (f_opendir(&pdir, fpath) != FR_OK)
+            return 1;
 
-		*(fname++) = '/';
-		fno.lfname = fname;
-		fno.lfsize = fpath + 255 - fname;
+        *(fname++) = '/';
+        fno.lfname = fname;
+        fno.lfsize = fpath + 255 - fname;
 
-		while (f_readdir(&pdir, &fno) == FR_OK) {
-			if ((strncmp(fno.fname, ".", 2) == 0) || (strncmp(fno.fname, "..", 3) == 0))
-				continue; // filter out virtual entries
-			if (fname[0] == 0)
-				strncpy(fname, fno.fname, fpath + 255 - fname);
-			if (fno.fname[0] == 0)
-				break;
-			else // return value won't matter
-				rrmdir_back(fpath);
-		}
+        while (f_readdir(&pdir, &fno) == FR_OK) {
+            if ((strncmp(fno.fname, ".", 2) == 0) || (strncmp(fno.fname, "..", 3) == 0))
+                continue; // filter out virtual entries
+            if (fname[0] == 0)
+                strncpy(fname, fno.fname, fpath + 255 - fname);
+            if (fno.fname[0] == 0)
+                break;
+            else // return value won't matter
+                rrmdir_back(fpath);
+        }
 
-		f_closedir(&pdir);
-		*(--fname) = '\0';
-	}
+        f_closedir(&pdir);
+        *(--fname) = '\0';
+    }
 
-	return f_unlink(fpath);
+    return f_unlink(fpath);
 }
 
-int rrmdir(char* name) {
-	char fpath[256];
-	strncpy(fpath, name, 256);
-	return rrmdir_back(fpath);
+int
+rrmdir(char *name)
+{
+    char fpath[256];
+    strncpy(fpath, name, 256);
+    return rrmdir_back(fpath);
 }
 
 int
@@ -108,8 +112,8 @@ fopen(const char *filename, const char *mode)
 void
 fclose(FILE *fp)
 {
-	if (!fp->is_open)
-		return;
+    if (!fp->is_open)
+        return;
 
     f_close(&(fp->handle));
 
@@ -119,8 +123,8 @@ fclose(FILE *fp)
 void
 fseek(FILE *fp, int64_t offset, int whence)
 {
-	if (!fp->is_open)
-		return;
+    if (!fp->is_open)
+        return;
 
     uint32_t fixed_offset;
     switch (whence) {
@@ -143,8 +147,8 @@ fseek(FILE *fp, int64_t offset, int whence)
 size_t
 ftell(FILE *fp)
 {
-	if (!fp->is_open)
-		return 0;
+    if (!fp->is_open)
+        return 0;
 
     return f_tell(&(fp->handle));
 }
@@ -152,8 +156,8 @@ ftell(FILE *fp)
 int
 feof(FILE *fp)
 {
-	if (!fp->is_open)
-		return 0;
+    if (!fp->is_open)
+        return 0;
 
     return f_eof(&(fp->handle));
 }
@@ -161,8 +165,8 @@ feof(FILE *fp)
 size_t
 fsize(FILE *fp)
 {
-	if (!fp->is_open)
-		return 0;
+    if (!fp->is_open)
+        return 0;
 
     return f_size(&(fp->handle));
 }
@@ -170,8 +174,8 @@ fsize(FILE *fp)
 size_t
 fwrite(const void *buffer, size_t elementSize, size_t elementCnt, FILE *fp)
 {
-	if (!fp->is_open)
-		return 0;
+    if (!fp->is_open)
+        return 0;
 
     UINT br;
     if (f_write(&(fp->handle), buffer, elementSize * elementCnt, &br))
@@ -184,8 +188,8 @@ fwrite(const void *buffer, size_t elementSize, size_t elementCnt, FILE *fp)
 size_t
 fread(void *buffer, size_t elementSize, size_t elementCnt, FILE *fp)
 {
-	if (!fp->is_open)
-		return 0;
+    if (!fp->is_open)
+        return 0;
 
     size_t br;
     if (f_read(&(fp->handle), buffer, elementSize * elementCnt, &br))

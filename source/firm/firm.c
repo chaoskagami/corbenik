@@ -161,7 +161,7 @@ load_firm(firm_h *dest, char *path, char *path_firmkey, uint32_t *size, uint64_t
         return 1;
     } else {
         fprintf(BOTTOM_SCREEN, "l");
-	}
+    }
 
     // Check and decrypt FIRM if it is encrypted.
     if (dest->magic != FIRM_MAGIC) {
@@ -171,7 +171,7 @@ load_firm(firm_h *dest, char *path, char *path_firmkey, uint32_t *size, uint64_t
                 fprintf(BOTTOM_SCREEN, "\nFailed to decrypt firmware.\n"
                                        "This is fatal. Aborting.\n");
             }
-			return 1;
+            return 1;
         }
         firmware_changed = 1; // Decryption performed.
     } else {
@@ -342,7 +342,7 @@ int firm_loaded = 0;
 int
 load_firms()
 {
-	int state = 0;
+    int state = 0;
 
     if (firm_loaded)
         return 0;
@@ -352,26 +352,26 @@ load_firms()
     fprintf(BOTTOM_SCREEN, "NATIVE_FIRM\n  [");
     if (load_firm(firm_loc, PATH_NATIVE_F, PATH_NATIVE_FIRMKEY, &firm_size, NATIVE_FIRM_TITLEID) != 0) {
         abort("]\n  Failed to load NATIVE_FIRM.\n");
-	}
+    }
     find_proc9(firm_loc, &firm_proc9, &firm_p9_exefs);
 
     fprintf(BOTTOM_SCREEN, "]\nTWL_FIRM\n  [");
     if (load_firm(twl_firm_loc, PATH_TWL_F, PATH_TWL_FIRMKEY, &twl_firm_size, TWL_FIRM_TITLEID) != 0) {
         fprintf(BOTTOM_SCREEN, "]\n  TWL_FIRM failed to load.\n");
-		state =1;
-	} else {
-		fprintf(stderr, "]\n");
+        state = 1;
+    } else {
+        fprintf(stderr, "]\n");
         find_proc9(twl_firm_loc, &twl_firm_proc9, &twl_firm_p9_exefs);
-	}
+    }
 
     fprintf(BOTTOM_SCREEN, "AGB_FIRM\n  [");
     if (load_firm(agb_firm_loc, PATH_AGB_F, PATH_AGB_FIRMKEY, &agb_firm_size, AGB_FIRM_TITLEID) != 0) {
         fprintf(BOTTOM_SCREEN, "]\n  AGB_FIRM failed to load.\n");
-		state = 1;
-	} else {
-		fprintf(stderr, "]\n");
+        state = 1;
+    } else {
+        fprintf(stderr, "]\n");
         find_proc9(agb_firm_loc, &agb_firm_proc9, &agb_firm_p9_exefs);
-	}
+    }
 
     firm_loaded = 1; // Loaded.
 
@@ -384,12 +384,12 @@ boot_cfw()
     fprintf(BOTTOM_SCREEN, "Loading firmware...\n");
     load_firms();
 
-	if (config.options[OPTION_RECONFIGURED]) {
-		fprintf(stderr, "Generating patch cache...\n");
-		generate_patch_cache();
-		config.options[OPTION_RECONFIGURED] = 0;
-		save_config();
-	}
+    if (config.options[OPTION_RECONFIGURED]) {
+        fprintf(stderr, "Generating patch cache...\n");
+        generate_patch_cache();
+        config.options[OPTION_RECONFIGURED] = 0;
+        save_config();
+    }
 
     fprintf(BOTTOM_SCREEN, "Patching firmware...\n");
     if (patch_firm_all() != 0)

@@ -1,7 +1,7 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
-_UNUSED static unsigned int config_version = 1;
+#define config_version 1
 
 #define CONFIG_MAGIC "OVAN"
 
@@ -54,8 +54,8 @@ struct options_s
 // Use builtin loader module replacer.
 #define OPTION_LOADER 2
 
-// Inject services (including backdoor for 11)
-#define OPTION_SERVICES 3
+// Inject svc calls (including backdoor for 11)
+#define OPTION_SVCS 3
 
 // Use builtin ARM9 thread injector.
 #define OPTION_ARM9THREAD 4
@@ -87,7 +87,7 @@ struct options_s
 // Enable language emulation.
 #define OPTION_LOADER_LANGEMU 13
 
-// Force replacement of services. Normally you don't want this.
+// Force replacement of non-null svcs. Normally you don't want this.
 #define OPTION_REPLACE_ALLOCATED_SVC 14
 
 // Ignore patch UUID dependencies. Not recommended.
@@ -107,24 +107,15 @@ struct options_s
 // change and causes caches to be regenerated.
 #define OPTION_RECONFIGURED 255
 
-// TODO - Every option beyond here is a patch now, so once I get listing
-// implemented, these shall go.
-
-#define OPTION_SIGPATCH 0 // Use builtin signature patch.
-#define OPTION_FIRMPROT 1 // Protect firmware from writes.
-
-#define OPTION_AADOWNGRADE 16 // Anti-anti-downgrade.
-#define OPTION_MEMEXEC 17     // Prevent MPU from disabling execute permissions.
-#define OPTION_UNITINFO 18    // Dev UNITINFO. Note that this is overkill.
-
 //#define HEADER_COLOR        12 // Color of header text.
 //#define BG_COLOR            13 // Color of background.
 //#define TEXT_COLOR          14 // Color of most text.
 //#define ARROW_COLOR         15 // Color of Arrow.
 
+#ifndef LOADER
 void load_config();
 void save_config();
-
+#endif
 /*
 [CORBENIK]
 version=1

@@ -8,15 +8,20 @@
 #define PATH_MAX 255
 #define _MAX_LFN 255
 #endif
-#include "config.h"
+#include "../../../source/config.h"
 #include "../../../source/patch_format.h"
 
 Handle log_file_hdl;
 int logger_is_initd = 0;
 
+extern struct config_file config;
+
 void
 openLogger()
 {
+    if (config.options[OPTION_SAVE_LOGS] == 0) {
+        logger_is_initd = -1; // Setting -1 effectively disables logs.
+    }
     Result r;
 
     if (logger_is_initd)

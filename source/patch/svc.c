@@ -33,7 +33,7 @@ PATCH(services)
 
     fprintf(stderr, "Svc: table at %x\n", (uint32_t)svcTable);
 
-    char str[] = PATH_SERVICES "/00.bin";
+    char str[] = PATH_SVC "/00.bin";
     char *at = str + (strlen(str) - 6);
     // FIXME - This is really slow. Some way to optimize it?
     for (uint32_t i = 0; i <= 0xf; i++) {

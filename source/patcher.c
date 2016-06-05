@@ -62,16 +62,16 @@ patch_firm_all()
     // Replace loader?
     if (config.options[OPTION_LOADER]) {
         if (patch_modules()) {
-            abort("Fatal. Service patch has failed.");
+            abort("Fatal. Loader inject has failed.");
         }
         // This requires OPTION_SIGPATCH.
         wait();
     }
 
     // Inject services?
-    if (config.options[OPTION_SERVICES]) {
+    if (config.options[OPTION_SVCS]) {
         if (patch_services()) {
-            abort("Fatal. Service patch has failed.");
+            abort("Fatal. Svc inject has failed.");
         }
         wait();
     }

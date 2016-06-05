@@ -153,7 +153,8 @@ loader_LoadProcess(Handle *process, u64 prog_handle)
     u32 text_grow, data_grow, ro_grow;
     u16 progver;
 
-    openLogger();
+    load_config(); // First order of business - we need the config file.
+    openLogger();  // Open logs if enabled in config.
 
     // make sure the cached info corrosponds to the current prog_handle
     if (g_cached_prog_handle != prog_handle) {
@@ -183,8 +184,6 @@ loader_LoadProcess(Handle *process, u64 prog_handle)
 
     logu64(progid);
     logstr("  validated params\n");
-
-    load_config(); // First order of business - we need the config file.
 
     // Check and set the CPU mode. Possible values: 0 - Keep o3ds speed, 1 -
     // n3ds speed, -1 force o3ds

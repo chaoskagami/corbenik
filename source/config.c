@@ -30,7 +30,7 @@ mk_structure()
     f_mkdir(PATH_PATCHES);
     f_mkdir(PATH_FIRMWARES);
     f_mkdir(PATH_MODULES);
-    f_mkdir(PATH_SERVICES);
+    f_mkdir(PATH_SVC);
     f_mkdir(PATH_KEYS);
     f_mkdir(PATH_EXEFS);
     f_mkdir(PATH_TEMP);

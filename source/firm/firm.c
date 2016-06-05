@@ -286,15 +286,16 @@ boot_firm()
         fprintf(BOTTOM_SCREEN, "Updated keyX keyslots\n");
     }
 
-    fumount(); // Unmount SD. No longer needed.
-    fprintf(BOTTOM_SCREEN, "SD Unmounted.\n");
-
     for (firm_section_h *section = firm_loc->section; section < firm_loc->section + 4 && section->address != 0; section++) {
         memcpy((void *)section->address, (void *)firm_loc + section->offset, section->size);
     }
     fprintf(BOTTOM_SCREEN, "Copied FIRM\n");
 
     wait();
+
+    clear_disp(BOTTOM_SCREEN);
+
+    fumount(); // Unmount SD. No longer needed.
 
     // No fprintf will work from here on out.
 

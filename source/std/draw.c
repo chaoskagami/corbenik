@@ -8,14 +8,16 @@
 #include "../fatfs/ff.h"
 #include "fs.h"
 #include "unused.h"
+#include "../config.h"
+#include "../patch_format.h"
 
 static unsigned int top_cursor_x = 0, top_cursor_y = 0;
 static unsigned int bottom_cursor_x = 0, bottom_cursor_y = 0;
 
-#ifdef BUFFER
-static char text_buffer_top[TEXT_TOP_HEIGHT * TEXT_TOP_WIDTH + 1];
 static char text_buffer_bottom[TEXT_BOTTOM_HEIGHT * TEXT_BOTTOM_WIDTH + 1];
 
+#ifdef BUFFER
+static char text_buffer_top[TEXT_TOP_HEIGHT * TEXT_TOP_WIDTH + 1];
 static char color_buffer_top[TEXT_TOP_HEIGHT * TEXT_TOP_WIDTH + 1];
 static char color_buffer_bottom[TEXT_BOTTOM_HEIGHT * TEXT_BOTTOM_WIDTH + 1];
 #endif
@@ -42,6 +44,22 @@ static uint32_t colors[16] = {
 void
 clear_disp(uint8_t *screen)
 {
+    // There's a reason the logging code is here rather than putc:
+    // writing a batch is faster.
+    if (screen == BOTTOM_SCREEN && config.options[OPTION_SAVE_LOGS]) {
+        FILE *f = fopen(PATH_CFW "/boot.log", "w");
+        fseek(f, 0, SEEK_END);
+        for (int i = 0; i < TEXT_BOTTOM_HEIGHT; i++) {
+            char *text = text_buffer_bottom + (TEXT_BOTTOM_WIDTH * i);
+            if (text[0] == 0)
+                break;
+            fwrite(text, 1, strnlen(text, TEXT_BOTTOM_WIDTH), f);
+            fwrite("\n", 1, 1, f);
+        }
+        fclose(f);
+        memset(text_buffer_bottom, 0, TEXT_BOTTOM_WIDTH * TEXT_BOTTOM_HEIGHT);
+    }
+
     if (screen == TOP_SCREEN)
         screen = framebuffers->top_left;
     else if (screen == BOTTOM_SCREEN)
@@ -224,6 +242,7 @@ putc(void *buf, const int c)
             clear_disp(buf);
             cursor_x[0] = 0;
             cursor_y[0] = 0;
+
 /*			uint32_t col = SCREEN_TOP_HEIGHT * SCREEN_DEPTH;
             uint32_t one_c = 8 * SCREEN_DEPTH;
             for (unsigned int x = 0; x < width * 8; x++) {
@@ -254,6 +273,8 @@ putc(void *buf, const int c)
                 }
 
 #else
+                if (buf == BOTTOM_SCREEN)
+                    text_buffer_bottom[cursor_y[0] * width + cursor_x[0]] = c;
                 draw_character(screen, c, cursor_x[0], cursor_y[0], colors[(*color >> 4) & 0xF], colors[*color & 0xF]);
 #endif
 

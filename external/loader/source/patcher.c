@@ -11,7 +11,7 @@
 #define PATH_MAX 255
 #define _MAX_LFN 255
 #endif
-#include "config.h"
+#include "../../../source/config.h"
 
 int
 fileOpen(Handle *file, FS_ArchiveID id, const char *path, int flags)
@@ -30,7 +30,7 @@ fileOpen(Handle *file, FS_ArchiveID id, const char *path, int flags)
     return FSLDR_OpenFileDirectly(file, id, apath, ppath, flags, 0);
 }
 
-static struct config_file config;
+struct config_file config;
 static int failed_load_config = 1;
 
 void

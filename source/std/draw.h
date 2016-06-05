@@ -66,6 +66,8 @@ void fflush(void *channel);
 
 void set_cursor(void *channel, unsigned int x, unsigned int y);
 
+void clear_disp(uint8_t *screen);
+
 // Like printf. Supports the following format specifiers:
 //  %s - char*
 //  %c - char

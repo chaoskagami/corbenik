@@ -21,14 +21,14 @@ static struct options_s options[] = {
     // Patches.
     { 0, "\x1b[32;40mOptions\x1b[0m", "", not_option, 0, 0 },
 
-    { OPTION_LOADER, "System Modules", "Replaces system modules (including loader)", boolean_val, 0, 0 },
+    { OPTION_LOADER, "Loader Replacement", "Replaces loader with one capable of the below and also applying bytecode patches.", boolean_val, 0, 0 },
     { OPTION_LOADER_CPU_L2, "  CPU - L2 cache", "Forces the system to use the L2 cache. Ignored if not a N3DS.", boolean_val, 0, 0 },
     { OPTION_LOADER_CPU_800MHZ, "  CPU - 800Mhz", "Forces the system to run in 800Mhz mode. Ignored if not a N3DS.", boolean_val, 0, 0 },
     { OPTION_LOADER_LANGEMU, "  Language Emulation", "Reads language emulation configuration and imitates the region/language.", boolean_val, 0, 0 },
 
     { 0, "", "", not_option, 0, 0 },
 
-    { OPTION_SERVICES, "Service Replacement", "Replaces ARM11 services, including svcBackdoor. With 11.0 NATIVE_FIRM, you need this.", boolean_val, 0, 0 },
+    { OPTION_SVCS, "SVC Replacement", "Replaces ARM11 svc calls, including svcBackdoor. With 11.0 NATIVE_FIRM, you probably want this.", boolean_val, 0, 0 },
 
     { 0, "", "", not_option, 0, 0 },
 
@@ -44,10 +44,14 @@ static struct options_s options[] = {
     // Patches.
     { 0, "\x1b[32;40mDeveloper Options\x1b[0m", "", not_option, 0, 0 },
 
-    { OPTION_REPLACE_ALLOCATED_SVC, "Force service replace", "Replace ARM11 services even if they exist. Don't use unless you know what you're doing.",
+    { OPTION_REPLACE_ALLOCATED_SVC, "Force svc replace", "Replace ARM11 svc calls even if they exist. Don't use this unless you know what you're doing.",
       boolean_val, 0, 0 },
-    { OPTION_TRACE, "Debug Pauses", "After each important step, [WAIT] will be shown and you'll need to press a key. Debug.", boolean_val, 0, 0 },
+    { OPTION_TRACE, "Step Through", "After each important step, [WAIT] will be shown and you'll need to press a key. Debug.", boolean_val, 0, 0 },
     { OPTION_OVERLY_VERBOSE, "Verbose", "Output more debug information than the average user needs.", boolean_val, 0, 0 },
+    { OPTION_SAVE_LOGS, "Logging", "Save logs to the corbenik folder. Slows operation a bit.", boolean_val, 0, 0 },
+
+    { OPTION_RECONFIGURED, "Reconfigured (DO NOT UNCHECK)", "If patches were reconfigured, this will be set. Do not untick this if ticked.", boolean_val, 0,
+      0 },
 
     //    { OPTION_ARM9THREAD,        "ARM9 Thread", boolean_val, 0, 0 },
     //    { IGNORE_PATCH_DEPS,   "Ignore dependencies", boolean_val, 0, 0 },

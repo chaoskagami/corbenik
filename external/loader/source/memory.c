@@ -7,7 +7,7 @@
 #define PATH_MAX 255
 #define _MAX_LFN 255
 #endif
-#include "config.h"
+#include "../../../source/config.h"
 #include "../../../source/patch_format.h"
 
 int

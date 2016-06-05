@@ -21,6 +21,7 @@
 #define OP_OR 0x0A
 #define OP_XOR 0x0B
 #define OP_NOT 0x0C
+#define OP_VER 0x0D
 
 #define OP_NEXT 0xFF
 
@@ -46,7 +47,7 @@ struct mode modes[19];
 int init_bytecode = 0;
 
 int
-exec_bytecode(uint8_t *bytecode, uint32_t len, int debug)
+exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
 {
     if (!init_bytecode) {
 #ifndef LOADER
@@ -298,6 +299,19 @@ exec_bytecode(uint8_t *bytecode, uint32_t len, int debug)
                 }
                 code += 2;
                 break;
+            case OP_VER:
+                if (debug)
+                    log("ver\n");
+                code++;
+                if (!test_was_false) {
+                    if (*(uint16_t *)code != ver) {
+                        test_was_false = 1;
+                    }
+                } else {
+                    test_was_false = 0;
+                }
+                code += 2;
+                break;
             case OP_NEXT:
                 if (debug)
                     log("next\n");
@@ -337,12 +351,13 @@ exec_bytecode(uint8_t *bytecode, uint32_t len, int debug)
 
 #ifdef LOADER
 int
-execb(uint64_t tid, uint8_t *search_mem, uint32_t search_len)
+execb(uint64_t tid, uint16_t ver, uint8_t *search_mem, uint32_t search_len)
 {
 #else
 int
 execb(char *filename, int build_cache)
 {
+    uint16_t ver = 0; // FIXME - Provide native_firm version
 #endif
     uint32_t patch_len;
 #ifdef LOADER
@@ -480,7 +495,6 @@ execb(char *filename, int build_cache)
         patch_mem = (uint8_t *)FCRAM_PATCH_LOC;
         patch_len = len;
     }
-
 #endif
 
     int debug = 0;
@@ -490,5 +504,5 @@ execb(char *filename, int build_cache)
     }
 #endif
 
-    return exec_bytecode(patch_mem, patch_len, debug);
+    return exec_bytecode(patch_mem, ver, patch_len, debug);
 }

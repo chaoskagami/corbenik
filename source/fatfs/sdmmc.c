@@ -383,36 +383,36 @@ InitSD()
 #ifdef DATA32_SUPPORT
     *(volatile uint16_t *)0x10006100 |= 0x402u; // SDDATACTL32
 #else
-    *(volatile uint16_t *)0x10006100 |= 0x402u; // SDDATACTL32
+    *(volatile uint16_t *)0x10006100 |= 0x402u;  // SDDATACTL32
 #endif
     *(volatile uint16_t *)0x100060D8 = (*(volatile uint16_t *)0x100060D8 & 0xFFDD) | 2;
 #ifdef DATA32_SUPPORT
     *(volatile uint16_t *)0x10006100 &= 0xFFFFu; // SDDATACTL32
     *(volatile uint16_t *)0x100060D8 &= 0xFFDFu; // SDDATACTL
-    *(volatile uint16_t *)0x10006104 = 512; // SDBLKLEN32
+    *(volatile uint16_t *)0x10006104 = 512;      // SDBLKLEN32
 #else
     *(volatile uint16_t *)0x10006100 &= 0xFFFDu; // SDDATACTL32
     *(volatile uint16_t *)0x100060D8 &= 0xFFDDu; // SDDATACTL
-    *(volatile uint16_t *)0x10006104 = 0; // SDBLKLEN32
+    *(volatile uint16_t *)0x10006104 = 0;        // SDBLKLEN32
 #endif
-    *(volatile uint16_t *)0x10006108 = 1; // SDBLKCOUNT32
-    *(volatile uint16_t *)0x100060E0 &= 0xFFFEu; // SDRESET
-    *(volatile uint16_t *)0x100060E0 |= 1u; // SDRESET
-    *(volatile uint16_t *)0x10006020 |= TMIO_MASK_ALL; // SDIR_MASK0
+    *(volatile uint16_t *)0x10006108 = 1;                    // SDBLKCOUNT32
+    *(volatile uint16_t *)0x100060E0 &= 0xFFFEu;             // SDRESET
+    *(volatile uint16_t *)0x100060E0 |= 1u;                  // SDRESET
+    *(volatile uint16_t *)0x10006020 |= TMIO_MASK_ALL;       // SDIR_MASK0
     *(volatile uint16_t *)0x10006022 |= TMIO_MASK_ALL >> 16; // SDIR_MASK1
-    *(volatile uint16_t *)0x100060FC |= 0xDBu; // SDCTL_RESERVED7
-    *(volatile uint16_t *)0x100060FE |= 0xDBu; // SDCTL_RESERVED8
-    *(volatile uint16_t *)0x10006002 &= 0xFFFCu; // SDPORTSEL
+    *(volatile uint16_t *)0x100060FC |= 0xDBu;               // SDCTL_RESERVED7
+    *(volatile uint16_t *)0x100060FE |= 0xDBu;               // SDCTL_RESERVED8
+    *(volatile uint16_t *)0x10006002 &= 0xFFFCu;             // SDPORTSEL
 #ifdef DATA32_SUPPORT
     *(volatile uint16_t *)0x10006024 = 0x20;
     *(volatile uint16_t *)0x10006028 = 0x40EE;
 #else
-    *(volatile uint16_t *)0x10006024 = 0x40; // Nintendo sets this to 0x20
-    *(volatile uint16_t *)0x10006028 = 0x40EB; // Nintendo sets this to 0x40EE
+    *(volatile uint16_t *)0x10006024 = 0x40;     // Nintendo sets this to 0x20
+    *(volatile uint16_t *)0x10006028 = 0x40EB;   // Nintendo sets this to 0x40EE
 #endif
     *(volatile uint16_t *)0x10006002 &= 0xFFFCu; ////SDPORTSEL
-    *(volatile uint16_t *)0x10006026 = 512; // SDBLKLEN
-    *(volatile uint16_t *)0x10006008 = 0; // SDSTOP
+    *(volatile uint16_t *)0x10006026 = 512;      // SDBLKLEN
+    *(volatile uint16_t *)0x10006008 = 0;        // SDSTOP
 
     inittarget(&handelSD);
 }

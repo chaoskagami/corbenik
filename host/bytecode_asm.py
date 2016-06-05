@@ -1,6 +1,13 @@
 #!/usr/bin/env python2
 # -*- encoding: utf8 -*-
 
+# This assembler is very dumb and needs severe improvement.
+# Maybe I should rewrite it as an LLVM backend. That would
+# be much easier to maintain and far less hackish.
+
+# Either way, expect this code to change, a lot. The bytecode
+# format probably won't.
+
 import os
 import sys
 import re
@@ -164,8 +171,12 @@ def parse_op(token_list, instr_offs):
 		if s != 2:
 			syn_err("invalid number of arguments")
 
-		# We cut corners and calculate stuff manually.
-		return bytearray.fromhex("09") + bytearray.fromhex(token_list[1])
+		return bytearray.fromhex("0C") + bytearray.fromhex(token_list[1])
+	elif token_list[0] == "ver":
+		if s != 2:
+			syn_err("invalid number of arguments")
+
+		return bytearray.fromhex("0D") + bytearray.fromhex(token_list[1])
 
 def pad_zero_r(x, c):
 	while len(x) < c:
@@ -216,6 +227,8 @@ with open(in_file, "r") as ins:
 			if bytes:
 				offsets += [size]
 				size += len(bytes)
+
+		offsets += [size+1] # So we can jump past the last instruction for 'exit' type behavior
 
 		ins.seek(0)
 

@@ -49,7 +49,7 @@ allocate_shared_mem(prog_addrs_t *shared, prog_addrs_t *vaddr, int flags)
 }
 
 static Result
-load_code(u64 progid, prog_addrs_t *shared, prog_addrs_t *original, u64 prog_handle, int is_compressed)
+load_code(u64 progid, u16 progver, prog_addrs_t *shared, prog_addrs_t *original, u64 prog_handle, int is_compressed)
 {
     Handle handle;
     FS_Path archivePath;
@@ -95,9 +95,9 @@ load_code(u64 progid, prog_addrs_t *shared, prog_addrs_t *original, u64 prog_han
     }
 
     // Patch segments
-    patch_text(progid, (u8 *)shared->text_addr, shared->text_size << 12, original->text_size << 12);
-    patch_data(progid, (u8 *)shared->data_addr, shared->data_size << 12, original->data_size << 12);
-    patch_ro(progid, (u8 *)shared->ro_addr, shared->ro_size << 12, original->ro_size << 12);
+    patch_text(progid, progver, (u8 *)shared->text_addr, shared->text_size << 12, original->text_size << 12);
+    patch_data(progid, progver, (u8 *)shared->data_addr, shared->data_size << 12, original->data_size << 12);
+    patch_ro(progid, progver, (u8 *)shared->ro_addr, shared->ro_size << 12, original->ro_size << 12);
 
     return 0;
 }
@@ -151,6 +151,7 @@ loader_LoadProcess(Handle *process, u64 prog_handle)
     u32 data_mem_size;
     u64 progid;
     u32 text_grow, data_grow, ro_grow;
+    u16 progver;
 
     openLogger();
 
@@ -178,6 +179,7 @@ loader_LoadProcess(Handle *process, u64 prog_handle)
 
     // load code
     progid = g_exheader.arm11systemlocalcaps.programid;
+    progver = g_exheader.codesetinfo.flags.remasterversion[0] + g_exheader.codesetinfo.flags.remasterversion[1] * 0x100;
 
     logu64(progid);
     logstr("  validated params\n");
@@ -206,9 +208,9 @@ loader_LoadProcess(Handle *process, u64 prog_handle)
     original_vaddr.total_size = original_vaddr.text_size + original_vaddr.ro_size + original_vaddr.data_size;
 
     // Allow changing code, ro, data sizes to allow adding code
-    text_grow = get_text_extend(progid, g_exheader.codesetinfo.text.codesize);
-    ro_grow = get_ro_extend(progid, g_exheader.codesetinfo.ro.codesize);
-    data_grow = get_data_extend(progid, g_exheader.codesetinfo.data.codesize);
+    text_grow = get_text_extend(progid, progver, g_exheader.codesetinfo.text.codesize);
+    ro_grow = get_ro_extend(progid, progver, g_exheader.codesetinfo.ro.codesize);
+    data_grow = get_data_extend(progid, progver, g_exheader.codesetinfo.data.codesize);
 
     // One page is 4096 bytes, thus all the 4095 constants.
 
@@ -226,7 +228,7 @@ loader_LoadProcess(Handle *process, u64 prog_handle)
         return res;
     }
 
-    if ((res = load_code(progid, &shared_addr, &original_vaddr, prog_handle, g_exheader.codesetinfo.flags.flag & 1)) >= 0) {
+    if ((res = load_code(progid, progver, &shared_addr, &original_vaddr, prog_handle, g_exheader.codesetinfo.flags.flag & 1)) >= 0) {
         memcpy(&codesetinfo.name, g_exheader.codesetinfo.name, 8);
         codesetinfo.program_id = progid;
         codesetinfo.text_addr = vaddr.text_addr;

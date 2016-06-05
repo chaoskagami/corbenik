@@ -38,13 +38,13 @@
 #define PATH_PATCHES PATH_CFW "/patch"      // Patch binary folder.
 #define PATH_FIRMWARES PATH_CFW "/firmware" // Firmware folder.
 #define PATH_MODULES PATH_CFW "/module"     // Sysmodule location
-#define PATH_SERVICES PATH_CFW "/service"   // Service code location.
+#define PATH_SERVICES PATH_CFW "/svc"       // Svc code location.
 
 #define PATH_TEMP PATH_CFW "/cache"           // Files that are transient and used to speed operation
 #define PATH_LOADER_CACHE PATH_TEMP "/loader" // Cached patch bytecode for loader.
 #define PATH_KEYS PATH_CFW "/keys"            // Keyfiles will be loaded from this dir, and
                                               // additionally the root if not found.
-#define PATH_EXEFS PATH_CFW "/exe"            // ExeFS overrides, named like '<titleid>.exefs'
+#define PATH_EXEFS PATH_CFW "/exe"            // ExeFS overrides, named like '<titleid>.exefs' - NYI
 
 #define PATH_NATIVE_F PATH_FIRMWARES "/native"
 #define PATH_AGB_F PATH_FIRMWARES "/agb"

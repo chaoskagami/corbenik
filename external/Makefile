@@ -1,13 +1,13 @@
 .PHONY: all
-all: loader service
+all: loader svc
 	mkdir -p ../out/corbenik/module
-	mkdir -p ../out/corbenik/service
+	mkdir -p ../out/corbenik/svc
 	cp loader/loader.cxi ../out/corbenik/module/loader.cxi
-	cp service/7b.bin ../out/corbenik/service/7b.bin
+	cp svc/7b.bin ../out/corbenik/svc/7b.bin
 
 .PHONY: clean
-clean: clean_loader clean_service
-	rm -rf ../out/corbenik/service
+clean: clean_loader clean_svc
+	rm -rf ../out/corbenik/svc
 	rm -rf ../out/corbenik/module
 
 .PHONY: loader
@@ -18,10 +18,10 @@ loader:
 clean_loader:
 	make -C loader clean
 
-.PHONY: service
-service:
-	make -C service
+.PHONY: svc
+svc:
+	make -C svc
 
-.PHONY: clean_service
-clean_service:
-	make -C service clean
+.PHONY: clean_svc
+clean_svc:
+	make -C svc clean

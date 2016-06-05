@@ -309,45 +309,45 @@ overlay_patch(u64 progId, u8 *code, u32 size)
 
 // This is only for the .data segment.
 void
-patch_data(u64 progId, u8 *data, u32 size, u32 orig_size)
+patch_data(u64 progId, u16 progver, u8 *data, u32 size, u32 orig_size)
 {
 }
 
 // This is only for the .ro segment.
 void
-patch_ro(u64 progId, u8 *ro, u32 size, u32 orig_size)
+patch_ro(u64 progId, u16 progver, u8 *ro, u32 size, u32 orig_size)
 {
 }
 
 // This is only for the .code segment.
 void
-patch_text(u64 progId, u8 *text, u32 size, u32 orig_size)
+patch_text(u64 progId, u16 progver, u8 *text, u32 size, u32 orig_size)
 {
     if (progId == 0x0004013000008002LL)
         adjust_cpu_settings(progId, text, orig_size);
 
-    execb(progId, text, orig_size);
+    execb(progId, progver, text, orig_size);
 
     language_emu(progId, text, orig_size);
 }
 
 // Gets how many bytes .text must be extended by for patches to fit.
 u32
-get_text_extend(u64 progId, u32 size_orig)
+get_text_extend(u64 progId, u16 progver, u32 size_orig)
 {
     return 0; // Stub - nothing needs this yet
 }
 
 // Gets how many bytes .ro must be extended.
 u32
-get_ro_extend(u64 progId, u32 size_orig)
+get_ro_extend(u64 progId, u16 progver, u32 size_orig)
 {
     return 0; // Stub - nothing needs this yet
 }
 
 // Again, same, but for .data.
 u32
-get_data_extend(u64 progId, u32 size_orig)
+get_data_extend(u64 progId, u16 progver, u32 size_orig)
 {
     return 0; // Stub - nothing needs this yet
 }

@@ -360,8 +360,8 @@ load_firms()
         fprintf(BOTTOM_SCREEN, "]\n  TWL_FIRM failed to load.\n");
         state = 1;
     } else {
-        fprintf(stderr, "]\n");
         find_proc9(twl_firm_loc, &twl_firm_proc9, &twl_firm_p9_exefs);
+        fprintf(stderr, "]\n");
     }
 
     fprintf(BOTTOM_SCREEN, "AGB_FIRM\n  [");
@@ -369,8 +369,8 @@ load_firms()
         fprintf(BOTTOM_SCREEN, "]\n  AGB_FIRM failed to load.\n");
         state = 1;
     } else {
-        fprintf(stderr, "]\n");
         find_proc9(agb_firm_loc, &agb_firm_proc9, &agb_firm_p9_exefs);
+        fprintf(stderr, "]\n");
     }
 
     firm_loaded = 1; // Loaded.

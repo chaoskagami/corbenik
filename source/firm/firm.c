@@ -170,8 +170,8 @@ load_firm(firm_h *dest, char *path, char *path_firmkey, uint32_t *size, uint64_t
             if (firm_title == NATIVE_FIRM_TITLEID) {
                 fprintf(BOTTOM_SCREEN, "\nFailed to decrypt firmware.\n"
                                        "This is fatal. Aborting.\n");
-				return 1;
             }
+			return 1;
         }
         firmware_changed = 1; // Decryption performed.
     } else {

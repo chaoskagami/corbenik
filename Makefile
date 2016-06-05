@@ -32,7 +32,9 @@ objects_cfw = $(patsubst $(dir_source)/%.s, $(dir_build)/%.o, \
 all: a9lh patch external
 
 .PHONY: full
-full: host/langemu.conf all
+full: all out/corbenik/locale
+	cp README.txt out/
+	cd out && zip -r9 release.zip *
 
 .PHONY: external
 external:
@@ -49,11 +51,9 @@ a9lh: $(dir_out)/arm9loaderhax.bin
 reformat:
 	clang-format -i $(dir_source)/*.{c,h} $(dir_source)/*/*.{c,h} external/loader/source/*.{c,h}
 
-host/langemu.conf:
-	echo "Generating langemu.conf - may take a bit"
-	cd host && ./generate_langemu_conf.sh
-	mkdir -p $(dir_out)/corbenik/etc
-	cp host/langemu.conf $(dir_out)/corbenik/config/langemu.conf
+out/corbenik/locale: all
+	echo "Generating langemu data from 3dsdb - may take a bit"
+	cd out/corbenik && ../../host/generate_langemu_conf.sh
 
 .PHONY: clean
 clean:

@@ -96,8 +96,8 @@ loadTitleLocaleConfig(u64 progId, u8 *regionId, u8 *languageId)
 
     // This really does need a rewrite.
 
-    char path[] = "/corbenik/etc/locale/0000000000000000";
-    u32 i = 36;
+    char path[] = "/corbenik/locale/0000000000000000";
+    u32 i = 32;
     while (progId) {
         static const char hexDigits[] = "0123456789ABCDEF";
         path[i--] = hexDigits[(u32)(progId & 0xF)];

@@ -29,15 +29,21 @@ Old 3DS (Native FIRM, 11.0):
 New 3DS (Native FIRM, 11.0):
   http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000002/00000021
 
-You'll need the firmkey for it as well unless you have decrypted it, which should
-be placed at `/corbenik/keys/native.key`. I can't tell you how to get it
-obviously, but a good place to start may be an older version of Plailect's guide
-when it still had a section on Cakes.
+You'll need the firmkey for it as well unless you have decrypted your firmware,
+and it should be placed at `/corbenik/keys/native.key`. I can't tell you how to
+get it obviously, but a good place to start may be an older version of Plailect's
+guide when it still had a section on Cakes.
 
 On New3DS units, there's additional crypto on arm9loader which requires the 9.6
 key to decrypt. It usually is named ``Slot0x11Key96.bin`, and I also can't tell
 you where to find this, aside from "check Plailect's guide." Corbenik will
 attempt to read this from the root as well as `/corbenik/keys/11.key`.
+
+The folder `corbenik/locale` is automatically generated language emulation
+files from 3dbrew for games that only specify one region and one language.
+Games which support more than one language are not generated, because there's
+no 'correct' language. You can remove this if the number of files unnerves
+you. It isn't required.
 
 Setup
 -------------------------
@@ -67,9 +73,10 @@ You'll also want these patches, which are done by loader and therefore require i
 
 If you're on 11.0, you also want these:
 
- * Title Downgrade Fix
+ * Title Downgrade Fix (Only enable with 11.0 firmware - others will fail)
 
-If you're deliberately still running 10.4 or something, you'll want these:
+If you're deliberately still running older firmware on your NAND, you'll
+want these:
 
  * Fake Friends Version
 

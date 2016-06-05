@@ -148,11 +148,24 @@ def parse_op(token_list, instr_offs):
 
 		# We cut corners and calculate stuff manually.
 		return bytearray.fromhex("09") + bytearray([len(token_list[1]) / 2]) + bytearray.fromhex(token_list[1])
-	elif token_list[0] == "title":
+	elif token_list[0] == "or":
 		if s != 2:
 			syn_err("invalid number of arguments")
 
-		return bytearray.fromhex("0A") + bytearray([len(token_list[1]) / 2 / 8]) + bytearray.fromhex(token_list[1])
+		# We cut corners and calculate stuff manually.
+		return bytearray.fromhex("0A") + bytearray([len(token_list[1]) / 2]) + bytearray.fromhex(token_list[1])
+	elif token_list[0] == "xor":
+		if s != 2:
+			syn_err("invalid number of arguments")
+
+		# We cut corners and calculate stuff manually.
+		return bytearray.fromhex("0B") + bytearray([len(token_list[1]) / 2]) + bytearray.fromhex(token_list[1])
+	elif token_list[0] == "not":
+		if s != 2:
+			syn_err("invalid number of arguments")
+
+		# We cut corners and calculate stuff manually.
+		return bytearray.fromhex("09") + bytearray.fromhex(token_list[1])
 
 def pad_zero_r(x, c):
 	while len(x) < c:

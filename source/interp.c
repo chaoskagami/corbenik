@@ -18,7 +18,10 @@
 #define OP_JMP 0x07
 #define OP_REWIND 0x08
 #define OP_AND 0x09
-#define OP_TITLE 0x0A
+#define OP_OR 0x0A
+#define OP_XOR 0x0B
+#define OP_NOT 0x0C
+
 #define OP_NEXT 0xFF
 
 #ifdef LOADER
@@ -253,6 +256,47 @@ exec_bytecode(uint8_t *bytecode, uint32_t len, int debug)
                     test_was_false = 0;
                 }
                 code += *(code - 1);
+                break;
+            case OP_OR:
+                if (debug)
+                    log("or\n");
+                code += 2;
+                if (!test_was_false) {
+                    for (i = 0; i < *(code - 1); i++) {
+                        *(current_mode->memory + offset) |= code[i];
+                    }
+                    offset += *(code - 1);
+                } else {
+                    test_was_false = 0;
+                }
+                code += *(code - 1);
+                break;
+            case OP_XOR:
+                if (debug)
+                    log("xor\n");
+                code += 2;
+                if (!test_was_false) {
+                    for (i = 0; i < *(code - 1); i++) {
+                        *(current_mode->memory + offset) ^= code[i];
+                    }
+                    offset += *(code - 1);
+                } else {
+                    test_was_false = 0;
+                }
+                code += *(code - 1);
+                break;
+            case OP_NOT:
+                if (debug)
+                    log("not\n");
+                if (!test_was_false) {
+                    for (i = 0; i < *(code + 1); i++) {
+                        *(current_mode->memory + offset) = ~*(current_mode->memory + offset);
+                    }
+                    offset += *(code + 1);
+                } else {
+                    test_was_false = 0;
+                }
+                code += 2;
                 break;
             case OP_NEXT:
                 if (debug)

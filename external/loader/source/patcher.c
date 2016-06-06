@@ -345,7 +345,7 @@ dump_code(u64 progId, u8 *code_loc, u32 code_len)
         {
             u32 len = 0;
             FSFILE_Write(code_f, &len, 0, code_loc, code_len, FS_WRITE_FLUSH | FS_WRITE_UPDATE_TIME);
-            logstr("dumped code to ");
+            logstr("  dumped code to ");
             logstr(code_path);
             logstr("\n");
         }

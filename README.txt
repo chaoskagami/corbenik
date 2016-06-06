@@ -130,7 +130,7 @@ The complete "Thanks cool people" list:
 
  @mid-kid        General inspiration from Cakes.
 
- @Wolfvak        Go use BootAnim9.
+ @Wolfvak        Code segment dumping, also BootAnim9 is cool stuff. Go use it.
 
  @AuroraWright   Luma made chunks of this possible.
 

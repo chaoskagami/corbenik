@@ -19,13 +19,7 @@ static struct options_s options[] = {
     // space
     { 0, "", "", not_option, 0, 0 },
     // Patches.
-    { 0, "\x1b[32;40mOptions\x1b[0m", "", not_option, 0, 0 },
-
-    { OPTION_LOADER, "Loader Replacement", "Replaces loader with one capable of the below and also applying bytecode patches.", boolean_val, 0, 0 },
-    { OPTION_LOADER_CPU_L2, "  CPU - L2 cache", "Forces the system to use the L2 cache. Ignored if not a N3DS.", boolean_val, 0, 0 },
-    { OPTION_LOADER_CPU_800MHZ, "  CPU - 800Mhz", "Forces the system to run in 800Mhz mode. Ignored if not a N3DS.", boolean_val, 0, 0 },
-    { OPTION_LOADER_LANGEMU, "  Language Emulation", "Reads language emulation configuration and imitates the region/language.", boolean_val, 0, 0 },
-    { OPTION_LOADER_DUMPCODE, "  Dump code section", "Dumps code sections to SD card only the first time they're loaded.", boolean_val, 0, 0 },
+    { 0, "\x1b[32;40mGeneral Options\x1b[0m", "", not_option, 0, 0 },
 
     { 0, "", "", not_option, 0, 0 },
 
@@ -44,6 +38,18 @@ static struct options_s options[] = {
     { 0, "", "", not_option, 0, 0 },
 
     { OPTION_READ_ME, "Hide `Help`", "Hides the help option from the main menu.", boolean_val, 0, 0 },
+
+    // space
+    { 0, "", "", not_option, 0, 0 },
+    // Patches.
+    { 0, "\x1b[32;40mLoader Options\x1b[0m", "", not_option, 0, 0 },
+
+    { OPTION_LOADER, "Use Loader Replacement", "Replaces loader with one capable of the below and also applying bytecode patches.", boolean_val, 0, 0 },
+    { OPTION_LOADER_CPU_L2, "  CPU - L2 cache (n3ds)", "Forces the system to use the L2 cache. Ignored if not a N3DS.", boolean_val, 0, 0 },
+    { OPTION_LOADER_CPU_800MHZ, "  CPU - 800Mhz (n3ds)", "Forces the system to run in 800Mhz mode. Ignored if not a N3DS.", boolean_val, 0, 0 },
+    { OPTION_LOADER_LANGEMU, "  Language Emulation", "Reads language emulation configuration and imitates the region/language.", boolean_val, 0, 0 },
+
+    { OPTION_LOADER_DUMPCODE, "  Dump Code Sections (dev)", "Dumps code sections for titles to SD card the first time they're loaded. This doesn't dump system titles. Slows things down considerably.", boolean_val, 0, 0 },
 
     // space
     { 0, "", "", not_option, 0, 0 },

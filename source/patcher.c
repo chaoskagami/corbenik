@@ -85,13 +85,11 @@ patch_firm_all()
         wait();
     }
 
-    // Use loopback EmuNAND?
+    // Use EmuNAND?
     if (config.options[OPTION_EMUNAND]) {
         // Yes.
-		patch_emunand(0);
-//		patch_loop_emunand("/nand.bin");
+		patch_emunand(config.options[OPTION_EMUNAND_INDEX]);
 
-        // FIXME - NYI
         wait();
     }
 

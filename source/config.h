@@ -99,6 +99,9 @@ struct options_s
 // Whether to use an EmuNAND
 #define OPTION_EMUNAND 16
 
+// Which EmuNAND to use (currently only allows 10 total, but eh, I can change that if anyone truly needs it)
+#define OPTION_EMUNAND_INDEX 17
+
 // Save log files during boot and from loader.
 // This will slow things down a bit.
 #define OPTION_SAVE_LOGS 253

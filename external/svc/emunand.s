@@ -10,7 +10,7 @@ _start:
 main:
     // If we're already trying to access the SD, return.
     ldr r2, [r0, #4]
-    ldr r1, sdmmc // In armips this instruction uses pc-releative loading
+    ldr r1, sdmmc // In armips this instruction uses pc-releative loading. Specifying it like this causes gcc to emit the same code.
     cmp r2, r1
     beq nand_sd_ret
 

@@ -32,7 +32,8 @@ static struct options_s options[] = {
 
     { 0, "", "", not_option, 0, 0 },
 
-    { OPTION_EMUNAND, "EmuNAND", "Redirects NAND write/read to EmuNAND #0. Right now, only one is supported (but the work is done)", boolean_val, 0, 0 },
+    { OPTION_EMUNAND, "Use EmuNAND", "Redirects NAND write/read to the SD.", boolean_val, 0, 0 },
+    { OPTION_EMUNAND_INDEX, "  Index", "Which EmuNAND to use. Currently, 10 maximum (but this is arbitrary)", ranged_val, 0, 0x9 },
 
     { 0, "", "", not_option, 0, 0 },
 
@@ -86,6 +87,8 @@ wait_key()
             get = BUTTON_A;
         else if (HID_PAD & BUTTON_B)
             get = BUTTON_B;
+        else if (HID_PAD & BUTTON_X)
+            get = BUTTON_X;
     }
     while (HID_PAD & get)
         ;
@@ -201,6 +204,9 @@ int
 menu_options()
 {
     show_menu(options, config.options);
+
+    // TODO - Determine whether it actually changed.
+    config.options[OPTION_RECONFIGURED] = 1;
 
     return MENU_MAIN;
 }

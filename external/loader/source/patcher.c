@@ -13,6 +13,10 @@
 #endif
 #include "../../../source/config.h"
 
+#define CODE_PATH PATH_EXEFS "/0000000000000000"
+
+static const char hexDigits[] = "0123456789ABCDEF";
+
 int
 fileOpen(Handle *file, FS_ArchiveID id, const char *path, int flags)
 {
@@ -99,7 +103,6 @@ loadTitleLocaleConfig(u64 progId, u8 *regionId, u8 *languageId)
     char path[] = "/corbenik/locale/0000000000000000";
     u32 i = 32;
     while (progId) {
-        static const char hexDigits[] = "0123456789ABCDEF";
         path[i--] = hexDigits[(u32)(progId & 0xF)];
         progId >>= 4;
     }
@@ -305,6 +308,50 @@ void
 overlay_patch(u64 progId, u8 *code, u32 size)
 {
     // TODO - Implement. Needs some thought. This should allow usage of files off SD rather than RomFS.
+}
+
+void
+dump_code(u64 progId, u8 *code_loc, u32 code_len)
+{
+    // If configuration was not loaded, or the option is disabled
+    if (failed_load_config || !config.options[OPTION_LOADER_DUMPCODE])
+        return;
+
+    u32 highTid = progId >> 0x20;
+
+    // Only regular titles and demos will get dumped
+    // Otherwise it's insanely slow
+    if (highTid != 0x00040000 && highTid != 0x00040002)
+        return;
+
+    char code_path[] = CODE_PATH;
+    u32 i = strlen(code_path) - 1;
+    Handle code_f;
+    while (progId) {
+        code_path[i--] = hexDigits[(u32)(progId & 0xF)];
+        progId >>= 4;
+    }
+
+    if (R_SUCCEEDED(fileOpen(&code_f, ARCHIVE_SDMC, code_path, FS_OPEN_READ)))
+    // Code was already dumped, do nothing
+    {
+        FSFILE_Close(code_f);
+        return;
+    }
+
+    else
+    {
+        if (R_SUCCEEDED(fileOpen(&code_f, ARCHIVE_SDMC, code_path, FS_OPEN_WRITE | FS_OPEN_CREATE)))
+        {
+            u32 len = 0;
+            FSFILE_Write(code_f, &len, 0, code_loc, code_len, FS_WRITE_FLUSH | FS_WRITE_UPDATE_TIME);
+            logstr("dumped code to ");
+            logstr(code_path);
+            logstr("\n");
+        }
+    }
+
+    return;
 }
 
 // This is only for the .code segment.

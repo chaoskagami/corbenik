@@ -102,6 +102,10 @@ struct options_s
 // Which EmuNAND to use (currently only allows 10 total, but eh, I can change that if anyone truly needs it)
 #define OPTION_EMUNAND_INDEX 17
 
+// Dump titles' code section as they're loaded by the loader module
+// WARNING!! Slows down boot time considerably the first time!
+#define OPTION_LOADER_DUMPCODE 252
+
 // Save log files during boot and from loader.
 // This will slow things down a bit.
 #define OPTION_SAVE_LOGS 253

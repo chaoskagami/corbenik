@@ -25,6 +25,7 @@ static struct options_s options[] = {
     { OPTION_LOADER_CPU_L2, "  CPU - L2 cache", "Forces the system to use the L2 cache. Ignored if not a N3DS.", boolean_val, 0, 0 },
     { OPTION_LOADER_CPU_800MHZ, "  CPU - 800Mhz", "Forces the system to run in 800Mhz mode. Ignored if not a N3DS.", boolean_val, 0, 0 },
     { OPTION_LOADER_LANGEMU, "  Language Emulation", "Reads language emulation configuration and imitates the region/language.", boolean_val, 0, 0 },
+    { OPTION_LOADER_DUMPCODE, "  Dump code section", "Dumps code sections to SD card only the first time they're loaded.", boolean_val, 0, 0 },
 
     { 0, "", "", not_option, 0, 0 },
 

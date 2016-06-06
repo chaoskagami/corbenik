@@ -8,7 +8,7 @@ It's mainly intended for developers; so if you don't know your way
 around the 3DS, chances are this isn't for you.
 
 Not every feature has been implemented/tested yet, but at the moment
-it offers a rather comprehensive SysNAND experience for N3DS users.
+it offers a rather comprehensive experience for N3DS users.
 
 Corbenik is licensed under the terms of the GPLv3. Please obey it.
 You should have recieved a copy either as part of the git repository,
@@ -34,6 +34,12 @@ and it should be placed at `/corbenik/keys/native.key`. I can't tell you how to
 get it obviously, but a good place to start may be an older version of Plailect's
 guide when it still had a section on Cakes.
 
+You can also fetch the agb firm and twl firms to `/corbenik/firmware/agb` and
+`/corbenik/firmware/twl` respectively. If you don't have the firmkeys for these,
+you can fetch the cetk for each of them to `/corbenik/keys/agb.cetk` and
+`/corbenik/keys/twl.cetk`. Boot up the system, go to system settings, and it
+will extract the firm keys for them after rebooting.
+
 On New3DS units, there's additional crypto on arm9loader which requires the 9.6
 key to decrypt. It usually is named ``Slot0x11Key96.bin`, and I also can't tell
 you where to find this, aside from "check Plailect's guide." Corbenik will
@@ -43,7 +49,7 @@ The folder `corbenik/locale` is automatically generated language emulation
 files from 3dbrew for games that only specify one region and one language.
 Games which support more than one language are not generated, because there's
 no 'correct' language. You can remove this if the number of files unnerves
-you. It isn't required.
+you. It isn't required. You can also add new files if you have specific needs.
 
 Setup
 -------------------------
@@ -52,8 +58,13 @@ For starters, you'll want to go into options and enable `System Modules` to get
 loader to run patches as well.
 
 If you're using 11.0 NATIVE_FIRM like I suggested, you'll want to tick
-`Service Replacement` to fix the broken svcBackdoor. Without this, Retroarch
+`Svc Replacement` to fix the broken svcBackdoor. Without this, Retroarch
 won't work - and other applications that do JIT also won't work.
+
+If you need to use an EmuNAND, you'll want to enable `EmuNAND` in options. If
+you've been using multiple EmuNANDs you can also select the index while you're
+there with A to increase and X to decrease. This supports both Gateway-style
+(first sector at back) and standard copied NAND (RedNAND)
 
 While you're there, you can enable `Autoboot` if you'd like, including
 `silent mode` if you're using something like BootAnim9.

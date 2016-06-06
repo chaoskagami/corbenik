@@ -8,6 +8,8 @@ void patch_exe(u64 progId, u16 progver,
     u8* data, u32 data_size, u32 orig_data,
     u8* ro, u32 ro_size, u32 orig_ro);
 
+void dump_code(u64 progId, u8 *code_loc, u32 code_len);
+
 u32 get_text_extend(u64 progId, u16 progver, u32 size_orig);
 u32 get_ro_extend(u64 progId, u16 progver, u32 size_orig);
 u32 get_data_extend(u64 progId, u16 progver, u32 size_orig);

@@ -55,9 +55,9 @@
 #define PATH_AGB_F PATH_FIRMWARES "/agb"
 #define PATH_TWL_F PATH_FIRMWARES "/twl"
 
-//#define PATH_NATIVE_CETK PATH_FIRMWARES "/native.cetk"
-//#define PATH_TWL_CETK PATH_FIRMWARES "/twl.cetk"
-//#define PATH_AGB_CETK PATH_FIRMWARES "/agb.cetk"
+#define PATH_NATIVE_CETK PATH_KEYS "/native.cetk"
+#define PATH_TWL_CETK PATH_KEYS "/twl.cetk"
+#define PATH_AGB_CETK PATH_KEYS "/agb.cetk"
 
 #define PATH_NATIVE_FIRMKEY PATH_KEYS "/native.key"
 #define PATH_TWL_FIRMKEY PATH_KEYS "/twl.key"

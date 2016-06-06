@@ -60,13 +60,8 @@ PATCH(services)
             // TODO - We can just fread directly to freeSpace with a little reordering.
 
             uint32_t size = fsize(data);
-            uint8_t *read_to = (void *)FCRAM_JUNK_LOC;
 
             fprintf(stderr, "Svc: %s, %d bytes\n", at, size);
-
-            fread(read_to, 1, size, data);
-
-            fclose(data);
 
             if (!freeSpace) {
                 for (freeSpace = exceptionsPage; *freeSpace != 0xFFFFFFFF; freeSpace++)
@@ -75,7 +70,9 @@ PATCH(services)
 
             fprintf(stderr, "Svc: Copy code to %x\n", (uint32_t)freeSpace);
 
-            memcpy(freeSpace, read_to, size);
+            fread(freeSpace, 1, size, data);
+            fclose(data);
+
             svcTable[svc] = 0xFFFF0000 + ((uint8_t *)freeSpace - (uint8_t *)exceptionsPage);
 
             freeSpace += size; // We keep track of this because there's more than 7B free.

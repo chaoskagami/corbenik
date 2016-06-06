@@ -43,9 +43,53 @@ slot0x11key96_init()
     // this.
 }
 
+int decrypt_cetk_key(void *key, const void *cetk) {
+	static int common_key_y_init = 0;
+	uint8_t iv[AES_BLOCK_SIZE] = {0};
+	uint32_t sigtype = __builtin_bswap32(*(uint32_t *)cetk);
+
+	if (sigtype != SIG_TYPE_RSA2048_SHA256)
+		return 1;
+
+	ticket_h *ticket = (ticket_h *)(cetk + sizeof(sigtype) + 0x13C);
+
+	if (ticket->ticketCommonKeyYIndex != 1)
+		return 1;
+
+	if (!common_key_y_init) {
+		uint8_t common_key_y[AES_BLOCK_SIZE] = {0};
+		uint8_t *p9_base = (uint8_t *)0x08028000;
+		uint8_t *i;
+		for (i = p9_base + 0x70000 - AES_BLOCK_SIZE; i >= p9_base; i--) {
+			if (i[0] == 0xD0 && i[4] == 0x9C && i[8] == 0x32 && i[12] == 0x23) {
+				// At i, there's 7 keys with 4 bytes padding between them.
+				// We only need the 2nd.
+				memcpy(common_key_y, i + AES_BLOCK_SIZE + 4, sizeof(common_key_y));
+				fprintf(stderr, "y");
+				break;
+			}
+		}
+
+		if (i < p9_base)
+			return 1;
+
+		aes_setkey(0x3D, common_key_y, AES_KEYY, AES_INPUT_BE | AES_INPUT_NORMAL);
+		common_key_y_init = 1;
+	}
+
+	aes_use_keyslot(0x3D);
+	memcpy(iv, ticket->titleID, sizeof(ticket->titleID));
+
+	memcpy(key, ticket->titleKey, sizeof(ticket->titleKey));
+	aes(key, key, 1, iv, AES_CBC_DECRYPT_MODE, AES_INPUT_BE | AES_INPUT_NORMAL);
+
+	fprintf(stderr, "g");
+
+	return 0;
+}
+
 int
-decrypt_firm_title(firm_h *dest, ncch_h *ncch, uint32_t *size, void *key)
-{
+decrypt_firm_title(firm_h *dest, ncch_h *ncch, uint32_t *size, void *key) {
     uint8_t firm_iv[16] = { 0 };
     uint8_t exefs_key[16] = { 0 };
     uint8_t exefs_iv[16] = { 0 };
@@ -120,14 +164,21 @@ decrypt_arm9bin(arm9bin_h *header, uint64_t firm_title, uint8_t version)
 }
 
 int
-decrypt_firm(firm_h *dest, char *path_firmkey, uint32_t *size)
+decrypt_firm(firm_h *dest, char *path_firmkey, char* path_cetk, uint32_t *size)
 {
     uint8_t firm_key[AES_BLOCK_SIZE];
 
     // Firmware is likely encrypted. Decrypt.
     if (!read_file(firm_key, path_firmkey, AES_BLOCK_SIZE)) {
-        fprintf(BOTTOM_SCREEN, "!");
-        return 1;
+		// Missing firmkey. Attempt to get from CETK (only works if system was booted)
+		if (!read_file((void*)FCRAM_JUNK_LOC, path_cetk, FCRAM_SPACING) ||
+			decrypt_cetk_key(firm_key, (void*)FCRAM_JUNK_LOC)) {
+	        fprintf(BOTTOM_SCREEN, "!");
+	        return 1;
+		} else {
+	        fprintf(BOTTOM_SCREEN, "t");
+			write_file(firm_key, path_firmkey, AES_BLOCK_SIZE);
+		}
     } else {
         fprintf(BOTTOM_SCREEN, "k");
     }
@@ -143,21 +194,13 @@ decrypt_firm(firm_h *dest, char *path_firmkey, uint32_t *size)
 extern int patch_services();
 
 int
-load_firm(firm_h *dest, char *path, char *path_firmkey, uint32_t *size, uint64_t firm_title)
+load_firm(firm_h *dest, char *path, char *path_firmkey, char *path_cetk, uint32_t *size, uint64_t firm_title)
 {
     int status = 0;
     int firmware_changed = 0;
 
     if (read_file(dest, path, *size) == 0) {
         fprintf(BOTTOM_SCREEN, "!");
-
-        // Only whine about this if it's NATIVE_FIRM, which is important.
-        if (firm_title == NATIVE_FIRM_TITLEID) {
-            fprintf(BOTTOM_SCREEN, "\nFailed to load NATIVE_FIRM from:\n"
-                                   "  " PATH_NATIVE_F "\n"
-                                   "This is fatal. Aborting.\n");
-        }
-
         return 1;
     } else {
         fprintf(BOTTOM_SCREEN, "l");
@@ -165,14 +208,11 @@ load_firm(firm_h *dest, char *path, char *path_firmkey, uint32_t *size, uint64_t
 
     // Check and decrypt FIRM if it is encrypted.
     if (dest->magic != FIRM_MAGIC) {
-        status = decrypt_firm(dest, path_firmkey, size);
+        status = decrypt_firm(dest, path_firmkey, path_cetk, size);
         if (status != 0) {
-            if (firm_title == NATIVE_FIRM_TITLEID) {
-                fprintf(BOTTOM_SCREEN, "\nFailed to decrypt firmware.\n"
-                                       "This is fatal. Aborting.\n");
-            }
+	        fprintf(BOTTOM_SCREEN, "!");
             return 1;
-        }
+		}
         firmware_changed = 1; // Decryption performed.
     } else {
         fprintf(BOTTOM_SCREEN, "_");
@@ -196,9 +236,6 @@ load_firm(firm_h *dest, char *path, char *path_firmkey, uint32_t *size, uint64_t
                 if (arm9bin_iscrypt) {
                     // Decrypt the arm9bin.
                     if (decrypt_arm9bin((arm9bin_h *)((uintptr_t)dest + section->offset), firm_title, fsig->version)) {
-                        fprintf(BOTTOM_SCREEN, "\nCouldn't decrypt ARM9 FIRM binary.\n"
-                                               "Check if you have the needed key at:\n"
-                                               "  " PATH_SLOT0X11KEY96 "\n");
                         return 1;
                     }
                     firmware_changed = 1; // Decryption of arm9bin performed.
@@ -351,13 +388,13 @@ load_firms()
     fprintf(BOTTOM_SCREEN, "FIRM load triggered.\n");
 
     fprintf(BOTTOM_SCREEN, "NATIVE_FIRM\n  [");
-    if (load_firm(firm_loc, PATH_NATIVE_F, PATH_NATIVE_FIRMKEY, &firm_size, NATIVE_FIRM_TITLEID) != 0) {
+    if (load_firm(firm_loc, PATH_NATIVE_F, PATH_NATIVE_FIRMKEY, PATH_NATIVE_CETK, &firm_size, NATIVE_FIRM_TITLEID) != 0) {
         abort("]\n  Failed to load NATIVE_FIRM.\n");
     }
     find_proc9(firm_loc, &firm_proc9, &firm_p9_exefs);
 
     fprintf(BOTTOM_SCREEN, "]\nTWL_FIRM\n  [");
-    if (load_firm(twl_firm_loc, PATH_TWL_F, PATH_TWL_FIRMKEY, &twl_firm_size, TWL_FIRM_TITLEID) != 0) {
+    if (load_firm(twl_firm_loc, PATH_TWL_F, PATH_TWL_FIRMKEY, PATH_TWL_CETK, &twl_firm_size, TWL_FIRM_TITLEID) != 0) {
         fprintf(BOTTOM_SCREEN, "]\n  TWL_FIRM failed to load.\n");
         state = 1;
     } else {
@@ -366,7 +403,7 @@ load_firms()
     }
 
     fprintf(BOTTOM_SCREEN, "AGB_FIRM\n  [");
-    if (load_firm(agb_firm_loc, PATH_AGB_F, PATH_AGB_FIRMKEY, &agb_firm_size, AGB_FIRM_TITLEID) != 0) {
+    if (load_firm(agb_firm_loc, PATH_AGB_F, PATH_AGB_FIRMKEY, PATH_AGB_CETK, &agb_firm_size, AGB_FIRM_TITLEID) != 0) {
         fprintf(BOTTOM_SCREEN, "]\n  AGB_FIRM failed to load.\n");
         state = 1;
     } else {

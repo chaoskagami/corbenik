@@ -181,6 +181,68 @@ def parse_op(token_list, instr_offs):
 			syn_err("invalid number of arguments")
 
 		return bytearray.fromhex("0D") + bytearray.fromhex(token_list[1])
+	elif token_list[0] == "clf":
+		return bytearray.fromhex("0E")
+	elif token_list[0] == "jmpeq":
+		if s != 2:
+			syn_err("invalid number of arguments")
+
+		if instr_offs == None:
+			return bytearray.fromhex("070000")
+		else:
+			tok = bytearray.fromhex(token_list[1])
+			num = struct.unpack(">H", tok)[0]
+			return bytearray.fromhex("17") + struct.pack(">H", instr_offs[num])
+	elif token_list[0] == "jmpne":
+		if s != 2:
+			syn_err("invalid number of arguments")
+
+		if instr_offs == None:
+			return bytearray.fromhex("070000")
+		else:
+			tok = bytearray.fromhex(token_list[1])
+			num = struct.unpack(">H", tok)[0]
+			return bytearray.fromhex("27") + struct.pack(">H", instr_offs[num])
+	elif token_list[0] == "jmplt":
+		if s != 2:
+			syn_err("invalid number of arguments")
+
+		if instr_offs == None:
+			return bytearray.fromhex("070000")
+		else:
+			tok = bytearray.fromhex(token_list[1])
+			num = struct.unpack(">H", tok)[0]
+			return bytearray.fromhex("37") + struct.pack(">H", instr_offs[num])
+	elif token_list[0] == "jmpgt":
+		if s != 2:
+			syn_err("invalid number of arguments")
+
+		if instr_offs == None:
+			return bytearray.fromhex("070000")
+		else:
+			tok = bytearray.fromhex(token_list[1])
+			num = struct.unpack(">H", tok)[0]
+			return bytearray.fromhex("47") + struct.pack(">H", instr_offs[num])
+	elif token_list[0] == "jmple":
+		if s != 2:
+			syn_err("invalid number of arguments")
+
+		if instr_offs == None:
+			return bytearray.fromhex("070000")
+		else:
+			tok = bytearray.fromhex(token_list[1])
+			num = struct.unpack(">H", tok)[0]
+			return bytearray.fromhex("57") + struct.pack(">H", instr_offs[num])
+	elif token_list[0] == "jmpge":
+		if s != 2:
+			syn_err("invalid number of arguments")
+
+		if instr_offs == None:
+			return bytearray.fromhex("070000")
+		else:
+			tok = bytearray.fromhex(token_list[1])
+			num = struct.unpack(">H", tok)[0]
+			return bytearray.fromhex("67") + struct.pack(">H", instr_offs[num])
 
 def pad_zero_r(x, c):
 	while len(x) < c:

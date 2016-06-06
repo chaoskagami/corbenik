@@ -22,6 +22,14 @@
 #define OP_XOR 0x0B
 #define OP_NOT 0x0C
 #define OP_VER 0x0D
+#define OP_CLF 0x0E
+
+#define OP_JMPEQ 0x17
+#define OP_JMPNE 0x27
+#define OP_JMPLT 0x37
+#define OP_JMPGT 0x47
+#define OP_JMPLE 0x57
+#define OP_JMPGE 0x67
 
 #define OP_NEXT 0xFF
 
@@ -120,9 +128,10 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
     struct mode *current_mode = &modes[set_mode];
 
     uint32_t offset = 0;
-    uint8_t test_was_false = 0;
 
     uint32_t i;
+
+	int eq = 0, gt = 0, lt = 0; // Flags.
 
     uint8_t *code = bytecode;
     uint8_t *end = code + len;
@@ -132,16 +141,12 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                 if (debug)
                     log("nop\n");
                 code++;
-                test_was_false = 0;
                 break;
             case OP_REL: // Change relativity.
                 if (debug)
                     log("rel\n");
                 code++;
-                if (!test_was_false)
-                    current_mode = &modes[*code];
-                else
-                    test_was_false = 0;
+                current_mode = &modes[*code];
                 set_mode = *code;
                 code++;
                 break;
@@ -149,45 +154,33 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                 if (debug)
                     log("find\n");
                 code += 2;
-                if (!test_was_false) {
-                    offset = (uint32_t)memfind(current_mode->memory + offset, current_mode->size - offset, code, *(code - 1));
-                    if ((uint8_t *)offset == NULL) {
-                        // Error. Abort.
-                        abort("Find opcode failed.\n");
-                    }
-                    offset = offset - (uint32_t)current_mode->memory;
-                } else {
-                    test_was_false = 0;
+                offset = (uint32_t)memfind(current_mode->memory + offset, current_mode->size - offset, code, *(code - 1));
+                if ((uint8_t *)offset == NULL) {
+                    // Error. Abort.
+                    abort("Find opcode failed.\n");
                 }
+                offset = offset - (uint32_t)current_mode->memory;
                 code += *(code - 1);
                 break;
             case OP_BACK:
                 if (debug)
                     log("back\n");
                 code++;
-                if (!test_was_false) {
-                    if (offset < *code) {
-                        // Went out of bounds. Error.
-                        abort("Back underflowed.\n");
-                    }
-                    offset -= *code;
-                } else {
-                    test_was_false = 0;
+                if (offset < *code) {
+                    // Went out of bounds. Error.
+                    abort("Back underflowed.\n");
                 }
+                offset -= *code;
                 code++;
                 break;
             case OP_FWD:
                 if (debug)
                     log("fwd\n");
                 code++;
-                if (!test_was_false) {
-                    offset += *code;
-                    if (offset >= current_mode->size) {
-                        // Went out of bounds. Error.
-                        abort("Fwd overflowed.\n");
-                    }
-                } else {
-                    test_was_false = 0;
+                offset += *code;
+                if (offset >= current_mode->size) {
+                    // Went out of bounds. Error.
+                    abort("Fwd overflowed.\n");
                 }
                 code++;
                 break;
@@ -195,10 +188,7 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                 if (debug)
                     log("set\n");
                 code += 2;
-                if (!test_was_false)
-                    memcpy(current_mode->memory + offset, code, *(code - 1));
-                else
-                    test_was_false = 0;
+                memcpy(current_mode->memory + offset, code, *(code - 1));
                 offset += *(code - 1);
                 code += *(code - 1);
                 break;
@@ -206,101 +196,135 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                 if (debug)
                     log("test\n");
                 code += 2;
-                if (memcmp(current_mode->memory + offset, code, *(code - 1))) {
-                    test_was_false = 1;
-                    if (debug)
-                        log("false\n");
-                } else if (debug) {
-                    log("true\n");
-                }
+                eq = memcmp(current_mode->memory + offset, code, *(code - 1));
+				if (eq < 0)
+					lt = 1;
+				if (eq > 0)
+					gt = 1;
+				eq = !eq;
                 code += *(code - 1);
                 break;
             case OP_JMP: // Jump to offset.
                 if (debug)
                     log("jmp\n");
                 code++;
-                if (!test_was_false) {
-                    code = bytecode + code[1] + (code[0] * 0x100);
-                } else {
-                    code += 2;
-                    test_was_false = 0;
-                }
+                code = bytecode + code[1] + (code[0] * 0x100);
+                break;
+            case OP_JMPEQ: // Jump to offset if equal
+                if (debug)
+                    log("jmpeq\n");
+	            code++;
+				if (eq)
+	                code = bytecode + code[1] + (code[0] * 0x100);
+				else
+					code += 2;
+                break;
+            case OP_JMPNE: // Jump to offset if not equal
+                if (debug)
+                    log("jmpne\n");
+	            code++;
+				if (!eq)
+	                code = bytecode + code[1] + (code[0] * 0x100);
+				else
+					code += 2;
+                break;
+            case OP_JMPLT: // Jump to offset if less than
+                if (debug)
+                    log("jmplt\n");
+	            code++;
+				if (lt)
+	                code = bytecode + code[1] + (code[0] * 0x100);
+				else
+					code += 2;
+                break;
+            case OP_JMPGT: // Jump to offset if greater than
+                if (debug)
+                    log("jmpgt\n");
+	            code++;
+				if (gt)
+	                code = bytecode + code[1] + (code[0] * 0x100);
+				else
+					code += 2;
+                break;
+            case OP_JMPLE: // Jump to offset if less than or equal
+                if (debug)
+                    log("jmple\n");
+	            code++;
+				if (lt || eq)
+	                code = bytecode + code[1] + (code[0] * 0x100);
+				else
+					code += 2;
+                break;
+            case OP_JMPGE: // Jump to offset if greater than or equal
+                if (debug)
+                    log("jmpge\n");
+	            code++;
+				if (gt || eq)
+	                code = bytecode + code[1] + (code[0] * 0x100);
+				else
+					code += 2;
+                break;
+            case OP_CLF: // Clear flags.
+                if (debug)
+                    log("clf\n");
+	            code++;
+				gt = lt = eq = 0;
                 break;
             case OP_REWIND:
                 if (debug)
                     log("rewind\n");
                 code++;
-                if (!test_was_false)
-                    offset = 0;
-                else
-                    test_was_false = 0;
+                offset = 0;
                 break;
             case OP_AND:
                 if (debug)
                     log("and\n");
                 code += 2;
-                if (!test_was_false) {
-                    for (i = 0; i < *(code - 1); i++) {
-                        *(current_mode->memory + offset) &= code[i];
-                    }
-                    offset += *(code - 1);
-                } else {
-                    test_was_false = 0;
+                for (i = 0; i < *(code - 1); i++) {
+                    *(current_mode->memory + offset) &= code[i];
                 }
+                offset += *(code - 1);
                 code += *(code - 1);
                 break;
             case OP_OR:
                 if (debug)
                     log("or\n");
                 code += 2;
-                if (!test_was_false) {
-                    for (i = 0; i < *(code - 1); i++) {
-                        *(current_mode->memory + offset) |= code[i];
-                    }
-                    offset += *(code - 1);
-                } else {
-                    test_was_false = 0;
+                for (i = 0; i < *(code - 1); i++) {
+                    *(current_mode->memory + offset) |= code[i];
                 }
+                offset += *(code - 1);
                 code += *(code - 1);
                 break;
             case OP_XOR:
                 if (debug)
                     log("xor\n");
                 code += 2;
-                if (!test_was_false) {
-                    for (i = 0; i < *(code - 1); i++) {
-                        *(current_mode->memory + offset) ^= code[i];
-                    }
-                    offset += *(code - 1);
-                } else {
-                    test_was_false = 0;
+                for (i = 0; i < *(code - 1); i++) {
+                    *(current_mode->memory + offset) ^= code[i];
                 }
+                offset += *(code - 1);
                 code += *(code - 1);
                 break;
             case OP_NOT:
                 if (debug)
                     log("not\n");
-                if (!test_was_false) {
-                    for (i = 0; i < *(code + 1); i++) {
-                        *(current_mode->memory + offset) = ~*(current_mode->memory + offset);
-                    }
-                    offset += *(code + 1);
-                } else {
-                    test_was_false = 0;
+                for (i = 0; i < *(code + 1); i++) {
+                    *(current_mode->memory + offset) = ~*(current_mode->memory + offset);
                 }
+                offset += *(code + 1);
                 code += 2;
                 break;
             case OP_VER:
                 if (debug)
                     log("ver\n");
                 code++;
-                if (!test_was_false) {
-                    if (*(uint16_t *)code != ver) {
-                        test_was_false = 1;
-                    }
-                } else {
-                    test_was_false = 0;
-                }
+                eq = memcmp(&ver, code, 2);
+				if (eq < 0)
+					lt = 1;
+				if (eq > 0)
+					gt = 1;
+				eq = !eq;
                 code += 2;
                 break;
             case OP_NEXT:
@@ -315,7 +339,6 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                 current_mode = &modes[set_mode];
 #endif
                 offset = 0;
-                test_was_false = 0;
                 code = bytecode;
                 break;
             default:

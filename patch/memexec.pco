@@ -13,11 +13,9 @@ rel native_s1
 find 9705000015E40000
 
 # Move backwards until we find what we want.
-# LOOP: (2)
-back 04
-test 16640100
-jmp  0006
-jmp  0002
+# LOOP:
+back   04
+test   16640100
+jmpne  0002
 
-# END LOOP: (6)
 and  efff

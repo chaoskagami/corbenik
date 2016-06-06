@@ -2,6 +2,10 @@
 .align 4
 .global _start
 _start:
+    b mpu
+
+    nop
+mpu:
     @ Change the stack pointer
     mov sp, #0x27000000
 

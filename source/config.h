@@ -105,6 +105,9 @@ struct options_s
 // Dump titles' code sections as they're loaded by the loader module.
 #define OPTION_LOADER_DUMPCODE 18
 
+// Hook firmlaunches.
+#define OPTION_REBOOT 19
+
 // Save log files during boot and from loader.
 // This will slow things down a bit.
 #define OPTION_SAVE_LOGS 253

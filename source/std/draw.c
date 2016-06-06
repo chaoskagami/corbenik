@@ -49,7 +49,7 @@ clear_disp(uint8_t *screen)
     if (screen == BOTTOM_SCREEN && config.options[OPTION_SAVE_LOGS]) {
         FILE *f = fopen(PATH_CFW "/boot.log", "w");
         fseek(f, 0, SEEK_END);
-        for (int i = 0; i < TEXT_BOTTOM_HEIGHT; i++) {
+        for (int i = 0; i < TEXT_BOTTOM_HEIGHT - 1; i++) {
             char *text = text_buffer_bottom + (TEXT_BOTTOM_WIDTH * i);
 			for(int j = 0; j < TEXT_BOTTOM_WIDTH; j++) {
 				if (text[j] == 0)
@@ -225,7 +225,7 @@ putc(void *buf, const int c)
             cursor_y[0]++;
         }
 
-        while (cursor_y[0] >= height) {
+        while (cursor_y[0] >= height - 1) {
 #ifdef BUFFER
             // Scroll.
             for (unsigned int y = 0; y < height - 1; y++) {

@@ -13,6 +13,7 @@ uint32_t wait_key();
 
 extern int patch_services();
 extern int patch_modules();
+extern int patch_reboot();
 
 extern int doing_autoboot;
 
@@ -69,6 +70,13 @@ patch_firm_all()
         wait();
     }
 
+    // Hook firmlaunch?
+    if (config.options[OPTION_REBOOT]) {
+        patch_reboot();
+
+        wait();
+    }
+
     // Inject services?
     if (config.options[OPTION_SVCS]) {
         if (patch_services()) {
@@ -76,6 +84,7 @@ patch_firm_all()
         }
         wait();
     }
+
 
     // Use ARM9 hook thread?
     if (config.options[OPTION_ARM9THREAD]) {

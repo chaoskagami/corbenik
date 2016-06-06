@@ -6,6 +6,8 @@ all: loader svc screeninit
 	cp loader/loader.cxi ../out/corbenik/module/loader.cxi
 	cp svc/7b.bin ../out/corbenik/svc/7b.bin
 	cp svc/emunand.bin ../out/corbenik/bits/emunand.bin
+	cp svc/reboot_hook.bin ../out/corbenik/bits/reboot_hook.bin
+	cp svc/reboot_code.bin ../out/corbenik/bits/reboot_code.bin
 	cp screeninit/build/screeninit.bin ../out/corbenik/bits/screeninit.bin
 
 .PHONY: clean

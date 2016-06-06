@@ -46,6 +46,9 @@ patch:
 
 .PHONY: a9lh
 a9lh: $(dir_out)/arm9loaderhax.bin
+	# For the reboot patch.
+	mkdir -p $(dir_out)/corbenik/bits
+	cp $(dir_out)/arm9loaderhax.bin $(dir_out)/corbenik/bits/corbenik.bin
 
 .PHONY: reformat
 reformat:

@@ -42,6 +42,11 @@
 
 #define PATH_TEMP PATH_CFW "/cache"           // Files that are transient and used to speed operation
 #define PATH_LOADER_CACHE PATH_TEMP "/loader" // Cached patch bytecode for loader.
+
+#define PATH_NATIVE_P PATH_TEMP "/p_native"
+#define PATH_AGB_P PATH_TEMP "/p_agb"
+#define PATH_TWL_P PATH_TEMP "/p_twl"
+
 #define PATH_KEYS PATH_CFW "/keys"            // Keyfiles will be loaded from this dir, and
                                               // additionally the root if not found.
 #define PATH_EXEFS PATH_CFW "/exe"            // ExeFS overrides, named like '<titleid>.exefs' - NYI

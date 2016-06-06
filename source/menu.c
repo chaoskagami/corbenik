@@ -21,21 +21,15 @@ static struct options_s options[] = {
     // Patches.
     { 0, "\x1b[32;40mGeneral Options\x1b[0m", "", not_option, 0, 0 },
 
-    { 0, "", "", not_option, 0, 0 },
-
     { OPTION_SVCS, "SVC Replacement", "Replaces ARM11 svc calls, including svcBackdoor. With 11.0 NATIVE_FIRM, you probably want this.", boolean_val, 0, 0 },
 
-    { 0, "", "", not_option, 0, 0 },
+    { OPTION_REBOOT, "Reboot Hook", "Hooks firmlaunch to keep the CFW resident on o3DS and allow patching TWL/AGB firms as well.", boolean_val, 0, 0 },
 
     { OPTION_EMUNAND, "Use EmuNAND", "Redirects NAND write/read to the SD.", boolean_val, 0, 0 },
     { OPTION_EMUNAND_INDEX, "  Index", "Which EmuNAND to use. Currently, 10 maximum (but this is arbitrary)", ranged_val, 0, 0x9 },
 
-    { 0, "", "", not_option, 0, 0 },
-
     { OPTION_AUTOBOOT, "Autoboot", "Boot the system automatically, unless the R key is held.", boolean_val, 0, 0 },
     { OPTION_SILENCE, "  Silent mode", "Suppress all debug output during autoboot. You'll see the screen turn on, then off.", boolean_val, 0, 0 },
-
-    { 0, "", "", not_option, 0, 0 },
 
     { OPTION_READ_ME, "Hide `Help`", "Hides the help option from the main menu.", boolean_val, 0, 0 },
 

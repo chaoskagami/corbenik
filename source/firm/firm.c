@@ -433,5 +433,17 @@ boot_cfw()
     if (patch_firm_all() != 0)
         return;
 
+	if (config.options[OPTION_REBOOT] && config.options[OPTION_RECONFIGURED]) {
+		fprintf(stderr, "Saving FIRMs for reboot...");
+		if (!write_file(firm_loc, PATH_NATIVE_P, firm_size))
+			abort("Failed to save prepatched native\n");
+
+		if (!write_file(twl_firm_loc, PATH_TWL_P, twl_firm_size))
+			abort("Failed to save prepatched twl\n");
+
+		if (!write_file(agb_firm_loc, PATH_AGB_P, agb_firm_size))
+			abort("Failed to save prepatched agb\n");
+	}
+
     boot_firm();
 }

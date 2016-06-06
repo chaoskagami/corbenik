@@ -38,7 +38,7 @@ PATCH(modules)
             // Expand firmware module size if needed to accomodate replacement.
             if (module->contentSize > sysmodule->contentSize) {
                 uint32_t need_units = (module->contentSize - sysmodule->contentSize);
-                fprintf(stderr, "Module: Would grow %d units but NYI\n", need_units);
+                fprintf(stderr, "module: Would grow %d units but NYI\n", need_units);
                 continue;
 
                 // TODO - so in a nutshell, the reason Luma works is because it

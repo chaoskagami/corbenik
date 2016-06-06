@@ -2733,6 +2733,56 @@ f_open(FIL *fp,           /* Pointer to the blank file object */
 /* Read File                                                             */
 /*-----------------------------------------------------------------------*/
 
+
+FRESULT
+f_getsector(FIL *fp,    /* Pointer to the file object */
+       UINT *sec    /* Pointer to uint which will contain the sector */
+       )
+{
+    FRESULT res;
+    DWORD clst = 0, sect = 0;
+    BYTE csect;
+
+    res = validate(fp); /* Check validity */
+
+    if (res != FR_OK)
+        LEAVE_FF(fp->fs, res);
+    if (fp->err) /* Check error */
+        LEAVE_FF(fp->fs, (FRESULT)fp->err);
+    if (!(fp->flag & FA_READ)) /* Check access mode */
+        LEAVE_FF(fp->fs, FR_DENIED);
+
+    if ((fp->fptr % SS(fp->fs)) == 0) {                              /* On the sector boundary? */
+    	csect = (BYTE)(fp->fptr / SS(fp->fs) & (fp->fs->csize - 1)); /* Sector offset in the cluster */
+    	if (!csect) {                                                /* On the cluster boundary? */
+    	    if (fp->fptr == 0) {                                     /* On the top of the file? */
+    	        clst = fp->sclust;                                   /* Follow from the origin */
+    	    } else {                                                 /* Middle or end of the file */
+    	        clst = get_fat(fp->fs, fp->clust); /* Follow cluster chain on the FAT */
+    	    }
+
+    	    if (clst < 2)
+    	        ABORT(fp->fs, FR_INT_ERR);
+    	    if (clst == 0xFFFFFFFF)
+    	        ABORT(fp->fs, FR_DISK_ERR);
+    	}
+
+	    sect = clust2sect(fp->fs, clst); /* Get current sector */
+    	if (!sect)
+        	ABORT(fp->fs, FR_INT_ERR);
+    	sect += csect;
+	}
+
+	*sec = sect;
+
+	return 0;
+}
+
+
+/*-----------------------------------------------------------------------*/
+/* Read File                                                             */
+/*-----------------------------------------------------------------------*/
+
 FRESULT
 f_read(FIL *fp,    /* Pointer to the file object */
        void *buff, /* Pointer to data buffer */

@@ -96,6 +96,9 @@ struct options_s
 // Allow enabling patches which are marked as 'incompatible'. Chances are there's a reason.
 #define IGNORE_BROKEN_SHIT 15
 
+// Whether to use an EmuNAND
+#define OPTION_EMUNAND 16
+
 // Save log files during boot and from loader.
 // This will slow things down a bit.
 #define OPTION_SAVE_LOGS 253

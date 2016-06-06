@@ -46,6 +46,11 @@
                                               // additionally the root if not found.
 #define PATH_EXEFS PATH_CFW "/exe"            // ExeFS overrides, named like '<titleid>.exefs' - NYI
 
+#define PATH_BITS PATH_CFW "/bits"            // Path to misc bits we need (emunand code, reboot code, etc)
+
+#define PATH_EMUNAND_CODE PATH_BITS "/emunand.bin" // Emunand hook.
+#define PATH_SCREENINIT_CODE PATH_BITS "/screeninit.bin" // Screeninit code (ARM11)
+
 #define PATH_NATIVE_F PATH_FIRMWARES "/native"
 #define PATH_AGB_F PATH_FIRMWARES "/agb"
 #define PATH_TWL_F PATH_FIRMWARES "/twl"

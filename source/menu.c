@@ -32,6 +32,10 @@ static struct options_s options[] = {
 
     { 0, "", "", not_option, 0, 0 },
 
+    { OPTION_EMUNAND, "EmuNAND", "Redirects NAND write/read to EmuNAND #0. Right now, only one is supported (but the work is done)", boolean_val, 0, 0 },
+
+    { 0, "", "", not_option, 0, 0 },
+
     { OPTION_AUTOBOOT, "Autoboot", "Boot the system automatically, unless the R key is held.", boolean_val, 0, 0 },
     { OPTION_SILENCE, "  Silent mode", "Suppress all debug output during autoboot. You'll see the screen turn on, then off.", boolean_val, 0, 0 },
 

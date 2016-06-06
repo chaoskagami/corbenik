@@ -22,15 +22,14 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
 
+// LEGAL - Note that despite the above notice, it must be used under
+// MPL 2.0 here. GPLv2 and GPLv3 are not compatible, and his software
+// delcares specifically GPLv2. We have to treat it as MPL 2.0 to
+// not violate any licensing.
+
 #include <stdint.h>
-#include <string.h>
-#include <stdlib.h>
+#include <stddef.h>
 #include <inttypes.h>
-#include <malloc.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <dirent.h>
-#include <errno.h>
 
 #include "sdmmc.h"
 //#include "DrawCharacter.h"

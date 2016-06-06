@@ -1,6 +1,6 @@
 PATH := $(PATH):$(DEVKITARM)/bin
 
-all: 7b.bin stub.bin
+all: 7b.bin stub.bin emunand.bin
 
 %.o: %.s
 	arm-none-eabi-as -o $@ $<

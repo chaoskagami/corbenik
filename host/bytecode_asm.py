@@ -48,6 +48,10 @@ def rel_name(x):
 		'twl_s1'   : "0F",
 		'twl_s2'   : "10",
 		'twl_s3'   : "11",
+
+		'exe_text' : "12",
+		'exe_data' : "13",
+		'exe_ro'   : "14",
 	}.get(x, "-1")
 
 name = "NO NAME"

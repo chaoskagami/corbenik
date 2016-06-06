@@ -42,8 +42,7 @@ struct mode
     uint8_t *memory;
     uint32_t size;
 };
-
-struct mode modes[19];
+struct mode modes[21];
 int init_bytecode = 0;
 
 int
@@ -71,47 +70,44 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
         modes[5].size = firm_p9_exefs->fileHeaders[0].size;
 
         // NATIVE_FIRM Sect 0
-        modes[6].memory = (uint8_t *)&firm_loc->section[0] + firm_loc->section[0].offset;
+        modes[6].memory = (uint8_t *)firm_loc + firm_loc->section[0].offset;
         modes[6].size = firm_loc->section[0].size;
         // NATIVE_FIRM Sect 1
-        modes[7].memory = (uint8_t *)&firm_loc->section[1] + firm_loc->section[1].offset;
+        modes[7].memory = (uint8_t *)firm_loc + firm_loc->section[1].offset;
         modes[7].size = firm_loc->section[1].size;
         // NATIVE_FIRM Sect 2
-        modes[8].memory = (uint8_t *)&firm_loc->section[2] + firm_loc->section[2].offset;
+        modes[8].memory = (uint8_t *)firm_loc + firm_loc->section[2].offset;
         modes[8].size = firm_loc->section[2].size;
         // NATIVE_FIRM Sect 3
-        modes[9].memory = (uint8_t *)&firm_loc->section[3] + firm_loc->section[3].offset;
+        modes[9].memory = (uint8_t *)firm_loc + firm_loc->section[3].offset;
         modes[9].size = firm_loc->section[3].size;
 
         // AGB_FIRM Sect 0
-        modes[10].memory = (uint8_t *)&agb_firm_loc->section[0] + agb_firm_loc->section[0].offset;
+        modes[10].memory = (uint8_t *)agb_firm_loc + agb_firm_loc->section[0].offset;
         modes[10].size = agb_firm_loc->section[0].size;
         // AGB_FIRM Sect 1
-        modes[11].memory = (uint8_t *)&agb_firm_loc->section[1] + agb_firm_loc->section[1].offset;
+        modes[11].memory = (uint8_t *)agb_firm_loc + agb_firm_loc->section[1].offset;
         modes[11].size = agb_firm_loc->section[1].size;
         // AGB_FIRM Sect 2
-        modes[12].memory = (uint8_t *)&agb_firm_loc->section[2] + agb_firm_loc->section[2].offset;
+        modes[12].memory = (uint8_t *)agb_firm_loc + agb_firm_loc->section[2].offset;
         modes[12].size = agb_firm_loc->section[2].size;
         // AGB_FIRM Sect 3
-        modes[13].memory = (uint8_t *)&agb_firm_loc->section[3] + agb_firm_loc->section[3].offset;
+        modes[13].memory = (uint8_t *)agb_firm_loc + agb_firm_loc->section[3].offset;
         modes[13].size = agb_firm_loc->section[3].size;
 
         // TWL_FIRM Sect 0
-        modes[14].memory = (uint8_t *)&twl_firm_loc->section[0] + twl_firm_loc->section[0].offset;
+        modes[14].memory = (uint8_t *)twl_firm_loc + twl_firm_loc->section[0].offset;
         modes[14].size = twl_firm_loc->section[0].size;
         // TWL_FIRM Sect 1
-        modes[15].memory = (uint8_t *)&twl_firm_loc->section[1] + twl_firm_loc->section[1].offset;
+        modes[15].memory = (uint8_t *)twl_firm_loc + twl_firm_loc->section[1].offset;
         modes[15].size = twl_firm_loc->section[1].size;
         // TWL_FIRM Sect 2
-        modes[16].memory = (uint8_t *)&twl_firm_loc->section[2] + twl_firm_loc->section[2].offset;
+        modes[16].memory = (uint8_t *)twl_firm_loc + twl_firm_loc->section[2].offset;
         modes[16].size = twl_firm_loc->section[2].size;
         // TWL_FIRM Sect 3
-        modes[17].memory = (uint8_t *)&twl_firm_loc->section[3] + twl_firm_loc->section[3].offset;
+        modes[17].memory = (uint8_t *)twl_firm_loc + twl_firm_loc->section[3].offset;
         modes[17].size = twl_firm_loc->section[3].size;
 #endif
-
-        // Loader (not valid in bootmode)
-        // modes[18] = { 0, 0 };
 
         init_bytecode = 1;
     }
@@ -139,10 +135,6 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                 test_was_false = 0;
                 break;
             case OP_REL: // Change relativity.
-#ifdef LOADER
-                // Loader doesn't support this. Just treat it like a two-byte NOP.
-                code += 2;
-#else
                 if (debug)
                     log("rel\n");
                 code++;
@@ -152,7 +144,6 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                     test_was_false = 0;
                 set_mode = *code;
                 code++;
-#endif
                 break;
             case OP_FIND: // Find pattern.
                 if (debug)
@@ -319,6 +310,9 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
 #ifndef LOADER
                 set_mode = 3;
                 current_mode = &modes[set_mode];
+#else
+                set_mode = 18;
+                current_mode = &modes[set_mode];
 #endif
                 offset = 0;
                 test_was_false = 0;
@@ -351,7 +345,10 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
 
 #ifdef LOADER
 int
-execb(uint64_t tid, uint16_t ver, uint8_t *search_mem, uint32_t search_len)
+execb(uint64_t tid, uint16_t ver,
+      uint8_t *text_mem, uint32_t text_len,
+      uint8_t* data_mem, uint32_t data_len,
+      uint8_t* ro_mem, uint32_t ro_len)
 {
 #else
 int
@@ -413,8 +410,16 @@ execb(char *filename, int build_cache)
     FSFILE_Close(file); // Done reading in.
 
     // Set memory.
-    modes[18].memory = search_mem;
-    modes[18].size = search_len;
+    modes[18].memory = text_mem;
+    modes[18].size   = text_len;
+
+    // Set memory.
+    modes[19].memory = data_mem;
+    modes[19].size   = data_len;
+
+    // Set memory.
+    modes[20].memory = ro_mem;
+    modes[20].size   = ro_len;
 
     log("  exec\n");
 

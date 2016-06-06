@@ -5,6 +5,7 @@
 #include "config.h"
 #include "common.h"
 #include "interp.h"
+#include "patch/emunand.h"
 
 // TODO - Basically all this needs to move to patcher programs.
 
@@ -79,6 +80,16 @@ patch_firm_all()
     // Use ARM9 hook thread?
     if (config.options[OPTION_ARM9THREAD]) {
         // Yes.
+
+        // FIXME - NYI
+        wait();
+    }
+
+    // Use loopback EmuNAND?
+    if (config.options[OPTION_EMUNAND]) {
+        // Yes.
+		patch_emunand(0);
+//		patch_loop_emunand("/nand.bin");
 
         // FIXME - NYI
         wait();

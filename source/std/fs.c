@@ -229,3 +229,24 @@ read_file(void *data, char *path, size_t size)
 
     return read;
 }
+
+//    DWORD fptr;   /* File read/write pointer (Zeroed on file open) */
+//    DWORD fsize;  /* File size */
+//    DWORD sclust; /* File start cluster (0:no cluster chain, always 0 when fsize is 0) */
+//    DWORD clust;  /* Current cluster of fpter (not valid when fprt is 0) */
+//    DWORD dsect;  /* Sector number appearing in buf[] (0:invalid) */
+
+size_t get_file_sector(char* path) {
+	FILE* temp = fopen(path, "r");
+
+    if (!temp || !temp->is_open)
+        return 0;
+
+	UINT sector;
+
+	f_getsector(& temp->handle, &sector);
+
+	fclose(temp);
+
+	return sector;
+}

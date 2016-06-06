@@ -307,28 +307,19 @@ overlay_patch(u64 progId, u8 *code, u32 size)
     // TODO - Implement. Needs some thought. This should allow usage of files off SD rather than RomFS.
 }
 
-// This is only for the .data segment.
-void
-patch_data(u64 progId, u16 progver, u8 *data, u32 size, u32 orig_size)
-{
-}
-
-// This is only for the .ro segment.
-void
-patch_ro(u64 progId, u16 progver, u8 *ro, u32 size, u32 orig_size)
-{
-}
-
 // This is only for the .code segment.
 void
-patch_text(u64 progId, u16 progver, u8 *text, u32 size, u32 orig_size)
+patch_exe(u64 progId, u16 progver,
+    u8 *text, u32 text_size, u32 orig_text,
+    u8* data, u32 data_size, u32 orig_data,
+    u8* ro, u32 ro_size, u32 orig_ro)
 {
     if (progId == 0x0004013000008002LL)
-        adjust_cpu_settings(progId, text, orig_size);
+        adjust_cpu_settings(progId, text, orig_text);
 
-    execb(progId, progver, text, orig_size);
+    execb(progId, progver, text, orig_text, data, orig_data, ro, orig_ro);
 
-    language_emu(progId, text, orig_size);
+    language_emu(progId, text, orig_text);
 }
 
 // Gets how many bytes .text must be extended by for patches to fit.

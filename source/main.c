@@ -2,6 +2,8 @@
 #include "firm/firm.h"
 #include "input.h"
 #include "config.h"
+#include "screeninit.h"
+#include "std/abort.h"
 
 int menu_handler();
 
@@ -11,9 +13,12 @@ void shut_up();
 int
 main()
 {
-    if (fmount()) {
+	int c = fmount();
+	screen_init();
+
+    if (c) {
         // Failed to mount SD. Bomb out.
-        fprintf(BOTTOM_SCREEN, "%pFailed to mount SD card.\n", COLOR(RED, BLACK));
+        abort("Failed to mount SD card.\n");
     }
 
     load_config(); // Load configuration.

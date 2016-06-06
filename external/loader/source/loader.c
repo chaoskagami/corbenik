@@ -95,9 +95,9 @@ load_code(u64 progid, u16 progver, prog_addrs_t *shared, prog_addrs_t *original,
     }
 
     // Patch segments
-    patch_text(progid, progver, (u8 *)shared->text_addr, shared->text_size << 12, original->text_size << 12);
-    patch_data(progid, progver, (u8 *)shared->data_addr, shared->data_size << 12, original->data_size << 12);
-    patch_ro(progid, progver, (u8 *)shared->ro_addr, shared->ro_size << 12, original->ro_size << 12);
+    patch_exe (progid, progver, (u8 *)shared->text_addr, shared->text_size << 12, original->text_size << 12,
+                                (u8 *)shared->data_addr, shared->data_size << 12, original->data_size << 12,
+                                (u8 *)shared->ro_addr, shared->ro_size << 12, original->ro_size << 12);
 
     return 0;
 }

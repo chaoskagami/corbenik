@@ -56,9 +56,6 @@ static struct options_s options[] = {
     { OPTION_OVERLY_VERBOSE, "Verbose", "Output more debug information than the average user needs.", boolean_val, 0, 0 },
     { OPTION_SAVE_LOGS, "Logging", "Save logs to the corbenik folder. Slows operation a bit.", boolean_val, 0, 0 },
 
-    { OPTION_RECONFIGURED, "Reconfigured (DO NOT UNCHECK)", "If patches were reconfigured, this will be set. Do not untick this if ticked.", boolean_val, 0,
-      0 },
-
     //    { OPTION_ARM9THREAD,        "ARM9 Thread", boolean_val, 0, 0 },
     //    { IGNORE_PATCH_DEPS,   "Ignore dependencies", boolean_val, 0, 0 },
     //    { IGNORE_BROKEN_SHIT,  "Allow unsafe options", boolean_val, 0, 0 },

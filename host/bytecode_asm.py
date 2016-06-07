@@ -149,7 +149,9 @@ def parse_op(token_list, instr_offs):
 		else:
 			tok = bytearray.fromhex(token_list[1])
 			num = struct.unpack(">H", tok)[0]
-			return bytearray.fromhex("07") + struct.pack(">H", instr_offs[num])
+			val = bytearray(struct.pack(">H", instr_offs[num]))
+			val.reverse()
+			return bytearray.fromhex("07") + val
 	elif token_list[0] == "rewind":
 		return bytearray.fromhex("08")
 	elif token_list[0] == "and":
@@ -186,7 +188,9 @@ def parse_op(token_list, instr_offs):
 		if s != 2:
 			syn_err("invalid number of arguments")
 
-		return bytearray.fromhex("0F") + bytearray.fromhex(token_list[1])
+		val = bytearray.fromhex(token_list[1])
+		val.reverse()
+		return bytearray.fromhex("0F") + val
 	elif token_list[0] == "jmpeq":
 		if s != 2:
 			syn_err("invalid number of arguments")
@@ -196,7 +200,8 @@ def parse_op(token_list, instr_offs):
 		else:
 			tok = bytearray.fromhex(token_list[1])
 			num = struct.unpack(">H", tok)[0]
-			return bytearray.fromhex("17") + struct.pack(">H", instr_offs[num])
+			val = bytearray(struct.pack(">H", instr_offs[num]))
+			return bytearray.fromhex("17") + val
 	elif token_list[0] == "jmpne":
 		if s != 2:
 			syn_err("invalid number of arguments")
@@ -206,7 +211,8 @@ def parse_op(token_list, instr_offs):
 		else:
 			tok = bytearray.fromhex(token_list[1])
 			num = struct.unpack(">H", tok)[0]
-			return bytearray.fromhex("27") + struct.pack(">H", instr_offs[num])
+			val = bytearray(struct.pack(">H", instr_offs[num]))
+			return bytearray.fromhex("27") + val
 	elif token_list[0] == "jmplt":
 		if s != 2:
 			syn_err("invalid number of arguments")
@@ -216,7 +222,8 @@ def parse_op(token_list, instr_offs):
 		else:
 			tok = bytearray.fromhex(token_list[1])
 			num = struct.unpack(">H", tok)[0]
-			return bytearray.fromhex("37") + struct.pack(">H", instr_offs[num])
+			val = bytearray(struct.pack(">H", instr_offs[num]))
+			return bytearray.fromhex("37") + val
 	elif token_list[0] == "jmpgt":
 		if s != 2:
 			syn_err("invalid number of arguments")
@@ -226,7 +233,8 @@ def parse_op(token_list, instr_offs):
 		else:
 			tok = bytearray.fromhex(token_list[1])
 			num = struct.unpack(">H", tok)[0]
-			return bytearray.fromhex("47") + struct.pack(">H", instr_offs[num])
+			val = bytearray(struct.pack(">H", instr_offs[num]))
+			return bytearray.fromhex("47") + val
 	elif token_list[0] == "jmple":
 		if s != 2:
 			syn_err("invalid number of arguments")
@@ -236,7 +244,8 @@ def parse_op(token_list, instr_offs):
 		else:
 			tok = bytearray.fromhex(token_list[1])
 			num = struct.unpack(">H", tok)[0]
-			return bytearray.fromhex("57") + struct.pack(">H", instr_offs[num])
+			val = bytearray(struct.pack(">H", instr_offs[num]))
+			return bytearray.fromhex("57") + val
 	elif token_list[0] == "jmpge":
 		if s != 2:
 			syn_err("invalid number of arguments")
@@ -246,7 +255,8 @@ def parse_op(token_list, instr_offs):
 		else:
 			tok = bytearray.fromhex(token_list[1])
 			num = struct.unpack(">H", tok)[0]
-			return bytearray.fromhex("67") + struct.pack(">H", instr_offs[num])
+			val = bytearray(struct.pack(">H", instr_offs[num]))
+			return bytearray.fromhex("67") + val
 
 def pad_zero_r(x, c):
 	while len(x) < c:
@@ -295,11 +305,7 @@ with open(in_file, "r") as ins:
 		for line in ins:
 			lines += 1
 			tokens = re.split("\s+", line.strip("\n")) # Split by whitespace.
-			try:
-				bytes = parse_op(tokens, None) # Parse.
-			except:
-				print("Error on line " + str(lines))
-				exit(1)
+			bytes = parse_op(tokens, None) # Parse.
 			if bytes:
 				offsets += [size]
 				size += len(bytes)
@@ -312,11 +318,7 @@ with open(in_file, "r") as ins:
 		for line in ins:
 			lines += 1
 			tokens = re.split("\s+", line.strip("\n")) # Split by whitespace.
-			try:
-				bytes = parse_op(tokens, offsets) # Parse.
-			except:
-				print("Error on line " + str(lines))
-				exit(1)
+			bytes = parse_op(tokens, offsets) # Parse.
 			if bytes:
 				bytecode += bytes
 

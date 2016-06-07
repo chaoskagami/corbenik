@@ -209,14 +209,14 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                 if (debug)
                     log("jmp\n");
                 code++;
-                code = bytecode + code[1] + (code[0] << 8);
+	            code = bytecode + (code[0] + (code[1] << 8));
                 break;
             case OP_JMPEQ: // Jump to offset if equal
                 if (debug)
                     log("jmpeq\n");
 	            code++;
 				if (eq)
-	                code = bytecode + code[1] + (code[0] << 8);
+		            code = bytecode + (code[0] + (code[1] << 8));
 				else
 					code += 2;
                 break;
@@ -225,7 +225,7 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                     log("jmpne\n");
 	            code++;
 				if (!eq)
-	                code = bytecode + code[1] + (code[0] << 8);
+		            code = bytecode + (code[0] + (code[1] << 8));
 				else
 					code += 2;
                 break;
@@ -234,7 +234,7 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                     log("jmplt\n");
 	            code++;
 				if (lt)
-	                code = bytecode + code[1] + (code[0] << 8);
+		            code = bytecode + (code[0] + (code[1] << 8));
 				else
 					code += 2;
                 break;
@@ -243,7 +243,7 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                     log("jmpgt\n");
 	            code++;
 				if (gt)
-	                code = bytecode + code[1] + (code[0] << 8);
+		            code = bytecode + (code[0] + (code[1] << 8));
 				else
 					code += 2;
                 break;
@@ -252,7 +252,7 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                     log("jmple\n");
 	            code++;
 				if (lt || eq)
-	                code = bytecode + code[1] + (code[0] << 8);
+		            code = bytecode + (code[0] + (code[1] << 8));
 				else
 					code += 2;
                 break;
@@ -261,7 +261,7 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                     log("jmpge\n");
 	            code++;
 				if (gt || eq)
-	                code = bytecode + code[1] + (code[0] << 8);
+		            code = bytecode + (code[0] + (code[1] << 8));
 				else
 					code += 2;
                 break;
@@ -332,16 +332,15 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                 if (debug)
                     log("seek\n");
 	            code++;
-	            offset = ( code[3] + (code[2] << 8) + (code[1] << 16) + (code[0] << 24));
-                if (offset > current_mode->size) {
+	            offset = code[0] + (code[1] << 8) + (code[2] << 16) + (code[3] << 24);
+                if (offset > current_mode->size) { // Went out of bounds. Error.
 #ifndef LOADER
 					fprintf(stderr, "%x", offset);
 #endif
-                    // Went out of bounds. Error.
                     abort("seeked out of bounds\n");
-                }
-				else
-					code += 4;
+				}
+
+				code += 4;
                 break;
             case OP_NEXT:
                 if (debug)

@@ -63,10 +63,10 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
         modes[0].size = FCRAM_SPACING; // NATIVE_FIRM
 
         modes[1].memory = (uint8_t *)agb_firm_loc;
-        modes[1].size = FCRAM_SPACING; // AGB_FIRM
+        modes[1].size = FCRAM_SPACING * 2; // AGB_FIRM
 
         modes[2].memory = (uint8_t *)twl_firm_loc;
-        modes[2].size = FCRAM_SPACING; // TWL_FIRM
+        modes[2].size = FCRAM_SPACING * 2; // TWL_FIRM
 
         // NATIVE_FIRM Process9 (This is also the default mode.)
         modes[3].memory = (uint8_t *)firm_p9_exefs + sizeof(exefs_h) + firm_p9_exefs->fileHeaders[0].offset;
@@ -209,14 +209,14 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                 if (debug)
                     log("jmp\n");
                 code++;
-                code = bytecode + code[1] + (code[0] * 0x100);
+                code = bytecode + code[1] + (code[0] << 8);
                 break;
             case OP_JMPEQ: // Jump to offset if equal
                 if (debug)
                     log("jmpeq\n");
 	            code++;
 				if (eq)
-	                code = bytecode + code[1] + (code[0] * 0x100);
+	                code = bytecode + code[1] + (code[0] << 8);
 				else
 					code += 2;
                 break;
@@ -225,7 +225,7 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                     log("jmpne\n");
 	            code++;
 				if (!eq)
-	                code = bytecode + code[1] + (code[0] * 0x100);
+	                code = bytecode + code[1] + (code[0] << 8);
 				else
 					code += 2;
                 break;
@@ -234,7 +234,7 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                     log("jmplt\n");
 	            code++;
 				if (lt)
-	                code = bytecode + code[1] + (code[0] * 0x100);
+	                code = bytecode + code[1] + (code[0] << 8);
 				else
 					code += 2;
                 break;
@@ -243,7 +243,7 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                     log("jmpgt\n");
 	            code++;
 				if (gt)
-	                code = bytecode + code[1] + (code[0] * 0x100);
+	                code = bytecode + code[1] + (code[0] << 8);
 				else
 					code += 2;
                 break;
@@ -252,7 +252,7 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                     log("jmple\n");
 	            code++;
 				if (lt || eq)
-	                code = bytecode + code[1] + (code[0] * 0x100);
+	                code = bytecode + code[1] + (code[0] << 8);
 				else
 					code += 2;
                 break;
@@ -261,7 +261,7 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                     log("jmpge\n");
 	            code++;
 				if (gt || eq)
-	                code = bytecode + code[1] + (code[0] * 0x100);
+	                code = bytecode + code[1] + (code[0] << 8);
 				else
 					code += 2;
                 break;
@@ -332,8 +332,11 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                 if (debug)
                     log("seek\n");
 	            code++;
-	            offset = code[3] + (code[2] * 0x100) + (code[1] * 0x10000) + (code[0] * 0x1000000);
+	            offset = ( code[3] + (code[2] << 8) + (code[1] << 16) + (code[0] << 24));
                 if (offset > current_mode->size) {
+#ifndef LOADER
+					fprintf(stderr, "%x", offset);
+#endif
                     // Went out of bounds. Error.
                     abort("seeked out of bounds\n");
                 }

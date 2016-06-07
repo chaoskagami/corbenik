@@ -331,6 +331,7 @@ boot_firm()
     wait();
 
     clear_disp(BOTTOM_SCREEN);
+	set_cursor(BOTTOM_SCREEN, 0, 0);
 
     fumount(); // Unmount SD. No longer needed.
 

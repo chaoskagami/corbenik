@@ -186,9 +186,7 @@ def parse_op(token_list, instr_offs):
 		if s != 2:
 			syn_err("invalid number of arguments")
 
-		v = bytearray.fromhex(token_list[1])
-		v.reverse()
-		return bytearray.fromhex("0F") + v
+		return bytearray.fromhex("0F") + bytearray.fromhex(token_list[1])
 	elif token_list[0] == "jmpeq":
 		if s != 2:
 			syn_err("invalid number of arguments")

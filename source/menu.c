@@ -303,9 +303,10 @@ menu_poweroff()
 int
 menu_main()
 {
+	// TODO - Stop using different menu code here.
     set_cursor(TOP_SCREEN, 0, 0);
 
-    const char *list[] = { "Options", "Patches", "Info", "Help/Readme", "Reset", "Power off", "Boot firmware" };
+    const char *list[] = { "Options", "Patches", "Info", "Help/Readme", "Reboot", "Power off", "Boot Firmware" };
     int menu_max = 7;
 
     header("A:Enter DPAD:Nav");

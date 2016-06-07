@@ -110,6 +110,4 @@ patch_reboot()
 
     fread(mem, 1, fsize(f), f);
     fclose(f);
-
-    write_file((void *)0x1FF8000, "/test", 0x8000);
 }

@@ -11,7 +11,7 @@ uint32_t wait_key();
         fprintf(stderr, x);                                                                                                                                    \
         wait_key();                                                                                                                                            \
         clear_disp(stderr);                                                                                                                                    \
-		set_cursor(stderr, 0, 0);                                                                                                                              \
+        set_cursor(stderr, 0, 0);                                                                                                                              \
         menu_poweroff();                                                                                                                                       \
     }
 

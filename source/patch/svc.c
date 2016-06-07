@@ -44,7 +44,7 @@ PATCH(services)
             uint32_t svc = (i << 4) & j; // Actual svc index.
 
             // Refuse to replace non-NULL services unless the user has it enabled.
-			// Also don't bother checking for non-null svc files (it's slow.)
+            // Also don't bother checking for non-null svc files (it's slow.)
             if (svcTable[svc] && !config.options[OPTION_REPLACE_ALLOCATED_SVC])
                 continue;
 
@@ -62,7 +62,8 @@ PATCH(services)
             fprintf(stderr, "Svc: %s, %d bytes\n", at, size);
 
             if (!freeSpace)
-                for (freeSpace = exceptionsPage; *freeSpace != 0xFFFFFFFF; freeSpace++);
+                for (freeSpace = exceptionsPage; *freeSpace != 0xFFFFFFFF; freeSpace++)
+                    ;
 
             fprintf(stderr, "Svc: Copy code to %x\n", (uint32_t)freeSpace);
 

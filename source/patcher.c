@@ -85,7 +85,6 @@ patch_firm_all()
         wait();
     }
 
-
     // Use ARM9 hook thread?
     if (config.options[OPTION_ARM9THREAD]) {
         // Yes.
@@ -97,7 +96,7 @@ patch_firm_all()
     // Use EmuNAND?
     if (config.options[OPTION_EMUNAND]) {
         // Yes.
-		patch_emunand(config.options[OPTION_EMUNAND_INDEX]);
+        patch_emunand(config.options[OPTION_EMUNAND_INDEX]);
 
         wait();
     }

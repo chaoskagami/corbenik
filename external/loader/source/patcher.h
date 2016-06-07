@@ -3,10 +3,7 @@
 
 #include <3ds/types.h>
 
-void patch_exe(u64 progId, u16 progver,
-    u8 *text, u32 text_size, u32 orig_text,
-    u8* data, u32 data_size, u32 orig_data,
-    u8* ro, u32 ro_size, u32 orig_ro);
+void patch_exe(u64 progId, u16 progver, u8 *text, u32 text_size, u32 orig_text, u8 *data, u32 data_size, u32 orig_data, u8 *ro, u32 ro_size, u32 orig_ro);
 
 void dump_code(u64 progId, u8 *code_loc, u32 code_len);
 

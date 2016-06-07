@@ -13,8 +13,8 @@ void shut_up();
 int
 main()
 {
-	int c = fmount();
-	screen_init();
+    int c = fmount();
+    screen_init();
 
     if (c) {
         // Failed to mount SD. Bomb out.

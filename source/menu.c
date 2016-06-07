@@ -43,7 +43,9 @@ static struct options_s options[] = {
     { OPTION_LOADER_CPU_800MHZ, "  CPU - 800Mhz (n3ds)", "Forces the system to run in 800Mhz mode. Ignored if not a N3DS.", boolean_val, 0, 0 },
     { OPTION_LOADER_LANGEMU, "  Language Emulation", "Reads language emulation configuration and imitates the region/language.", boolean_val, 0, 0 },
 
-    { OPTION_LOADER_DUMPCODE, "  Dump Code Sections (dev)", "Dumps code sections for titles to SD card the first time they're loaded. This doesn't dump system titles. Slows things down considerably.", boolean_val, 0, 0 },
+    { OPTION_LOADER_DUMPCODE, "  Dump Code Sections (dev)",
+      "Dumps code sections for titles to SD card the first time they're loaded. This doesn't dump system titles. Slows things down considerably.", boolean_val,
+      0, 0 },
 
     // space
     { 0, "", "", not_option, 0, 0 },
@@ -300,7 +302,7 @@ menu_poweroff()
 int
 menu_main()
 {
-	// TODO - Stop using different menu code here.
+    // TODO - Stop using different menu code here.
     set_cursor(TOP_SCREEN, 0, 0);
 
     const char *list[] = { "Options", "Patches", "Info", "Help/Readme", "Reboot", "Power off", "Boot Firmware" };

@@ -339,10 +339,8 @@ dump_code(u64 progId, u8 *code_loc, u32 code_len)
         return;
     }
 
-    else
-    {
-        if (R_SUCCEEDED(fileOpen(&code_f, ARCHIVE_SDMC, code_path, FS_OPEN_WRITE | FS_OPEN_CREATE)))
-        {
+    else {
+        if (R_SUCCEEDED(fileOpen(&code_f, ARCHIVE_SDMC, code_path, FS_OPEN_WRITE | FS_OPEN_CREATE))) {
             u32 len = 0;
             FSFILE_Write(code_f, &len, 0, code_loc, code_len, FS_WRITE_FLUSH | FS_WRITE_UPDATE_TIME);
             logstr("  dumped code to ");
@@ -356,10 +354,7 @@ dump_code(u64 progId, u8 *code_loc, u32 code_len)
 
 // This is only for the .code segment.
 void
-patch_exe(u64 progId, u16 progver,
-    u8 *text, u32 text_size, u32 orig_text,
-    u8* data, u32 data_size, u32 orig_data,
-    u8* ro, u32 ro_size, u32 orig_ro)
+patch_exe(u64 progId, u16 progver, u8 *text, u32 text_size, u32 orig_text, u8 *data, u32 data_size, u32 orig_data, u8 *ro, u32 ro_size, u32 orig_ro)
 {
     if (progId == 0x0004013000008002LL)
         adjust_cpu_settings(progId, text, orig_text);

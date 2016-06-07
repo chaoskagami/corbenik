@@ -132,7 +132,7 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
 
     uint32_t i;
 
-	int eq = 0, gt = 0, lt = 0; // Flags.
+    int eq = 0, gt = 0, lt = 0; // Flags.
 
     uint8_t *code = bytecode;
     uint8_t *end = code + len;
@@ -198,78 +198,78 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                     log("test\n");
                 code += 2;
                 eq = memcmp(current_mode->memory + offset, code, *(code - 1));
-				if (eq < 0)
-					lt = 1;
-				if (eq > 0)
-					gt = 1;
-				eq = !eq;
+                if (eq < 0)
+                    lt = 1;
+                if (eq > 0)
+                    gt = 1;
+                eq = !eq;
                 code += *(code - 1);
                 break;
             case OP_JMP: // Jump to offset.
                 if (debug)
                     log("jmp\n");
                 code++;
-	            code = bytecode + (code[0] + (code[1] << 8));
+                code = bytecode + (code[0] + (code[1] << 8));
                 break;
             case OP_JMPEQ: // Jump to offset if equal
                 if (debug)
                     log("jmpeq\n");
-	            code++;
-				if (eq)
-		            code = bytecode + (code[0] + (code[1] << 8));
-				else
-					code += 2;
+                code++;
+                if (eq)
+                    code = bytecode + (code[0] + (code[1] << 8));
+                else
+                    code += 2;
                 break;
             case OP_JMPNE: // Jump to offset if not equal
                 if (debug)
                     log("jmpne\n");
-	            code++;
-				if (!eq)
-		            code = bytecode + (code[0] + (code[1] << 8));
-				else
-					code += 2;
+                code++;
+                if (!eq)
+                    code = bytecode + (code[0] + (code[1] << 8));
+                else
+                    code += 2;
                 break;
             case OP_JMPLT: // Jump to offset if less than
                 if (debug)
                     log("jmplt\n");
-	            code++;
-				if (lt)
-		            code = bytecode + (code[0] + (code[1] << 8));
-				else
-					code += 2;
+                code++;
+                if (lt)
+                    code = bytecode + (code[0] + (code[1] << 8));
+                else
+                    code += 2;
                 break;
             case OP_JMPGT: // Jump to offset if greater than
                 if (debug)
                     log("jmpgt\n");
-	            code++;
-				if (gt)
-		            code = bytecode + (code[0] + (code[1] << 8));
-				else
-					code += 2;
+                code++;
+                if (gt)
+                    code = bytecode + (code[0] + (code[1] << 8));
+                else
+                    code += 2;
                 break;
             case OP_JMPLE: // Jump to offset if less than or equal
                 if (debug)
                     log("jmple\n");
-	            code++;
-				if (lt || eq)
-		            code = bytecode + (code[0] + (code[1] << 8));
-				else
-					code += 2;
+                code++;
+                if (lt || eq)
+                    code = bytecode + (code[0] + (code[1] << 8));
+                else
+                    code += 2;
                 break;
             case OP_JMPGE: // Jump to offset if greater than or equal
                 if (debug)
                     log("jmpge\n");
-	            code++;
-				if (gt || eq)
-		            code = bytecode + (code[0] + (code[1] << 8));
-				else
-					code += 2;
+                code++;
+                if (gt || eq)
+                    code = bytecode + (code[0] + (code[1] << 8));
+                else
+                    code += 2;
                 break;
             case OP_CLF: // Clear flags.
                 if (debug)
                     log("clf\n");
-	            code++;
-				gt = lt = eq = 0;
+                code++;
+                gt = lt = eq = 0;
                 break;
             case OP_REWIND:
                 if (debug)
@@ -321,26 +321,26 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                     log("ver\n");
                 code++;
                 eq = memcmp(&ver, code, 2);
-				if (eq < 0)
-					lt = 1;
-				if (eq > 0)
-					gt = 1;
-				eq = !eq;
+                if (eq < 0)
+                    lt = 1;
+                if (eq > 0)
+                    gt = 1;
+                eq = !eq;
                 code += 2;
                 break;
             case OP_SEEK: // Jump to offset if greater than or equal
                 if (debug)
                     log("seek\n");
-	            code++;
-	            offset = code[0] + (code[1] << 8) + (code[2] << 16) + (code[3] << 24);
+                code++;
+                offset = code[0] + (code[1] << 8) + (code[2] << 16) + (code[3] << 24);
                 if (offset > current_mode->size) { // Went out of bounds. Error.
 #ifndef LOADER
-					fprintf(stderr, "%x", offset);
+                    fprintf(stderr, "%x", offset);
 #endif
                     abort("seeked out of bounds\n");
-				}
+                }
 
-				code += 4;
+                code += 4;
                 break;
             case OP_NEXT:
                 if (debug)
@@ -383,10 +383,7 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
 
 #ifdef LOADER
 int
-execb(uint64_t tid, uint16_t ver,
-      uint8_t *text_mem, uint32_t text_len,
-      uint8_t* data_mem, uint32_t data_len,
-      uint8_t* ro_mem, uint32_t ro_len)
+execb(uint64_t tid, uint16_t ver, uint8_t *text_mem, uint32_t text_len, uint8_t *data_mem, uint32_t data_len, uint8_t *ro_mem, uint32_t ro_len)
 {
 #else
 int
@@ -449,15 +446,15 @@ execb(char *filename, int build_cache)
 
     // Set memory.
     modes[18].memory = text_mem;
-    modes[18].size   = text_len;
+    modes[18].size = text_len;
 
     // Set memory.
     modes[19].memory = data_mem;
-    modes[19].size   = data_len;
+    modes[19].size = data_len;
 
     // Set memory.
     modes[20].memory = ro_mem;
-    modes[20].size   = ro_len;
+    modes[20].size = ro_len;
 
     log("  exec\n");
 

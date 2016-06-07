@@ -51,10 +51,10 @@ clear_disp(uint8_t *screen)
         fseek(f, 0, SEEK_END);
         for (int i = 0; i < TEXT_BOTTOM_HEIGHT - 1; i++) {
             char *text = text_buffer_bottom + (TEXT_BOTTOM_WIDTH * i);
-			for(int j = 0; j < TEXT_BOTTOM_WIDTH; j++) {
-				if (text[j] == 0)
-					text[j] = ' ';
-			}
+            for (int j = 0; j < TEXT_BOTTOM_WIDTH; j++) {
+                if (text[j] == 0)
+                    text[j] = ' ';
+            }
             fwrite(text, 1, strnlen(text, TEXT_BOTTOM_WIDTH), f);
             fwrite("\n", 1, 1, f);
         }

@@ -47,13 +47,13 @@
 #define PATH_AGB_P PATH_TEMP "/p_agb"
 #define PATH_TWL_P PATH_TEMP "/p_twl"
 
-#define PATH_KEYS PATH_CFW "/keys"            // Keyfiles will be loaded from this dir, and
-                                              // additionally the root if not found.
-#define PATH_EXEFS PATH_CFW "/exe"            // ExeFS overrides, named like '<titleid>.exefs' - NYI
+#define PATH_KEYS PATH_CFW "/keys" // Keyfiles will be loaded from this dir, and
+                                   // additionally the root if not found.
+#define PATH_EXEFS PATH_CFW "/exe" // ExeFS overrides, named like '<titleid>.exefs' - NYI
 
-#define PATH_BITS PATH_CFW "/bits"            // Path to misc bits we need (emunand code, reboot code, etc)
+#define PATH_BITS PATH_CFW "/bits" // Path to misc bits we need (emunand code, reboot code, etc)
 
-#define PATH_EMUNAND_CODE PATH_BITS "/emunand.bin" // Emunand hook.
+#define PATH_EMUNAND_CODE PATH_BITS "/emunand.bin"       // Emunand hook.
 #define PATH_SCREENINIT_CODE PATH_BITS "/screeninit.bin" // Screeninit code (ARM11)
 
 #define PATH_NATIVE_F PATH_FIRMWARES "/native"

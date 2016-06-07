@@ -236,17 +236,19 @@ read_file(void *data, char *path, size_t size)
 //    DWORD clust;  /* Current cluster of fpter (not valid when fprt is 0) */
 //    DWORD dsect;  /* Sector number appearing in buf[] (0:invalid) */
 
-size_t get_file_sector(char* path) {
-	FILE* temp = fopen(path, "r");
+size_t
+get_file_sector(char *path)
+{
+    FILE *temp = fopen(path, "r");
 
     if (!temp || !temp->is_open)
         return 0;
 
-	UINT sector;
+    UINT sector;
 
-	f_getsector(& temp->handle, &sector);
+    f_getsector(&temp->handle, &sector);
 
-	fclose(temp);
+    fclose(temp);
 
-	return sector;
+    return sector;
 }

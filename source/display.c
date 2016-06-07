@@ -79,7 +79,7 @@ show_menu(struct options_s *options, uint8_t *toggles)
                     fprintf(TOP_SCREEN, "   ");
 
                 fprintf(TOP_SCREEN, "[%u]  %s  \n", toggles[options[i].index], options[i].name);
-			} else if (options[i].allowed == not_option) {
+            } else if (options[i].allowed == not_option) {
                 fprintf(TOP_SCREEN, "%s\n", options[i].name);
             }
             ++i;
@@ -112,21 +112,21 @@ show_menu(struct options_s *options, uint8_t *toggles)
                 break;
             case BUTTON_A:
                 if (options[cursor_y].allowed == boolean_val) {
-	                toggles[options[cursor_y].index] = !toggles[options[cursor_y].index];
-				} else if (options[cursor_y].allowed == ranged_val) {
-					if (toggles[options[cursor_y].index] == options[cursor_y].b)
-						toggles[options[cursor_y].index] = options[cursor_y].a;
-					else
-						toggles[options[cursor_y].index]++;
-				}
+                    toggles[options[cursor_y].index] = !toggles[options[cursor_y].index];
+                } else if (options[cursor_y].allowed == ranged_val) {
+                    if (toggles[options[cursor_y].index] == options[cursor_y].b)
+                        toggles[options[cursor_y].index] = options[cursor_y].a;
+                    else
+                        toggles[options[cursor_y].index]++;
+                }
                 break;
             case BUTTON_X:
-				if (options[cursor_y].allowed == ranged_val) {
-					if (toggles[options[cursor_y].index] == options[cursor_y].a)
-						toggles[options[cursor_y].index] = options[cursor_y].b;
+                if (options[cursor_y].allowed == ranged_val) {
+                    if (toggles[options[cursor_y].index] == options[cursor_y].a)
+                        toggles[options[cursor_y].index] = options[cursor_y].b;
                     else
-    					toggles[options[cursor_y].index]--;
-				}
+                        toggles[options[cursor_y].index]--;
+                }
                 break;
             case BUTTON_B:
                 exit = 1;

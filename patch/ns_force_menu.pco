@@ -4,14 +4,14 @@
 # $ver   01
 # $uuid  1e
 
-# Major thanks to @Reisyukaku for this one.
+# This was originally based on the code from @Reisyukaku's pastebin.
 
-# Status: needs loader
+# Suggestion from @TuxSH / @Steveice10.
+# Searching for a relative bl is error prone,
+# so find the code before the bl and seek forward instead
+find 1b00000abc009fe5
+fwd  04
 
-# ldr r0, =0x101
-# bl getRegionSpecificAppID
-find bc009fe5524500eb
-
-# mov r0, r9 (== 0x00008102) */
-# mov r1, r8 (== 0x00040030) */
-set 0910a0e10800a0e1
+# mov r0, r9 (== 0x00008102)
+# mov r1, r8 (== 0x00040030)
+set  0910a0e10800a0e1

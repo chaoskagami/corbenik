@@ -4,6 +4,8 @@
 # $ver   01
 # $uuid  02
 
+rel exe_text
+
 # Status: needs loader
 
 find 30B5F1B0

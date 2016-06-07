@@ -39,8 +39,8 @@ static struct options_s options[] = {
     { 0, "\x1b[32;40mLoader Options\x1b[0m", "", not_option, 0, 0 },
 
     { OPTION_LOADER, "Use Loader Replacement", "Replaces loader with one capable of the below and also applying bytecode patches.", boolean_val, 0, 0 },
-    { OPTION_LOADER_CPU_L2, "  CPU - L2 cache (n3ds)", "Forces the system to use the L2 cache. Ignored if not a N3DS.", boolean_val, 0, 0 },
-    { OPTION_LOADER_CPU_800MHZ, "  CPU - 800Mhz (n3ds)", "Forces the system to run in 800Mhz mode. Ignored if not a N3DS.", boolean_val, 0, 0 },
+    { OPTION_LOADER_CPU_L2, "  CPU - L2 cache (n3ds)", "Forces the system to use the L2 cache. Ignored if not a N3DS.", boolean_val_n3ds, 0, 0 },
+    { OPTION_LOADER_CPU_800MHZ, "  CPU - 800Mhz (n3ds)", "Forces the system to run in 800Mhz mode. Ignored if not a N3DS.", boolean_val_n3ds, 0, 0 },
     { OPTION_LOADER_LANGEMU, "  Language Emulation", "Reads language emulation configuration and imitates the region/language.", boolean_val, 0, 0 },
 
     { OPTION_LOADER_DUMPCODE, "  Dump Code Sections (dev)",
@@ -278,6 +278,10 @@ menu_help()
 int
 menu_reset()
 {
+    write_file(enable_list, PATH_TEMP "/PATCHENABLE", FCRAM_SPACING / 2);
+    config.options[OPTION_RECONFIGURED] = 1;
+	save_config(); // Save config, including the reconfigured flag.
+
     fumount(); // Unmount SD.
 
     // Reboot.
@@ -290,6 +294,10 @@ menu_reset()
 int
 menu_poweroff()
 {
+    write_file(enable_list, PATH_TEMP "/PATCHENABLE", FCRAM_SPACING / 2);
+    config.options[OPTION_RECONFIGURED] = 1;
+	save_config(); // Save config, including the reconfigured flag.
+
     fumount(); // Unmount SD.
 
     // Reboot.

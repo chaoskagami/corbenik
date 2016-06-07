@@ -5,15 +5,15 @@
 # $flags devmode
 
 # 0: Relative to NATIVE_FIRM, section index [1]
-rel native_s1
+rel    native_s1
 
 # 1: Find this byte string.
-find 9705000015E40000
+find   9705000015E40000
 
 # Move backwards until we find what we want.
 # LOOP (2):
 back   04
 test   16640100
-jmpne  0002
+jmpne  2
 
-and  efff
+and    ef

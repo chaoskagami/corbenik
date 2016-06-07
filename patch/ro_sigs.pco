@@ -4,6 +4,8 @@
 # $ver   01
 # $uuid  0a
 
+rel exe_text
+
 # Status: needs loader
 
 find 30402DE90250A0E1

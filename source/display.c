@@ -13,6 +13,8 @@
 
 void header(char *append);
 
+extern int is_n3ds;
+
 int
 show_menu(struct options_s *options, uint8_t *toggles)
 {
@@ -55,7 +57,7 @@ show_menu(struct options_s *options, uint8_t *toggles)
 
         int i = 0;
         while (options[i].index != -1) { // -1 Sentinel.
-            if (options[i].allowed == boolean_val) {
+            if (options[i].allowed == boolean_val || (is_n3ds && options[i].allowed == boolean_val_n3ds)) {
                 if (cursor_y == i)
                     fprintf(TOP_SCREEN, "\x1b[32m>>\x1b[0m ");
                 else
@@ -92,26 +94,26 @@ show_menu(struct options_s *options, uint8_t *toggles)
         switch (key) {
             case BUTTON_UP:
                 cursor_y -= 1;
-                while (options[cursor_y].allowed == not_option && cursor_y >= cursor_min)
+                while ((options[cursor_y].allowed == not_option || (options[cursor_y].allowed == boolean_val_n3ds && !is_n3ds)) && cursor_y >= cursor_min)
                     cursor_y--;
                 break;
             case BUTTON_DOWN:
                 cursor_y += 1;
-                while (options[cursor_y].allowed == not_option && cursor_y < cursor_max)
+                while ((options[cursor_y].allowed == not_option || (options[cursor_y].allowed == boolean_val_n3ds && !is_n3ds)) && cursor_y < cursor_max)
                     cursor_y++;
                 break;
             case BUTTON_LEFT:
                 cursor_y -= 5;
-                while (options[cursor_y].allowed == not_option && cursor_y >= cursor_min)
+                while ((options[cursor_y].allowed == not_option || (options[cursor_y].allowed == boolean_val_n3ds && !is_n3ds)) && cursor_y >= cursor_min)
                     cursor_y--;
                 break;
             case BUTTON_RIGHT:
                 cursor_y += 5;
-                while (options[cursor_y].allowed == not_option && cursor_y < cursor_max)
+                while ((options[cursor_y].allowed == not_option || (options[cursor_y].allowed == boolean_val_n3ds && !is_n3ds)) && cursor_y < cursor_max)
                     cursor_y++;
                 break;
             case BUTTON_A:
-                if (options[cursor_y].allowed == boolean_val) {
+                if (options[cursor_y].allowed == boolean_val || options[cursor_y].allowed == boolean_val_n3ds) {
                     toggles[options[cursor_y].index] = !toggles[options[cursor_y].index];
                 } else if (options[cursor_y].allowed == ranged_val) {
                     if (toggles[options[cursor_y].index] == options[cursor_y].b)

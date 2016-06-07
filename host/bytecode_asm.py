@@ -109,7 +109,7 @@ def parse_op(token_list, instr_offs):
 		index = rel_name(token_list[1])
 		if index == "-1":
 			# TODO - Check if an integer was passed.
-			syn_error("invalid argument")
+			syn_err("invalid argument")
 
 		return bytearray.fromhex("01" + index)
 	elif token_list[0] == "find":
@@ -147,8 +147,7 @@ def parse_op(token_list, instr_offs):
 		if instr_offs == None:
 			return bytearray.fromhex("070000")
 		else:
-			tok = bytearray.fromhex(token_list[1])
-			num = struct.unpack(">H", tok)[0]
+			num = int(token_list[1])
 			val = bytearray(struct.pack(">H", instr_offs[num]))
 			val.reverse()
 			return bytearray.fromhex("07") + val
@@ -198,9 +197,9 @@ def parse_op(token_list, instr_offs):
 		if instr_offs == None:
 			return bytearray.fromhex("070000")
 		else:
-			tok = bytearray.fromhex(token_list[1])
-			num = struct.unpack(">H", tok)[0]
+			num = int(token_list[1])
 			val = bytearray(struct.pack(">H", instr_offs[num]))
+			val.reverse()
 			return bytearray.fromhex("17") + val
 	elif token_list[0] == "jmpne":
 		if s != 2:
@@ -209,9 +208,9 @@ def parse_op(token_list, instr_offs):
 		if instr_offs == None:
 			return bytearray.fromhex("070000")
 		else:
-			tok = bytearray.fromhex(token_list[1])
-			num = struct.unpack(">H", tok)[0]
+			num = int(token_list[1])
 			val = bytearray(struct.pack(">H", instr_offs[num]))
+			val.reverse()
 			return bytearray.fromhex("27") + val
 	elif token_list[0] == "jmplt":
 		if s != 2:
@@ -220,9 +219,9 @@ def parse_op(token_list, instr_offs):
 		if instr_offs == None:
 			return bytearray.fromhex("070000")
 		else:
-			tok = bytearray.fromhex(token_list[1])
-			num = struct.unpack(">H", tok)[0]
+			num = int(token_list[1])
 			val = bytearray(struct.pack(">H", instr_offs[num]))
+			val.reverse()
 			return bytearray.fromhex("37") + val
 	elif token_list[0] == "jmpgt":
 		if s != 2:
@@ -231,9 +230,9 @@ def parse_op(token_list, instr_offs):
 		if instr_offs == None:
 			return bytearray.fromhex("070000")
 		else:
-			tok = bytearray.fromhex(token_list[1])
-			num = struct.unpack(">H", tok)[0]
+			num = int(token_list[1])
 			val = bytearray(struct.pack(">H", instr_offs[num]))
+			val.reverse()
 			return bytearray.fromhex("47") + val
 	elif token_list[0] == "jmple":
 		if s != 2:
@@ -242,9 +241,9 @@ def parse_op(token_list, instr_offs):
 		if instr_offs == None:
 			return bytearray.fromhex("070000")
 		else:
-			tok = bytearray.fromhex(token_list[1])
-			num = struct.unpack(">H", tok)[0]
+			num = int(token_list[1])
 			val = bytearray(struct.pack(">H", instr_offs[num]))
+			val.reverse()
 			return bytearray.fromhex("57") + val
 	elif token_list[0] == "jmpge":
 		if s != 2:
@@ -253,9 +252,9 @@ def parse_op(token_list, instr_offs):
 		if instr_offs == None:
 			return bytearray.fromhex("070000")
 		else:
-			tok = bytearray.fromhex(token_list[1])
-			num = struct.unpack(">H", tok)[0]
+			num = int(token_list[1])
 			val = bytearray(struct.pack(">H", instr_offs[num]))
+			val.reverse()
 			return bytearray.fromhex("67") + val
 
 def pad_zero_r(x, c):
@@ -310,7 +309,7 @@ with open(in_file, "r") as ins:
 				offsets += [size]
 				size += len(bytes)
 
-		offsets += [size+1] # So we can jump past the last instruction for 'exit' type behavior
+		offsets += [size] # So we can jump past the last instruction for 'exit' type behavior
 		lines = 0
 
 		ins.seek(0)

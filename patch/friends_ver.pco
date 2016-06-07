@@ -5,6 +5,8 @@
 # $uuid  05
 # $flags noabort
 
+rel exe_text
+
 # Status: needs loader
 
 find E01EFF2FE1010101

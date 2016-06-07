@@ -7,12 +7,19 @@
 
 int menu_handler();
 
+int is_n3ds = 0;
+
 int doing_autoboot = 0;
 void shut_up();
+
+#define CONFIG_PLATFORM_REG ((volatile uint32_t*)0x10140FFC)
 
 int
 main()
 {
+	if (*CONFIG_PLATFORM_REG == 7)
+		is_n3ds = 1;
+
     int c = fmount();
     screen_init();
 

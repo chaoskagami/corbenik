@@ -10,42 +10,27 @@ rel agb
 
 # #############################
 
-# Sigs (1)
+# New3DS Sigs (1)
 seek  0009DF64
 test  C117491C31D0
-jmpne 0006
+jmpne 8
 set   00204EB070BD
-jmp   000D
 
-# OLD3DS Sigs (6)
-seek  0009D2A8
-test  C117491C31D0
-jmpne 000B
-set   00204EB070BD
-jmp   000D
-# Failed to set sigcheck.
-
-# Abort due to failure. (11)
-rewind
-back  01
-
-# The above rewinds the file and moves backwards
-# one byte (which triggers the underflow error in
-# the VM)
-
-# ##############################
-
-# Bootscreen (13)
+# Bootscreen (5)
 seek  000D8B8A
-test  01
-jmpne 0012
 set   26
-jmp   0016
+jmp   12
 
-# OLD3ds bootscreen (18)
+#########################
+
+# OLD3DS Sigs (8)
+seek  0009D2A8
+set   00204EB070BD
+
+# OLD3ds bootscreen (10)
 seek  000D7A12
-test  01
-jmpne 000B
 set   26
 
-# End (22)
+# #######################
+
+# End (12)

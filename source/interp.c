@@ -24,6 +24,7 @@
 #define OP_VER 0x0D
 #define OP_CLF 0x0E
 #define OP_SEEK 0x0F
+#define OP_N3DS 0x10
 
 #define OP_JMPEQ 0x17
 #define OP_JMPNE 0x27
@@ -53,6 +54,12 @@ struct mode
 };
 struct mode modes[21];
 int init_bytecode = 0;
+
+#ifndef LOADER
+extern int is_n3ds;
+#else
+int is_n3ds = 1; // TODO - We don't really need to care, but it should still work from loader
+#endif
 
 int
 exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
@@ -326,6 +333,13 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                 if (eq > 0)
                     gt = 1;
                 eq = !eq;
+                code += 2;
+                break;
+            case OP_N3DS:
+                if (debug)
+                    log("ver\n");
+                code++;
+                eq = is_n3ds;
                 code += 2;
                 break;
             case OP_SEEK: // Jump to offset if greater than or equal

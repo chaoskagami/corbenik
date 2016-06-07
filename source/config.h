@@ -30,11 +30,12 @@ extern struct config_file config;
 
 enum type
 {
-    boolean_val = 0, // Toggle
-    ranged_val = 1,  // N1 - N2, left and right to pick.
-    mask_val = 2,    // Bitmask allowed values.
-    not_option = 3,  // Skip over this.
-    call_fun = 4     // Call a function. Treat (a) as (void)(*)(void).
+    boolean_val = 0,      // Toggle
+    ranged_val = 1,       // N1 - N2, left and right to pick.
+    mask_val = 2,         // Bitmask allowed values.
+    not_option = 3,       // Skip over this.
+    call_fun = 4,         // Call a function. Treat (a) as (void)(*)(void).
+    boolean_val_n3ds = 5  // Toggle, but only show on n3DS
 };
 
 struct range_str

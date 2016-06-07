@@ -423,6 +423,13 @@ void
 boot_cfw()
 {
     fprintf(BOTTOM_SCREEN, "Loading firmware...\n");
+
+    if (config.options[OPTION_RECONFIGURED]) {
+        config.options[OPTION_RECONFIGURED] = 0;
+        save_config();
+        config.options[OPTION_RECONFIGURED] = 1;
+    }
+
     load_firms();
 
     if (config.options[OPTION_RECONFIGURED]) {
@@ -444,11 +451,6 @@ boot_cfw()
 
         if (!write_file(agb_firm_loc, PATH_AGB_P, agb_firm_size))
             abort("Failed to save prepatched agb\n");
-    }
-
-    if (config.options[OPTION_RECONFIGURED]) {
-        config.options[OPTION_RECONFIGURED] = 0;
-        save_config();
     }
 
     boot_firm();

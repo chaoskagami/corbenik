@@ -1,0 +1,42 @@
+# $name TWL_FIRM patches (New3DS)
+# $desc 
+# $ver  01
+# $uuid 34
+
+# TODO - Make dynamic
+
+# Relative to twl_firm
+rel  twl
+
+# Disable main signature checks
+seek 00165D64
+set  00204EB070BD
+
+# Patch RSA function to not report invalid signatures
+seek 0017474A
+set  0120
+
+# Disable header Nintendo logo check (not generally needed)
+seek 0017553E
+set  00200000
+
+# Disable whitelist check
+seek 001756A0
+set  00200000
+
+# Disable cartridge blacklist check (mostly, if not entirely, demo carts)
+seek 00175A8E
+set  01200000
+
+# Disable save type check
+seek 00175A9A
+set  01200000
+
+# Disable DSi cartridge save exploit check
+seek 00175AA6
+set  01200000
+
+# Stub function commonly used to compare SHA hashes to always succeed
+seek 00175B92
+set  01207047
+

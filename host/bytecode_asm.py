@@ -100,7 +100,6 @@ def parse_op(token_list, instr_offs):
 
 		return bytearray()
 
-
 	if token_list[0] == "nop": # Nop. Expects 0 args.
 		return bytearray.fromhex("00")
 	elif token_list[0] == "rel": # Rel. Expects one argument. Possibly requires mapping.
@@ -183,6 +182,13 @@ def parse_op(token_list, instr_offs):
 		return bytearray.fromhex("0D") + bytearray.fromhex(token_list[1])
 	elif token_list[0] == "clf":
 		return bytearray.fromhex("0E")
+	elif token_list[0] == "seek":
+		if s != 2:
+			syn_err("invalid number of arguments")
+
+		v = bytearray.fromhex(token_list[1])
+		v.reverse()
+		return bytearray.fromhex("0F") + v
 	elif token_list[0] == "jmpeq":
 		if s != 2:
 			syn_err("invalid number of arguments")
@@ -275,8 +281,8 @@ except:
 	exit(1)
 
 size = 0
-
 offsets = []
+labels = []
 
 with open(in_file, "r") as ins:
 	with open(out_file, "wb") as writ:
@@ -286,22 +292,33 @@ with open(in_file, "r") as ins:
 		# One to figure out the opcode offsets, one
 		# to actually parse everything.
 
+		# FIXME - We need label support ASAP. The AGB and TWL patches I wrote make my head hurt.
+
 		for line in ins:
 			lines += 1
 			tokens = re.split("\s+", line.strip("\n")) # Split by whitespace.
-			bytes = parse_op(tokens, None) # Parse.
+			try:
+				bytes = parse_op(tokens, None) # Parse.
+			except:
+				print("Error on line " + str(lines))
+				exit(1)
 			if bytes:
 				offsets += [size]
 				size += len(bytes)
 
 		offsets += [size+1] # So we can jump past the last instruction for 'exit' type behavior
+		lines = 0
 
 		ins.seek(0)
 
 		for line in ins:
 			lines += 1
 			tokens = re.split("\s+", line.strip("\n")) # Split by whitespace.
-			bytes = parse_op(tokens, offsets) # Parse.
+			try:
+				bytes = parse_op(tokens, offsets) # Parse.
+			except:
+				print("Error on line " + str(lines))
+				exit(1)
 			if bytes:
 				bytecode += bytes
 

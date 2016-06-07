@@ -23,7 +23,7 @@ static struct options_s options[] = {
 
     { OPTION_SVCS, "SVC Replacement", "Replaces ARM11 svc calls, including svcBackdoor. With 11.0 NATIVE_FIRM, you probably want this.", boolean_val, 0, 0 },
 
-    { OPTION_REBOOT, "Reboot Hook", "Hooks firmlaunch to keep the CFW resident on o3DS and allow patching TWL/AGB firms as well.", boolean_val, 0, 0 },
+    { OPTION_REBOOT, "Reboot Hook", "Hooks firmlaunch to allow largemem games on o3DS (and allow patching TWL/AGB on all consoles)", boolean_val, 0, 0 },
 
     { OPTION_EMUNAND, "Use EmuNAND", "Redirects NAND write/read to the SD.", boolean_val, 0, 0 },
     { OPTION_EMUNAND_INDEX, "  Index", "Which EmuNAND to use. Currently, 10 maximum (but this is arbitrary)", ranged_val, 0, 0x9 },

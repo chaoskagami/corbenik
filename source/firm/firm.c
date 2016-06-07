@@ -425,8 +425,6 @@ boot_cfw()
     if (config.options[OPTION_RECONFIGURED]) {
         fprintf(stderr, "Generating patch cache...\n");
         generate_patch_cache();
-        config.options[OPTION_RECONFIGURED] = 0;
-        save_config();
     }
 
     fprintf(BOTTOM_SCREEN, "Patching firmware...\n");
@@ -434,7 +432,7 @@ boot_cfw()
         return;
 
 	if (config.options[OPTION_REBOOT] && config.options[OPTION_RECONFIGURED]) {
-		fprintf(stderr, "Saving FIRMs for reboot...");
+		fprintf(stderr, "Saving FIRM for reboot...\n");
 		if (!write_file(firm_loc, PATH_NATIVE_P, firm_size))
 			abort("Failed to save prepatched native\n");
 
@@ -443,6 +441,11 @@ boot_cfw()
 
 		if (!write_file(agb_firm_loc, PATH_AGB_P, agb_firm_size))
 			abort("Failed to save prepatched agb\n");
+	}
+
+    if (config.options[OPTION_RECONFIGURED]) {
+        config.options[OPTION_RECONFIGURED] = 0;
+        save_config();
 	}
 
     boot_firm();

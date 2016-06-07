@@ -73,20 +73,26 @@ void patch_reboot() {
 	*pos_native = (uint32_t)mem;
 	memcpy(mem, L"sdmc:", 10);
 	mem += 10;
-	for(size_t i=0; i < sizeof(PATH_NATIVE_P); i++, mem += 2)
+	for(size_t i=0; i < sizeof(PATH_NATIVE_P); i++, mem += 2) {
 		*mem = PATH_NATIVE_P[i];
+		*(mem + 1) = 0;
+	}
 
 	*pos_twl = (uint32_t)mem;
 	memcpy(mem, L"sdmc:", 10);
 	mem += 10;
-	for(size_t i=0; i < sizeof(PATH_TWL_P); i++, mem += 2)
+	for(size_t i=0; i < sizeof(PATH_TWL_P); i++, mem += 2) {
 		*mem = PATH_TWL_P[i];
+		*(mem + 1) = 0;
+	}
 
 	*pos_agb = (uint32_t)mem;
 	memcpy(mem, L"sdmc:", 10);
 	mem += 10;
-	for(size_t i=0; i < sizeof(PATH_AGB_P); i++, mem += 2)
+	for(size_t i=0; i < sizeof(PATH_AGB_P); i++, mem += 2) {
 		*mem = PATH_AGB_P[i];
+		*(mem + 1) = 0;
+	}
 
 	uint32_t *pos_rebc    = (uint32_t*)memfind(off, size, "rebc", 4);
 	*pos_rebc = (uint32_t)mem;
@@ -99,4 +105,6 @@ void patch_reboot() {
 
 	fread(mem, 1, fsize(f), f);
 	fclose(f);
+
+	write_file((void*)0x1FF8000, "/test", 0x8000);
 }

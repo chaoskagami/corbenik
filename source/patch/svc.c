@@ -41,6 +41,13 @@ PATCH(services)
         at[0] = ("0123456789abcdef")[i];
 
         for (uint32_t j = 0; j < 0xf; j++) {
+            uint32_t svc = (i << 4) & j; // Actual svc index.
+
+            // Refuse to replace non-NULL services unless the user has it enabled.
+			// Also don't bother checking for non-null svc files (it's slow.)
+            if (svcTable[svc] && !config.options[OPTION_REPLACE_ALLOCATED_SVC])
+                continue;
+
             // This is just hexdump. Nothing complicated.
             at[1] = ("0123456789abcdef")[j];
 
@@ -48,34 +55,24 @@ PATCH(services)
             if (!data)
                 continue; // No file for svc. Move on.
 
-            uint32_t svc = (i << 4) & j;
-
-            // Refuse to replace non-NULL services unless the user says to.
-            if (svcTable[svc] && !config.options[OPTION_REPLACE_ALLOCATED_SVC]) {
-                fclose(data);
-                fprintf(stderr, "Svc: %x non-null, moving on\n", i);
-                continue;
-            }
-
             // TODO - We can just fread directly to freeSpace with a little reordering.
 
             uint32_t size = fsize(data);
 
             fprintf(stderr, "Svc: %s, %d bytes\n", at, size);
 
-            if (!freeSpace) {
-                for (freeSpace = exceptionsPage; *freeSpace != 0xFFFFFFFF; freeSpace++)
-                    ;
-            }
+            if (!freeSpace)
+                for (freeSpace = exceptionsPage; *freeSpace != 0xFFFFFFFF; freeSpace++);
 
             fprintf(stderr, "Svc: Copy code to %x\n", (uint32_t)freeSpace);
 
             fread(freeSpace, 1, size, data);
+
             fclose(data);
 
             svcTable[svc] = 0xFFFF0000 + ((uint8_t *)freeSpace - (uint8_t *)exceptionsPage);
 
-            freeSpace += size; // We keep track of this because there's more than 7B free.
+            freeSpace += size;
 
             fprintf(stderr, "Svc: entry set as %x\n", svcTable[svc]);
         }

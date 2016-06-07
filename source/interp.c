@@ -23,6 +23,7 @@
 #define OP_NOT 0x0C
 #define OP_VER 0x0D
 #define OP_CLF 0x0E
+#define OP_SEEK 0x0F
 
 #define OP_JMPEQ 0x17
 #define OP_JMPNE 0x27
@@ -326,6 +327,18 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
 					gt = 1;
 				eq = !eq;
                 code += 2;
+                break;
+            case OP_SEEK: // Jump to offset if greater than or equal
+                if (debug)
+                    log("seek\n");
+	            code++;
+	            offset = code[3] + (code[2] * 0x100) + (code[1] * 0x10000) + (code[0] * 0x1000000);
+                if (offset > current_mode->size) {
+                    // Went out of bounds. Error.
+                    abort("seeked out of bounds\n");
+                }
+				else
+					code += 4;
                 break;
             case OP_NEXT:
                 if (debug)

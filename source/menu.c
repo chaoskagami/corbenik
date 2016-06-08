@@ -43,8 +43,12 @@ static struct options_s options[] = {
     { OPTION_LOADER_CPU_800MHZ, "  CPU - 800Mhz (n3ds)", "Forces the system to run in 800Mhz mode. Ignored if not a N3DS.", boolean_val_n3ds, 0, 0 },
     { OPTION_LOADER_LANGEMU, "  Language Emulation", "Reads language emulation configuration and imitates the region/language.", boolean_val, 0, 0 },
 
-    { OPTION_LOADER_DUMPCODE, "  Dump Code Sections (dev)",
-      "Dumps code sections for titles to SD card the first time they're loaded. This doesn't dump system titles. Slows things down considerably.", boolean_val,
+    { OPTION_LOADER_DUMPCODE, "  Dump Title Code Sections",
+      "Dumps code sections for titles to SD card the first time they're loaded. Slows things down considerably.", boolean_val,
+      0, 0 },
+
+    { OPTION_LOADER_DUMPCODE_ALL, "    + System Titles",
+      "Dumps code sections for system titles, too. Expect to sit at a black screen for >3mins on the first time.", boolean_val,
       0, 0 },
 
     // space

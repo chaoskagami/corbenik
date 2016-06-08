@@ -109,6 +109,9 @@ struct options_s
 // Hook firmlaunches.
 #define OPTION_REBOOT 19
 
+// Dump *all* code, from system applications, modules, etc. You'll be sitting around for about five minutes.
+#define OPTION_LOADER_DUMPCODE_ALL 20
+
 // Save log files during boot and from loader.
 // This will slow things down a bit.
 #define OPTION_SAVE_LOGS 253

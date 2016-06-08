@@ -319,9 +319,8 @@ dump_code(u64 progId, u8 *code_loc, u32 code_len)
 
     u32 highTid = progId >> 0x20;
 
-    // Only regular titles and demos will get dumped
-    // Otherwise it's insanely slow
-    if (highTid != 0x00040000 && highTid != 0x00040002)
+    // Only dump user titles unless the user is prepared for pain.
+    if (highTid != 0x00040000 && highTid != 0x00040002 && !config.options[OPTION_LOADER_DUMPCODE_ALL])
         return;
 
     char code_path[] = CODE_PATH;

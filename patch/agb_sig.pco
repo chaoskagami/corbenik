@@ -1,7 +1,7 @@
-# $name  AGB Patches
-# $desc  Patches signatures and bootscreen in AGB firm
+# $name  AGB Siganture fix
+# $desc  Patches signatures in AGB_FIRM
 # $ver   01
-# $uuid  35
+# $uuid  39
 
 # TODO - Make dynamic.
 #        This is also terribly inconvienent without labels.
@@ -13,24 +13,17 @@ rel agb
 # New3DS Sigs (1)
 seek  0009DF64
 test  C117491C31D0
-jmpne 8
+jmpne 6
 set   00204EB070BD
 
-# Bootscreen (5)
-seek  000D8B8A
-set   26
-jmp   12
+jmp   8
 
 #########################
 
-# OLD3DS Sigs (8)
+# OLD3DS Sigs (6)
 seek  0009D2A8
 set   00204EB070BD
 
-# OLD3ds bootscreen (10)
-seek  000D7A12
-set   26
-
 # #######################
 
-# End (12)
+# End (8)

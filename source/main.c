@@ -12,13 +12,11 @@ int is_n3ds = 0;
 int doing_autoboot = 0;
 void shut_up();
 
-#define CONFIG_PLATFORM_REG ((volatile uint32_t*)0x10140FFC)
-
 int
 main()
 {
-	if (*CONFIG_PLATFORM_REG == 7)
-		is_n3ds = 1;
+	if (PDN_MPCORE_CFG == 7)
+		is_n3ds = 1; // Enable n3ds specific options.
 
     int c = fmount();
     screen_init();
@@ -29,6 +27,11 @@ main()
     }
 
     load_config(); // Load configuration.
+
+	if (CFG_BOOTENV == 7) {
+		fprintf(stderr, "Rebooted from AGB, disabling EmuNAND\n");
+		config.options[OPTION_EMUNAND] = 0;
+	}
 
     // Autoboot. Non-standard code path.
     if (config.options[OPTION_AUTOBOOT] && !(HID_PAD & BUTTON_R)) {

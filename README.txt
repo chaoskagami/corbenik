@@ -64,10 +64,13 @@ won't work - and other applications that do JIT also won't work.
 If you need to use an EmuNAND, you'll want to enable `EmuNAND` in options. If
 you've been using multiple EmuNANDs you can also select the index while you're
 there with A to increase and X to decrease. This supports both Gateway-style
-(first sector at back) and standard copied NAND (RedNAND)
+(first sector at back) and standard copied NANDs (RedNAND)
 
 While you're there, you can enable `Autoboot` if you'd like, including
 `silent mode` if you're using something like BootAnim9.
+
+If you plan to use TWL/AGB patches or have an O3DS, you should enable
+`Reboot Hook` in options.
 
 You'll also want to go into `Patches` and enable the usual bits, which includes:
 
@@ -81,6 +84,11 @@ You'll also want these patches, which are done by loader and therefore require i
  * Block NIM updates
  * Region free HOME
  * RO signature fix
+
+If you're using the reboot hook, you might want these:
+
+ * AGB Patches
+ * TWL Patches
 
 If you're on 11.0, you also want these:
 

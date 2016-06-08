@@ -123,6 +123,9 @@ loadTitleLocaleConfig(u64 progId, u8 *regionId, u8 *languageId)
         for (u32 i = 0; i < 7; i++) {
             if (memcmp(buf, regions[i], 3) == 0) {
                 *regionId = (u8)i;
+				logstr("  localeemu region - ");
+				logstr(regions[i]);
+				logstr("\n");
                 break;
             }
         }
@@ -130,11 +133,14 @@ loadTitleLocaleConfig(u64 progId, u8 *regionId, u8 *languageId)
         for (u32 i = 0; i < 12; i++) {
             if (memcmp(buf + 4, languages[i], 2) == 0) {
                 *languageId = (u8)i;
+				logstr("  localeemu lang - ");
+				logstr(languages[i]);
+				logstr("\n");
                 break;
             }
         }
 
-        logstr("  langemu cfg applied\n  ");
+        logstr("  localeemu read for ");
         logstr(path);
         logstr("\n");
     }
@@ -219,7 +225,7 @@ patchCfgGetLanguage(u8 *code, u32 size, u8 languageId, u8 *CFGU_GetConfigInfoBlk
                         *((u32 *)instr + 1) = 0xE3B00000; // (1 or 2 instructions)         => movs
                                                           // r0, 0             (result code)
 
-                        logstr("  patched language\n");
+                        logstr("  patched cfggetlanguage\n");
 
                         // We're done
                         return;
@@ -251,7 +257,7 @@ patchCfgGetRegion(u8 *code, u32 size, u8 regionId, u32 CFGUHandleOffset)
         }
     }
 
-    logstr("  patched region\n");
+    logstr("  patched cfggetregion\n");
 }
 
 static void
@@ -276,6 +282,8 @@ adjust_cpu_settings(u64 progId, u8 *code, u32 size)
             }
         }
     }
+
+    logstr("  patched cpu\n");
 }
 
 void

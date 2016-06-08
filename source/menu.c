@@ -265,7 +265,7 @@ menu_help()
                     "  together either by code or documentation:\n"
                     "  @mid-kid, @Wolfvak, @Reisyukaku, @AuroraWright\n"
                     "  @d0k3, @TuxSH, @Steveice10, @delebile,\n"
-					"  @Normatt, @b1l1s, @dark-samus, and others.\n"
+					"  @Normatt, @b1l1s, @dark-samus, @TiniVi, etc\n"
                     "\n"
                     "[PROTECT BREAK] DATA DRAIN: OK\n"
                     "\n"

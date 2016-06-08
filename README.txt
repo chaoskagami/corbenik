@@ -144,4 +144,6 @@ The complete list:
 
  @smealum        HANS code, and pioneering the open source hax frontier.
 
+ @TiniVi         RE work, screen deinit.
+
  CyberConnect2   Because the name originates from .hack, which you should go play.

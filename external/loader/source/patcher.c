@@ -332,14 +332,9 @@ dump_code(u64 progId, u8 *code_loc, u32 code_len)
         progId >>= 4;
     }
 
-    if (R_SUCCEEDED(fileOpen(&code_f, ARCHIVE_SDMC, code_path, FS_OPEN_READ)))
-    // Code was already dumped, do nothing
+    if (!R_SUCCEEDED(fileOpen(&code_f, ARCHIVE_SDMC, code_path, FS_OPEN_READ)))
     {
         FSFILE_Close(code_f);
-        return;
-    }
-
-    else {
         if (R_SUCCEEDED(fileOpen(&code_f, ARCHIVE_SDMC, code_path, FS_OPEN_WRITE | FS_OPEN_CREATE))) {
             u32 len = 0;
             FSFILE_Write(code_f, &len, 0, code_loc, code_len, FS_WRITE_FLUSH | FS_WRITE_UPDATE_TIME);
@@ -348,6 +343,9 @@ dump_code(u64 progId, u8 *code_loc, u32 code_len)
             logstr("\n");
         }
     }
+    // Code was already dumped, do nothing
+
+    FSFILE_Close(code_f);
 
     return;
 }

@@ -109,37 +109,39 @@ And these YOU SHOULD NOT ENABLE unless you have specialized needs:
 Credits
 -------------------------
 
-This software contains code from multiple other open source projects, including:
-
- @mid-kid/CakesForeveryWan - FIRM Decryptor
-
- @AuroraWright/Luma3DS     - Used as reference for patcher bytecode (and in earlier
-                             versions, the patch code itself) The version of loader
-                             in use also originated from the code here.
-
- @d0k3/GodMode9            - FatFS version originates from here, start.s too.
-                             Additionally, recursive directory removal and listing
-                             patches is partially based on GodMode9.
-
- @yifanlu                  - Loader.
-
-The complete "Thanks cool people" list:
+The complete list:
 
  @yifanlu        For the absolutely insane and wonderful idea to use bytecode,
-                 as well as the loader replacement.
+                 as well as the open source loader replacement.
+                 https://github.com/yifanlu/3ds_injector
 
- @mid-kid        General inspiration from Cakes.
+ @mid-kid        General inspiration from Cakes, FIRM decryption code, reboot
+                 assembly code, some code for text display.
+                 https://github.com/mid-kid/CakesForeveryWan
 
- @Wolfvak        Code segment dumping, also BootAnim9 is cool stuff. Go use it.
+ @Wolfvak        Code segment dumping.
 
- @AuroraWright   Luma made chunks of this possible.
+ @AuroraWright   RE work, patches, EmuNAND, and Reboot/Firmlaunch C code.
+                 https://github.com/AuroraWright/Luma3ds
 
- @Reisyukaku     You can thank him for the 'Force TestMenu' patch.
+ @Reisyukaku     For the 'Force TestMenu' patch, and RE work.
 
- @d0k3           Mostly code. Oh, and Decrypt9WIP/GodMode9 too.
+ @d0k3           start.s, recursive directory listing, RE work.
+                 https://github.com/d0k3/GodMode9
+
+ @TuxSH          RE work, code, and patches. Some code in loader is based
+                 on his extensions to it.
+
+ @Steveice10     RE work, patch offsets.
+
+ @dark-samus     RE work, screen init.
+
+ @b1l1s          RE work, screen init.
+
+ @Normmatt       RE work, screen init, and sdmmc.c/h
+
+ @delebile       RE work, screen init, and also the A9LH version I personally use.
 
  @smealum        HANS code, and pioneering the open source hax frontier.
-
- @TuxSH          Lots of RE work and important commits to Luma that I rely on.
 
  CyberConnect2   Because the name originates from .hack, which you should go play.

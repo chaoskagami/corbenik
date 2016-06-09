@@ -29,6 +29,9 @@ Old 3DS (Native FIRM, 11.0):
 New 3DS (Native FIRM, 11.0):
   http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000002/00000021
 
+Note that this is only a recommendation - you can supply near any valid firmware
+file for your console.
+
 You'll need the firmkey for it as well unless you have decrypted your firmware,
 and it should be placed at `/corbenik/keys/native.key`. I can't tell you how to
 get it obviously, but a good place to start may be an older version of Plailect's
@@ -58,8 +61,9 @@ For starters, you'll want to go into options and enable `System Modules` to get
 loader to run patches as well.
 
 If you're using 11.0 NATIVE_FIRM like I suggested, you'll want to tick
-`Svc Replacement` to fix the broken svcBackdoor. Without this, Retroarch
-won't work - and other applications that do JIT also won't work.
+`Svc Replacement` to fix the broken svcBackdoor if you plan on using anything
+which requires it. This includes HBMenu, NTR, etc. Your system will be more
+secure (as in against malicious code, not as in Nintendo) if you leave it off.
 
 If you need to use an EmuNAND, you'll want to enable `EmuNAND` in options. If
 you've been using multiple EmuNANDs you can also select the index while you're
@@ -67,7 +71,7 @@ there with A to increase and X to decrease. This supports both Gateway-style
 (first sector at back) and standard copied NANDs (RedNAND)
 
 While you're there, you can enable `Autoboot` if you'd like, including
-`silent mode` if you're using something like BootAnim9.
+`Silent mode` if you're using something like BootAnim9.
 
 If you plan to use TWL/AGB patches or have an O3DS, you should enable
 `Reboot Hook` in options.
@@ -87,7 +91,8 @@ You'll also want these patches, which are done by loader and therefore require i
 
 If you're using the reboot hook, you might want these:
 
- * AGB Patches
+ * AGB Signature fix
+ * AGB Bootscreen
  * TWL Patches
 
 If you're on 11.0, you also want these:
@@ -127,7 +132,7 @@ The complete list:
                  assembly code, some code for text display.
                  https://github.com/mid-kid/CakesForeveryWan
 
- @Wolfvak        Code segment dumping.
+ @Wolfvak        Code segment dumping + loading
 
  @AuroraWright   RE work, patches, EmuNAND, and Reboot/Firmlaunch C code.
                  https://github.com/AuroraWright/Luma3ds

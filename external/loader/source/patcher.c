@@ -346,23 +346,20 @@ sd_code(u64 progId, u8 *code_loc, u32 code_len)
         logstr(code_path);
         logstr("\n");
     }
-
     // Either system title with OPTION_LOADER_DUMPCODE_ALL enabled, or regular title
-    else if ( config.options[OPTION_LOADER_DUMPCODE] && ((highTid != 0x00040000 && highTid != 0x00040002 && config.options[OPTION_LOADER_DUMPCODE_ALL]) || (highTid == 0x00040000 || highTid == 0x00040002)))
-    {
-        if (R_SUCCEEDED(fileOpen(&code_f, ARCHIVE_SDMC, code_path, FS_OPEN_WRITE | FS_OPEN_CREATE)))
-        {
+    else if ( config.options[OPTION_LOADER_DUMPCODE] ) {
+        if ((highTid == 0x00040000 || highTid == 0x00040002) && !config.options[OPTION_LOADER_DUMPCODE_ALL])
+            goto return_close;
+
+        if (R_SUCCEEDED(fileOpen(&code_f, ARCHIVE_SDMC, code_path, FS_OPEN_WRITE | FS_OPEN_CREATE))) {
             FSFILE_Write(code_f, &len, 0, code_loc, code_len, FS_WRITE_FLUSH | FS_WRITE_UPDATE_TIME);
             logstr("  dumped code to ");
             logstr(code_path);
             logstr("\n");
         }
-        else
-        {
-            FSFILE_Close(code_f);
-            return;
-        }
     }
+
+return_close:
 
     FSFILE_Close(code_f);
     return;

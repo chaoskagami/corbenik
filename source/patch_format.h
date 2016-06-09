@@ -30,10 +30,10 @@
 #define PATH_CFW "/corbenik" // CFW root directory.
 #endif
 
-#define PATH_CONFIG_DIR PATH_CFW "/config"          // Config file directory.
-#define PATH_CONFIG PATH_CONFIG_DIR "/main.conf"    // Config file.
-#define PATH_LOCEMU PATH_CONFIG_DIR "/locale" // Locale emulation config
-#define PATH_CPU_CFG PATH_CONFIG_DIR "/cpu.conf"    // CPU settings config
+#define PATH_CONFIG_DIR PATH_CFW "/config"       // Config file directory.
+#define PATH_CONFIG PATH_CONFIG_DIR "/main.conf" // Config file.
+#define PATH_LOCEMU PATH_CONFIG_DIR "/locale"    // Locale emulation config
+#define PATH_CPU_CFG PATH_CONFIG_DIR "/cpu.conf" // CPU settings config
 
 #define PATH_PATCHES PATH_CFW "/patch"      // Patch binary folder.
 #define PATH_FIRMWARES PATH_CFW "/firmware" // Firmware folder.

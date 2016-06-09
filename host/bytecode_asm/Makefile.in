@@ -1,0 +1,54 @@
+SHELL = /bin/sh
+top_srcdir = @top_srcdir@
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+.SUFFIXES: .c .o
+
+PICFLAGS    := -fPIC
+CXX         := @CXX@
+CXXFLAGS    := @CXXFLAGS@ $(PICFLAGS)
+STABLE_VER  := 0.0.1
+CPPFLAGS    := -I$(srcdir)/include -I$(srcdir)/platform/include -DGIT_REV=\"$(shell git rev-parse HEAD || echo "$(STABLE_VER)")\"
+LDFLAGS     := $(PICFLAGS) @LDFLAGS@
+LIBS        := @LIBS@
+INSTALL     := @INSTALL@
+prefix      := @prefix@
+exec_prefix := @exec_prefix@
+bindir      := $(exec_prefix)/bin
+libdir      := $(prefix)/lib
+
+SOURCES=$(wildcard src/*.c platform/src/*.c)
+OBJS=$(patsubst %.c,%.o,$(SOURCES))
+
+MISC=configure mkinstalldirs install-sh aclocal.m4
+
+all: datadrain
+
+install: all
+	$(top_srcdir)/mkinstalldirs $(bindir)
+	$(top_srcdir)/mkinstalldirs $(libdir)
+	$(INSTALL) datadrain $(bindir)/datadrain
+
+uninstall:
+	/bin/rm -f $(bindir)/datadrain
+
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c -o $@ $<
+
+vndc: $(OBJS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(LIBS) -o $@ $(OBJS)
+
+clean:
+	/bin/rm -f $(OBJS) vndc
+
+distclean: clean
+	/bin/rm -f Makefile config.h config.status config.cache config.log
+
+clobber: distclean
+	/bin/rm -fr autom4te.cache configure
+
+# These are for compatibility, nothing more.
+mostlyclean: clean
+
+maintainer-clean: clean

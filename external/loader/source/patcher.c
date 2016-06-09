@@ -13,9 +13,10 @@
 #endif
 #include "../../../source/config.h"
 
-#define CODE_PATH PATH_EXEFS "/0000000000000000"
+#define CODE_PATH PATH_EXEFS  "/0000000000000000"
+#define LANG_PATH PATH_LOCEMU "/0000000000000000"
 
-static const char hexDigits[] = "0123456789ABCDEF";
+const char hexDigits[] = "0123456789ABCDEF";
 
 int
 fileOpen(Handle *file, FS_ArchiveID id, const char *path, int flags)
@@ -77,6 +78,15 @@ load_config()
     return;
 }
 
+void
+hexdump_titleid(u64 progId, char* buf) {
+    u32 i = strlen(buf) - 1;
+    while (progId) {
+        buf[i--] = hexDigits[(u32)(progId & 0xF)];
+        progId >>= 4;
+    }
+}
+
 static int
 loadTitleLocaleConfig(u64 progId, u8 *regionId, u8 *languageId)
 {
@@ -100,12 +110,8 @@ loadTitleLocaleConfig(u64 progId, u8 *regionId, u8 *languageId)
 
     // This really does need a rewrite.
 
-    char path[] = "/corbenik/locale/0000000000000000";
-    u32 i = 32;
-    while (progId) {
-        path[i--] = hexDigits[(u32)(progId & 0xF)];
-        progId >>= 4;
-    }
+    char path[] = LANG_PATH;
+	hexdump_titleid(progId, path);
 
     static const char *regions[] = { "JPN", "USA", "EUR", "AUS", "CHN", "KOR", "TWN" };
     static const char *languages[] = { "JA", "EN", "FR", "DE", "IT", "ES", "ZH", "KO", "NL", "PT", "RU", "TW" };
@@ -328,13 +334,9 @@ sd_code(u64 progId, u8 *code_loc, u32 code_len)
     u32 highTid = progId >> 0x20;
 
     char code_path[] = CODE_PATH;
-    u32 i = strlen(code_path) - 1;
     Handle code_f;
 
-    while (progId) {
-        code_path[i--] = hexDigits[(u32)(progId & 0xF)];
-        progId >>= 4;
-    }
+	hexdump_titleid(progId, code_path);
 
     u32 len;
 

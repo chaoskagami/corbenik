@@ -32,7 +32,7 @@
 
 #define PATH_CONFIG_DIR PATH_CFW "/config"          // Config file directory.
 #define PATH_CONFIG PATH_CONFIG_DIR "/main.conf"    // Config file.
-#define PATH_LOCEMU PATH_CONFIG_DIR "/langemu.conf" // Locale emulation config
+#define PATH_LOCEMU PATH_CONFIG_DIR "/locale" // Locale emulation config
 #define PATH_CPU_CFG PATH_CONFIG_DIR "/cpu.conf"    // CPU settings config
 
 #define PATH_PATCHES PATH_CFW "/patch"      // Patch binary folder.
@@ -49,7 +49,8 @@
 
 #define PATH_KEYS PATH_CFW "/keys" // Keyfiles will be loaded from this dir, and
                                    // additionally the root if not found.
-#define PATH_EXEFS PATH_CFW "/exe" // ExeFS overrides, named like '<titleid>.exefs' - NYI
+
+#define PATH_EXEFS PATH_CFW "/exe" // ExeFS overrides, named by titleid
 
 #define PATH_BITS PATH_CFW "/bits" // Path to misc bits we need (emunand code, reboot code, etc)
 
@@ -67,11 +68,6 @@
 #define PATH_NATIVE_FIRMKEY PATH_KEYS "/native.key"
 #define PATH_TWL_FIRMKEY PATH_KEYS "/twl.key"
 #define PATH_AGB_FIRMKEY PATH_KEYS "/agb.key"
-
-// These are used with O3DS units. Keep in mind I have no way to test this.
-#define PATH_NATIVE_FIRMKEY_2 PATH_KEYS "/native_old.key"
-#define PATH_TWL_FIRMKEY_2 PATH_KEYS "/twl_old.key"
-#define PATH_AGB_FIRMKEY_2 PATH_KEYS "/agb_old.key"
 
 #define PATH_SLOT0X11KEY96 PATH_KEYS "/11.key"
 

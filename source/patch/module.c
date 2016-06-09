@@ -16,14 +16,14 @@ PATCH(modules)
     fclose(f);
 
     // Look for the section that holds all the sysmodules
-	int section_index = 0;
+    int section_index = 0;
     firm_section_h *sysmodule_section = NULL;
     for (firm_section_h *section = firm_loc->section; section < firm_loc->section + 4; section++) {
         if (section->address == 0x1FF00000 && section->type == FIRM_TYPE_ARM11) {
             sysmodule_section = section;
             break;
         }
-		section_index++;
+        section_index++;
     }
 
     if (!sysmodule_section) {
@@ -41,23 +41,23 @@ PATCH(modules)
             if (module->contentSize > sysmodule->contentSize) {
                 uint32_t need_units = (module->contentSize - sysmodule->contentSize);
 
-                memmove((uint8_t *)sysmodule + module->contentSize * 0x200,
-                        (uint8_t *)sysmodule + sysmodule->contentSize * 0x200,
-                        ((uint8_t *)firm_loc + firm_size) - ((uint8_t*)sysmodule + (module->contentSize * 0x200))
-                );
+                memmove((uint8_t *)sysmodule + module->contentSize * 0x200, (uint8_t *)sysmodule + sysmodule->contentSize * 0x200,
+                        ((uint8_t *)firm_loc + firm_size) - ((uint8_t *)sysmodule + (module->contentSize * 0x200)));
 
-				sysmodule_section->size += 0x200 * need_units;
-				for(int i=section_index+1; i < 4; i++) {
-					firm_loc->section[i].offset += 0x200 * need_units;
-					firm_loc->section[i].size   += 0x200 * need_units;
-				}
+                sysmodule_section->size += 0x200 * need_units;
+                for (int i = section_index + 1; i < 4; i++) {
+                    if (firm_loc->section[i].size != 0) { // The last section (3) is usually empty.
+                        firm_loc->section[i].offset += 0x200 * need_units;
+                        firm_loc->section[i].size += 0x200 * need_units;
+                    }
+                }
 
                 fprintf(stderr, "module: Grow %d units\n", need_units);
             }
 
             // Move the remaining modules closer
             else if (module->contentSize < sysmodule->contentSize) {
-				// NOTE - This doesn't change the sysmodule section size; it isn't needed to do so.
+                // NOTE - This doesn't change the sysmodule section size; it isn't needed to do so.
                 fprintf(stderr, "Module: Shrink %d units\n", sysmodule->contentSize - module->contentSize);
                 int remaining_size =
                     sysmodule_section->size - (((uint32_t)sysmodule + sysmodule->contentSize * 0x200) - ((uint32_t)firm_loc + sysmodule_section->offset));

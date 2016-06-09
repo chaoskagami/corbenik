@@ -36,11 +36,11 @@ uninstall:
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c -o $@ $<
 
-vndc: $(OBJS)
+datadrain: $(OBJS)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(LIBS) -o $@ $(OBJS)
 
 clean:
-	/bin/rm -f $(OBJS) vndc
+	/bin/rm -f $(OBJS) datadrain
 
 distclean: clean
 	/bin/rm -f Makefile config.h config.status config.cache config.log

@@ -18,16 +18,19 @@ struct firm_signature
 };
 
 extern firm_h *firm_loc;
+extern uint32_t firm_size;
 extern struct firm_signature *current_firm;
 extern firm_section_h firm_proc9;
 extern exefs_h *firm_p9_exefs;
 
 extern firm_h *twl_firm_loc;
+extern uint32_t twl_firm_size;
 extern struct firm_signature *current_twl_firm;
 extern firm_section_h twl_firm_proc9;
 extern exefs_h *twl_firm_p9_exefs;
 
 extern firm_h *agb_firm_loc;
+extern uint32_t agb_firm_size;
 extern struct firm_signature *current_agb_firm;
 extern firm_section_h agb_firm_proc9;
 extern exefs_h *agb_firm_p9_exefs;

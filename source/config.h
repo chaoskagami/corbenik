@@ -112,6 +112,9 @@ struct options_s
 // Dump *all* code, from system applications, modules, etc. You'll be sitting around for about five minutes.
 #define OPTION_LOADER_DUMPCODE_ALL 20
 
+// Load *all* code sections. This is intended for big patches that are currently not implementable and quick testing.
+#define OPTION_LOADER_LOADCODE 21
+
 // Save log files during boot and from loader.
 // This will slow things down a bit.
 #define OPTION_SAVE_LOGS 253

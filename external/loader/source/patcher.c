@@ -319,41 +319,52 @@ overlay_patch(u64 progId, u8 *code, u32 size)
 }
 
 void
-dump_code(u64 progId, u8 *code_loc, u32 code_len)
+sd_code(u64 progId, u8 *code_loc, u32 code_len)
 {
-    // If configuration was not loaded, or the option is disabled
-    if (failed_load_config || !config.options[OPTION_LOADER_DUMPCODE])
+    // If configuration was not loaded, or both options (load / dump) are disabled
+    if (failed_load_config || (!config.options[OPTION_LOADER_DUMPCODE] && !config.options[OPTION_LOADER_LOADCODE]))
         return;
 
     u32 highTid = progId >> 0x20;
 
-    // Only dump user titles unless the user is prepared for pain.
-    if (highTid != 0x00040000 && highTid != 0x00040002 && !config.options[OPTION_LOADER_DUMPCODE_ALL])
-        return;
-
     char code_path[] = CODE_PATH;
     u32 i = strlen(code_path) - 1;
     Handle code_f;
+
     while (progId) {
         code_path[i--] = hexDigits[(u32)(progId & 0xF)];
         progId >>= 4;
     }
 
-    if (!R_SUCCEEDED(fileOpen(&code_f, ARCHIVE_SDMC, code_path, FS_OPEN_READ)))
+    u32 len;
+
+    // Attempts to load code section from SD card, including system titles/modules/etc.
+    if (R_SUCCEEDED(fileOpen(&code_f, ARCHIVE_SDMC, code_path, FS_OPEN_READ)) && config.options[OPTION_LOADER_LOADCODE])
     {
-        FSFILE_Close(code_f);
-        if (R_SUCCEEDED(fileOpen(&code_f, ARCHIVE_SDMC, code_path, FS_OPEN_WRITE | FS_OPEN_CREATE))) {
-            u32 len = 0;
+        FSFILE_Read(code_f, &len, 0, code_loc, code_len);
+        logstr("  loaded code from ");
+        logstr(code_path);
+        logstr("\n");
+    }
+
+    // Either system title with OPTION_LOADER_DUMPCODE_ALL enabled, or regular title
+    else if ( config.options[OPTION_LOADER_DUMPCODE] && ((highTid != 0x00040000 && highTid != 0x00040002 && config.options[OPTION_LOADER_DUMPCODE_ALL]) || (highTid == 0x00040000 || highTid == 0x00040002)))
+    {
+        if (R_SUCCEEDED(fileOpen(&code_f, ARCHIVE_SDMC, code_path, FS_OPEN_WRITE | FS_OPEN_CREATE)))
+        {
             FSFILE_Write(code_f, &len, 0, code_loc, code_len, FS_WRITE_FLUSH | FS_WRITE_UPDATE_TIME);
             logstr("  dumped code to ");
             logstr(code_path);
             logstr("\n");
         }
+        else
+        {
+            FSFILE_Close(code_f);
+            return;
+        }
     }
-    // Code was already dumped, do nothing
 
     FSFILE_Close(code_f);
-
     return;
 }
 

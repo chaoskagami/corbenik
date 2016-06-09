@@ -513,11 +513,11 @@ execb(char *filename, int build_cache)
                 uint32_t len = strlen(cache_path) - 1;
                 uint64_t prog = *(uint64_t *)title_buf;
                 while (prog) {
-                    title_buf[i--] = hexDigits[(uint32_t)(prog & 0xF)];
+                    title_buf[len--] = hexDigits[(uint32_t)(prog & 0xF)];
                     prog >>= 4;
                 }
 
-                fprintf(stderr, "  cache: %s\n", &cache_path[len]);
+                fprintf(stderr, "  cache: %s\n", cache_path);
 
                 char reset = 0xFF;
 

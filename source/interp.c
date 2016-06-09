@@ -57,6 +57,7 @@ int init_bytecode = 0;
 
 #ifndef LOADER
 extern int is_n3ds;
+static const char hexDigits[] = "0123456789ABCDEF";
 #else
 int is_n3ds = 1; // TODO - We don't really need to care, but it should still work from loader
 #endif
@@ -408,14 +409,8 @@ execb(char *filename, int build_cache)
     uint32_t patch_len;
 #ifdef LOADER
     char cache_path[] = PATH_LOADER_CACHE "/0000000000000000";
-    int len = strlen(cache_path) - 16;
 
-    uint8_t *title_buf = (uint8_t *)&tid;
-
-    for (int j = 0; j < 8; j++) {
-        cache_path[len + (j * 2)] = ("0123456789ABCDEF")[(title_buf[j] >> 4) & 0x0f];
-        cache_path[len + (j * 2) + 1] = ("0123456789ABCDEF")[title_buf[j] & 0x0f];
-    }
+    hexdump_titleid(tid, cache_path);
 
     static uint8_t patch_dat[MAX_PATCHSIZE];
 
@@ -510,17 +505,20 @@ execb(char *filename, int build_cache)
 
             fprintf(stderr, "patch: %s\n", patch->name);
 
-            for (uint32_t i = 0; i < patch->titles; i++, title_buf += 8) {
-                // FIXME - This is outputting once per boot. We need to detect and nuke the cache.
+            for (uint32_t i = 0; i < patch->titles; i++) {
                 char cache_path[] = PATH_LOADER_CACHE "/0000000000000000";
-                int len = strlen(cache_path) - 16;
 
-                for (int j = 0; j < 8; j++) {
-                    cache_path[len + (j * 2)] = ("0123456789ABCDEF")[(title_buf[j] >> 4) & 0x0f];
-                    cache_path[len + (j * 2) + 1] = ("0123456789ABCDEF")[title_buf[j] & 0x0f];
+                uint64_t title = 0;
+                memcpy(&title, &title_buf[i * 8], 8);
+
+                uint32_t tlen = strlen(cache_path) - 1;
+                int j = 16;
+                while (j--) {
+                    cache_path[tlen--] = hexDigits[title & 0xF];
+                    title >>= 4;
                 }
 
-                fprintf(stderr, "  cache: %s\n", &cache_path[len]);
+                fprintf(stderr, "  cache: %s\n", &cache_path[strlen(cache_path) - 16]);
 
                 char reset = 0xFF;
 
@@ -533,7 +531,6 @@ execb(char *filename, int build_cache)
             }
         } else {
             // BOOT patch
-            // FIXME - This is outputting once per boot. We need to detect and nuke the cache.
             char cache_path[] = PATH_LOADER_CACHE "/BOOT";
             char reset = 0xFF;
 

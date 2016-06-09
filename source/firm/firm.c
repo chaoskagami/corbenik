@@ -6,17 +6,17 @@
 #include "../common.h"
 
 firm_h *firm_loc = (firm_h *)FCRAM_FIRM_LOC;
-static uint32_t firm_size = FCRAM_SPACING;
+uint32_t firm_size = FCRAM_SPACING;
 firm_section_h firm_proc9;
 exefs_h *firm_p9_exefs;
 
 firm_h *twl_firm_loc = (firm_h *)FCRAM_TWL_FIRM_LOC;
-static uint32_t twl_firm_size = FCRAM_SPACING * 2;
+uint32_t twl_firm_size = FCRAM_SPACING * 2;
 firm_section_h twl_firm_proc9;
 exefs_h *twl_firm_p9_exefs;
 
 firm_h *agb_firm_loc = (firm_h *)FCRAM_AGB_FIRM_LOC;
-static uint32_t agb_firm_size = FCRAM_SPACING;
+uint32_t agb_firm_size = FCRAM_SPACING * 2;
 firm_section_h agb_firm_proc9;
 exefs_h *agb_firm_p9_exefs;
 

@@ -45,12 +45,10 @@ static struct options_s options[] = {
     { OPTION_LOADER_LOADCODE, "  Load Code Sections", "Loads code sections from SD card and patches afterwards.", boolean_val, 0, 0 },
 
     { OPTION_LOADER_DUMPCODE, "  Dump Title Code Sections",
-      "Dumps code sections for titles to SD card the first time they're loaded. Slows things down considerably.", boolean_val,
-      0, 0 },
+      "Dumps code sections for titles to SD card the first time they're loaded. Slows things down considerably.", boolean_val, 0, 0 },
 
     { OPTION_LOADER_DUMPCODE_ALL, "    + System Titles",
-      "Dumps code sections for system titles, too. Expect to sit at a black screen for >3mins on the first time.", boolean_val,
-      0, 0 },
+      "Dumps code sections for system titles, too. Expect to sit at a black screen for >3mins on the first time.", boolean_val, 0, 0 },
 
     // space
     { 0, "", "", not_option, 0, 0 },
@@ -266,7 +264,7 @@ menu_help()
                     "  together either by code or documentation:\n"
                     "  @mid-kid, @Wolfvak, @Reisyukaku, @AuroraWright\n"
                     "  @d0k3, @TuxSH, @Steveice10, @delebile,\n"
-					"  @Normmatt, @b1l1s, @dark-samus, @TiniVi, etc\n"
+                    "  @Normmatt, @b1l1s, @dark-samus, @TiniVi, etc\n"
                     "\n"
                     "[PROTECT BREAK] DATA DRAIN: OK\n"
                     "\n"
@@ -286,7 +284,7 @@ menu_reset()
 {
     write_file(enable_list, PATH_TEMP "/PATCHENABLE", FCRAM_SPACING / 2);
     config.options[OPTION_RECONFIGURED] = 1;
-	save_config(); // Save config, including the reconfigured flag.
+    save_config(); // Save config, including the reconfigured flag.
 
     fumount(); // Unmount SD.
 
@@ -302,7 +300,7 @@ menu_poweroff()
 {
     write_file(enable_list, PATH_TEMP "/PATCHENABLE", FCRAM_SPACING / 2);
     config.options[OPTION_RECONFIGURED] = 1;
-	save_config(); // Save config, including the reconfigured flag.
+    save_config(); // Save config, including the reconfigured flag.
 
     fumount(); // Unmount SD.
 

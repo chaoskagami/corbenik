@@ -1,15 +1,16 @@
 #include "common.h"
 #include "firm/firm.h"
 #include "firm/headers.h"
-#define MENU_MAIN 1
 
+#define MENU_MAIN    1
 #define MENU_OPTIONS 2
 #define MENU_PATCHES 3
-#define MENU_INFO 4
-#define MENU_HELP 5
-#define MENU_RESET 6
-#define MENU_POWER 7
-#define MENU_BOOTME 8
+#define MENU_INFO    4
+#define MENU_HELP    5
+#define MENU_RESET   6
+#define MENU_POWER   7
+#define MENU_SAVECFG 8
+#define MENU_BOOTME  9
 
 #define MAX_PATCHES ((FCRAM_SPACING / 2) / sizeof(struct options_s))
 struct options_s *patches = (struct options_s *)FCRAM_MENU_LOC;
@@ -189,16 +190,7 @@ int show_menu(struct options_s *options, uint8_t *toggles);
 int
 menu_patches()
 {
-    list_patches_build(PATH_PATCHES, 0);
-
     show_menu(patches, enable_list);
-
-    // Remove old settings, save new
-    f_unlink(PATH_TEMP "/PATCHENABLE");
-    write_file(enable_list, PATH_TEMP "/PATCHENABLE", FCRAM_SPACING / 2);
-
-    // TODO - Determine whether it actually changed.
-    config.options[OPTION_RECONFIGURED] = 1;
 
     return MENU_MAIN;
 }
@@ -207,9 +199,6 @@ int
 menu_options()
 {
     show_menu(options, config.options);
-
-    // TODO - Determine whether it actually changed.
-    config.options[OPTION_RECONFIGURED] = 1;
 
     return MENU_MAIN;
 }
@@ -282,10 +271,6 @@ menu_help()
 int
 menu_reset()
 {
-    write_file(enable_list, PATH_TEMP "/PATCHENABLE", FCRAM_SPACING / 2);
-    config.options[OPTION_RECONFIGURED] = 1;
-    save_config(); // Save config, including the reconfigured flag.
-
     fumount(); // Unmount SD.
 
     // Reboot.
@@ -298,10 +283,6 @@ menu_reset()
 int
 menu_poweroff()
 {
-    write_file(enable_list, PATH_TEMP "/PATCHENABLE", FCRAM_SPACING / 2);
-    config.options[OPTION_RECONFIGURED] = 1;
-    save_config(); // Save config, including the reconfigured flag.
-
     fumount(); // Unmount SD.
 
     // Reboot.
@@ -311,14 +292,20 @@ menu_poweroff()
         ;
 }
 
+int menu_saveconfig() {
+    save_config(); // Save config, including the reconfigured flag.
+
+	return MENU_MAIN;
+}
+
 int
 menu_main()
 {
     // TODO - Stop using different menu code here.
     set_cursor(TOP_SCREEN, 0, 0);
 
-    const char *list[] = { "Options", "Patches", "Info", "Help/Readme", "Reboot", "Power off", "Boot Firmware" };
-    int menu_max = 7;
+    const char *list[] = { "Options", "Patches", "Info", "Help/Readme", "Reboot", "Power off", "Save Configuration", "Boot Firmware" };
+    int menu_max = 8;
 
     header("A:Enter DPAD:Nav");
 
@@ -392,6 +379,9 @@ menu_handler()
             break;
         case MENU_HELP:
             to_menu = menu_help();
+            break;
+        case MENU_SAVECFG:
+            to_menu = menu_saveconfig();
             break;
         case MENU_BOOTME:
             return 0;

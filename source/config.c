@@ -3,6 +3,8 @@
 FILE *conf_handle;
 
 struct config_file config;
+extern uint8_t *enable_list;
+void list_patches_build(char *name, int desc_is_fname);
 
 void
 regenerate_config()
@@ -74,6 +76,8 @@ load_config()
         }
     }
 
+    list_patches_build(PATH_PATCHES, 0);
+
     if (!config.options[OPTION_SILENCE])
         fprintf(BOTTOM_SCREEN, "Config file loaded.\n");
 }
@@ -83,6 +87,8 @@ save_config()
 {
     fprintf(stderr, "Saving config.\n");
 
+    write_file(enable_list, PATH_TEMP "/PATCHENABLE", FCRAM_SPACING / 2);
+
     f_unlink(PATH_CONFIG);
 
     if (!(conf_handle = fopen(PATH_CONFIG, "w")))
@@ -90,4 +96,6 @@ save_config()
 
     fwrite(&config, 1, sizeof(config), conf_handle);
     fclose(conf_handle);
+
+	config.options[OPTION_RECONFIGURED] = 1; // Save caches on boot.
 }

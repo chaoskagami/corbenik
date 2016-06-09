@@ -424,12 +424,6 @@ boot_cfw()
 {
     fprintf(BOTTOM_SCREEN, "Loading firmware...\n");
 
-    if (config.options[OPTION_RECONFIGURED]) {
-        config.options[OPTION_RECONFIGURED] = 0;
-        save_config();
-        config.options[OPTION_RECONFIGURED] = 1;
-    }
-
     load_firms();
 
     if (config.options[OPTION_RECONFIGURED]) {

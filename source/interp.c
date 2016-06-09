@@ -396,8 +396,6 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
     return 0;
 }
 
-void hexdump_titleid(uint64_t tid, char *path);
-
 #ifdef LOADER
 int
 execb(uint64_t tid, uint16_t ver, uint8_t *text_mem, uint32_t text_len, uint8_t *data_mem, uint32_t data_len, uint8_t *ro_mem, uint32_t ro_len)
@@ -507,17 +505,20 @@ execb(char *filename, int build_cache)
 
             fprintf(stderr, "patch: %s\n", patch->name);
 
-            for (uint32_t i = 0; i < patch->titles; i++, title_buf += 8) {
+            for (uint32_t i = 0; i < patch->titles; i++) {
                 char cache_path[] = PATH_LOADER_CACHE "/0000000000000000";
 
-                uint32_t len = strlen(cache_path) - 1;
-                uint64_t prog = *(uint64_t *)title_buf;
-                while (prog) {
-                    title_buf[len--] = hexDigits[(uint32_t)(prog & 0xF)];
-                    prog >>= 4;
+                uint64_t title = 0;
+                memcpy(&title, &title_buf[i * 8], 8);
+
+                uint32_t tlen = strlen(cache_path) - 1;
+                int j = 16;
+                while (j--) {
+                    cache_path[tlen--] = hexDigits[title & 0xF];
+                    title >>= 4;
                 }
 
-                fprintf(stderr, "  cache: %s\n", cache_path);
+                fprintf(stderr, "  cache: %s\n", &cache_path[strlen(cache_path) - 16]);
 
                 char reset = 0xFF;
 

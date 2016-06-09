@@ -82,7 +82,8 @@ void
 hexdump_titleid(u64 progId, char *buf)
 {
     u32 i = strlen(buf) - 1;
-    while (progId) {
+    u32 j = 16;
+    while (j--) {
         buf[i--] = hexDigits[(u32)(progId & 0xF)];
         progId >>= 4;
     }
@@ -111,7 +112,7 @@ loadTitleLocaleConfig(u64 progId, u8 *regionId, u8 *languageId)
 
     // This really does need a rewrite.
 
-    char path[] = LANG_PATH;
+    static char path[] = LANG_PATH;
     hexdump_titleid(progId, path);
 
     static const char *regions[] = { "JPN", "USA", "EUR", "AUS", "CHN", "KOR", "TWN" };
@@ -334,7 +335,7 @@ sd_code(u64 progId, u8 *code_loc, u32 code_len)
 
     u32 highTid = progId >> 0x20;
 
-    char code_path[] = CODE_PATH;
+    static char code_path[] = CODE_PATH;
     Handle code_f;
 
     hexdump_titleid(progId, code_path);

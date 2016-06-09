@@ -17,4 +17,6 @@ int fileOpen(Handle *file, FS_ArchiveID id, const char *path, int flags);
 
 u8 get_cpumode(u64 progId);
 
+void hexdump_titleid(u64 progId, char *buf);
+
 #endif

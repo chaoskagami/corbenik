@@ -22,7 +22,7 @@ static struct options_s options[] = {
     // Patches.
     { 0, "\x1b[32;40mGeneral Options\x1b[0m", "", not_option, 0, 0 },
 
-    { OPTION_SVCS, "SVC Replacement", "Replaces ARM11 svc calls, including svcBackdoor. With 11.0 NATIVE_FIRM, you probably want this.", boolean_val, 0, 0 },
+    { OPTION_SVCS, "svcBackdoor Fixup", "Reinserts svcBackdoor on 11.0 NATIVE_FIRM.", boolean_val, 0, 0 },
 
     { OPTION_REBOOT, "Reboot Hook", "Hooks firmlaunch to allow largemem games on o3DS (and allow patching TWL/AGB on all consoles)", boolean_val, 0, 0 },
 
@@ -56,8 +56,6 @@ static struct options_s options[] = {
     // Patches.
     { 0, "\x1b[32;40mDeveloper Options\x1b[0m", "", not_option, 0, 0 },
 
-    { OPTION_REPLACE_ALLOCATED_SVC, "Force svc replace", "Replace ARM11 svc calls even if they exist. Don't use this unless you know what you're doing.",
-      boolean_val, 0, 0 },
     { OPTION_TRACE, "Step Through", "After each important step, [WAIT] will be shown and you'll need to press a key. Debug.", boolean_val, 0, 0 },
     { OPTION_OVERLY_VERBOSE, "Verbose", "Output more debug information than the average user needs.", boolean_val, 0, 0 },
     { OPTION_SAVE_LOGS, "Logging", "Save logs to the corbenik folder. Slows operation a bit.", boolean_val, 0, 0 },

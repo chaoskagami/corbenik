@@ -348,12 +348,6 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                     log("seek\n");
                 code++;
                 offset = code[0] + (code[1] << 8) + (code[2] << 16) + (code[3] << 24);
-                if (offset > current_mode->size) { // Went out of bounds. Error.
-#ifndef LOADER
-                    fprintf(stderr, "%x", offset);
-#endif
-                    abort("seeked out of bounds\n");
-                }
 
                 code += 4;
                 break;
@@ -387,6 +381,14 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                 abort("Halting startup.\n");
                 break;
         }
+
+        if (offset > current_mode->size) { // Went out of bounds. Error.
+#ifndef LOADER
+            fprintf(stderr, "%x", offset);
+#endif
+            abort("seeked out of bounds\n");
+        }
+
 #ifndef LOADER
         if (debug)
             wait();

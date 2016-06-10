@@ -30,11 +30,11 @@ PATCH(services)
     if (!svcTable[0x7B]) {
         fprintf(stderr, "svc: 0x7B (backdoor) missing.\n");
 
-        FILE *data = fopen(PATH_SVC "/7b.bin", "r");
+        FILE *data = fopen(PATH_BACKDOOR, "r");
         uint32_t size = fsize(data);
 
-        fprintf(stderr, "Svc: 7b, %d bytes\n", size);
-        fprintf(stderr, "Svc: Copy code to %x\n", (uint32_t)svc_tab_open);
+        fprintf(stderr, "Svc: backdoor is %d bytes\n", size);
+        fprintf(stderr, "Svc: Read code to %x\n", (uint32_t)svc_tab_open);
 
         fread(svc_tab_open, 1, size, data);
 

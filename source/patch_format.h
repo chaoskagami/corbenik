@@ -50,12 +50,15 @@
 #define PATH_KEYS PATH_CFW "/keys" // Keyfiles will be loaded from this dir, and
                                    // additionally the root if not found.
 
-#define PATH_EXEFS PATH_CFW "/exe" // ExeFS overrides, named by titleid
+#define PATH_EXEFS PATH_CFW "/exe" // ExeFS overrides/dumps, named by titleid
 
 #define PATH_BITS PATH_CFW "/bits" // Path to misc bits we need (emunand code, reboot code, etc)
 
 #define PATH_EMUNAND_CODE PATH_BITS "/emunand.bin"       // Emunand hook.
 #define PATH_SCREENINIT_CODE PATH_BITS "/screeninit.bin" // Screeninit code (ARM11)
+#define PATH_BACKDOOR PATH_BITS "/backdoor.bin"   // svcBackdoor
+#define PATH_REBOOT_HOOK PATH_BITS "/reboot_hook.bin"   // Reboot hook
+#define PATH_REBOOT_CODE PATH_BITS "/reboot_code.bin"   // Reboot entry code
 
 #define PATH_NATIVE_F PATH_FIRMWARES "/native"
 #define PATH_AGB_F PATH_FIRMWARES "/agb"

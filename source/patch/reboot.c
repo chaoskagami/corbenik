@@ -47,7 +47,7 @@ patch_reboot()
     wait();
 
     // Copy firmlaunch code
-    FILE *f = fopen(PATH_BITS "/reboot_hook.bin", "r");
+    FILE *f = fopen(PATH_REBOOT_HOOK, "r");
     if (!f)
         abort("reboot: hook not found on SD\n");
 
@@ -104,7 +104,7 @@ patch_reboot()
 
     fprintf(stderr, "reboot: rebc @ %x\n", pos_rebc);
 
-    f = fopen(PATH_BITS "/reboot_code.bin", "r");
+    f = fopen(PATH_REBOOT_CODE, "r");
     if (!f)
         abort("reboot: boot not found on SD\n");
 

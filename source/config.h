@@ -88,9 +88,6 @@ struct options_s
 // Enable language emulation.
 #define OPTION_LOADER_LANGEMU 13
 
-// Force replacement of non-null svcs. Normally you don't want this.
-#define OPTION_REPLACE_ALLOCATED_SVC 14
-
 // Ignore patch UUID dependencies. Not recommended.
 #define IGNORE_PATCH_DEPS 14
 
@@ -113,6 +110,7 @@ struct options_s
 #define OPTION_LOADER_DUMPCODE_ALL 20
 
 // Load *all* code sections. This is intended for big patches that are currently not implementable and quick testing.
+// (e.g. SaltySD)
 #define OPTION_LOADER_LOADCODE 21
 
 // Save log files during boot and from loader.

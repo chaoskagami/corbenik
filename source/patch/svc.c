@@ -1,82 +1,53 @@
 #include "patch_file.h"
 
-// This code handles replacement of services. This includes backdoor, but not
-// just backdoor.
-// Any service can be replaced provided there's enough space within the
-// exception page.
+uint8_t *arm11Section1 = NULL;
+uint32_t *svc_tab_open = NULL, *exceptionsPage = NULL, *svcTable = NULL;
+int svc_offs_init = 0;
 
-// Please note that the actual code for services is in `external/service`.
-
-uint32_t *
-getSvcAndExceptions(uint8_t *pos, uint32_t size, uint32_t **exceptionsPage)
-{
-    uint8_t pattern[] = { 0x00, 0xB0, 0x9C, 0xE5 }; // cpsid aif
-
-    *exceptionsPage = (uint32_t *)memfind(pos, size, pattern, 4) - 0xB;
-
-    uint32_t svcOffset = (-(((*exceptionsPage)[2] & 0xFFFFFF) << 2) & (0xFFFFFF << 2)) - 8;                             // Branch offset + 8 for prefetch
-    uint32_t *svcTable = (uint32_t *)(pos + *(uint32_t *)(pos + 0xFFFF0008 - svcOffset - 0xFFF00000 + 8) - 0xFFF00000); // SVC handler address
-    while (*svcTable)
-        svcTable++; // Look for SVC0 (NULL)
-
-    return svcTable;
-}
-
-uint32_t *freeSpace = NULL;
+// This code handles restoration of backdoor
 
 PATCH(services)
 {
+    if (svc_offs_init == 0) {
+        arm11Section1 = (uint8_t *)firm_loc + firm_loc->section[1].offset;
+
+        uint8_t pattern[] = { 0x00, 0xB0, 0x9C, 0xE5 }; // cpsid aif
+
+        exceptionsPage = (uint32_t *)memfind(arm11Section1, firm_loc->section[1].size, pattern, 4) - 0xB;
+
+        uint32_t svcOffset = (-(((exceptionsPage)[2] & 0xFFFFFF) << 2) & (0xFFFFFF << 2)) - 8; // Branch offset + 8 for prefetch
+        svcTable = (uint32_t *)(arm11Section1 + *(uint32_t *)(arm11Section1 + 0xFFFF0008 - svcOffset - 0xFFF00000 + 8) - 0xFFF00000); // SVC handler address
+        while (*svcTable)
+            svcTable++; // Look for SVC0 (NULL)
+
+        // Skip to free space
+        for (svc_tab_open = exceptionsPage; *svc_tab_open != 0xFFFFFFFF; svc_tab_open++)
+            ;
+        svc_offs_init = 1;
+    }
+
     // Make sure svcBackdoor is there.
-    uint8_t *arm11Section1 = (uint8_t *)firm_loc + firm_loc->section[1].offset;
-    uint32_t *exceptionsPage;
-    uint32_t *svcTable = getSvcAndExceptions(arm11Section1, firm_loc->section[1].size, &exceptionsPage);
+    if (!svcTable[0x7B]) {
+        fprintf(stderr, "svc: 0x7B (backdoor) missing.\n");
 
-    fprintf(stderr, "Svc: table at %x\n", (uint32_t)svcTable);
+        FILE *data = fopen(PATH_SVC "/7b.bin", "r");
+        uint32_t size = fsize(data);
 
-    char str[] = PATH_SVC "/00.bin";
-    char *at = str + (strlen(str) - 6);
-    // FIXME - This is really slow. Some way to optimize it?
-    for (uint32_t i = 0; i <= 0xf; i++) {
-        // Get string for svc.
-        at[0] = ("0123456789abcdef")[i];
+        fprintf(stderr, "Svc: 7b, %d bytes\n", size);
+        fprintf(stderr, "Svc: Copy code to %x\n", (uint32_t)svc_tab_open);
 
-        for (uint32_t j = 0; j < 0xf; j++) {
-            uint32_t svc = (i << 4) & j; // Actual svc index.
+        fread(svc_tab_open, 1, size, data);
 
-            // Refuse to replace non-NULL services unless the user has it enabled.
-            // Also don't bother checking for non-null svc files (it's slow.)
-            if (svcTable[svc] && !config.options[OPTION_REPLACE_ALLOCATED_SVC])
-                continue;
+        fclose(data);
 
-            // This is just hexdump. Nothing complicated.
-            at[1] = ("0123456789abcdef")[j];
+        //		memcpy(svc_tab_open, svcbackdoor, sizeof(svcbackdoor));
+        svcTable[0x7B] = 0xFFFF0000 + ((uint8_t *)svc_tab_open - (uint8_t *)exceptionsPage);
 
-            FILE *data = fopen(str, "r");
-            if (!data)
-                continue; // No file for svc. Move on.
+        svc_tab_open += size;
 
-            // TODO - We can just fread directly to freeSpace with a little reordering.
-
-            uint32_t size = fsize(data);
-
-            fprintf(stderr, "Svc: %s, %d bytes\n", at, size);
-
-            if (!freeSpace)
-                for (freeSpace = exceptionsPage; *freeSpace != 0xFFFFFFFF; freeSpace++)
-                    ;
-
-            fprintf(stderr, "Svc: Copy code to %x\n", (uint32_t)freeSpace);
-
-            fread(freeSpace, 1, size, data);
-
-            fclose(data);
-
-            svcTable[svc] = 0xFFFF0000 + ((uint8_t *)freeSpace - (uint8_t *)exceptionsPage);
-
-            freeSpace += size;
-
-            fprintf(stderr, "Svc: entry set as %x\n", svcTable[svc]);
-        }
+        fprintf(stderr, "svc: Injected 0x7B.\n");
+    } else {
+        fprintf(stderr, "svc: No change needed.\n");
     }
 
     return 0;

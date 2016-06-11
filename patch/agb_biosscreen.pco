@@ -1,6 +1,6 @@
 # $name  AGB Bootscreen
 # $desc  Force usage of GBA bios in AGB_FIRM.
-# $ver   01
+# $ver   09
 # $uuid  35
 
 # TODO - Make dynamic. Also broken on O3DS.

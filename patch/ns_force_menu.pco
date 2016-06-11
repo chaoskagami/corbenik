@@ -1,7 +1,7 @@
 # $name  Force TestMenu
 # $desc  Force NS to boot TestMenu rather than HOME (TestMenu must be installed)
 # $title 0004013000008002
-# $ver   01
+# $ver   09
 # $uuid  1e
 
 rel exe_text

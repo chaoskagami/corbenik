@@ -1,6 +1,6 @@
 # $name FIRM Protect
 # $desc Prevents writing FIRM to the NAND during updates.
-# $ver  01
+# $ver  09
 # $uuid 08
 # $flags require
 

@@ -1,7 +1,7 @@
 # $name  Block eShop Updates
 # $desc  Prevents eShop from checking for system updates.
 # $title 0004013000002C02
-# $ver   01
+# $ver   09
 # $uuid  02
 
 rel exe_text

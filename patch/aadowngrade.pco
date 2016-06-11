@@ -1,6 +1,6 @@
 # $name Title Downgrade Fix
 # $desc Removes added checks to prevent downgrade (in 11.0)
-# $ver  01
+# $ver  09
 # $uuid 00
 # $flags require
 

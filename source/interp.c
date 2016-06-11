@@ -170,8 +170,8 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                 if ((uint8_t *)new_offset != NULL) {
                     // Pattern found, set found state flag
                     found = 1;
+                    offset = new_offset - (uint32_t)current_mode->memory;
                 }
-                offset = offset - (uint32_t)current_mode->memory;
                 code += *(code - 1);
                 break;
             case OP_BACK:
@@ -394,10 +394,10 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
         }
 
         if (offset > current_mode->size) { // Went out of bounds. Error.
-#ifndef LOADER
-            fprintf(stderr, "%x", offset);
-#endif
             abort("seeked out of bounds\n");
+#ifndef LOADER
+            fprintf(stderr, " -> %x", offset);
+#endif
         }
 
 #ifndef LOADER

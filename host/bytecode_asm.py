@@ -256,6 +256,28 @@ def parse_op(token_list, instr_offs):
 			val = bytearray(struct.pack(">H", instr_offs[num]))
 			val.reverse()
 			return bytearray.fromhex("67") + val
+	elif token_list[0] == "jmpf":
+		if s != 2:
+			syn_err("invalid number of arguments")
+
+		if instr_offs == None:
+			return bytearray.fromhex("070000")
+		else:
+			num = int(token_list[1])
+			val = bytearray(struct.pack(">H", instr_offs[num]))
+			val.reverse()
+			return bytearray.fromhex("77") + val
+	elif token_list[0] == "jmpnf":
+		if s != 2:
+			syn_err("invalid number of arguments")
+
+		if instr_offs == None:
+			return bytearray.fromhex("070000")
+		else:
+			num = int(token_list[1])
+			val = bytearray(struct.pack(">H", instr_offs[num]))
+			val.reverse()
+			return bytearray.fromhex("87") + val
 
 def pad_zero_r(x, c):
 	while len(x) < c:

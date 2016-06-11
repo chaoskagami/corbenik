@@ -32,6 +32,8 @@
 #define OP_JMPGT 0x47
 #define OP_JMPLE 0x57
 #define OP_JMPGE 0x67
+#define OP_JMPF  0x77
+#define OP_JMPNF 0x87
 
 #define OP_NEXT 0xFF
 
@@ -140,7 +142,7 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
 
     uint32_t i;
 
-    int eq = 0, gt = 0, lt = 0; // Flags.
+    int eq = 0, gt = 0, lt = 0, found = 0; // Flags.
 
     uint8_t *code = bytecode;
     uint8_t *end = code + len;
@@ -163,10 +165,11 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                 if (debug)
                     log("find\n");
                 code += 2;
-                offset = (uint32_t)memfind(current_mode->memory + offset, current_mode->size - offset, code, *(code - 1));
-                if ((uint8_t *)offset == NULL) {
-                    // Error. Abort.
-                    abort("Find opcode failed.\n");
+                found = 0;
+                new_offset = (uint32_t)memfind(current_mode->memory + offset, current_mode->size - offset, code, *(code - 1));
+                if ((uint8_t *)new_offset != NULL) {
+                    // Pattern found, set found state flag
+                    found = 1;
                 }
                 offset = offset - (uint32_t)current_mode->memory;
                 code += *(code - 1);
@@ -264,11 +267,20 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                 else
                     code += 2;
                 break;
-            case OP_JMPGE: // Jump to offset if greater than or equal
+            case OP_JMPF: // Jump to offset if pattern found
                 if (debug)
-                    log("jmpge\n");
+                    log("jmpf\n");
                 code++;
-                if (gt || eq)
+                if (found)
+                    code = bytecode + (code[0] + (code[1] << 8));
+                else
+                    code += 2;
+                break;
+            case OP_JMPNF: // Jump to offset if pattern NOT found
+                if (debug)
+                    log("jmpnf\n");
+                code++;
+                if (!found)
                     code = bytecode + (code[0] + (code[1] << 8));
                 else
                     code += 2;
@@ -277,7 +289,7 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                 if (debug)
                     log("clf\n");
                 code++;
-                gt = lt = eq = 0;
+                found = gt = lt = eq = 0;
                 break;
             case OP_REWIND:
                 if (debug)

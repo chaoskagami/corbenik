@@ -9,11 +9,13 @@ rel    native_s1
 
 # 1: Find this byte string.
 find   9705000015E40000
+abortnf
 
 # Move backwards until we find what we want.
-# LOOP (2):
+loop_back:
+
 back   04
 test   16640100
-jmpne  2
+jmpne  loop_back
 
 and    ef

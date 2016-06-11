@@ -61,6 +61,19 @@ ver = "01"
 flags = []
 uuid = ""
 deps = []
+size = 0
+offsets = {}
+
+def pad_zero_r(x, c):
+	while len(x) < c:
+		x = x + bytearray([0])
+	return x
+
+
+def pad_zero_l(x, c):
+	while len(x) < c:
+		x = bytearray([0]) + x
+	return x
 
 def cat_list(list):
 	retstr = ""
@@ -80,7 +93,12 @@ def parse_op(token_list, instr_offs):
 	if s == 0:
 		return bytearray() # Empty.
 
-	if token_list[0] == "#": # Comment.
+	elif token_list[0][-1:] == ":":
+		if instr_offs == None: # Label.
+			offsets[token_list[0][:-1]] = size
+		return bytearray()
+
+	elif token_list[0] == "#": # Comment.
 		if s < 3:
 			return bytearray() # Nope.
 		elif token_list[1] == "$name": # Meta: name
@@ -147,10 +165,9 @@ def parse_op(token_list, instr_offs):
 		if instr_offs == None:
 			return bytearray.fromhex("070000")
 		else:
-			num = int(token_list[1])
-			val = bytearray(struct.pack(">H", instr_offs[num]))
+			val = bytearray(struct.pack(">H", offsets[token_list[1]]))
 			val.reverse()
-			return bytearray.fromhex("07") + val
+			return bytearray.fromhex("07") + pad_zero_r(val, 2)
 	elif token_list[0] == "rewind":
 		return bytearray.fromhex("08")
 	elif token_list[0] == "and":
@@ -197,10 +214,9 @@ def parse_op(token_list, instr_offs):
 		if instr_offs == None:
 			return bytearray.fromhex("070000")
 		else:
-			num = int(token_list[1])
-			val = bytearray(struct.pack(">H", instr_offs[num]))
+			val = bytearray(struct.pack(">H", offsets[token_list[1]]))
 			val.reverse()
-			return bytearray.fromhex("17") + val
+			return bytearray.fromhex("17") + pad_zero_r(val, 2)
 	elif token_list[0] == "jmpne":
 		if s != 2:
 			syn_err("invalid number of arguments")
@@ -208,10 +224,9 @@ def parse_op(token_list, instr_offs):
 		if instr_offs == None:
 			return bytearray.fromhex("070000")
 		else:
-			num = int(token_list[1])
-			val = bytearray(struct.pack(">H", instr_offs[num]))
+			val = bytearray(struct.pack(">H", offsets[token_list[1]]))
 			val.reverse()
-			return bytearray.fromhex("27") + val
+			return bytearray.fromhex("27") + pad_zero_r(val, 2)
 	elif token_list[0] == "jmplt":
 		if s != 2:
 			syn_err("invalid number of arguments")
@@ -219,10 +234,9 @@ def parse_op(token_list, instr_offs):
 		if instr_offs == None:
 			return bytearray.fromhex("070000")
 		else:
-			num = int(token_list[1])
-			val = bytearray(struct.pack(">H", instr_offs[num]))
+			val = bytearray(struct.pack(">H", offsets[token_list[1]]))
 			val.reverse()
-			return bytearray.fromhex("37") + val
+			return bytearray.fromhex("37") + pad_zero_r(val, 2)
 	elif token_list[0] == "jmpgt":
 		if s != 2:
 			syn_err("invalid number of arguments")
@@ -230,10 +244,9 @@ def parse_op(token_list, instr_offs):
 		if instr_offs == None:
 			return bytearray.fromhex("070000")
 		else:
-			num = int(token_list[1])
-			val = bytearray(struct.pack(">H", instr_offs[num]))
+			val = bytearray(struct.pack(">H", offsets[token_list[1]]))
 			val.reverse()
-			return bytearray.fromhex("47") + val
+			return bytearray.fromhex("47") + pad_zero_r(val, 2)
 	elif token_list[0] == "jmple":
 		if s != 2:
 			syn_err("invalid number of arguments")
@@ -241,10 +254,9 @@ def parse_op(token_list, instr_offs):
 		if instr_offs == None:
 			return bytearray.fromhex("070000")
 		else:
-			num = int(token_list[1])
-			val = bytearray(struct.pack(">H", instr_offs[num]))
+			val = bytearray(struct.pack(">H", offsets[token_list[1]]))
 			val.reverse()
-			return bytearray.fromhex("57") + val
+			return bytearray.fromhex("57") + pad_zero_r(val, 2)
 	elif token_list[0] == "jmpge":
 		if s != 2:
 			syn_err("invalid number of arguments")
@@ -252,10 +264,9 @@ def parse_op(token_list, instr_offs):
 		if instr_offs == None:
 			return bytearray.fromhex("070000")
 		else:
-			num = int(token_list[1])
-			val = bytearray(struct.pack(">H", instr_offs[num]))
+			val = bytearray(struct.pack(">H", offsets[token_list[1]]))
 			val.reverse()
-			return bytearray.fromhex("67") + val
+			return bytearray.fromhex("67") + pad_zero_r(val, 2)
 	elif token_list[0] == "jmpf":
 		if s != 2:
 			syn_err("invalid number of arguments")
@@ -263,10 +274,9 @@ def parse_op(token_list, instr_offs):
 		if instr_offs == None:
 			return bytearray.fromhex("070000")
 		else:
-			num = int(token_list[1])
-			val = bytearray(struct.pack(">H", instr_offs[num]))
+			val = bytearray(struct.pack(">H", offsets[token_list[1]]))
 			val.reverse()
-			return bytearray.fromhex("77") + val
+			return bytearray.fromhex("77") + pad_zero_r(val, 2)
 	elif token_list[0] == "jmpnf":
 		if s != 2:
 			syn_err("invalid number of arguments")
@@ -274,23 +284,26 @@ def parse_op(token_list, instr_offs):
 		if instr_offs == None:
 			return bytearray.fromhex("070000")
 		else:
-			num = int(token_list[1])
-			val = bytearray(struct.pack(">H", instr_offs[num]))
+			val = bytearray(struct.pack(">H", offsets[token_list[1]]))
 			val.reverse()
-			return bytearray.fromhex("87") + val
+			return bytearray.fromhex("87") + pad_zero_r(val, 2)
 	elif token_list[0] == "n3ds": # Sets the eq flag if this is an n3ds.
 		return bytearray.fromhex("10")
 
-def pad_zero_r(x, c):
-	while len(x) < c:
-		x = x + bytearray([0])
-	return x
-
-
-def pad_zero_l(x, c):
-	while len(x) < c:
-		x = bytearray([0]) + x
-	return x
+	elif token_list[0] == "abort":
+		return bytearray.fromhex("18")
+	elif token_list[0] == "aborteq":
+		return bytearray.fromhex("28")
+	elif token_list[0] == "abortne":
+		return bytearray.fromhex("38")
+	elif token_list[0] == "abortlt":
+		return bytearray.fromhex("48")
+	elif token_list[0] == "abortgt":
+		return bytearray.fromhex("58")
+	elif token_list[0] == "abortf":
+		return bytearray.fromhex("68")
+	elif token_list[0] == "abortnf":
+		return bytearray.fromhex("78")
 
 def flag_convert(x):
 	flags = 0
@@ -311,10 +324,6 @@ except:
 	usage()
 	exit(1)
 
-size = 0
-offsets = []
-labels = []
-
 with open(in_file, "r") as ins:
 	with open(out_file, "wb") as writ:
 		bytecode = bytearray()
@@ -330,11 +339,7 @@ with open(in_file, "r") as ins:
 			tokens = re.split("\s+", line.strip("\n")) # Split by whitespace.
 			bytes = parse_op(tokens, None) # Parse.
 			if bytes:
-				offsets += [size]
 				size += len(bytes)
-
-		offsets += [size] # So we can jump past the last instruction for 'exit' type behavior
-		lines = 0
 
 		ins.seek(0)
 
@@ -343,6 +348,7 @@ with open(in_file, "r") as ins:
 			tokens = re.split("\s+", line.strip("\n")) # Split by whitespace.
 			bytes = parse_op(tokens, offsets) # Parse.
 			if bytes:
+				print([bytes])
 				bytecode += bytes
 
 		data  = bytearray("AIDA")

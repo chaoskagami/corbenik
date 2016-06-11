@@ -10,12 +10,14 @@ rel  twl
 
 # Disable main signature checks (1)
 find C117491C31D0
+abortnf
 set  00204EB070BD
 rewind
 
 # Patch RSA function to not report invalid signatures (4)
 # TODO - Check O3DS
 find 18ee0020
+abortnf
 fwd  02
 set  0120
 rewind
@@ -23,60 +25,67 @@ rewind
 # Disable header Nintendo logo check (not generally needed) (8)
 # TODO - Check O3DS
 find c03006f0
+abortnf
 fwd  02
 set  00200000
 rewind
 
 # Disable whitelist check (12)
 find FFF7B6FB
+abortnf
 set  00200000
 rewind
 
 # Disable cartridge blacklist check (mostly, if not entirely, demo carts) (15)
 # TODO - Check O3DS
 find 012520000ef0
+abortnf
 fwd  04
 set  01200000
 rewind
 
 # Stub function commonly used to compare SHA hashes to always succeed (19)
 find 10B51422
+abortnf
 set  01207047
 rewind
 
-##################################### (22)
+##################################### (28)
 
 # There's not enough context for the patterns below to patch both o3ds and n3ds, so
 # we have to split them up.
 
 n3ds
-jmpeq 25
-jmp   32
+jmpne o3ds
 
-# new: (25)
+# new: (31)
 
 # Disable save type check
 find FCF745FE
+abortnf
 set  01200000
 rewind
 
-# Disable DSi cartridge save exploit check (28)
+# Disable DSi cartridge save exploit check (35)
 find FCF765FD
+abortnf
 set  01200000
 rewind
 
-jmp 38
+jmp end
 
-# old: (32)
+o3ds:
 
 # Disable save type check
 find FCF771FE
+abortnf
 set  01200000
 rewind
 
 # Disable DSi cartridge save exploit check (35)
 find FCF791FD
+abortnf
 set  01200000
 rewind
 
-# end (38)
+end:

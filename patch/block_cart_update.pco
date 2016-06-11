@@ -9,7 +9,9 @@ rel exe_text
 # Status: needs loader
 
 find 0C18E1D8
+abortnf
 set  0B1821C8
 
 find 0C18E1D8
+abortnf
 set  0B1821C8

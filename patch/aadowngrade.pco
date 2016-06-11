@@ -13,5 +13,6 @@ rel  native_p9
 
 # We want to patch the fifth byte of this pattern.
 find 890a814202D2
+abortnf
 fwd  05
 set  E0

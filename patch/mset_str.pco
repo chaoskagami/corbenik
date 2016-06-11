@@ -11,5 +11,7 @@ rel exe_text
 # u"Ver."
 find 5600650072002e00
 
+abortnf
+
 # u".hax"
 set  2e006800610078

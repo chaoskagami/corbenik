@@ -9,7 +9,11 @@
 rel native_p9
 # String: 'exe:'
 find 6578653a
+abortnf
+
 back 01
 back ff
+
 find 002801DA
+abortnf
 set  0020C046

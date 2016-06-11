@@ -12,6 +12,7 @@ rel exe_text
 # Searching for a relative bl is error prone,
 # so find the code before the bl and seek forward instead
 find 1b00000abc009fe5
+abortnf
 fwd  04
 
 # mov r0, r9 (== 0x00008102)

@@ -10,11 +10,17 @@ rel exe_text
 # Status: needs loader
 
 find 1400D0E5DB9A9FED
+abortnf
 set  0000A0E3
 
 find 1400D0E5010010E3
+abortnf
 set  0000A0E3
+
 find 1400D0E5010010E3
+abortnf
 set  0000A0E3
+
 find 1400D0E5010010E3
+abortnf
 set  0000A0E3

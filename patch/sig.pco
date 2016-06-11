@@ -13,6 +13,7 @@ rel  native_p9
 
 # Pattern one.
 find c01c76e7
+abortnf
 set  0020
 
 # Rewind to beginning.
@@ -20,5 +21,6 @@ rewind
 
 # Pattern 2.
 find b5224d0c
+abortnf
 back 01
 set  00207047

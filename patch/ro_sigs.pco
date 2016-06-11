@@ -9,10 +9,13 @@ rel exe_text
 # Status: needs loader
 
 find 30402DE90250A0E1
+abortnf
 set  0000A0E31EFF2FE1
 
 find 30402DE924D04DE2
+abortnf
 set  0000A0E31EFF2FE1
 
 find F84F2DE90170A0E1
+abortnf
 set  0000A0E31EFF2FE1

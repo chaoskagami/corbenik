@@ -26,6 +26,14 @@
 #define OP_SEEK 0x0F
 #define OP_N3DS 0x10
 
+#define OP_ABORT   0x18
+#define OP_ABORTEQ 0x28
+#define OP_ABORTNE 0x38
+#define OP_ABORTLT 0x48
+#define OP_ABORTGT 0x58
+#define OP_ABORTF  0x68
+#define OP_ABORTNF 0x78
+
 #define OP_JMPEQ 0x17
 #define OP_JMPNE 0x27
 #define OP_JMPLT 0x37
@@ -435,6 +443,55 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
 #endif
                 }
                 code += 4;
+                break;
+            case OP_ABORT:
+                code++;
+                if (debug)
+                    log("abort\n");
+
+                abort("abort triggered, halting VM!\n")
+                break;
+            case OP_ABORTEQ:
+                code++;
+                if (debug)
+                    log("aborteq\n");
+                if (eq)
+                    abort("eq flag not set, halting VM!\n")
+                break;
+            case OP_ABORTNE:
+                code++;
+                if (debug)
+                    log("abortlt\n");
+                if (!eq)
+                    abort("eq flag not set, halting VM!\n")
+                break;
+            case OP_ABORTLT:
+                code++;
+                if (debug)
+                    log("abortlt\n");
+                if (lt)
+                    abort("lt flag set, halting VM!\n")
+                break;
+            case OP_ABORTGT:
+                code++;
+                if (debug)
+                    log("abortgt\n");
+                if (gt)
+                    abort("gt flag set, halting VM!\n")
+                break;
+            case OP_ABORTF:
+                code++;
+                if (debug)
+                    log("abortf\n");
+                if (found)
+                    abort("f flag set, halting VM!\n")
+                break;
+            case OP_ABORTNF:
+                code++;
+                if (debug)
+                    log("abortnf\n");
+                if (!found)
+                    abort("f flag is not set, halting VM!\n")
                 break;
             case OP_NEXT:
                 if (debug) {

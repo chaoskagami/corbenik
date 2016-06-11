@@ -9,4 +9,5 @@ rel exe_text
 # Status: needs loader
 
 find 06461048FC
+abortnf
 set  0026

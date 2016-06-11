@@ -15,5 +15,6 @@ rel agb
 
 # Bootscreen (1)
 find  000001ef
+abortnf
 fwd   02
 set   26

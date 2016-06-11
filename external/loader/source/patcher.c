@@ -324,6 +324,61 @@ void
 overlay_patch(u64 progId, u8 *code, u32 size)
 {
     // TODO - Implement. Needs some thought. This should allow usage of files off SD rather than RomFS.
+
+    /* Okay, so in a nutshell, here's how the alternatives work:
+     * -----------------------------------------------------------------
+     * NTR / layeredFS
+     *
+     * NTR injects itself in the process' memory, so the plugin running
+     * is a part of the program for all intents. That explains a few
+     * things.
+     *
+     * What layeredFS does is hook fsRegArchive with its' own callback,
+     * and fsOpenFile as well (in the program.) The fsRegArchive hook
+     * registers a SDMC archive as ram:/ (instead of rom:/) as well as
+     * the usual setup. When calling fsOpenFile, it checks to see if
+     * a rom:/ path is used and if a file exists at ram:/ (and if so,
+     * replaces o -> a.
+     *
+     * Things running in NTR are automatically patched for SD access,
+     * too, which can be solved from here (considering we patch OURSELF
+     * to do so in loader)
+     *
+     * layeredFS lacks any comments to help decipher but that's what I
+     * understand, at least.
+     *
+     * While it also could memsearch at runtime and work as generic,
+     * it doesn't. It uses a python script to find static offsets.
+     * There's really no good reason for it to be implemented this way.
+     *
+     * -----------------------------------------------------------------
+     * HANS
+     *
+     * So, considering the code isn't terribly well documented, this may
+     * be wrong. Feel free to correct me.
+     *
+     * All the archive mounting/reading functions are taken over by HANS
+     * and replaced with its own hooks instead.
+     *
+     * HANS does so in an incredibly interesting way using darm. It
+     * disassembles the code to find what it's looking for, and extracts
+     * offsets from branches. It calculates where it can inject the code
+     * and re-allocates the space for its own hooks.
+     *
+     * In the end, HANS takes over the RomFS mounting code so it mounts
+     * off the SD rather than the game. It doesn't take over fsOpenFile
+     * because the game has correct handles passed around for the RomFS.
+     *
+     * This is probably incredibly inefficient but also entirely fool-
+     * proof.
+     * -----------------------------------------------------------------
+     *
+     * The best approach here is to implement the hooks like layeredFS
+     * does and append code to the text segment. This has a few
+     * negatives, namely, we have to write it as assembler.
+     *
+     * Otherwise, it is completely viable to do this from loader.
+     */
 }
 
 void

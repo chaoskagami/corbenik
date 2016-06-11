@@ -178,10 +178,6 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                 if (debug)
                     log("back\n");
                 code++;
-                if (offset < *code) {
-                    // Went out of bounds. Error.
-                    abort("Back underflowed.\n");
-                }
                 offset -= *code;
                 code++;
                 break;
@@ -365,6 +361,8 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
             case OP_NEXT:
                 if (debug)
                     log("next\n");
+                found = gt = lt = eq = 0;
+
                 bytecode = code + 1;
 #ifndef LOADER
                 set_mode = 3;
@@ -373,7 +371,7 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                 set_mode = 18;
                 current_mode = &modes[set_mode];
 #endif
-                offset = 0;
+                offset = new_offset = 0;
                 code = bytecode;
                 break;
             default:

@@ -72,9 +72,13 @@ static int cursor_y = 0;
 static int which_menu = 1;
 static int need_redraw = 1;
 
+extern void waitcycles(uint32_t cycles);
+
 uint32_t
 wait_key()
 {
+    waitcycles(100); // Moves too fast. Hopefully this prevents the issue.
+
     uint32_t get = 0;
     while (get == 0) {
         if (HID_PAD & BUTTON_UP)

@@ -138,7 +138,7 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
 #endif
     struct mode *current_mode = &modes[set_mode];
 
-    uint32_t offset = 0;
+    uint32_t offset = 0, new_offset = 0;
 
     uint32_t i;
 
@@ -350,10 +350,9 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                 break;
             case OP_N3DS:
                 if (debug)
-                    log("ver\n");
+                    log("n3ds\n");
                 code++;
                 eq = is_n3ds;
-                code += 2;
                 break;
             case OP_SEEK: // Jump to offset if greater than or equal
                 if (debug)

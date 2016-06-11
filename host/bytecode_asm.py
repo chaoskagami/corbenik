@@ -278,6 +278,8 @@ def parse_op(token_list, instr_offs):
 			val = bytearray(struct.pack(">H", instr_offs[num]))
 			val.reverse()
 			return bytearray.fromhex("87") + val
+	elif token_list[0] == "n3ds": # Sets the eq flag if this is an n3ds.
+		return bytearray.fromhex("10")
 
 def pad_zero_r(x, c):
 	while len(x) < c:

@@ -3,89 +3,88 @@
 # $ver  09
 # $uuid 34
 
-# TODO - Use proper section
+# TODO - Make dynamic. Not that hard, but some 
+#        fixes need more context bytes than on Steveice10's
+#        pastebin
+
+# Relative to twl_firm (0)
 rel  twl
 
 ###########################################
-
-# Disable main signature checks (1)
-find C117491C31D0
-abortnf
-set  00204EB070BD
-rewind
-
-# Patch RSA function to not report invalid signatures (4)
-# TODO - Check O3DS
-find 18ee0020
-abortnf
-fwd  02
-set  0120
-rewind
-
-# Disable header Nintendo logo check (not generally needed) (8)
-# TODO - Check O3DS
-find c03006f0
-abortnf
-fwd  02
-set  00200000
-rewind
-
-# Disable whitelist check (12)
-find FFF7B6FB
-abortnf
-set  00200000
-rewind
-
-# Disable cartridge blacklist check (mostly, if not entirely, demo carts) (15)
-# TODO - Check O3DS
-find 012520000ef0
-abortnf
-fwd  04
-set  01200000
-rewind
-
-# Stub function commonly used to compare SHA hashes to always succeed (19)
-find 10B51422
-abortnf
-set  01207047
-rewind
-
-##################################### (28)
-
-# There's not enough context for the patterns below to patch both o3ds and n3ds, so
-# we have to split them up.
+# New3ds
 
 n3ds
-jmpne o3ds
+jmpne old
 
-# new: (31)
+# Disable main signature checks (1)
+seek  00165D64
+set   00204EB070BD
 
-# Disable save type check
-find FCF745FE
-abortnf
+# Patch RSA function to not report invalid signatures (5)
+seek 0017474A
+set  0120
+
+# Disable header Nintendo logo check (not generally needed) (7)
+seek 0017553E
+set  00200000
+
+# Disable whitelist check (9)
+seek 001756A0
+set  00200000
+
+# Disable cartridge blacklist check (mostly, if not entirely, demo carts) (11)
+seek 00175A8E
 set  01200000
-rewind
 
-# Disable DSi cartridge save exploit check (35)
-find FCF765FD
-abortnf
+# Disable save type check (13)
+seek 00175A9A
 set  01200000
-rewind
 
-jmp end
-
-o3ds:
-
-# Disable save type check
-find FCF771FE
-abortnf
+# Disable DSi cartridge save exploit check (15)
+seek 00175AA6
 set  01200000
-rewind
 
-# Disable DSi cartridge save exploit check (35)
-find FCF791FD
-abortnf
+# Stub function commonly used to compare SHA hashes to always succeed (17)
+seek 00175B92
+set  01207047
+
+jmp  end
+
+###########################################
+# Old3ds
+
+old:
+
+# Disable main signature checks (20)
+seek 001650C0
+set  00204EB070BD
+
+# Patch RSA function to not report invalid signatures (22)
+seek 00173A0E
+set  0120
+
+# Disable header Nintendo logo check (not generally needed) (24)
+seek 00174802
+set  00200000
+
+# Disable whitelist check (26)
+seek 00174964
+set  00200000
+
+# Disable cartridge blacklist check (mostly, if not entirely, demo carts) (28)
+seek 00174D52
 set  01200000
-rewind
+
+# Disable save type check (30)
+seek 00174D5E
+set  01200000
+
+# Disable DSi cartridge save exploit check (32)
+seek 00174D6A
+set  01200000
+
+# Stub function commonly used to compare SHA hashes to always succeed (34)
+seek 00174E56
+set  01207047
 
 end:

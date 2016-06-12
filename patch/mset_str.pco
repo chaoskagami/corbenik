@@ -6,12 +6,8 @@
 
 rel exe_text
 
-# Status: needs loader
-
-# u"Ver."
 find u"Ver."
 
 abortnf
 
-# u".hax"
-set  u".hax"
+set  u".hack//%d%d%d:%d%ls"

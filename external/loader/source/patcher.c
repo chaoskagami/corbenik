@@ -1,5 +1,6 @@
 #include <3ds.h>
 #include "patcher.h"
+#include "exheader.h"
 #include "fsldr.h"
 #include "internal.h"
 #include "memory.h"
@@ -13,7 +14,9 @@
 #endif
 #include "../../../source/config.h"
 
-#define CODE_PATH PATH_EXEFS "/0000000000000000"
+#define TEXT_PATH PATH_EXEFS_TEXT "/0000000000000000"
+#define DATA_PATH PATH_EXEFS_DATA "/0000000000000000"
+#define RO_PATH PATH_EXEFS_RO "/0000000000000000"
 #define LANG_PATH PATH_LOCEMU "/0000000000000000"
 
 const char hexDigits[] = "0123456789ABCDEF";
@@ -382,7 +385,7 @@ overlay_patch(u64 progId, u8 *code, u32 size)
 }
 
 void
-sd_code(u64 progId, u8 *code_loc, u32 code_len)
+code_handler(u64 progId, prog_addrs_t *shared)
 {
     // If configuration was not loaded, or both options (load / dump) are disabled
     if (failed_load_config || (!config.options[OPTION_LOADER_DUMPCODE] && !config.options[OPTION_LOADER_LOADCODE]))
@@ -390,37 +393,79 @@ sd_code(u64 progId, u8 *code_loc, u32 code_len)
 
     u32 highTid = progId >> 0x20;
 
-    static char code_path[] = CODE_PATH;
+    if ((highTid == 0x00040000 || highTid == 0x00040002) && !config.options[OPTION_LOADER_DUMPCODE_ALL])
+        return;
+
+    static char text_path[] = TEXT_PATH;
+    static char data_path[] = DATA_PATH;
+    static char ro_path[] = RO_PATH;
     Handle code_f;
 
-    hexdump_titleid(progId, code_path);
+    hexdump_titleid(progId, text_path);
+    hexdump_titleid(progId, data_path);
+    hexdump_titleid(progId, ro_path);
 
     u32 len;
 
+	// Text section.
+
     // Attempts to load code section from SD card, including system titles/modules/etc.
-    if (R_SUCCEEDED(fileOpen(&code_f, ARCHIVE_SDMC, code_path, FS_OPEN_READ)) && config.options[OPTION_LOADER_LOADCODE]) {
-        FSFILE_Read(code_f, &len, 0, code_loc, code_len);
-        logstr("  loaded code from ");
-        logstr(code_path);
+    if (R_SUCCEEDED(fileOpen(&code_f, ARCHIVE_SDMC, text_path, FS_OPEN_READ)) && config.options[OPTION_LOADER_LOADCODE]) {
+        FSFILE_Read(code_f, &len, 0, (void*)shared->text_addr, shared->text_size << 12);
+        logstr("  loaded text from ");
+        logstr(text_path);
         logstr("\n");
     }
     // Either system title with OPTION_LOADER_DUMPCODE_ALL enabled, or regular title
     else if (config.options[OPTION_LOADER_DUMPCODE]) {
-        if ((highTid == 0x00040000 || highTid == 0x00040002) && !config.options[OPTION_LOADER_DUMPCODE_ALL])
-            goto return_close;
-
-        if (R_SUCCEEDED(fileOpen(&code_f, ARCHIVE_SDMC, code_path, FS_OPEN_WRITE | FS_OPEN_CREATE))) {
-            FSFILE_Write(code_f, &len, 0, code_loc, code_len, FS_WRITE_FLUSH | FS_WRITE_UPDATE_TIME);
-            logstr("  dumped code to ");
-            logstr(code_path);
+        if (R_SUCCEEDED(fileOpen(&code_f, ARCHIVE_SDMC, text_path, FS_OPEN_WRITE | FS_OPEN_CREATE))) {
+            FSFILE_Write(code_f, &len, 0, (void*)shared->text_addr, shared->text_size << 12, FS_WRITE_FLUSH | FS_WRITE_UPDATE_TIME);
+            logstr("  dumped text to ");
+            logstr(text_path);
             logstr("\n");
         }
     }
-
-return_close:
-
     FSFILE_Close(code_f);
-    return;
+
+	// Data section.
+
+    // Attempts to load code section from SD card, including system titles/modules/etc.
+    if (R_SUCCEEDED(fileOpen(&code_f, ARCHIVE_SDMC, data_path, FS_OPEN_READ)) && config.options[OPTION_LOADER_LOADCODE]) {
+        FSFILE_Read(code_f, &len, 0, (void*)shared->data_addr, shared->data_size << 12);
+        logstr("  loaded data from ");
+        logstr(data_path);
+        logstr("\n");
+    }
+    // Either system title with OPTION_LOADER_DUMPCODE_ALL enabled, or regular title
+    else if (config.options[OPTION_LOADER_DUMPCODE]) {
+        if (R_SUCCEEDED(fileOpen(&code_f, ARCHIVE_SDMC, data_path, FS_OPEN_WRITE | FS_OPEN_CREATE))) {
+            FSFILE_Write(code_f, &len, 0, (void*)shared->data_addr, shared->data_size << 12, FS_WRITE_FLUSH | FS_WRITE_UPDATE_TIME);
+            logstr("  dumped data to ");
+            logstr(data_path);
+            logstr("\n");
+        }
+    }
+    FSFILE_Close(code_f);
+
+	// RO Section.
+
+    // Attempts to load code section from SD card, including system titles/modules/etc.
+    if (R_SUCCEEDED(fileOpen(&code_f, ARCHIVE_SDMC, ro_path, FS_OPEN_READ)) && config.options[OPTION_LOADER_LOADCODE]) {
+        FSFILE_Read(code_f, &len, 0, (void*)shared->ro_addr, shared->ro_size << 12);
+        logstr("  loaded ro from ");
+        logstr(ro_path);
+        logstr("\n");
+    }
+    // Either system title with OPTION_LOADER_DUMPCODE_ALL enabled, or regular title
+    else if (config.options[OPTION_LOADER_DUMPCODE]) {
+        if (R_SUCCEEDED(fileOpen(&code_f, ARCHIVE_SDMC, ro_path, FS_OPEN_WRITE | FS_OPEN_CREATE))) {
+            FSFILE_Write(code_f, &len, 0, (void*)shared->ro_addr, shared->ro_size << 12, FS_WRITE_FLUSH | FS_WRITE_UPDATE_TIME);
+            logstr("  dumped ro to ");
+            logstr(ro_path);
+            logstr("\n");
+        }
+    }
+    FSFILE_Close(code_f);
 }
 
 // This is only for the .code segment.

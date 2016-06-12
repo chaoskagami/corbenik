@@ -5,6 +5,17 @@
 
 typedef struct
 {
+    u32 text_addr;
+    u32 text_size;
+    u32 ro_addr;
+    u32 ro_size;
+    u32 data_addr;
+    u32 data_size;
+    u32 total_size;
+} prog_addrs_t;
+
+typedef struct
+{
     u8 reserved[5];
     u8 flag;
     u8 remasterversion[2];

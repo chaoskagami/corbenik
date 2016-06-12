@@ -16,17 +16,6 @@
 
 const char CODE_PATH[] = { 0x01, 0x00, 0x00, 0x00, 0x2E, 0x63, 0x6F, 0x64, 0x65, 0x00, 0x00, 0x00 };
 
-typedef struct
-{
-    u32 text_addr;
-    u32 text_size;
-    u32 ro_addr;
-    u32 ro_size;
-    u32 data_addr;
-    u32 data_size;
-    u32 total_size;
-} prog_addrs_t;
-
 static Handle g_handles[MAX_SESSIONS + 2];
 static int g_active_handles;
 static u64 g_cached_prog_handle;
@@ -94,8 +83,8 @@ load_code(u64 progid, u16 progver, prog_addrs_t *shared, prog_addrs_t *original,
         lzss_decompress((u8 *)shared->text_addr + size);
     }
 
-    // Load/Dump code section
-    sd_code(progid, (u8 *)shared->text_addr, shared->total_size << 12);
+    // Load/Dump code sections
+    code_handler(progid, shared);
 
     // Patch segments
     patch_exe(progid, progver, (u8 *)shared->text_addr, shared->text_size << 12, original->text_size << 12, (u8 *)shared->data_addr, shared->data_size << 12,

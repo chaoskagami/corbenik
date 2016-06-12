@@ -310,7 +310,6 @@ def parse_op(token_list, instr_offs):
 			return bytearray.fromhex("87") + pad_zero_r(val, 2)
 	elif token_list[0] == "n3ds": # Sets the eq flag if this is an n3ds.
 		return bytearray.fromhex("10")
-
 	elif token_list[0] == "abort":
 		return bytearray.fromhex("18")
 	elif token_list[0] == "aborteq":

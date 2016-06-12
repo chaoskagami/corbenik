@@ -33,6 +33,9 @@ mk_structure()
     f_mkdir(PATH_SVC);
     f_mkdir(PATH_KEYS);
     f_mkdir(PATH_EXEFS);
+    f_mkdir(PATH_EXEFS_TEXT);
+    f_mkdir(PATH_EXEFS_DATA);
+    f_mkdir(PATH_EXEFS_RO);
     f_mkdir(PATH_TEMP);
     f_mkdir(PATH_LOADER_CACHE);
 }

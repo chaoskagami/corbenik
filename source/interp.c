@@ -60,7 +60,7 @@ int wait();
 struct mode
 {
     uint8_t *memory;
-    uint32_t size;
+    size_t size;
 };
 struct mode modes[21];
 int init_bytecode = 0;
@@ -77,14 +77,17 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
 {
     if (!init_bytecode) {
 #ifndef LOADER
-        modes[0].memory = (uint8_t *)firm_loc;
-        modes[0].size = FCRAM_SPACING; // NATIVE_FIRM
+        modes[0].memory = (uint8_t *)firm_loc + sizeof(firm_h);
+        modes[0].size   = firm_loc->section[0].size + firm_loc->section[1].size +
+                          firm_loc->section[2].size + firm_loc->section[3].size; // NATIVE_FIRM
 
-        modes[1].memory = (uint8_t *)agb_firm_loc;
-        modes[1].size = FCRAM_SPACING * 2; // AGB_FIRM
+        modes[1].memory = (uint8_t *)agb_firm_loc + sizeof(firm_h);
+        modes[1].size   = agb_firm_loc->section[0].size + agb_firm_loc->section[1].size +
+                          agb_firm_loc->section[2].size + agb_firm_loc->section[3].size; // AGB_FIRM
 
-        modes[2].memory = (uint8_t *)twl_firm_loc;
-        modes[2].size = FCRAM_SPACING * 2; // TWL_FIRM
+        modes[2].memory = (uint8_t *)twl_firm_loc + sizeof(firm_h);
+        modes[2].size   = twl_firm_loc->section[0].size + twl_firm_loc->section[1].size +
+                          twl_firm_loc->section[2].size + twl_firm_loc->section[3].size; // TWL_FIRM
 
         // NATIVE_FIRM Process9 (This is also the default mode.)
         modes[3].memory = (uint8_t *)firm_p9_exefs + sizeof(exefs_h) + firm_p9_exefs->fileHeaders[0].offset;
@@ -140,15 +143,15 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
     }
 
 #ifdef LOADER
-    uint32_t set_mode = 18;
+    size_t set_mode = 18;
 #else
-    uint32_t set_mode = 3;
+    size_t set_mode = 3;
 #endif
     struct mode *current_mode = &modes[set_mode];
 
-    uint32_t offset = 0, new_offset = 0;
+    size_t offset = 0, new_offset = 0;
 
-    uint32_t i;
+    size_t i;
 
     int eq = 0, gt = 0, lt = 0, found = 0; // Flags.
 
@@ -180,18 +183,17 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
 #ifdef LOADER
                     log("find\n");
 #else
-                    fprintf(stderr, "find %u ...\n", *(code+1));
+                    fprintf(stderr, "find %u ...\n", code[1]);
 #endif
                 }
-                code += 2;
                 found = 0;
-                new_offset = (uint32_t)memfind(current_mode->memory + offset, current_mode->size - offset, code, *(code - 1));
+                new_offset = (size_t)memfind(current_mode->memory + offset, current_mode->size - offset, &code[2], code[1]);
                 if ((uint8_t *)new_offset != NULL) {
                     // Pattern found, set found state flag
                     found = 1;
-                    offset = new_offset - (uint32_t)current_mode->memory;
+                    offset = new_offset - (size_t)current_mode->memory;
                 }
-                code += *(code - 1);
+                code += code[1] + 2;
                 break;
             case OP_BACK:
                 if (debug) {
@@ -201,9 +203,8 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                     fprintf(stderr, "back %u\n", *(code+1));
 #endif
                 }
-                code++;
-                offset -= *code;
-                code++;
+                offset -= code[1];
+                code += 2;
                 break;
             case OP_FWD:
                 if (debug) {
@@ -213,39 +214,36 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                     fprintf(stderr, "fwd %u\n", *(code+1));
 #endif
                 }
-                code++;
-                offset += *code;
-                code++;
+                offset += code[1];
+                code += 2;
                 break;
             case OP_SET: // Set data.
                 if (debug) {
 #ifdef LOADER
                     log("set\n");
 #else
-                    fprintf(stderr, "set %u, ...\n", *(code+1));
+                    fprintf(stderr, "set %u, ...\n", code[1]);
 #endif
                 }
-                code += 2;
-                memcpy(current_mode->memory + offset, code, *(code - 1));
-                offset += *(code - 1);
-                code += *(code - 1);
+                memcpy(current_mode->memory + offset, &code[2], code[1]);
+                offset += code[1];
+                code += code[1] + 2;
                 break;
             case OP_TEST: // Test data.
                 if (debug) {
 #ifdef LOADER
                     log("test\n");
 #else
-                    fprintf(stderr, "test %u, ...\n", *(code+1));
+                    fprintf(stderr, "test %u, ...\n", code[1]);
 #endif
                 }
-                code += 2;
-                eq = memcmp(current_mode->memory + offset, code, *(code - 1));
+                eq = memcmp(current_mode->memory + offset, &code[2], code[1]);
                 if (eq < 0)
                     lt = 1;
                 if (eq > 0)
                     gt = 1;
                 eq = !eq;
-                code += *(code - 1);
+                code += code[1] + 2;
                 break;
             case OP_JMP: // Jump to offset.
                 code++;
@@ -528,15 +526,15 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
         }
 
         if (offset > current_mode->size) { // Went out of bounds. Error.
-            abort("seeked out of bounds\n");
 #ifndef LOADER
             fprintf(stderr, " -> %x", offset);
 #endif
+            abort("seeked out of bounds\n");
         }
 
 #ifndef LOADER
         if (debug) {
-            fprintf(stderr, "  l:%u, g:%u, e:%u, f:%u", lt, gt, eq, found);
+            fprintf(stderr, "l:%u g:%u e:%u f:%u m:%u\no:0x%x c:0x%x m:0x%x n:%x\n", lt, gt, eq, found, set_mode, offset, code - bytecode, current_mode->memory + offset, code);
             wait();
         }
 #endif

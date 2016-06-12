@@ -34,20 +34,8 @@ isprint(char c)
 void
 memcpy(void *dest, const void *src, size_t size)
 {
-    char *destc = (char *)dest;
-    const char *srcc = (const char *)src;
-
-    // If we can align both dest and src together...
-    if ((uintptr_t)srcc % sizeof(size_t) == (uintptr_t)destc % sizeof(size_t)) {
-        // Align them and copy faster
-        while ((uintptr_t)srcc % sizeof(size_t) && size--) {
-            *destc++ = *srcc++;
-        }
-
-        for (; size >= sizeof(size_t); size -= sizeof(size_t), destc += sizeof(size_t), srcc += sizeof(size_t)) {
-            *(size_t *)destc = *(size_t *)srcc;
-        }
-    }
+    uint8_t *destc = (uint8_t *)dest;
+    const uint8_t *srcc = (const uint8_t *)src;
 
     // Finish by copying the leftovers
     while (size--) {
@@ -64,21 +52,8 @@ memmove(void *dest, const void *src, size_t size)
     }
 
     // Moving forward is just a reverse memcpy
-    char *destc = (char *)dest;
-    const char *srcc = (const char *)src;
-
-    // If we can align both dest and src together...
-    if ((uintptr_t)srcc % sizeof(size_t) == (uintptr_t)destc % sizeof(size_t)) {
-        // Align them and copy faster
-        while ((uintptr_t)(destc + size) % sizeof(size_t) && size--) {
-            destc[size] = srcc[size];
-        }
-
-        while (size >= sizeof(size_t)) {
-            size -= sizeof(size_t);
-            *(size_t *)(destc + size) = *(size_t *)(srcc + size);
-        }
-    }
+    uint8_t *destc = (uint8_t *)dest;
+    const uint8_t *srcc = (const uint8_t *)src;
 
     // Finish by copying the leftovers
     while (size--) {

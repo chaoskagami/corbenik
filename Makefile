@@ -33,7 +33,7 @@ all: a9lh patch external
 
 .PHONY: full
 full: all out/corbenik/locale
-	cp README.txt LICENSE.txt out/
+	cp README.md LICENSE.txt out/
 	cd out && zip -r9 release.zip *
 
 .PHONY: external

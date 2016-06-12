@@ -348,7 +348,6 @@ with open(in_file, "r") as ins:
 			tokens = re.split("\s+", line.strip("\n")) # Split by whitespace.
 			bytes = parse_op(tokens, offsets) # Parse.
 			if bytes:
-				print([bytes])
 				bytecode += bytes
 
 		data  = bytearray("AIDA")

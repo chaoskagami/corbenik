@@ -77,16 +77,16 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
 {
     if (!init_bytecode) {
 #ifndef LOADER
-        modes[0].memory = (uint8_t *)firm_loc + sizeof(firm_h);
-        modes[0].size   = firm_loc->section[0].size + firm_loc->section[1].size +
+        modes[0].memory = (uint8_t *)firm_loc;
+        modes[0].size   = firm_loc->section[0].size + firm_loc->section[1].size + sizeof(firm_h) +
                           firm_loc->section[2].size + firm_loc->section[3].size; // NATIVE_FIRM
 
-        modes[1].memory = (uint8_t *)agb_firm_loc + sizeof(firm_h);
-        modes[1].size   = agb_firm_loc->section[0].size + agb_firm_loc->section[1].size +
+        modes[1].memory = (uint8_t *)agb_firm_loc;
+        modes[1].size   = agb_firm_loc->section[0].size + agb_firm_loc->section[1].size + sizeof(firm_h) +
                           agb_firm_loc->section[2].size + agb_firm_loc->section[3].size; // AGB_FIRM
 
-        modes[2].memory = (uint8_t *)twl_firm_loc + sizeof(firm_h);
-        modes[2].size   = twl_firm_loc->section[0].size + twl_firm_loc->section[1].size +
+        modes[2].memory = (uint8_t *)twl_firm_loc;
+        modes[2].size   = twl_firm_loc->section[0].size + twl_firm_loc->section[1].size + sizeof(firm_h) +
                           twl_firm_loc->section[2].size + twl_firm_loc->section[3].size; // TWL_FIRM
 
         // NATIVE_FIRM Process9 (This is also the default mode.)

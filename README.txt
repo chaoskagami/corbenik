@@ -8,7 +8,8 @@ It's mainly intended for developers; so if you don't know your way
 around the 3DS, chances are this isn't for you.
 
 Not every feature has been implemented/tested yet, but at the moment
-it offers a rather comprehensive experience for N3DS users.
+it offers a rather comprehensive experience for people who know
+what they're doing.
 
 Corbenik is licensed under the terms of the GPLv3. Please obey it.
 You should have recieved a copy either as part of the git repository,
@@ -33,6 +34,9 @@ following steps to SAFELY update:
      * Delete everything
    * 0.0.7
      * Delete `patch`.
+   * 0.0.8
+     * Delete `patch`.
+     * Delete `svc`. Backdoor was folded into `bits`.
  * Unzip all files in-place, overwriting if prompted.
  * Reconfigure settings on boot (follow `Setup` for defaults)
 
@@ -133,11 +137,13 @@ If you're using the reboot hook, you might want these:
 
  * AGB Signature fix
  * AGB Bootscreen
+   * Will stop games with corrupted Nintendo logos from running. Disable for
+     romhacks if this occurs.
  * TWL Patches
 
 If you're on 11.0, you also want these:
 
- * Title Downgrade Fix (Only enable with 11.0 firmware - others will fail)
+ * Title Downgrade Fix (Only enable with 11.0 firmware.)
 
 If you're deliberately still running older firmware on your NAND, you'll
 want these:
@@ -158,7 +164,7 @@ And these YOU SHOULD NOT ENABLE unless you have specialized needs:
  * Developer UNITINFO (Pretends to be a developer console/Panda)
  * ARM11 XN Disable   (Grants +X maps by default)
  * Force TestMenu     (Boots into TestMenu rather than HOME - requires
-                       it to be installed.)
+                       TestMenu to be installed.)
 
 Before booting, you should select 'Save Configuration' from the menu.
 
@@ -169,9 +175,14 @@ If you think you've found a bug, please do the following first, to save
 me some time:
 
  * Check if a recently enabled patch is the cause of the issue. If so,
-   you should include this in a report
- * Enable Logging in `Options` and retrieve the files `/corbenik/boot.log`
-   and `/corbenik/loader.log` if they exist.
+   you should include this in the report.
+
+ * Enable `Logging` and `Verbose` in `Options` then `Save Configuration`
+   and retrieve the files `/corbenik/boot.log` and `/corbenik/loader.log`
+   if they exist. I will want them. Do not report bugs without them,
+   unless they are not created with the above enabled.
+
+ * Please at least try to reproduce the bug from a clean installation.
 
 Credits
 -------------------------

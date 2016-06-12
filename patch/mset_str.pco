@@ -9,9 +9,9 @@ rel exe_text
 # Status: needs loader
 
 # u"Ver."
-find 5600650072002e00
+find u"Ver."
 
 abortnf
 
 # u".hax"
-set  2e006800610078
+set  u".hax"

@@ -134,8 +134,15 @@ def parse_op(token_list, instr_offs):
 		if s != 2:
 			syn_err("invalid number of arguments")
 
-		# We cut corners and calculate stuff manually.
-		return bytearray.fromhex("02") + bytearray([len(token_list[1]) / 2]) + bytearray.fromhex(token_list[1])
+		if token_list[1][:1] == "\"": # Quoted string.
+			data = bytearray(eval(token_list[1]).encode('utf-8'))
+			return bytearray.fromhex("02") + bytearray([len(data)]) + data
+		elif token_list[1][:2] == "u\"": # Wide quoted string.
+			data = bytearray(eval(token_list[1]).encode('utf-16le'))
+			return bytearray.fromhex("02") + bytearray([len(data)]) + data
+		else:
+			# We cut corners and calculate stuff manually.
+			return bytearray.fromhex("02") + bytearray([len(token_list[1]) / 2]) + bytearray.fromhex(token_list[1])
 	elif token_list[0] == "back":
 		if s != 2:
 			syn_err("invalid number of arguments")
@@ -150,14 +157,28 @@ def parse_op(token_list, instr_offs):
 		if s != 2:
 			syn_err("invalid number of arguments")
 
-		# We cut corners and calculate stuff manually.
-		return bytearray.fromhex("05") + bytearray([len(token_list[1]) / 2]) + bytearray.fromhex(token_list[1])
+		if token_list[1][:1] == "\"": # Quoted string.
+			data = bytearray(eval(token_list[1]).encode('utf-8'))
+			return bytearray.fromhex("05") + bytearray([len(data)]) + data
+		elif token_list[1][:2] == "u\"": # Wide quoted string.
+			data = bytearray(eval(token_list[1]).encode('utf-16le'))
+			return bytearray.fromhex("05") + bytearray([len(data)]) + data
+		else:
+			# We cut corners and calculate stuff manually.
+			return bytearray.fromhex("05") + bytearray([len(token_list[1]) / 2]) + bytearray.fromhex(token_list[1])
 	elif token_list[0] == "test":
 		if s != 2:
 			syn_err("invalid number of arguments")
 
-		# We cut corners and calculate stuff manually.
-		return bytearray.fromhex("06") + bytearray([len(token_list[1]) / 2]) + bytearray.fromhex(token_list[1])
+		if token_list[1][:1] == "\"": # Quoted string.
+			data = bytearray(eval(token_list[1]).encode('utf-8'))
+			return bytearray.fromhex("06") + bytearray([len(data)]) + data
+		elif token_list[1][:2] == "u\"": # Wide quoted string.
+			data = bytearray(eval(token_list[1]).encode('utf-16le'))
+			return bytearray.fromhex("06") + bytearray([len(data)]) + data
+		else:
+			# We cut corners and calculate stuff manually.
+			return bytearray.fromhex("06") + bytearray([len(token_list[1]) / 2]) + bytearray.fromhex(token_list[1])
 	elif token_list[0] == "jmp":
 		if s != 2:
 			syn_err("invalid number of arguments")

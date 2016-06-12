@@ -650,8 +650,7 @@ execb(char *filename, int build_cache)
             // We should generate a cache for loader in a file intended for titleid.
             uint8_t *title_buf = (uint8_t *)patch + sizeof(struct system_patch);
 
-            fprintf(stderr, "patch:   %s\n", patch->name);
-            fprintf(stderr, "version: %u\n", patch->version);
+            fprintf(stderr, "  Version: %u\n", patch->version);
 
             for (uint32_t i = 0; i < patch->titles; i++) {
                 char cache_path[] = PATH_LOADER_CACHE "/0000000000000000";
@@ -697,11 +696,9 @@ execb(char *filename, int build_cache)
 #endif
 
     int debug = 0;
-#ifndef LOADER
     if (config.options[OPTION_OVERLY_VERBOSE]) {
         debug = 1;
     }
-#endif
 
     return exec_bytecode(patch_mem, ver, patch_len, debug);
 }

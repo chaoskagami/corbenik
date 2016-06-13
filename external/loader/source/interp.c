@@ -15,9 +15,13 @@
 #include "../../../source/config.h"
 #include "../../../source/patch_format.h"
 
-// Because I want to avoid malloc.
-// Patches must be smaller than this (including header!)
-#define MAX_PATCHSIZE 512
+// Patches must consist of fewer bytes than this.
+// 16K is reasonable, IMO, and doesn't cause issues.
+
+// I'm too lazy to implement file buffering here,
+// and 16K is large enough for anything.
+
+#define MAX_PATCHSIZE 16384
 
 // Yes, we're including a C file. Problem?
 #include "../../../source/interp.c"

@@ -68,8 +68,6 @@ static struct options_s options[] = {
     { -1, "", "", 0, -1, -1 }, // cursor_min and cursor_max are stored in the last two.
 };
 
-static int cursor_y = 0;
-static int which_menu = 1;
 static int need_redraw = 1;
 
 extern void waitcycles(uint32_t cycles);
@@ -300,64 +298,26 @@ int menu_saveconfig() {
 	return MENU_MAIN;
 }
 
+static struct options_s main_s[] = {
+    // space
+    { 0, "Options",            "", call_fun, (uint32_t)menu_options,    0 },
+    { 0, "Patches",            "", call_fun, (uint32_t)menu_patches,    0 },
+    { 0, "Info",               "", call_fun, (uint32_t)menu_info,       0 },
+    { 0, "Help/Readme",        "", call_fun, (uint32_t)menu_help,       0 },
+    { 0, "Reboot",             "", call_fun, (uint32_t)menu_reset,      0 },
+    { 0, "Power off",          "", call_fun, (uint32_t)menu_poweroff,   0 },
+    { 0, "Save Configuration", "", call_fun, (uint32_t)menu_saveconfig, 0 },
+    { 0, "Boot Firmware",      "", break_menu, 0, 0 },
+
+    // Sentinel.
+    { -1, "", "", 0, -1, -1 }, // cursor_min and cursor_max are stored in the last two.
+};
+
 int
 menu_main()
 {
     // TODO - Stop using different menu code here.
-    set_cursor(TOP_SCREEN, 0, 0);
-
-    const char *list[] = { "Options", "Patches", "Info", "Help/Readme", "Reboot", "Power off", "Save Configuration", "Boot Firmware" };
-    int menu_max = 8;
-
-    header("A:Enter DPAD:Nav");
-
-    for (int i = 0; i < menu_max; i++) {
-        if (!(i + 2 == MENU_HELP && config.options[OPTION_READ_ME])) {
-            if (cursor_y == i)
-                fprintf(TOP_SCREEN, "\x1b[32m>>\x1b[0m ");
-            else
-                fprintf(TOP_SCREEN, "   ");
-
-            if (need_redraw)
-                fprintf(TOP_SCREEN, "%s\n", list[i]);
-            else
-                putc(TOP_SCREEN, '\n');
-        }
-    }
-
-    need_redraw = 0;
-
-    uint32_t key = wait_key();
-
-    int ret = cursor_y + 2;
-
-    switch (key) {
-        case BUTTON_UP:
-            cursor_y -= 1;
-            if (config.options[OPTION_READ_ME] && cursor_y + 2 == MENU_HELP)
-                cursor_y -= 1; // Disable help.
-            break;
-        case BUTTON_DOWN:
-            cursor_y += 1;
-            if (config.options[OPTION_READ_ME] && cursor_y + 2 == MENU_HELP)
-                cursor_y += 1; // Disable help.
-            break;
-        case BUTTON_A:
-            need_redraw = 1;
-            cursor_y = 0;
-            if (ret == MENU_BOOTME)
-                return MENU_BOOTME; // Boot meh, damnit!
-            clear_screen(TOP_SCREEN);
-            if (ret == MENU_OPTIONS)
-                cursor_y = 0; // Fixup positions
-            return ret;
-    }
-
-    // Loop around the cursor.
-    if (cursor_y < 0)
-        cursor_y = menu_max - 1;
-    if (cursor_y > menu_max - 1)
-        cursor_y = 0;
+    show_menu(main_s, NULL);
 
     return 0;
 }
@@ -365,39 +325,5 @@ menu_main()
 int
 menu_handler()
 {
-    int to_menu = 0;
-    switch (which_menu) {
-        case MENU_MAIN:
-            to_menu = menu_main();
-            break;
-        case MENU_OPTIONS:
-            to_menu = menu_options();
-            break;
-        case MENU_PATCHES:
-            to_menu = menu_patches();
-            break;
-        case MENU_INFO:
-            to_menu = menu_info();
-            break;
-        case MENU_HELP:
-            to_menu = menu_help();
-            break;
-        case MENU_SAVECFG:
-            to_menu = menu_saveconfig();
-            break;
-        case MENU_BOOTME:
-            return 0;
-        case MENU_RESET:
-            menu_reset();
-        case MENU_POWER:
-            menu_poweroff();
-        default:
-            fprintf(stderr, "Attempt to enter wrong menu!\n");
-            to_menu = MENU_MAIN;
-    }
-
-    if (to_menu != 0)
-        which_menu = to_menu;
-
-    return 1;
+    return menu_main();
 }

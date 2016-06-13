@@ -24,6 +24,8 @@ show_menu(struct options_s *options, uint8_t *toggles)
     int cursor_max = -1;
     int exit = 0;
 
+    clear_screen(TOP_SCREEN);
+
     if (options[0].index == -1) {
         set_cursor(TOP_SCREEN, 0, 0);
         header("Any:Back");
@@ -74,6 +76,16 @@ show_menu(struct options_s *options, uint8_t *toggles)
                     putc(TOP_SCREEN, ']');
                     putc(TOP_SCREEN, '\n');
                 }
+            } else if (options[i].allowed == call_fun || options[i].allowed == break_menu) {
+                if (cursor_y == i)
+                    fprintf(TOP_SCREEN, "\x1b[32m>>\x1b[0m ");
+                else
+                    fprintf(TOP_SCREEN, "   ");
+
+                if (need_redraw)
+                    fprintf(TOP_SCREEN, "%s\n", options[i].name);
+                else
+                    putc(TOP_SCREEN, '\n');
             } else if (options[i].allowed == ranged_val) {
                 if (cursor_y == i)
                     fprintf(TOP_SCREEN, "\x1b[32m>>\x1b[0m ");
@@ -120,6 +132,12 @@ show_menu(struct options_s *options, uint8_t *toggles)
                         toggles[options[cursor_y].index] = options[cursor_y].a;
                     else
                         toggles[options[cursor_y].index]++;
+                } else if (options[cursor_y].allowed == call_fun) {
+                    ((func_call_t)(options[cursor_y].a))(); // Call 'a' as a function.
+                    need_redraw = 1;
+                } else if (options[cursor_y].allowed == break_menu) {
+                    exit = 1;
+                    need_redraw = 1;
                 }
                 break;
             case BUTTON_X:
@@ -143,6 +161,8 @@ show_menu(struct options_s *options, uint8_t *toggles)
         else if (cursor_y > cursor_max - 1)
             cursor_y = cursor_min;
     }
+
+    clear_screen(TOP_SCREEN);
 
     return 0;
 }

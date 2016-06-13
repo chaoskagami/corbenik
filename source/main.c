@@ -38,12 +38,8 @@ main()
         if (config.options[OPTION_SILENCE])
             shut_up(); // This does exactly what it sounds like.
         doing_autoboot = 1;
-        boot_cfw(); // Just boot shit.
-    }
-
-    int in_menu = 1;
-    while (in_menu) {
-        in_menu = menu_handler();
+    } else {
+        menu_handler();
     }
 
     boot_cfw();

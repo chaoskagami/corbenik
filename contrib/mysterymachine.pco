@@ -2,7 +2,7 @@
 # $desc  Patches Mystery Gift to point to SALT servers
 # $title 000400000011C400 000400000011C500 0004000000055D00 0004000000055E00
 # $ver   01
-# $uuid  0010
+# $uuid  0001
 
 # This is for current-gen pokemon games, and points mystery gift
 # to SALT's servers. See here:

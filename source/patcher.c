@@ -61,6 +61,8 @@ patch_firm_all()
 {
     execb(PATH_LOADER_CACHE "/BOOT", 0);
 
+    fprintf(stderr, "VM exited without issue\n");
+
     // Hook firmlaunch?
     if (config.options[OPTION_REBOOT]) {
         patch_reboot();

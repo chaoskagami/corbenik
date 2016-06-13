@@ -277,7 +277,7 @@ putc(void *buf, const int c)
 #else
                 if (buf == BOTTOM_SCREEN)
                     text_buffer_bottom[cursor_y[0] * width + cursor_x[0]] = c;
-                draw_character(screen, c, cursor_x[0], cursor_y[0], colors[(*color >> 4) & 0xF], colors[*color & 0xF]);
+                draw_character(screen, c, cursor_x[0], cursor_y[0], colors[(color[0] >> 4) & 0xF], colors[color[0] & 0xF]);
 #endif
 
                 cursor_x[0]++;
@@ -298,8 +298,8 @@ puts(void *buf, const char *string)
 
     char *ref = (char *)string;
 
-    while (*ref != '\0') {
-        putc(buf, *ref);
+    while (ref[0] != 0) {
+        putc(buf, ref[0]);
         ref++;
     }
 }
@@ -438,50 +438,50 @@ vfprintf(void *channel, const char *format, va_list ap)
     else if (channel == TOP_SCREEN)
         color = &color_bottom;
 
-    while (*ref != '\0') {
-        if (*ref == 0x1B && *(++ref) == '[' && (channel == stdout || channel == stderr)) {
+    while (ref[0] != '\0') {
+        if (ref[0] == 0x1B && (++ref)[0] == '[' && (channel == stdout || channel == stderr)) {
         ansi_codes:
             // Ansi escape code.
             ++ref;
             // [30-37] Set text color
-            if (*ref == '3') {
+            if (ref[0] == '3') {
                 ++ref;
-                if (*ref >= '0' && *ref <= '7') {
+                if (ref[0] >= '0' && ref[0] <= '7') {
                     // Valid FG color.
-                    *color &= 0x0f; // Remove fg color.
-                    *color |= (*ref - '0') << 4;
+                    color[0] &= 0x0f; // Remove fg color.
+                    color[0] |= (ref[0] - '0') << 4;
                 }
             }
             // [40-47] Set bg color
-            else if (*ref == '4') {
+            else if (ref[0] == '4') {
                 ++ref;
-                if (*ref >= '0' && *ref <= '7') {
+                if (ref[0] >= '0' && ref[0] <= '7') {
                     // Valid BG color.
-                    *color &= 0xf0; // Remove bg color.
-                    *color |= *ref - '0';
+                    color[0] &= 0xf0; // Remove bg color.
+                    color[0] |= ref[0] - '0';
                 }
-            } else if (*ref == '0') {
+            } else if (ref[0] == '0') {
                 // Reset.
-                *color = 0xf0;
+                color[0] = 0xf0;
             }
 
             ++ref;
 
-            if (*ref == ';') {
+            if (ref[0] == ';') {
                 goto ansi_codes; // Another code.
             }
 
             // Loop until the character is somewhere 0x40 - 0x7E, which
             // terminates an ANSI sequence
-            while (!(*ref >= 0x40 && *ref <= 0x7E))
+            while (!(ref[0] >= 0x40 && ref[0] <= 0x7E))
                 ref++;
-        } else if (*ref == '%' && !disable_format) {
+        } else if (ref[0] == '%' && !disable_format) {
             int type_size = 0;
             int length = -1;
         check_format:
             // Format string.
             ++ref;
-            switch (*ref) {
+            switch (ref[0]) {
                 case 'd':
                     switch (type_size) {
                         case 2:
@@ -526,14 +526,14 @@ vfprintf(void *channel, const char *format, va_list ap)
                     put_hexdump(channel, va_arg(ap, unsigned int));
                     break;
                 default:
-                    if (*ref >= '0' && *ref <= '9') {
-                        length = *ref - '0';
+                    if (ref[0] >= '0' && ref[0] <= '9') {
+                        length = ref[0] - '0';
                         goto check_format;
                     }
                     break;
             }
         } else {
-            putc(channel, *ref);
+            putc(channel, ref[0]);
         }
         ++ref;
     }

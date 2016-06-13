@@ -61,6 +61,8 @@ patch_firm_all()
 {
     execb(PATH_LOADER_CACHE "/BOOT", 0);
 
+    fprintf(stderr, "VM exited without issue\n");
+
     // Replace loader?
     if (config.options[OPTION_LOADER]) {
         if (patch_modules()) {

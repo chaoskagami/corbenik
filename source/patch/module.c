@@ -70,7 +70,6 @@ PATCH(modules)
             fprintf(stderr, "Module: Injecting %llu\n", module->programID);
             // Copy the module into the firm
             memcpy(sysmodule, module, module->contentSize * 0x200);
-            break;
         }
         sysmodule = (ncch_h *)((uintptr_t)sysmodule + sysmodule->contentSize * 0x200);
     }

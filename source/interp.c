@@ -372,7 +372,7 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                     log("and\n");
                 }
                 for (i = 0; i < code[1]; i++) {
-                    current_mode->memory[offset] &= code[i+1];
+                    current_mode->memory[offset] &= code[i+2];
                 }
                 offset += code[1];
                 code += code[1] + 2;
@@ -382,7 +382,7 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                     log("or\n");
                 }
                 for (i = 0; i < code[1]; i++) {
-                    current_mode->memory[offset] |= code[i+1];
+                    current_mode->memory[offset] |= code[i+2];
                 }
                 offset += code[1];
                 code += code[1] + 2;
@@ -392,7 +392,7 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                     log("xor\n");
                 }
                 for (i = 0; i < code[1]; i++) {
-                    current_mode->memory[offset] ^= code[i+1];
+                    current_mode->memory[offset] ^= code[i+2];
                 }
                 offset += code[1];
                 code += code[1] + 2;

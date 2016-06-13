@@ -50,7 +50,7 @@ clear_disp(uint8_t *screen)
         FILE *f = fopen(PATH_CFW "/boot.log", "w");
         fseek(f, 0, SEEK_END);
         for (int i = 0; i < TEXT_BOTTOM_HEIGHT - 1; i++) {
-            char *text = text_buffer_bottom + (TEXT_BOTTOM_WIDTH * i);
+            char *text = &text_buffer_bottom[TEXT_BOTTOM_WIDTH * i];
             for (int j = 0; j < TEXT_BOTTOM_WIDTH; j++) {
                 if (text[j] == 0)
                     text[j] = ' ';

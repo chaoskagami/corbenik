@@ -75,6 +75,8 @@ On New3DS units, there's additional crypto on arm9loader which requires the 9.6 
 
 The folder `/corbenik/locale` is automatically generated language emulation files from 3dbrew for games that only specify one region and one language. Games which support more than one language are not generated, because there's no 'correct' language. You can remove this if the number of files unnerves you. It isn't required. You can also add new files if you have specific needs.
 
+The folder `/contrib` contains additional patches you may add at your own discretion. These are not as well tested as official patches and don't generally affect core functionality. Documentation is usually found on the header of the source code for them (contrib/*.pco) in the git repo.
+
 Setup
 -------------------------
 

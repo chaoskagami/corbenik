@@ -11,8 +11,8 @@ PATCH(modules)
         return 2;
     }
 
-    uint32_t size = fsize(f);
-    fread((uint8_t *)FCRAM_JUNK_LOC, 1, size, f);
+    size_t size = fsize(f);
+    fread((void *)FCRAM_JUNK_LOC, 1, size, f);
     fclose(f);
 
     // Look for the section that holds all the sysmodules

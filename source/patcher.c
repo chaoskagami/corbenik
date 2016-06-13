@@ -61,18 +61,17 @@ patch_firm_all()
 {
     execb(PATH_LOADER_CACHE "/BOOT", 0);
 
-    // Replace loader?
-    if (config.options[OPTION_LOADER]) {
-        if (patch_modules()) {
-            abort("Fatal. Loader inject has failed.");
-        }
-        // This requires OPTION_SIGPATCH.
-        wait();
-    }
-
     // Hook firmlaunch?
     if (config.options[OPTION_REBOOT]) {
         patch_reboot();
+
+        wait();
+    }
+
+    // Use EmuNAND?
+    if (config.options[OPTION_EMUNAND]) {
+        // Yes.
+        patch_emunand(config.options[OPTION_EMUNAND_INDEX]);
 
         wait();
     }
@@ -85,19 +84,20 @@ patch_firm_all()
         wait();
     }
 
+    // Replace loader?
+    if (config.options[OPTION_LOADER]) {
+        if (patch_modules()) {
+            abort("Fatal. Loader inject has failed.");
+        }
+        // This requires OPTION_SIGPATCH.
+        wait();
+    }
+
     // Use ARM9 hook thread?
     if (config.options[OPTION_ARM9THREAD]) {
         // Yes.
 
         // FIXME - NYI
-        wait();
-    }
-
-    // Use EmuNAND?
-    if (config.options[OPTION_EMUNAND]) {
-        // Yes.
-        patch_emunand(config.options[OPTION_EMUNAND_INDEX]);
-
         wait();
     }
 

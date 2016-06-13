@@ -32,9 +32,13 @@ objects_cfw = $(patsubst $(dir_source)/%.s, $(dir_build)/%.o, \
 all: a9lh patch external
 
 .PHONY: full
-full: all out/corbenik/locale
+full: all contrib out/corbenik/locale
 	cp README.md LICENSE.txt out/
 	cd out && zip -r9 release.zip *
+
+.PHONY: contrib
+contrib:
+	make -C contrib
 
 .PHONY: external
 external:

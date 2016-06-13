@@ -371,43 +371,40 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                 if (debug) {
                     log("and\n");
                 }
-                code += 2;
-                for (i = 0; i < *(code - 1); i++) {
-                    *(current_mode->memory + offset) &= code[i];
+                for (i = 0; i < code[1]; i++) {
+                    current_mode->memory[offset] &= code[i+1];
                 }
-                offset += *(code - 1);
-                code += *(code - 1);
+                offset += code[1];
+                code += code[1] + 2;
                 break;
             case OP_OR:
                 if (debug) {
                     log("or\n");
                 }
-                code += 2;
-                for (i = 0; i < *(code - 1); i++) {
-                    *(current_mode->memory + offset) |= code[i];
+                for (i = 0; i < code[1]; i++) {
+                    current_mode->memory[offset] |= code[i+1];
                 }
-                offset += *(code - 1);
-                code += *(code - 1);
+                offset += code[1];
+                code += code[1] + 2;
                 break;
             case OP_XOR:
                 if (debug) {
                     log("xor\n");
                 }
-                code += 2;
-                for (i = 0; i < *(code - 1); i++) {
-                    *(current_mode->memory + offset) ^= code[i];
+                for (i = 0; i < code[1]; i++) {
+                    current_mode->memory[offset] ^= code[i+1];
                 }
-                offset += *(code - 1);
-                code += *(code - 1);
+                offset += code[1];
+                code += code[1] + 2;
                 break;
             case OP_NOT:
                 if (debug) {
                     log("not\n");
                 }
-                for (i = 0; i < *(code + 1); i++) {
-                    *(current_mode->memory + offset) = ~*(current_mode->memory + offset);
+                for (i = 0; i < code[1]; i++) {
+                    current_mode->memory[offset] = ~current_mode->memory[offset];
                 }
-                offset += *(code + 1);
+                offset += code[1];
                 code += 2;
                 break;
             case OP_VER:
@@ -534,7 +531,7 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
 
 #ifndef LOADER
         if (debug) {
-            fprintf(stderr, "l:%u g:%u e:%u f:%u m:%u\no:0x%x c:0x%x m:0x%x n:%x\n", lt, gt, eq, found, set_mode, offset, code - bytecode, current_mode->memory + offset, code);
+            fprintf(stderr, "l:%u g:%u e:%u f:%u m:%u o:0x%x\nc:0x%x m:0x%x n:%x\n", lt, gt, eq, found, set_mode, offset, code - bytecode, current_mode->memory + offset, code);
             wait();
         }
 #endif

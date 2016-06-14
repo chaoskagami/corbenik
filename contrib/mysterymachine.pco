@@ -1,4 +1,4 @@
-# $name  MysteryMachine Patcher
+# $name  MysteryMachine Patcher (Loader)
 # $desc  Patches Mystery Gift to point to SALT servers
 # $title 000400000011C400 000400000011C500 0004000000055D00 0004000000055E00
 # $ver   01

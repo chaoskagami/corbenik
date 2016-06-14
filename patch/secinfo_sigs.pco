@@ -1,4 +1,4 @@
-# $name  SecureInfo_A Signature Fix
+# $name  SecureInfo_A Signature Fix (Loader)
 # $desc  Allows using unsigned or improperly signed SecureInfo_A files. Useful for region changes.
 # $title 0004013000001702
 # $ver   09

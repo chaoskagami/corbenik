@@ -1,4 +1,4 @@
-# $name  ErrDisp devmode
+# $name  ErrDisp devmode (Loader)
 # $desc  Forces ErrDisp into displaying developer info without developer UNITINFO. Doesn't break eShop.
 # $title 0004003000008A02
 # $ver   09

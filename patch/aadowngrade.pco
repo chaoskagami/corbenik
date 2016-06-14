@@ -1,4 +1,4 @@
-# $name Title Downgrade Fix
+# $name Title Downgrade Fix (11.0 NFIRM)
 # $desc Removes added checks to prevent downgrade (in 11.0)
 # $ver  09
 # $uuid 00

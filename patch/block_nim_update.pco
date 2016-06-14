@@ -1,4 +1,4 @@
-# $name  Block NIM updates
+# $name  Block NIM updates (Loader)
 # $desc  Prevents NIM from downloading system updates.
 # $title 0004013000002C02
 # $ver   09

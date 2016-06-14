@@ -47,7 +47,7 @@ verify_emunand(uint32_t index, uint32_t *off, uint32_t *head)
         *off = offset + 1;
         *head = offset + 1;
 
-        fprintf(stderr, "emunand: found NCSD magic for #%u\n", index);
+        fprintf(stderr, "emunand: found NCSD magic for %u\n", index);
         fprintf(stderr, "emunand: layout is normal\n");
     }
     // Check for GW EmuNAND on SD

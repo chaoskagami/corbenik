@@ -2,16 +2,6 @@
 #include "firm/firm.h"
 #include "firm/headers.h"
 
-#define MENU_MAIN    1
-#define MENU_OPTIONS 2
-#define MENU_PATCHES 3
-#define MENU_INFO    4
-#define MENU_HELP    5
-#define MENU_RESET   6
-#define MENU_POWER   7
-#define MENU_SAVECFG 8
-#define MENU_BOOTME  9
-
 #define MAX_PATCHES ((FCRAM_SPACING / 2) / sizeof(struct options_s))
 struct options_s *patches = (struct options_s *)FCRAM_MENU_LOC;
 uint8_t *enable_list = (uint8_t *)FCRAM_PATCHLIST_LOC;
@@ -191,23 +181,19 @@ list_patches_build(char *name, int desc_is_fname)
 
 int show_menu(struct options_s *options, uint8_t *toggles);
 
-int
+void
 menu_patches()
 {
     show_menu(patches, enable_list);
-
-    return MENU_MAIN;
 }
 
-int
+void
 menu_options()
 {
     show_menu(options, config.options);
-
-    return MENU_MAIN;
 }
 
-int
+void
 menu_info()
 {
     // This menu requres firm to be loaded. Unfortunately.
@@ -234,11 +220,9 @@ menu_info()
 
     need_redraw = 1;
     clear_screen(TOP_SCREEN);
-
-    return MENU_MAIN;
 }
 
-int
+void
 menu_help()
 {
     clear_screen(TOP_SCREEN);
@@ -268,12 +252,10 @@ menu_help()
 
     need_redraw = 1;
     clear_screen(TOP_SCREEN);
-
-    return MENU_MAIN;
 }
 
-int
-menu_reset()
+void
+reset()
 {
     fumount(); // Unmount SD.
 
@@ -284,8 +266,8 @@ menu_reset()
         ;
 }
 
-int
-menu_poweroff()
+void
+poweroff()
 {
     fumount(); // Unmount SD.
 
@@ -296,38 +278,23 @@ menu_poweroff()
         ;
 }
 
-int menu_saveconfig() {
-    save_config(); // Save config, including the reconfigured flag.
-
-	return MENU_MAIN;
-}
-
 static struct options_s main_s[] = {
     // space
-    { 0, "Options",            "", call_fun, (uint32_t)menu_options,    0 },
-    { 0, "Patches",            "", call_fun, (uint32_t)menu_patches,    0 },
-    { 0, "Info",               "", call_fun, (uint32_t)menu_info,       0 },
-    { 0, "Help/Readme",        "", call_fun, (uint32_t)menu_help,       0 },
-    { 0, "Reboot",             "", call_fun, (uint32_t)menu_reset,      0 },
-    { 0, "Power off",          "", call_fun, (uint32_t)menu_poweroff,   0 },
-    { 0, "Save Configuration", "", call_fun, (uint32_t)menu_saveconfig, 0 },
+    { 0, "Options",            "", call_fun, (uint32_t)menu_options, 0 },
+    { 0, "Patches",            "", call_fun, (uint32_t)menu_patches, 0 },
+    { 0, "Info",               "", call_fun, (uint32_t)menu_info,    0 },
+    { 0, "Help/Readme",        "", call_fun, (uint32_t)menu_help,    0 },
+    { 0, "Reboot",             "", call_fun, (uint32_t)reset,        0 },
+    { 0, "Power off",          "", call_fun, (uint32_t)poweroff,     0 },
+    { 0, "Save Configuration", "", call_fun, (uint32_t)save_config,  0 },
     { 0, "Boot Firmware",      "", break_menu, 0, 0 },
 
     // Sentinel.
     { -1, "", "", 0, -1, -1 }, // cursor_min and cursor_max are stored in the last two.
 };
 
-int
-menu_main()
-{
-    // TODO - Stop using different menu code here.
-    show_menu(main_s, NULL);
-
-    return 0;
-}
-
-int
+void
 menu_handler()
 {
-    return menu_main();
+    show_menu(main_s, NULL);
 }

@@ -3,7 +3,7 @@
 
 #include "draw.h"
 
-int menu_poweroff();
+void poweroff();
 uint32_t wait_key();
 
 #define abort(x...)                                                                                                                                            \
@@ -12,7 +12,7 @@ uint32_t wait_key();
         wait_key();                                                                                                                                            \
         clear_disp(stderr);                                                                                                                                    \
         set_cursor(stderr, 0, 0);                                                                                                                              \
-        menu_poweroff();                                                                                                                                       \
+        poweroff();                                                                                                                                            \
     }
 
 #endif

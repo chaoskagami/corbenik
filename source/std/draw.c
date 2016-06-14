@@ -432,10 +432,10 @@ vfprintf(void *channel, const char *format, va_list ap)
 
     char *ref = (char *)format;
 
-    unsigned char *color;
+    unsigned char *color = NULL;
     if (channel == TOP_SCREEN)
         color = &color_top;
-    else if (channel == TOP_SCREEN)
+    else if (channel == BOTTOM_SCREEN)
         color = &color_bottom;
 
     while (ref[0] != '\0') {

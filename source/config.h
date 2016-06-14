@@ -61,7 +61,7 @@ struct options_s
 // Inject svc calls (including backdoor for 11)
 #define OPTION_SVCS 3
 
-// Use builtin ARM9 thread injector.
+// Use builtin ARM9 thread injector. (NYI)
 #define OPTION_ARM9THREAD 4
 
 // Skip menu unless L is held.
@@ -73,14 +73,8 @@ struct options_s
 // Pause for A key on each step.
 #define OPTION_TRACE 7
 
-// Background color is not drawn under text.
-#define OPTION_TRANSP_BG 8
-
-// Framebuffer is preserved from whatever ran before us.
-#define OPTION_NO_CLEAR_BG 9
-
-// Remove Help/Readme from menu.
-#define OPTION_READ_ME 10
+// Freed up options due to code changes.
+// 8, 9, 10
 
 // Enable L2 cache.
 #define OPTION_LOADER_CPU_L2 11

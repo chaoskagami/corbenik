@@ -8,8 +8,8 @@ build: clean $(patsubst %.pco, %.vco, $(wildcard *.pco))
 
 .PHONY: install
 install: build
-	mkdir -p ../out/contrib
-	cp *.vco ../out/contrib/
+	mkdir -p ../out/corbenik/contrib
+	cp *.vco README.md ../out/corbenik/contrib/
 
 %.vco: %.pco
 	../host/bytecode_asm.py $< $@

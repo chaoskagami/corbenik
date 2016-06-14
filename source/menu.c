@@ -22,8 +22,6 @@ static struct options_s options[] = {
     { OPTION_AUTOBOOT, "Autoboot", "Boot the system automatically, unless the R key is held.", boolean_val, 0, 0 },
     { OPTION_SILENCE, "  Silent mode", "Suppress all debug output during autoboot. You'll see the screen turn on, then off.", boolean_val, 0, 0 },
 
-    { OPTION_READ_ME, "Hide `Help`", "Hides the help option from the main menu.", boolean_val, 0, 0 },
-
     // space
     { 0, "", "", not_option, 0, 0 },
     // Patches.
@@ -65,7 +63,7 @@ extern void waitcycles(uint32_t cycles);
 uint32_t
 wait_key()
 {
-    #define ARM9_APPROX_DELAY_MAX 134058675 / 70
+    #define ARM9_APPROX_DELAY_MAX 134058675 / 85
     waitcycles(ARM9_APPROX_DELAY_MAX); // Approximately what a human can input - fine tuning needed (sorry, TASers!)
 
     uint32_t ret = 0, get = 0;

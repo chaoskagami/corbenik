@@ -30,7 +30,7 @@ show_menu(struct options_s *options, uint8_t *toggles)
         set_cursor(TOP_SCREEN, 0, 0);
         header("Any:Back");
         fprintf(stdout, "No entries.\n");
-        wait_key();
+        wait_key(1);
         return 0;
     }
 
@@ -101,7 +101,7 @@ show_menu(struct options_s *options, uint8_t *toggles)
 
         need_redraw = 0;
 
-        uint32_t key = wait_key();
+        uint32_t key = wait_key(1);
 
         switch (key) {
             case BUTTON_UP:

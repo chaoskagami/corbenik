@@ -7,8 +7,6 @@ struct options_s *patches = (struct options_s *)FCRAM_MENU_LOC;
 uint8_t *enable_list = (uint8_t *)FCRAM_PATCHLIST_LOC;
 
 static struct options_s options[] = {
-    // space
-    { 0, "", "", not_option, 0, 0 },
     // Patches.
     { 0, "\x1b[32;40mGeneral Options\x1b[0m", "", not_option, 0, 0 },
 
@@ -61,10 +59,12 @@ static int need_redraw = 1;
 extern void waitcycles(uint32_t cycles);
 
 uint32_t
-wait_key()
+wait_key(int sleep)
 {
-    #define ARM9_APPROX_DELAY_MAX 134058675 / 85
-    waitcycles(ARM9_APPROX_DELAY_MAX); // Approximately what a human can input - fine tuning needed (sorry, TASers!)
+    if (sleep) {
+        #define ARM9_APPROX_DELAY_MAX 134058675 / 85
+        waitcycles(ARM9_APPROX_DELAY_MAX); // Approximately what a human can input - fine tuning needed (sorry, TASers!)
+    }
 
     uint32_t ret = 0, get = 0;
     while (ret == 0) {
@@ -94,7 +94,9 @@ wait_key()
 void
 header(char *append)
 {
-    fprintf(stdout, "\x1b[30;42m.corbenik//%s %s\x1b[0m\n", VERSION, append);
+    fprintf(stdout, "\x1b[30;42m                                                  ");
+    set_cursor(TOP_SCREEN, 0, 0);
+    fprintf(stdout, "\x1b[30;42m Corbenik//%s %s\x1b[0m\n\n", VERSION, append);
 }
 
 static int current_menu_index_patches = 0;
@@ -158,12 +160,27 @@ list_patches_build_back(char *fpath, int desc_is_path)
     return 0;
 }
 
+// This is dual purpose. When we actually list
+// patches to build the cache - desc_is_fname
+// will be set to 1.
+
 void
 list_patches_build(char *name, int desc_is_fname)
 {
     current_menu_index_patches = 0;
 
     memset(enable_list, 0, FCRAM_SPACING / 2);
+
+    if (!desc_is_fname) {
+        strncpy(patches[0].name, "\x1b[40;32mPatches\x1b[0m", 64);
+        strncpy(patches[0].desc, "", 255);
+        patches[0].index = 0;
+        patches[0].allowed = not_option;
+        patches[0].a = 0;
+        patches[0].b = 0;
+
+        current_menu_index_patches += 1;
+    }
 
     char fpath[256];
     strncpy(fpath, name, 256);
@@ -214,7 +231,7 @@ menu_info()
                     "  Version: %s (%x)\n",
             native->version_string, native->version, agb->version_string, agb->version, twl->version_string, twl->version);
 
-    wait_key();
+    wait_key(1);
 
     need_redraw = 1;
     clear_screen(TOP_SCREEN);
@@ -246,7 +263,7 @@ menu_help()
                     " <https://github.com/chaoskagami/corbenik>\n"
                     "\n");
 
-    wait_key();
+    wait_key(1);
 
     need_redraw = 1;
     clear_screen(TOP_SCREEN);
@@ -277,7 +294,6 @@ poweroff()
 }
 
 static struct options_s main_s[] = {
-    // space
     { 0, "Options",            "", call_fun, (uint32_t)menu_options, 0 },
     { 0, "Patches",            "", call_fun, (uint32_t)menu_patches, 0 },
     { 0, "Info",               "", call_fun, (uint32_t)menu_info,    0 },

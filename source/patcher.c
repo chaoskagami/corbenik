@@ -9,7 +9,7 @@
 
 // TODO - Basically all this needs to move to patcher programs.
 
-uint32_t wait_key();
+uint32_t wait_key(int sleep);
 
 extern int patch_services();
 extern int patch_modules();
@@ -23,10 +23,10 @@ void
 wait()
 {
     if (config.options[OPTION_TRACE] && !doing_autoboot) {
-        fprintf(stderr, "                                 [WAIT]");
-        wait_key();
+        fprintf(stderr, "[Waiting...]");
+        wait_key(0); // No delay on traces.
     }
-    fprintf(stderr, "\r                                       \r");
+    fprintf(stderr, "            \r");
 }
 
 void list_patches_build(char *name, int desc_is_fname);

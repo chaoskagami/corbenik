@@ -75,28 +75,32 @@ extern void waitcycles(uint32_t cycles);
 uint32_t
 wait_key()
 {
-    waitcycles(100); // Moves too fast. Hopefully this prevents the issue.
+    #define ARM9_APPROX_DELAY_MAX 134058675 / 70
+    waitcycles(ARM9_APPROX_DELAY_MAX); // Approximately what a human can input - fine tuning needed (sorry, TASers!)
 
-    uint32_t get = 0;
-    while (get == 0) {
-        if (HID_PAD & BUTTON_UP)
-            get = BUTTON_UP;
-        else if (HID_PAD & BUTTON_DOWN)
-            get = BUTTON_DOWN;
-        else if (HID_PAD & BUTTON_RIGHT)
-            get = BUTTON_RIGHT;
-        else if (HID_PAD & BUTTON_LEFT)
-            get = BUTTON_LEFT;
-        else if (HID_PAD & BUTTON_A)
-            get = BUTTON_A;
-        else if (HID_PAD & BUTTON_B)
-            get = BUTTON_B;
-        else if (HID_PAD & BUTTON_X)
-            get = BUTTON_X;
+    uint32_t ret = 0, get = 0;
+    while (ret == 0) {
+        get = HID_PAD;
+
+        if (get & BUTTON_UP)
+            ret = BUTTON_UP;
+        else if (get & BUTTON_DOWN)
+            ret = BUTTON_DOWN;
+        else if (get & BUTTON_RIGHT)
+            ret = BUTTON_RIGHT;
+        else if (get & BUTTON_LEFT)
+            ret = BUTTON_LEFT;
+        else if (get & BUTTON_A)
+            ret = BUTTON_A;
+        else if (get & BUTTON_B)
+            ret = BUTTON_B;
+        else if (get & BUTTON_X)
+            ret = BUTTON_X;
+
     }
-    while (HID_PAD & get)
-        ;
-    return get;
+    while (HID_PAD & ret);
+
+    return ret;
 }
 
 void

@@ -41,31 +41,35 @@ Copy the files to the root of your SD (and optionally, rename arm9loaderhax.bin 
 Without the FIRMs, it cannot boot up your system. You'll need to fetch the following at minimum, and put it at `/corbenik/firmware/native`:
 
 Old 3DS (Native FIRM, 11.0):
-*  http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000002/00000052
+ * firm: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000002/00000052
+ * cetk: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000002/cetk
 
 New 3DS (Native FIRM, 11.0):
-*  http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000002/00000021
+ * firm: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000002/00000021
+ * cetk: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000002/cetk
 
 Note that this is only a recommendation - you can supply near any valid firmware file for your console.
 
-You'll need the firmkey for it as well unless you have decrypted your firmware, and it should be placed at `/corbenik/keys/native.key`. I can't tell you how to get it obviously, but a good place to start may be an older version of Plailect's guide when it still had a section on Cakes.
+You'll need the firmkey for it as well unless you have decrypted your firmware, and it should be placed at `/corbenik/keys/native.key`. I can't tell you where to get it obviously, but there are a few ways to get valid firmware with/without a firmkey and not involving a download from a questionable place:
+
+ * Decrypt the CETK using D9 and extract the firmkey using D9's scripts
+ * Extract the encTitleKey using D9's scripts, and have D9 convert it
+ * Decrypt the firmware with D9 directly
+ * Boot another CFW, then reboot into Corbenik with a cetk for native at `/corbenik/keys/native.cetk`
 
 You can also fetch the agb firm and twl firms to `/corbenik/firmware/agb` and `/corbenik/firmware/twl` respectively. If you don't have the firmkeys for these, you can fetch the cetk for each of them to `/corbenik/keys/agb.cetk` and `/corbenik/keys/twl.cetk`. Boot up the system, go to system settings, and it will extract the firm keys for them after rebooting.
 
 Old 3DS TWL_FIRM (Firmware for DS/DSi games):
  * cetk: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000102/cetk
  * firm: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000102/00000016
-  
 
 New 3DS TWL_FIRM (Firmware for DS/DSi games):
  * cetk: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000102/cetk
  * firm: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000102/00000000
-  
 
 Old 3DS AGB_FIRM (Firmware for GBA games):
  * cetk: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000202/cetk
  * firm: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000202/0000000B
-  
 
 New 3DS AGB_FIRM (Firmware for GBA games):
  * cetk: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000202/cetk

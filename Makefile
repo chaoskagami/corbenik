@@ -2,10 +2,15 @@ rwildcard = $(foreach d, $(wildcard $1*), $(filter $(subst *, %, $2), $d) $(call
 
 PATH := $(PATH):$(DEVKITARM)/bin
 
-CC := arm-none-eabi-gcc
-AS := arm-none-eabi-as
-LD := arm-none-eabi-ld
-OC := arm-none-eabi-objcopy
+CROSS_CC := arm-none-eabi-gcc
+CROSS_AS := arm-none-eabi-as
+CROSS_LD := arm-none-eabi-ld
+CROSS_OC := arm-none-eabi-objcopy
+
+CC ?= gcc
+AS ?= as
+LD ?= ld
+OC ?= objcopy
 
 name := Corbenik
 
@@ -19,17 +24,20 @@ dir_out    := out
 
 REVISION := r$(shell git rev-list --count HEAD):$(shell git rev-parse HEAD | head -c8)
 
-ASFLAGS := -mlittle-endian -mcpu=arm946e-s -march=armv5te
-CFLAGS  := -MMD -MP -Wall -Wextra -Werror -fomit-frame-pointer -Os $(ASFLAGS) -fshort-wchar -fno-builtin -std=gnu11 -DVERSION=\"$(REVISION)\"
-FLAGS   := dir_out=$(abspath $(dir_out)) --no-print-directory
-LDFLAGS := -nostdlib -Wl,-z,defs -lgcc -Wl,-Map,$(dir_build)/link.map
+CROSS_ASFLAGS := -mlittle-endian -mcpu=arm946e-s -march=armv5te
+CROSS_CFLAGS  := -MMD -MP -Wall -Wextra -Werror -fomit-frame-pointer -Os $(ASFLAGS) -fshort-wchar -fno-builtin -std=gnu11 -DVERSION=\"$(REVISION)\"
+CROSS_FLAGS   := dir_out=$(abspath $(dir_out)) --no-print-directory
+CROSS_LDFLAGS := -nostdlib -Wl,-z,defs -lgcc -Wl,-Map,$(dir_build)/link.map
 
 objects_cfw = $(patsubst $(dir_source)/%.s, $(dir_build)/%.o, \
 			  $(patsubst $(dir_source)/%.c, $(dir_build)/%.o, \
 			  $(call rwildcard, $(dir_source), *.s *.c)))
 
 .PHONY: all
-all: a9lh patch external
+all: hosttools a9lh patch external
+
+.PHONY: hosttools
+	make -C host/bdfe
 
 .PHONY: full
 full: all contrib out/corbenik/locale
@@ -75,49 +83,49 @@ $(dir_out)/arm9loaderhax.bin: $(dir_build)/main.bin
 	@cp -av $< $@
 
 $(dir_build)/main.bin: $(dir_build)/main.elf
-	$(OC) -S -O binary $< $@
+	$(CROSS_OC) $(CROSS_OCFLAGS) -S -O binary $< $@
 
 $(dir_build)/main.elf: $(objects_cfw)
-	$(CC) -T linker.ld $(OUTPUT_OPTION) $^ $(LDFLAGS)
+	$(CROSS_CC) -T linker.ld $(OUTPUT_OPTION) $^ $(CROSS_LDFLAGS)
 
 $(dir_build)/%.o: $(dir_source)/%.c
 	@mkdir -p "$(@D)"
-	$(COMPILE.c) $(OUTPUT_OPTION) $<
+	$(CROSS_CC) $(CROSS_CFLAGS) -c $(OUTPUT_OPTION) $<
 
 $(dir_build)/%.o: $(dir_source)/%.s
 	@mkdir -p "$(@D)"
-	$(COMPILE.s) $(OUTPUT_OPTION) $<
+	$(CROSS_AS) $(CROSS_ASFLAGS) -c $(OUTPUT_OPTION) $<
 
 $(dir_build)/fatfs/%.o: $(dir_source)/fatfs/%.c
 	@mkdir -p "$(@D)"
-	$(COMPILE.c) -Wno-unused-function $(OUTPUT_OPTION) $<
+	$(CROSS_CC) $(CROSS_CFLAGS) -c -Wno-unused-function $(OUTPUT_OPTION) $<
 
 $(dir_build)/fatfs/%.o: $(dir_source)/fatfs/%.s
 	@mkdir -p "$(@D)"
-	$(COMPILE.s) $(OUTPUT_OPTION) $<
+	$(CROSS_AS) $(CROSS_ASFLAGS) -c $(OUTPUT_OPTION) $<
 
 $(dir_build)/std/%.o: $(dir_source)/std/%.c
 	@mkdir -p "$(@D)"
-	$(COMPILE.c) -Wno-unused-function $(OUTPUT_OPTION) $<
+	$(CROSS_CC) $(CROSS_CFLAGS) -c -Wno-unused-function $(OUTPUT_OPTION) $<
 
 $(dir_build)/std/%.o: $(dir_source)/std/%.s
 	@mkdir -p "$(@D)"
-	$(COMPILE.s) $(OUTPUT_OPTION) $<
+	$(CROSS_AS) $(CROSS_ASFLAGS) -c $(OUTPUT_OPTION) $<
 
 $(dir_build)/firm/%.o: $(dir_source)/firm/%.c
 	@mkdir -p "$(@D)"
-	$(COMPILE.c) -Wno-unused-function $(OUTPUT_OPTION) $<
+	$(CROSS_CC) $(CROSS_CFLAGS) -c -Wno-unused-function $(OUTPUT_OPTION) $<
 
 $(dir_build)/firm/%.o: $(dir_source)/firm/%.s
 	@mkdir -p "$(@D)"
-	$(COMPILE.s) $(OUTPUT_OPTION) $<
+	$(CROSS_AS) $(CROSS_ASFLAGS) -c $(OUTPUT_OPTION) $<
 
 $(dir_build)/patch/%.o: $(dir_source)/patch/%.c
 	@mkdir -p "$(@D)"
-	$(COMPILE.c) -Wno-unused-function $(OUTPUT_OPTION) $<
+	$(CROSS_CC) $(CROSS_CFLAGS) -c -Wno-unused-function $(OUTPUT_OPTION) $<
 
 $(dir_build)/patch/%.o: $(dir_source)/patch/%.s
 	@mkdir -p "$(@D)"
-	$(COMPILE.s) $(OUTPUT_OPTION) $<
+	$(CROSS_AS) $(CROSS_ASFLAGS) -c $(OUTPUT_OPTION) $<
 
 include $(call rwildcard, $(dir_build), *.d)

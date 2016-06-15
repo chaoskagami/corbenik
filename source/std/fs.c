@@ -4,6 +4,7 @@
 #include "../fatfs/ff.h"
 #include "draw.h"
 #include "memory.h"
+#include "../config.h"
 
 static FATFS fs;
 
@@ -79,6 +80,8 @@ fumount(void)
 
     if (f_mount(NULL, "0:", 1))
         return 1;
+
+    config.options[OPTION_SAVE_LOGS] = 0; // FS unmounted, can't log anymore
 
     return 0;
 }

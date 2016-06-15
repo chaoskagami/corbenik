@@ -6,28 +6,16 @@
 
 #include <stdint.h>
 
-#define SCREEN_TOP_WIDTH 400
-#define SCREEN_TOP_HEIGHT 240
+#define TOP_WIDTH 400
+#define TOP_HEIGHT 240
 
-#define SCREEN_BOTTOM_WIDTH 320
-#define SCREEN_BOTTOM_HEIGHT 240
+#define BOTTOM_WIDTH 320
+#define BOTTOM_HEIGHT 240
 
 #define SCREEN_DEPTH 3
 
-#define SCREEN_TOP_SIZE (SCREEN_TOP_WIDTH * SCREEN_TOP_HEIGHT * SCREEN_DEPTH)
-#define SCREEN_BOTTOM_SIZE (SCREEN_BOTTOM_WIDTH * SCREEN_BOTTOM_HEIGHT * SCREEN_DEPTH)
-
-#define CHARA_HEIGHT 8
-#define CHARA_WIDTH 8
-
-#define TEXT_TOP_WIDTH (SCREEN_TOP_WIDTH / CHARA_WIDTH)
-#define TEXT_TOP_HEIGHT (SCREEN_TOP_HEIGHT / CHARA_HEIGHT)
-
-#define TEXT_BOTTOM_WIDTH (SCREEN_BOTTOM_WIDTH / CHARA_WIDTH)
-#define TEXT_BOTTOM_HEIGHT (SCREEN_BOTTOM_HEIGHT / CHARA_HEIGHT)
-
-#define TEXT_TOP_SIZE (TEXT_TOP_WIDTH * TEXT_TOP_HEIGHT)
-#define TEXT_BOTTOM_SIZE (TEXT_BOTTOM_WIDTH * TEXT_BOTTOM_HEIGHT)
+#define TOP_SIZE (TOP_WIDTH * TOP_HEIGHT * SCREEN_DEPTH)
+#define BOTTOM_SIZE (BOTTOM_WIDTH * BOTTOM_HEIGHT * SCREEN_DEPTH)
 
 enum screen
 {
@@ -51,8 +39,9 @@ _UNUSED static struct framebuffers
 
 void clear_screen(uint8_t *screen);
 void clear_screens();
-void draw_character(uint8_t *screen, const char character, const unsigned int pos_x, const unsigned int pos_y, const uint32_t color_fg,
-                    const uint32_t color_bg);
+void draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, const uint32_t color_fg, const uint32_t color_bg);
+
+void set_font(const char* filename);
 
 #define TOP_SCREEN ((void *)0)
 #define BOTTOM_SCREEN ((void *)2)

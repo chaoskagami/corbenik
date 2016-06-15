@@ -21,6 +21,8 @@ main()
     int c = fmount();
     screen_init();
 
+    set_font(PATH_BITS "/termfont.bin");
+
     if (c) {
         // Failed to mount SD. Bomb out.
         abort("Failed to mount SD card.\n");

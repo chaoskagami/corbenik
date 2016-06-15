@@ -3,7 +3,6 @@
 
 #include "std/types.h"
 #include "std/draw.h"
-#include "std/font.h"
 #include "std/fs.h"
 #include "std/memory.h"
 #include "std/abort.h"

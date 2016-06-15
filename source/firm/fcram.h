@@ -33,4 +33,7 @@ extern void *fcram_temp;
 // Path that the patch enable list is located at.
 #define FCRAM_PATCHLIST_LOC (FCRAM_MENU_LOC + (FCRAM_SPACING / 2))
 
+// Path that the font will be loaded at.
+#define FCRAM_FONT_LOC (FCRAM_PATCHLIST_LOC + (FCRAM_SPACING / 2))
+
 #endif

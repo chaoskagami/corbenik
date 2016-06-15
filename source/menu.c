@@ -258,8 +258,6 @@ menu_help()
                     "  @d0k3, @TuxSH, @Steveice10, @delebile,\n"
                     "  @Normmatt, @b1l1s, @dark-samus, @TiniVi, etc\n"
                     "\n"
-                    "[PROTECT BREAK] DATA DRAIN: OK\n"
-                    "\n"
                     " <https://github.com/chaoskagami/corbenik>\n"
                     "\n");
 
@@ -272,6 +270,8 @@ menu_help()
 void
 reset()
 {
+    fflush(stderr);
+
     fumount(); // Unmount SD.
 
     // Reboot.
@@ -284,6 +284,8 @@ reset()
 void
 poweroff()
 {
+    fflush(stderr);
+
     fumount(); // Unmount SD.
 
     // Reboot.

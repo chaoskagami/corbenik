@@ -335,6 +335,8 @@ boot_firm()
     clear_disp(BOTTOM_SCREEN);
     set_cursor(BOTTOM_SCREEN, 0, 0);
 
+    fflush(stderr); // Flush logs if need be before unmount.
+
     fumount(); // Unmount SD. No longer needed.
 
     // No fprintf will work from here on out.

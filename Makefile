@@ -34,10 +34,17 @@ objects_cfw = $(patsubst $(dir_source)/%.s, $(dir_build)/%.o, \
 			  $(call rwildcard, $(dir_source), *.s *.c)))
 
 .PHONY: all
-all: hosttools a9lh patch external
+all: hosttools font a9lh patch external
 
 .PHONY: hosttools
+hosttools:
 	make -C host/bdfe
+
+.PHONY: font
+font: hosttools
+	./host/conv-font-bin.sh
+	mkdir -p out/corbenik/bits
+	cp host/termfont.bin out/corbenik/bits/
 
 .PHONY: full
 full: all contrib out/corbenik/locale
@@ -73,7 +80,7 @@ out/corbenik/locale: all
 
 .PHONY: clean
 clean:
-	rm -f host/langemu.conf
+	rm -f host/{font-emit,font.h,font_prop.h,termfont.bin}
 	make -C external clean
 	make -C patch clean
 	rm -rf $(dir_out) $(dir_build)

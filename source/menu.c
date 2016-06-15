@@ -91,10 +91,14 @@ wait_key(int sleep)
     return ret;
 }
 
+extern unsigned int font_w;
+
 void
 header(char *append)
 {
-    fprintf(stdout, "\x1b[30;42m                                                  ");
+    for (unsigned int i = 0; i < TOP_WIDTH / font_w; i++) {
+        fprintf(stdout, "\x1b[30;42m ");
+    }
     set_cursor(TOP_SCREEN, 0, 0);
     fprintf(stdout, "\x1b[30;42m Corbenik//%s %s\x1b[0m\n\n", VERSION, append);
 }

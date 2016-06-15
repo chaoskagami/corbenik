@@ -17,8 +17,8 @@ static unsigned int bottom_cursor_x = 0, bottom_cursor_y = 0;
 static size_t  log_size = 0;
 static char    log_buffer[4096]; // Log buffer.
 
-static unsigned int font_w = 8;
-static unsigned int font_h = 8;
+unsigned int font_w = 8;
+unsigned int font_h = 8;
 static unsigned int font_kern = 0;
 
 static unsigned int text_top_width = 20;
@@ -231,7 +231,7 @@ putc(void *buf, const int c)
             cursor_y[0]++;
         }
 
-        while (cursor_y[0] >= height - 1) {
+        while (cursor_y[0] >= height) {
             clear_disp(buf);
             cursor_x[0] = 0;
             cursor_y[0] = 0;

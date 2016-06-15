@@ -223,7 +223,7 @@ menu_info()
     struct firm_signature *agb = get_firm_info(agb_firm_loc);
     struct firm_signature *twl = get_firm_info(twl_firm_loc);
 
-    fprintf(stdout, "\nNATIVE_FIRM / Firmware:\n"
+    fprintf(stdout, "NATIVE_FIRM / Firmware:\n"
                     "  Version: %s (%x)\n"
                     "AGB_FIRM / GBA Firmware:\n"
                     "  Version: %s (%x)\n"
@@ -246,7 +246,7 @@ menu_help()
 
     header("Any:Back");
 
-    fprintf(stdout, "\nCorbenik is another 3DS CFW for power users.\n"
+    fprintf(stdout, "Corbenik is another 3DS CFW for power users.\n"
                     "  It seeks to address some faults in other\n"
                     "  CFWs and is generally just another choice\n"
                     "  for users - but primarily is intended for\n"

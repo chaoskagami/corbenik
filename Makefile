@@ -83,6 +83,7 @@ clean:
 	rm -f host/{font-emit,font.h,font_prop.h,termfont.bin}
 	make -C external clean
 	make -C patch clean
+	make -C host/bdfe clean
 	rm -rf $(dir_out) $(dir_build)
 
 .PHONY: $(dir_out)/arm9loaderhax.bin

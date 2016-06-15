@@ -43,6 +43,7 @@ all: hosttools a9lh patch external
 full: all contrib out/corbenik/locale
 	cp README.md LICENSE.txt out/
 	cd out && zip -r9 release.zip *
+	cd out && sha512sum -b release.zip > release.zip.sha512 # Security.
 
 .PHONY: contrib
 contrib:

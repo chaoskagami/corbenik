@@ -243,7 +243,7 @@ putc(void *buf, const int c)
             } */
         }
 
-        if (isprint(c) && buf == BOTTOM_SCREEN) {
+        if ((isprint(c) || c == '\n') && buf == BOTTOM_SCREEN) {
             log_buffer[log_size] = c;
             log_size++;
             dump_log(0);

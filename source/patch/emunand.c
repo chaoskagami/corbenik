@@ -46,6 +46,7 @@ verify_emunand(uint32_t index, uint32_t *off, uint32_t *head)
 
     if (config.options[OPTION_EMUNAND_REVERSE]) {
         // Subtract offset from back of disk.
+        offset = getMMCDevice(1)->total_size - offset;
     }
 
     // Check for RedNAND/Normal physical layout on SD

@@ -16,6 +16,7 @@ static struct options_s options[] = {
 
     { OPTION_EMUNAND, "Use EmuNAND", "Redirects NAND write/read to the SD.", boolean_val, 0, 0 },
     { OPTION_EMUNAND_INDEX, "  Index", "Which EmuNAND to use. Currently, 10 maximum (but this is arbitrary)", ranged_val, 0, 0x9 },
+    { OPTION_EMUNAND_REVERSE, "  Reverse mode", "EmuNAND is at the back of the disk, not the front.", boolean_val, 0, 0x9 },
 
     { OPTION_AUTOBOOT, "Autoboot", "Boot the system automatically, unless the R key is held.", boolean_val, 0, 0 },
     { OPTION_SILENCE, "  Silent mode", "Suppress all debug output during autoboot. You'll see the screen turn on, then off.", boolean_val, 0, 0 },

@@ -110,6 +110,17 @@ struct options_s
 // (e.g. SaltySD)
 #define OPTION_LOADER_LOADCODE 21
 
+// Calculate EmuNAND at the back of the disk, rather than the front.
+// There's many good reasons for this to be supported:
+//   - Resizable FAT partition
+//     - Shrink to add EmuNAND
+//     = Grow to delete EmuNAND
+//   - Doesn't require copying fucktons of data to manage multiemunand
+// This isn't supported by ANY tools like D9 at the moment
+// (Though I hope they'll consider it -
+//  there's only benefits to users with multiple EmuNANDs)
+#define OPTION_EMUNAND_REVERSE 22
+
 // Save log files during boot and from loader.
 // This will slow things down a bit.
 #define OPTION_SAVE_LOGS 253

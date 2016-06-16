@@ -114,14 +114,6 @@ loader_GetProgramInfo(exheader_header *exheader, u64 prog_handle)
     }
 }
 
-static void
-ConfigureNew3DSCPU(u8 mode)
-{
-	// Note that this is untested as of yet - I haven't got around to it.
-
-    svcKernelSetState(10, mode, 0, 0); // Set N3DS CPU speed.
-}
-
 static Result
 loader_LoadProcess(Handle *process, u64 prog_handle)
 {
@@ -172,19 +164,6 @@ loader_LoadProcess(Handle *process, u64 prog_handle)
     logu64(progid);
     logstr("  validated params\n");
 
-    // Check and set the CPU mode. Possible values: 0 - Keep o3ds speed, 1 -
-    // n3ds speed, -1 force o3ds
-    // This is A-OK because the CPU speed parameter isn't passed through to any
-    // kernel function; meaning it has already been set.
-    u8 n3ds_mode = g_exheader.arm11systemlocalcaps.flags[1] & 0x3; // 0x3 -> L2+800Mhz
-    u8 cpu_mode = get_cpumode(progid);
-    if (cpu_mode != 0xFF) {             // Skip?
-        u8 mode = n3ds_mode | cpu_mode; // Keep flags set by exheader.
-        ConfigureNew3DSCPU(mode);       // We do not use PXIPM because we are a
-                                        // sysmodule. It doesn't make sense.
-                                        // Therefore, we directly call CPU setup.
-    }
-
     // TODO - clean up this shit below. Not only is it unoptimized but it reads like garbage.
 
     // What the addressing info would be if not for expansion. This is passed to
@@ -229,9 +208,11 @@ loader_LoadProcess(Handle *process, u64 prog_handle)
         codesetinfo.rw_size_total = data_mem_size;
         res = svcCreateCodeSet(&codeset, &codesetinfo, (void *)shared_addr.text_addr, (void *)shared_addr.ro_addr, (void *)shared_addr.data_addr);
         if (res >= 0) {
-            closeLogger();
-
             res = svcCreateProcess(process, codeset, g_exheader.arm11kernelcaps.descriptors, count);
+
+            logstr("Created process\n");
+
+            closeLogger();
 
             svcCloseHandle(codeset);
             if (res >= 0) {

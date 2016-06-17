@@ -25,6 +25,7 @@ show_menu(struct options_s *options, uint8_t *toggles)
     int exit = 0;
     int window_size = (TOP_HEIGHT / font_h) - 3;
     int window_top = 0, window_bottom = window_size;
+    int less_mode = 0;
 
     clear_screen(TOP_SCREEN);
 
@@ -49,17 +50,28 @@ show_menu(struct options_s *options, uint8_t *toggles)
                 --cursor_max;
         }
 
+        if (cursor_max == 0)
+            less_mode = 1; // Behave as a pager
+
         // Figure out the min if unset.
         if (cursor_min == -1) {
-            cursor_min = 0;
-            while (options[cursor_min].allowed == not_option)
-                ++cursor_min;
-            cursor_y = cursor_min;
+            if (less_mode == 1) {
+                cursor_max = 0;
+                while (options[cursor_max].index != -1)
+                    ++cursor_max;
+
+                cursor_min = 0;
+            } else {
+                cursor_min = 0;
+                while (options[cursor_min].allowed == not_option)
+                    ++cursor_min;
+                cursor_y = cursor_min;
+            }
         }
 
-        if (cursor_max == cursor_y && cursor_max == 0)
-            header("B:Back");
-        else if (cursor_max == cursor_y)
+        if (less_mode)
+            header("B:Back DPAD:Scroll");
+        else if (cursor_max == cursor_min)
             header("A:Enter B:Back");
         else
             header("A:Enter B:Back DPAD:Nav Select:Info");
@@ -106,31 +118,34 @@ show_menu(struct options_s *options, uint8_t *toggles)
                 if (cursor_min == cursor_max)
                     break;
                 cursor_y -= 1;
-                while ((options[cursor_y].allowed == not_option || (options[cursor_y].allowed == boolean_val_n3ds && !is_n3ds)) && cursor_y >= cursor_min)
+                while ((options[cursor_y].allowed == not_option || (options[cursor_y].allowed == boolean_val_n3ds && !is_n3ds)) && cursor_y >= cursor_min && !less_mode)
                     cursor_y--;
                 break;
             case BUTTON_DOWN:
                 if (cursor_min == cursor_max)
                     break;
                 cursor_y += 1;
-                while ((options[cursor_y].allowed == not_option || (options[cursor_y].allowed == boolean_val_n3ds && !is_n3ds)) && cursor_y < cursor_max)
+                while ((options[cursor_y].allowed == not_option || (options[cursor_y].allowed == boolean_val_n3ds && !is_n3ds)) && cursor_y < cursor_max && !less_mode)
                     cursor_y++;
                 break;
             case BUTTON_LEFT:
                 if (cursor_min == cursor_max)
                     break;
                 cursor_y -= 5;
-                while ((options[cursor_y].allowed == not_option || (options[cursor_y].allowed == boolean_val_n3ds && !is_n3ds)) && cursor_y >= cursor_min)
+                while ((options[cursor_y].allowed == not_option || (options[cursor_y].allowed == boolean_val_n3ds && !is_n3ds)) && cursor_y >= cursor_min && !less_mode)
                     cursor_y--;
                 break;
             case BUTTON_RIGHT:
                 if (cursor_min == cursor_max)
                     break;
                 cursor_y += 5;
-                while ((options[cursor_y].allowed == not_option || (options[cursor_y].allowed == boolean_val_n3ds && !is_n3ds)) && cursor_y < cursor_max)
+                while ((options[cursor_y].allowed == not_option || (options[cursor_y].allowed == boolean_val_n3ds && !is_n3ds)) && cursor_y < cursor_max && !less_mode)
                     cursor_y++;
                 break;
             case BUTTON_A:
+                if (less_mode)
+                    break;
+
                 if (options[cursor_y].allowed == boolean_val || options[cursor_y].allowed == boolean_val_n3ds) {
                     toggles[options[cursor_y].index] = !toggles[options[cursor_y].index];
                 } else if (options[cursor_y].allowed == ranged_val) {

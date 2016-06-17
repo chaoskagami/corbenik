@@ -222,8 +222,6 @@ static struct options_s info_d[] = {
 	{ 0, "  AGB FIRM:    ", "The version of AGB_FIRM in use. This is used to run GBA games.", not_option, 0, 0},
 	{ 0, "  TWL FIRM:    ", "The version of TWL_FIRM in use. This is used to run DS games and DSiware.", not_option, 0, 0},
 	{ 0, "  Corbenik:    " VERSION " (" REL ")", "Corbenik's version.", not_option, 0, 0},
-	{ 0, "", "", not_option, 0, 0},
-	{ 0, "[OK]", "", break_menu, 0, 0 }, // Temporary
 	{ -1, "", "", not_option, 0, 0 }
 };
 static int is_setup_info = 0;
@@ -263,10 +261,8 @@ static struct options_s help_d[] = {
 	ln("  @mid-kid, @Wolfvak, @Reisyukaku, @AuroraWright"),
 	ln("  @d0k3, @TuxSH, @Steveice10, @delebile,"),
 	ln("  @Normmatt, @b1l1s, @dark-samus, @TiniVi, etc"),
-	ln(""),
+    ln(""),
 	ln("  <https://github.com/chaoskagami/corbenik>"),
-	ln(""),
-	{ 0, "[OK]", "", break_menu, 0, 0 }, // Temporary
 	{ -1, "", "", not_option, 0, 0 }
 };
 

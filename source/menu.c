@@ -55,8 +55,6 @@ static struct options_s options[] = {
     { -1, "", "", 0, -1, -1 }, // cursor_min and cursor_max are stored in the last two.
 };
 
-static int need_redraw = 1;
-
 extern void waitcycles(uint32_t cycles);
 
 uint32_t
@@ -251,34 +249,31 @@ menu_info()
     show_menu(info_d, NULL);
 }
 
+#define ln(s) { 0, s, "", not_option, 0, 0 }
+
+static struct options_s help_d[] = {
+	ln("Corbenik is another 3DS CFW for power users."),
+	ln("  It seeks to address some faults in other"),
+	ln("  CFWs and is generally just another choice"),
+	ln("  for users - but primarily is intended for"),
+	ln("  developers and is not for the faint of heart."),
+	ln(""),
+	ln("Credits to people who've helped me put this"),
+	ln("  together by code, documentation, or help:"),
+	ln("  @mid-kid, @Wolfvak, @Reisyukaku, @AuroraWright"),
+	ln("  @d0k3, @TuxSH, @Steveice10, @delebile,"),
+	ln("  @Normmatt, @b1l1s, @dark-samus, @TiniVi, etc"),
+	ln(""),
+	ln("  <https://github.com/chaoskagami/corbenik>"),
+	ln(""),
+	{ 0, "[OK]", "", break_menu, 0, 0 }, // Temporary
+	{ -1, "", "", not_option, 0, 0 }
+};
+
 void
 menu_help()
 {
-    clear_screen(TOP_SCREEN);
-
-    set_cursor(TOP_SCREEN, 0, 0);
-
-    header("Any:Back");
-
-    fprintf(stdout, "Corbenik is another 3DS CFW for power users.\n"
-                    "  It seeks to address some faults in other\n"
-                    "  CFWs and is generally just another choice\n"
-                    "  for users - but primarily is intended for\n"
-                    "  developers.\n"
-                    "\n"
-                    "Credits to people who've helped me put this\n"
-                    "  together either by code or documentation:\n"
-                    "  @mid-kid, @Wolfvak, @Reisyukaku, @AuroraWright\n"
-                    "  @d0k3, @TuxSH, @Steveice10, @delebile,\n"
-                    "  @Normmatt, @b1l1s, @dark-samus, @TiniVi, etc\n"
-                    "\n"
-                    " <https://github.com/chaoskagami/corbenik>\n"
-                    "\n");
-
-    wait_key(1);
-
-    need_redraw = 1;
-    clear_screen(TOP_SCREEN);
+    show_menu(help_d, NULL);
 }
 
 void

@@ -103,7 +103,7 @@ header(char *append)
         fprintf(stdout, "\x1b[30;42m ");
     }
     set_cursor(TOP_SCREEN, 0, 0);
-    fprintf(stdout, "\x1b[30;42m Corbenik//%s %s\x1b[0m\n\n", VERSION, append);
+    fprintf(stdout, "\x1b[30;42m .Corbenik // %s\x1b[0m\n\n", append);
 }
 
 static int current_menu_index_patches = 0;
@@ -215,33 +215,40 @@ menu_options()
     show_menu(options, config.options);
 }
 
+#ifndef REL
+#define REL "master"
+#endif
+
+static struct options_s info_d[] = {
+	{ 0, "  Native FIRM: ", "The version of NATIVE_FIRM in use.", not_option, 0, 0},
+	{ 0, "  AGB FIRM:    ", "The version of AGB_FIRM in use. This is used to run GBA games.", not_option, 0, 0},
+	{ 0, "  TWL FIRM:    ", "The version of TWL_FIRM in use. This is used to run DS games and DSiware.", not_option, 0, 0},
+	{ 0, "  Corbenik:    " VERSION " (" REL ")", "Corbenik's version.", not_option, 0, 0},
+	{ 0, "", "", not_option, 0, 0},
+	{ 0, "[OK]", "", break_menu, 0, 0 }, // Temporary
+	{ -1, "", "", not_option, 0, 0 }
+};
+static int is_setup_info = 0;
+
 void
 menu_info()
 {
-    // This menu requres firm to be loaded. Unfortunately.
-    load_firms(); // Lazy load!
+    if (!is_setup_info) {
+	    // This menu requres firm to be loaded. Unfortunately.
+    	load_firms(); // Lazy load!
 
-    clear_screen(TOP_SCREEN);
+	    struct firm_signature *native = get_firm_info(firm_loc);
+    	struct firm_signature *agb = get_firm_info(agb_firm_loc);
+    	struct firm_signature *twl = get_firm_info(twl_firm_loc);
 
-    set_cursor(TOP_SCREEN, 0, 0);
+	    memcpy(&info_d[0].name[strlen(info_d[0].name)], native->version_string, strlen(native->version_string));
+    	memcpy(&info_d[1].name[strlen(info_d[1].name)], agb->version_string, strlen(agb->version_string));
+    	memcpy(&info_d[2].name[strlen(info_d[2].name)], twl->version_string, strlen(twl->version_string));
 
-    header("Any:Back");
-    struct firm_signature *native = get_firm_info(firm_loc);
-    struct firm_signature *agb = get_firm_info(agb_firm_loc);
-    struct firm_signature *twl = get_firm_info(twl_firm_loc);
+		is_setup_info = 1;
+	}
 
-    fprintf(stdout, "NATIVE_FIRM / Firmware:\n"
-                    "  Version: %s (%x)\n"
-                    "AGB_FIRM / GBA Firmware:\n"
-                    "  Version: %s (%x)\n"
-                    "TWL_FIRM / DSi Firmware:\n"
-                    "  Version: %s (%x)\n",
-            native->version_string, native->version, agb->version_string, agb->version, twl->version_string, twl->version);
-
-    wait_key(1);
-
-    need_redraw = 1;
-    clear_screen(TOP_SCREEN);
+    show_menu(info_d, NULL);
 }
 
 void

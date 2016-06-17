@@ -45,11 +45,11 @@ show_menu(struct options_s *options, uint8_t *toggles)
             while (options[cursor_max].index != -1)
                 ++cursor_max;
 
-            while (options[cursor_max].allowed == not_option)
+            while (options[cursor_max].allowed == not_option && cursor_max > 0)
                 --cursor_max;
         }
 
-        // Figure out the max if unset.
+        // Figure out the min if unset.
         if (cursor_min == -1) {
             cursor_min = 0;
             while (options[cursor_min].allowed == not_option)
@@ -57,7 +57,13 @@ show_menu(struct options_s *options, uint8_t *toggles)
             cursor_y = cursor_min;
         }
 
-        header("A:Enter B:Back DPAD:Nav Select:Info");
+        if (cursor_max == cursor_y && cursor_max == 0)
+            header("B:Back");
+        else if (cursor_max == cursor_y)
+            header("A:Enter B:Back");
+        else
+            header("A:Enter B:Back DPAD:Nav Select:Info");
+
 
         int i = window_top;
         while (options[i].index != -1) { // -1 Sentinel.
@@ -97,21 +103,29 @@ show_menu(struct options_s *options, uint8_t *toggles)
 
         switch (key) {
             case BUTTON_UP:
+                if (cursor_min == cursor_max)
+                    break;
                 cursor_y -= 1;
                 while ((options[cursor_y].allowed == not_option || (options[cursor_y].allowed == boolean_val_n3ds && !is_n3ds)) && cursor_y >= cursor_min)
                     cursor_y--;
                 break;
             case BUTTON_DOWN:
+                if (cursor_min == cursor_max)
+                    break;
                 cursor_y += 1;
                 while ((options[cursor_y].allowed == not_option || (options[cursor_y].allowed == boolean_val_n3ds && !is_n3ds)) && cursor_y < cursor_max)
                     cursor_y++;
                 break;
             case BUTTON_LEFT:
+                if (cursor_min == cursor_max)
+                    break;
                 cursor_y -= 5;
                 while ((options[cursor_y].allowed == not_option || (options[cursor_y].allowed == boolean_val_n3ds && !is_n3ds)) && cursor_y >= cursor_min)
                     cursor_y--;
                 break;
             case BUTTON_RIGHT:
+                if (cursor_min == cursor_max)
+                    break;
                 cursor_y += 5;
                 while ((options[cursor_y].allowed == not_option || (options[cursor_y].allowed == boolean_val_n3ds && !is_n3ds)) && cursor_y < cursor_max)
                     cursor_y++;
@@ -128,6 +142,8 @@ show_menu(struct options_s *options, uint8_t *toggles)
                     ((func_call_t)(options[cursor_y].a))(); // Call 'a' as a function.
                 } else if (options[cursor_y].allowed == break_menu) {
                     exit = 1;
+                    clear_screen(TOP_SCREEN);
+                    cursor_y = cursor_min;
                 }
                 break;
             case BUTTON_X:

@@ -83,13 +83,23 @@ The folder `/contrib` contains additional patches you may add at your own discre
 Setup
 -------------------------
 
+Unless otherwise noted, menu controls are always shown at the top, but for reference:
+ * A      -> enter/select/enable/increase
+ * X      -> Decrease
+ * B      -> back/exit/boot
+ * Up     -> Up one
+ * Down   -> Down one
+ * Left   -> Up five
+ * Right  -> Down five
+ * Select -> Help
+
 For starters, you'll want to go into options and enable `Loader Replacement` to get loader to run patches as well. Even if you don't plan to run any loader patches, this will at very least kill ASLR and anti-OOThax/anti-ninjhax features in the official Nintendo loader.
 
 If you're using 11.0 NATIVE_FIRM like I suggested, you may want to tick `svcBackdoor Fixup` to fix the broken svcBackdoor if you plan on using anything which requires it. This includes HBMenu, some Retroarch cores, etc. Your system will be more secure (as in against malicious code, not as in Nintendo) if you leave it off.
 
 If you need to use an EmuNAND, you'll want to enable `EmuNAND` in options. If you've been using multiple EmuNANDs via Cakes or Luma you can also select the index while you're there with A to increase and X to decrease. This supports both Gateway-style (first sector at back) and standard copy NANDs (RedNAND)
 
-You can enable `Autoboot` if you'd like, including `Silent mode` if you're using something like BootAnim9. As of 0.0.8, EmuNAND will be automatically disabled on AGB reboot, so you need not worry about your savedata with this.
+You can enable `Autoboot` if you'd like, including `Silent mode` if you're using something like BootAnim9. As of 0.0.8, EmuNAND will be automatically disabled on AGB reboot, so you need not worry about your savedata with this. If you want to get back in the menu, hold the `R` button while booting.
 
 If you plan to use TWL/AGB patches or have an O3DS, you should enable `Reboot Hook` in options.
 

@@ -1,4 +1,3 @@
-
 ![Corbenik](https://raw.github.com/wiki/chaoskagami/corbenik/corbenik-logo.png)
 
 Corbenik is another CFW for the 3DS somewhat like cakes, but using bytecode-based patches. This allows for doing most of what it does, but taking the control level to its' logical extreme.
@@ -155,7 +154,7 @@ Credits
  * Code segment dumping + loading
 
 @AuroraWright
- * RE work, patches, EmuNAND, and Reboot/Firmlaunch C code. ttps://github.com/AuroraWright/Luma3ds
+ * RE work, patches, EmuNAND, and Reboot/Firmlaunch C code. https://github.com/AuroraWright/Luma3ds
 
 @Reisyukaku
  * For the 'Force TestMenu' patch, and RE work. Also coded ReiNand, which some parts of Luma are derived from and thus some parts of this.

@@ -1,0 +1,15 @@
+# $name Disable SVC permission checks
+# $desc Disables permission checks on SVC calls, so all titles have permission to use all SVC calls. This is a potential security hazard.
+# $ver  01
+# $uuid 0002
+
+# Status: Working
+
+# Original patch by Subv. Conversion by @Wolfvak.
+
+rel  native_s0
+
+find EAFFFF0A
+abortnf
+set  00F020E3
+

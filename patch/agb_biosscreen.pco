@@ -1,5 +1,5 @@
 # $name  AGB Bootscreen
-# $desc  Force usage of GBA bios in AGB_FIRM.
+# $desc  Force usage of GBA bios in AGB_FIRM. Games must pass the Nintendo logo check. If you see garbage instead of Nintendo, turn this off.
 # $ver   09
 # $uuid  35
 

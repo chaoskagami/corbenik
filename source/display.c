@@ -8,6 +8,14 @@ extern int is_n3ds;
 
 extern unsigned int font_h;
 
+void show_help(char* help) {
+    clear_screen(TOP_SCREEN);
+    set_cursor(TOP_SCREEN, 0, 0);
+    header("Any:Back");
+    fprintf(stdout, "%s", help);
+    wait_key(1);
+}
+
 int
 show_menu(struct options_s *options, uint8_t *toggles)
 {
@@ -49,7 +57,7 @@ show_menu(struct options_s *options, uint8_t *toggles)
             cursor_y = cursor_min;
         }
 
-        header("A:Enter B:Back DPAD:Nav");
+        header("A:Enter B:Back DPAD:Nav Select:Info");
 
         int i = window_top;
         while (options[i].index != -1) { // -1 Sentinel.
@@ -134,6 +142,12 @@ show_menu(struct options_s *options, uint8_t *toggles)
                 exit = 1;
                 clear_screen(TOP_SCREEN);
                 cursor_y = cursor_min;
+                break;
+            case BUTTON_SEL:
+                if (options[cursor_y].desc[0] != 0) {
+                    show_help(options[cursor_y].desc);
+                    clear_screen(TOP_SCREEN);
+                }
                 break;
         }
 

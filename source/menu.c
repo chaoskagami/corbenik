@@ -10,42 +10,42 @@ static struct options_s options[] = {
     // Patches.
     { 0, "\x1b[32;40mGeneral Options\x1b[0m", "", not_option, 0, 0 },
 
-    { OPTION_SVCS, "svcBackdoor Fixup", "Reinserts svcBackdoor on 11.0 NATIVE_FIRM.", boolean_val, 0, 0 },
+    { OPTION_SVCS, "svcBackdoor Fixup", "Reinserts svcBackdoor on 11.0 NATIVE_FIRM. svcBackdoor allows executing arbitrary functions with ARM11 kernel permissions, and is required by some (poorly coded) applications.", boolean_val, 0, 0 },
 
-    { OPTION_REBOOT, "Reboot Hook", "Hooks firmlaunch to allow largemem games on o3DS (and allow patching TWL/AGB on all consoles)", boolean_val, 0, 0 },
+    { OPTION_REBOOT, "Reboot Hook", "Hooks firmlaunch to allow largemem games on o3DS. Also allows patching TWL/AGB on all consoles.", boolean_val, 0, 0 },
 
-    { OPTION_EMUNAND, "Use EmuNAND", "Redirects NAND write/read to the SD.", boolean_val, 0, 0 },
-    { OPTION_EMUNAND_INDEX, "  Index", "Which EmuNAND to use. Currently, 10 maximum (but this is arbitrary)", ranged_val, 0, 0x9 },
-    { OPTION_EMUNAND_REVERSE, "  Reverse layout", "EmuNAND is at the end of the disk, not the start.", boolean_val, 0, 0x9 },
+    { OPTION_EMUNAND, "Use EmuNAND", "Redirects NAND write/read to the SD. This supports both Gateway and redirected layouts.", boolean_val, 0, 0 },
+    { OPTION_EMUNAND_INDEX, "  Index", "Which EmuNAND to use. If you only have one, you want 0. Currently the maximum supported is 10 (0-9), but this is arbitrary.", ranged_val, 0, 0x9 },
+    { OPTION_EMUNAND_REVERSE, "  Reverse layout", "(Warning - Experimental!) Calculate EmuNAND sector from the end of the disk, not the start. This isn't supported by tools like Decrypt9, but has some advantages.", boolean_val, 0, 0x9 },
 
-    { OPTION_AUTOBOOT, "Autoboot", "Boot the system automatically, unless the R key is held.", boolean_val, 0, 0 },
-    { OPTION_SILENCE, "  Silent mode", "Suppress all debug output during autoboot. You'll see the screen turn on, then off.", boolean_val, 0, 0 },
+    { OPTION_AUTOBOOT, "Autoboot", "Boot the system automatically, unless the R key is held while booting.", boolean_val, 0, 0 },
+    { OPTION_SILENCE, "  Silent mode", "Suppress all debug output during autoboot. You'll see the screen turn on and then off once.", boolean_val, 0, 0 },
 
     // space
     { 0, "", "", not_option, 0, 0 },
     // Patches.
     { 0, "\x1b[32;40mLoader Options\x1b[0m", "", not_option, 0, 0 },
 
-    { OPTION_LOADER, "Use Loader Replacement", "Replaces loader with one capable of the below and also applying bytecode patches.", boolean_val, 0, 0 },
-    { OPTION_LOADER_CPU_L2, "  CPU - L2 cache (n3ds)", "Forces the system to use the L2 cache. Ignored if not a N3DS.", boolean_val_n3ds, 0, 0 },
-    { OPTION_LOADER_CPU_800MHZ, "  CPU - 800Mhz (n3ds)", "Forces the system to run in 800Mhz mode. Ignored if not a N3DS.", boolean_val_n3ds, 0, 0 },
-    { OPTION_LOADER_LANGEMU, "  Language Emulation", "Reads language emulation configuration and imitates the region/language.", boolean_val, 0, 0 },
-    { OPTION_LOADER_LOADCODE, "  Load Code Sections", "Loads code sections from SD card and patches afterwards.", boolean_val, 0, 0 },
+    { OPTION_LOADER, "Use Loader Replacement", "Replaces loader with one capable of extra features. You should enable this even if you don't plan to use loader-based patches to kill ASLR and the Ninjhax/OOThax checks.", boolean_val, 0, 0 },
+    { OPTION_LOADER_CPU_L2, "  CPU - L2 cache", "Forces the system to use the L2 cache on all applications. If you have issues with crashes, try turning this off.", boolean_val_n3ds, 0, 0 },
+    { OPTION_LOADER_CPU_800MHZ, "  CPU - 800Mhz", "Forces the system to run in 800Mhz mode on all applications.", boolean_val_n3ds, 0, 0 },
+    { OPTION_LOADER_LANGEMU, "  Language Emulation", "Reads language emulation configuration from `" PATH_LOCEMU "` and imitates the region/language.", boolean_val, 0, 0 },
+    { OPTION_LOADER_LOADCODE, "  Load Code Sections", "Loads code sections (text/ro/data) from SD card and patches afterwards.", boolean_val, 0, 0 },
 
-    { OPTION_LOADER_DUMPCODE, "  Dump Title Code Sections",
-      "Dumps code sections for titles to SD card the first time they're loaded. Slows things down considerably.", boolean_val, 0, 0 },
+    { OPTION_LOADER_DUMPCODE, "  Dump Code Sections",
+      "Dumps code sections for titles to SD card the first time they're loaded. Slows things down on first launch.", boolean_val, 0, 0 },
 
     { OPTION_LOADER_DUMPCODE_ALL, "    + System Titles",
-      "Dumps code sections for system titles, too. Expect to sit at a black screen for >3mins on the first time.", boolean_val, 0, 0 },
+      "Dumps code sections for system titles, too. Expect to sit at a blank screen for >3mins on the first time you do this, because it dumps everything.", boolean_val, 0, 0 },
 
     // space
     { 0, "", "", not_option, 0, 0 },
     // Patches.
     { 0, "\x1b[32;40mDeveloper Options\x1b[0m", "", not_option, 0, 0 },
 
-    { OPTION_TRACE, "Step Through", "After each important step, [WAIT] will be shown and you'll need to press a key. Debug.", boolean_val, 0, 0 },
+    { OPTION_TRACE, "Step Through", "After each important step, [WAIT] will be shown and you'll need to press a key. Debug feature.", boolean_val, 0, 0 },
     { OPTION_OVERLY_VERBOSE, "Verbose", "Output more debug information than the average user needs.", boolean_val, 0, 0 },
-    { OPTION_SAVE_LOGS, "Logging", "Save logs to the corbenik folder. Slows operation a bit.", boolean_val, 0, 0 },
+    { OPTION_SAVE_LOGS, "Logging", "Save logs to `" PATH_CFW "` as `boot.log` and `loader.log`. Slows operation a bit.", boolean_val, 0, 0 },
 
     //    { OPTION_ARM9THREAD,        "ARM9 Thread", boolean_val, 0, 0 },
     //    { IGNORE_PATCH_DEPS,   "Ignore dependencies", boolean_val, 0, 0 },
@@ -85,6 +85,8 @@ wait_key(int sleep)
             ret = BUTTON_B;
         else if (get & BUTTON_X)
             ret = BUTTON_X;
+        else if (get & BUTTON_SEL)
+            ret = BUTTON_SEL;
 
     }
     while (HID_PAD & ret);
@@ -301,14 +303,14 @@ poweroff()
 }
 
 static struct options_s main_s[] = {
-    { 0, "Options",            "", call_fun, (uint32_t)menu_options, 0 },
-    { 0, "Patches",            "", call_fun, (uint32_t)menu_patches, 0 },
-    { 0, "Info",               "", call_fun, (uint32_t)menu_info,    0 },
-    { 0, "Help/Readme",        "", call_fun, (uint32_t)menu_help,    0 },
-    { 0, "Reboot",             "", call_fun, (uint32_t)reset,        0 },
-    { 0, "Power off",          "", call_fun, (uint32_t)poweroff,     0 },
-    { 0, "Save Configuration", "", call_fun, (uint32_t)save_config,  0 },
-    { 0, "Boot Firmware",      "", break_menu, 0, 0 },
+    { 0, "Options",            "Internal options for the CFW. These are part of Corbenik itself.", call_fun, (uint32_t)menu_options, 0 },
+    { 0, "Patches",            "External bytecode patches found in `" PATH_PATCHES "`. You can choose which to enable.", call_fun, (uint32_t)menu_patches, 0 },
+    { 0, "Info",               "Shows the current FIRM versions (and loads them, if needed)", call_fun, (uint32_t)menu_info,    0 },
+    { 0, "Help/Readme",        "Displays info. Why are you opening help on help? That's kind of silly.", call_fun, (uint32_t)menu_help,    0 },
+    { 0, "Reboot",             "Reboots the console.", call_fun, (uint32_t)reset,        0 },
+    { 0, "Power off",          "Powers off the console.", call_fun, (uint32_t)poweroff,     0 },
+    { 0, "Save Configuration", "Save the configuration. You must do this prior to booting, otherwise nothing is done.", call_fun, (uint32_t)save_config,  0 },
+    { 0, "Boot Firmware",      "Generates caches, patches the firmware, and boots it.", break_menu, 0, 0 },
 
     // Sentinel.
     { -1, "", "", 0, -1, -1 }, // cursor_min and cursor_max are stored in the last two.

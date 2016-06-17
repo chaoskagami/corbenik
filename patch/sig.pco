@@ -1,5 +1,5 @@
 # $name Signature Fix
-# $desc Disables signature checks on content.
+# $desc Disables signature checks on all content.
 # $ver  09
 # $uuid 0c
 # $flags require

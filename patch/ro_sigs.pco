@@ -1,5 +1,5 @@
 # $name  RO signature fix (Loader)
-# $desc  Allows usage of unsigned CRO files. This is useful for romhacks.
+# $desc  Allows usage of unsigned CRO files. This is useful for romhacks of ORAS, for example.
 # $title 0004013000003702
 # $ver   09
 # $uuid  0a

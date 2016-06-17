@@ -1,5 +1,5 @@
 # $name ARM11 XN Disable
-# $desc Disables the XN bit on the ARM11 kernel to allow executing code from all memory. May be unsafe.
+# $desc Disables the XN bit on the ARM11 kernel to allow executing code from memory. May be unsafe.
 # $ver  09
 # $uuid 06
 # $flags devmode

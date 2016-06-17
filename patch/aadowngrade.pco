@@ -1,5 +1,5 @@
 # $name Title Downgrade Fix (11.0 NFIRM)
-# $desc Removes added checks to prevent downgrade (in 11.0)
+# $desc Removes added checks to prevent downgrade of system titles (in 11.0 NATIVE_FIRM)
 # $ver  09
 # $uuid 00
 # $flags require

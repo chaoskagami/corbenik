@@ -1,7 +1,7 @@
-# $name  Region free HOME
+# $name  Region free HOME (Loader)
 # $desc  Allows launching installed software from any region.
 # $title 0004003000008F02 0004003000008202 0004003000009802 000400300000A102 000400300000A902 000400300000B102
-# $ver   01
+# $ver   09
 # $uuid  09
 
 rel exe_text
@@ -9,6 +9,7 @@ rel exe_text
 # Status: needs loader
 
 find 000055E30110A0E3
+abortnf
 
 # 16
 back 10

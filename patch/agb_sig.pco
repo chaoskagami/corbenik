@@ -1,29 +1,14 @@
-# $name  AGB Siganture fix
+# $name  AGB Signature fix
 # $desc  Patches signatures in AGB_FIRM
-# $ver   01
+# $ver   09
 # $uuid  39
 
-# TODO - Make dynamic.
-#        This is also terribly inconvienent without labels.
+# TODO - Use proper section.
 
 rel agb
 
 # #############################
 
-# New3DS Sigs (1)
-seek  0009DF64
-test  C117491C31D0
-jmpne 6
+find  C117491C31D0
+abortnf
 set   00204EB070BD
-
-jmp   8
-
-#########################
-
-# OLD3DS Sigs (6)
-seek  0009D2A8
-set   00204EB070BD
-
-# #######################
-
-# End (8)

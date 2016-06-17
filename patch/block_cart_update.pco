@@ -1,7 +1,7 @@
-# $name  Block Cart Updates
+# $name  Block Cart Updates (Loader)
 # $desc  Blocks update checks on cartridges (and also allows region free carts, as a byproduct.)
 # $title 0004013000008002
-# $ver   01
+# $ver   09
 # $uuid  01
 
 rel exe_text
@@ -9,7 +9,9 @@ rel exe_text
 # Status: needs loader
 
 find 0C18E1D8
+abortnf
 set  0B1821C8
 
 find 0C18E1D8
+abortnf
 set  0B1821C8

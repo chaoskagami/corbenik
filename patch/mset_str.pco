@@ -1,15 +1,13 @@
-# $name  MSET Version
+# $name  MSET Version (Loader)
 # $desc  Replaces 'Ver.' with CFW info.
 # $title 0004001000021000 0004001000020000 0004001000022000 0004001000026000 0004001000027000 0004001000028000
-# $ver   01
+# $ver   09
 # $uuid  07
 
 rel exe_text
 
-# Status: needs loader
+find u"Ver."
 
-# u"Ver."
-find 5600650072002e00
+abortnf
 
-# u".hax"
-set  2e006800610078
+set  u".hack//%d%d%d:%d%ls"

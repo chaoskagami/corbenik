@@ -26,12 +26,22 @@
 #define OP_SEEK 0x0F
 #define OP_N3DS 0x10
 
+#define OP_ABORT   0x18
+#define OP_ABORTEQ 0x28
+#define OP_ABORTNE 0x38
+#define OP_ABORTLT 0x48
+#define OP_ABORTGT 0x58
+#define OP_ABORTF  0x68
+#define OP_ABORTNF 0x78
+
 #define OP_JMPEQ 0x17
 #define OP_JMPNE 0x27
 #define OP_JMPLT 0x37
 #define OP_JMPGT 0x47
 #define OP_JMPLE 0x57
 #define OP_JMPGE 0x67
+#define OP_JMPF  0x77
+#define OP_JMPNF 0x87
 
 #define OP_NEXT 0xFF
 
@@ -50,7 +60,7 @@ int wait();
 struct mode
 {
     uint8_t *memory;
-    uint32_t size;
+    size_t size;
 };
 struct mode modes[21];
 int init_bytecode = 0;
@@ -68,13 +78,16 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
     if (!init_bytecode) {
 #ifndef LOADER
         modes[0].memory = (uint8_t *)firm_loc;
-        modes[0].size = FCRAM_SPACING; // NATIVE_FIRM
+        modes[0].size   = firm_loc->section[0].size + firm_loc->section[1].size + sizeof(firm_h) +
+                          firm_loc->section[2].size + firm_loc->section[3].size; // NATIVE_FIRM
 
         modes[1].memory = (uint8_t *)agb_firm_loc;
-        modes[1].size = FCRAM_SPACING * 2; // AGB_FIRM
+        modes[1].size   = agb_firm_loc->section[0].size + agb_firm_loc->section[1].size + sizeof(firm_h) +
+                          agb_firm_loc->section[2].size + agb_firm_loc->section[3].size; // AGB_FIRM
 
         modes[2].memory = (uint8_t *)twl_firm_loc;
-        modes[2].size = FCRAM_SPACING * 2; // TWL_FIRM
+        modes[2].size   = twl_firm_loc->section[0].size + twl_firm_loc->section[1].size + sizeof(firm_h) +
+                          twl_firm_loc->section[2].size + twl_firm_loc->section[3].size; // TWL_FIRM
 
         // NATIVE_FIRM Process9 (This is also the default mode.)
         modes[3].memory = (uint8_t *)firm_p9_exefs + sizeof(exefs_h) + firm_p9_exefs->fileHeaders[0].offset;
@@ -130,154 +143,223 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
     }
 
 #ifdef LOADER
-    uint32_t set_mode = 18;
+    size_t set_mode = 18;
 #else
-    uint32_t set_mode = 3;
+    size_t set_mode = 3;
 #endif
     struct mode *current_mode = &modes[set_mode];
 
-    uint32_t offset = 0;
+    size_t offset = 0, new_offset = 0;
 
-    uint32_t i;
+    size_t i;
 
-    int eq = 0, gt = 0, lt = 0; // Flags.
+    int eq = 0, gt = 0, lt = 0, found = 0; // Flags.
 
     uint8_t *code = bytecode;
     uint8_t *end = code + len;
     while (code < end && code >= bytecode) {
         switch (*code) {
             case OP_NOP:
-                if (debug)
+                if (debug) {
                     log("nop\n");
+                }
                 code++;
                 break;
             case OP_REL: // Change relativity.
-                if (debug)
+                if (debug) {
+#ifdef LOADER
                     log("rel\n");
+#else
+                    fprintf(stderr, "rel %u\n", *(code+1));
+#endif
+                }
                 code++;
                 current_mode = &modes[*code];
                 set_mode = *code;
                 code++;
                 break;
             case OP_FIND: // Find pattern.
-                if (debug)
+                if (debug) {
+#ifdef LOADER
                     log("find\n");
-                code += 2;
-                offset = (uint32_t)memfind(current_mode->memory + offset, current_mode->size - offset, code, *(code - 1));
-                if ((uint8_t *)offset == NULL) {
-                    // Error. Abort.
-                    abort("Find opcode failed.\n");
+#else
+                    fprintf(stderr, "find %u ...\n", code[1]);
+#endif
                 }
-                offset = offset - (uint32_t)current_mode->memory;
-                code += *(code - 1);
+                found = 0;
+                new_offset = (size_t)memfind(current_mode->memory + offset, current_mode->size - offset, &code[2], code[1]);
+                if ((uint8_t *)new_offset != NULL) {
+                    // Pattern found, set found state flag
+                    found = 1;
+                    offset = new_offset - (size_t)current_mode->memory;
+                }
+                code += code[1] + 2;
                 break;
             case OP_BACK:
-                if (debug)
+                if (debug) {
+#ifdef LOADER
                     log("back\n");
-                code++;
-                if (offset < *code) {
-                    // Went out of bounds. Error.
-                    abort("Back underflowed.\n");
+#else
+                    fprintf(stderr, "back %u\n", *(code+1));
+#endif
                 }
-                offset -= *code;
-                code++;
+                offset -= code[1];
+                code += 2;
                 break;
             case OP_FWD:
-                if (debug)
+                if (debug) {
+#ifdef LOADER
                     log("fwd\n");
-                code++;
-                offset += *code;
-                if (offset >= current_mode->size) {
-                    // Went out of bounds. Error.
-                    abort("Fwd overflowed.\n");
+#else
+                    fprintf(stderr, "fwd %u\n", *(code+1));
+#endif
                 }
-                code++;
+                offset += code[1];
+                code += 2;
                 break;
             case OP_SET: // Set data.
-                if (debug)
+                if (debug) {
+#ifdef LOADER
                     log("set\n");
-                code += 2;
-                memcpy(current_mode->memory + offset, code, *(code - 1));
-                offset += *(code - 1);
-                code += *(code - 1);
+#else
+                    fprintf(stderr, "set %u, ...\n", code[1]);
+#endif
+                }
+                memcpy(current_mode->memory + offset, &code[2], code[1]);
+                offset += code[1];
+                code += code[1] + 2;
                 break;
             case OP_TEST: // Test data.
-                if (debug)
+                if (debug) {
+#ifdef LOADER
                     log("test\n");
-                code += 2;
-                eq = memcmp(current_mode->memory + offset, code, *(code - 1));
+#else
+                    fprintf(stderr, "test %u, ...\n", code[1]);
+#endif
+                }
+                eq = memcmp(current_mode->memory + offset, &code[2], code[1]);
                 if (eq < 0)
                     lt = 1;
                 if (eq > 0)
                     gt = 1;
                 eq = !eq;
-                code += *(code - 1);
+                code += code[1] + 2;
                 break;
             case OP_JMP: // Jump to offset.
-                if (debug)
-                    log("jmp\n");
                 code++;
                 code = bytecode + (code[0] + (code[1] << 8));
+                if (debug) {
+#ifdef LOADER
+                    log("jmp\n");
+#else
+                    fprintf(stderr, "jmp %u\n", code - bytecode);
+#endif
+                }
                 break;
             case OP_JMPEQ: // Jump to offset if equal
-                if (debug)
-                    log("jmpeq\n");
                 code++;
                 if (eq)
                     code = bytecode + (code[0] + (code[1] << 8));
                 else
                     code += 2;
+                if (debug) {
+#ifdef LOADER
+                    log("jmpeq\n");
+#else
+                    fprintf(stderr, "jmpeq %u\n", code - bytecode);
+#endif
+                }
                 break;
             case OP_JMPNE: // Jump to offset if not equal
-                if (debug)
-                    log("jmpne\n");
                 code++;
                 if (!eq)
                     code = bytecode + (code[0] + (code[1] << 8));
                 else
                     code += 2;
+                if (debug) {
+#ifdef LOADER
+                    log("jmpne\n");
+#else
+                    fprintf(stderr, "jmpeq %u\n", code - bytecode);
+#endif
+                }
                 break;
             case OP_JMPLT: // Jump to offset if less than
-                if (debug)
-                    log("jmplt\n");
                 code++;
                 if (lt)
                     code = bytecode + (code[0] + (code[1] << 8));
                 else
                     code += 2;
+                if (debug) {
+#ifdef LOADER
+                    log("jmplt\n");
+#else
+                    fprintf(stderr, "jmplt %u\n", code - bytecode);
+#endif
+                }
                 break;
             case OP_JMPGT: // Jump to offset if greater than
-                if (debug)
-                    log("jmpgt\n");
                 code++;
                 if (gt)
                     code = bytecode + (code[0] + (code[1] << 8));
                 else
                     code += 2;
+                if (debug) {
+#ifdef LOADER
+                    log("jmplt\n");
+#else
+                    fprintf(stderr, "jmplt %u\n", code - bytecode);
+#endif
+                }
                 break;
             case OP_JMPLE: // Jump to offset if less than or equal
-                if (debug)
-                    log("jmple\n");
                 code++;
                 if (lt || eq)
                     code = bytecode + (code[0] + (code[1] << 8));
                 else
                     code += 2;
+                if (debug) {
+#ifdef LOADER
+                    log("jmplt\n");
+#else
+                    fprintf(stderr, "jmplt %u\n", code - bytecode);
+#endif
+                }
                 break;
-            case OP_JMPGE: // Jump to offset if greater than or equal
-                if (debug)
-                    log("jmpge\n");
+            case OP_JMPF: // Jump to offset if pattern found
                 code++;
-                if (gt || eq)
+                if (found)
                     code = bytecode + (code[0] + (code[1] << 8));
                 else
                     code += 2;
+                if (debug) {
+#ifdef LOADER
+                    log("jmplt\n");
+#else
+                    fprintf(stderr, "jmplt %u\n", code - bytecode);
+#endif
+                }
+                break;
+            case OP_JMPNF: // Jump to offset if pattern NOT found
+                code++;
+                if (!found)
+                    code = bytecode + (code[0] + (code[1] << 8));
+                else
+                    code += 2;
+                if (debug) {
+#ifdef LOADER
+                    log("jmplt\n");
+#else
+                    fprintf(stderr, "jmplt %u\n", code - bytecode);
+#endif
+                }
                 break;
             case OP_CLF: // Clear flags.
-                if (debug)
+                if (debug) {
                     log("clf\n");
+                }
                 code++;
-                gt = lt = eq = 0;
+                found = gt = lt = eq = 0;
                 break;
             case OP_REWIND:
                 if (debug)
@@ -286,47 +368,49 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                 offset = 0;
                 break;
             case OP_AND:
-                if (debug)
+                if (debug) {
                     log("and\n");
-                code += 2;
-                for (i = 0; i < *(code - 1); i++) {
-                    *(current_mode->memory + offset) &= code[i];
                 }
-                offset += *(code - 1);
-                code += *(code - 1);
+                for (i = 0; i < code[1]; i++) {
+                    current_mode->memory[offset] &= code[i+2];
+                }
+                offset += code[1];
+                code += code[1] + 2;
                 break;
             case OP_OR:
-                if (debug)
+                if (debug) {
                     log("or\n");
-                code += 2;
-                for (i = 0; i < *(code - 1); i++) {
-                    *(current_mode->memory + offset) |= code[i];
                 }
-                offset += *(code - 1);
-                code += *(code - 1);
+                for (i = 0; i < code[1]; i++) {
+                    current_mode->memory[offset] |= code[i+2];
+                }
+                offset += code[1];
+                code += code[1] + 2;
                 break;
             case OP_XOR:
-                if (debug)
+                if (debug) {
                     log("xor\n");
-                code += 2;
-                for (i = 0; i < *(code - 1); i++) {
-                    *(current_mode->memory + offset) ^= code[i];
                 }
-                offset += *(code - 1);
-                code += *(code - 1);
+                for (i = 0; i < code[1]; i++) {
+                    current_mode->memory[offset] ^= code[i+2];
+                }
+                offset += code[1];
+                code += code[1] + 2;
                 break;
             case OP_NOT:
-                if (debug)
+                if (debug) {
                     log("not\n");
-                for (i = 0; i < *(code + 1); i++) {
-                    *(current_mode->memory + offset) = ~*(current_mode->memory + offset);
                 }
-                offset += *(code + 1);
+                for (i = 0; i < code[1]; i++) {
+                    current_mode->memory[offset] = ~current_mode->memory[offset];
+                }
+                offset += code[1];
                 code += 2;
                 break;
             case OP_VER:
-                if (debug)
+                if (debug) {
                     log("ver\n");
+                }
                 code++;
                 eq = memcmp(&ver, code, 2);
                 if (eq < 0)
@@ -337,29 +421,79 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                 code += 2;
                 break;
             case OP_N3DS:
-                if (debug)
-                    log("ver\n");
+                if (debug) {
+                    log("n3ds\n");
+                }
                 code++;
                 eq = is_n3ds;
-                code += 2;
                 break;
             case OP_SEEK: // Jump to offset if greater than or equal
-                if (debug)
-                    log("seek\n");
                 code++;
                 offset = code[0] + (code[1] << 8) + (code[2] << 16) + (code[3] << 24);
-                if (offset > current_mode->size) { // Went out of bounds. Error.
-#ifndef LOADER
-                    fprintf(stderr, "%x", offset);
+                if (debug) {
+#ifdef LOADER
+                    log("seek\n");
+#else
+                    fprintf(stderr, "seek %u\n", offset);
 #endif
-                    abort("seeked out of bounds\n");
                 }
-
                 code += 4;
                 break;
-            case OP_NEXT:
+            case OP_ABORT:
+                code++;
                 if (debug)
+                    log("abort\n");
+
+                abort("abort triggered, halting VM!\n")
+                break;
+            case OP_ABORTEQ:
+                code++;
+                if (debug)
+                    log("aborteq\n");
+                if (eq)
+                    abort("eq flag not set, halting VM!\n")
+                break;
+            case OP_ABORTNE:
+                code++;
+                if (debug)
+                    log("abortlt\n");
+                if (!eq)
+                    abort("eq flag not set, halting VM!\n")
+                break;
+            case OP_ABORTLT:
+                code++;
+                if (debug)
+                    log("abortlt\n");
+                if (lt)
+                    abort("lt flag set, halting VM!\n")
+                break;
+            case OP_ABORTGT:
+                code++;
+                if (debug)
+                    log("abortgt\n");
+                if (gt)
+                    abort("gt flag set, halting VM!\n")
+                break;
+            case OP_ABORTF:
+                code++;
+                if (debug)
+                    log("abortf\n");
+                if (found)
+                    abort("f flag set, halting VM!\n")
+                break;
+            case OP_ABORTNF:
+                code++;
+                if (debug)
+                    log("abortnf\n");
+                if (!found)
+                    abort("f flag is not set, halting VM!\n")
+                break;
+            case OP_NEXT:
+                if (debug) {
                     log("next\n");
+                }
+                found = gt = lt = eq = 0;
+
                 bytecode = code + 1;
 #ifndef LOADER
                 set_mode = 3;
@@ -368,7 +502,7 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                 set_mode = 18;
                 current_mode = &modes[set_mode];
 #endif
-                offset = 0;
+                offset = new_offset = 0;
                 code = bytecode;
                 break;
             default:
@@ -387,9 +521,19 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                 abort("Halting startup.\n");
                 break;
         }
+
+        if (offset > current_mode->size) { // Went out of bounds. Error.
 #ifndef LOADER
-        if (debug)
+            fprintf(stderr, " -> %x", offset);
+#endif
+            abort("seeked out of bounds\n");
+        }
+
+#ifndef LOADER
+        if (debug) {
+            fprintf(stderr, "l:%u g:%u e:%u f:%u m:%u o:0x%x\nc:0x%x m:0x%x n:%x\n", lt, gt, eq, found, set_mode, offset, code - bytecode, current_mode->memory + offset, code);
             wait();
+        }
 #endif
     }
 
@@ -503,7 +647,7 @@ execb(char *filename, int build_cache)
             // We should generate a cache for loader in a file intended for titleid.
             uint8_t *title_buf = (uint8_t *)patch + sizeof(struct system_patch);
 
-            fprintf(stderr, "patch: %s\n", patch->name);
+            fprintf(stderr, "  Version: %u\n", patch->version);
 
             for (uint32_t i = 0; i < patch->titles; i++) {
                 char cache_path[] = PATH_LOADER_CACHE "/0000000000000000";
@@ -549,11 +693,9 @@ execb(char *filename, int build_cache)
 #endif
 
     int debug = 0;
-#ifndef LOADER
     if (config.options[OPTION_OVERLY_VERBOSE]) {
         debug = 1;
     }
-#endif
 
     return exec_bytecode(patch_mem, ver, patch_len, debug);
 }

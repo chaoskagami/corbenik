@@ -7,7 +7,7 @@ size_t
 strlen(const char *string)
 {
     char *string_end = (char *)string;
-    while (*string_end)
+    while (string_end[0])
         string_end++;
     return string_end - string;
 }
@@ -34,24 +34,11 @@ isprint(char c)
 void
 memcpy(void *dest, const void *src, size_t size)
 {
-    char *destc = (char *)dest;
-    const char *srcc = (const char *)src;
+    uint8_t *destc = (uint8_t *)dest;
+    const uint8_t *srcc = (const uint8_t *)src;
 
-    // If we can align both dest and src together...
-    if ((uintptr_t)srcc % sizeof(size_t) == (uintptr_t)destc % sizeof(size_t)) {
-        // Align them and copy faster
-        while ((uintptr_t)srcc % sizeof(size_t) && size--) {
-            *destc++ = *srcc++;
-        }
-
-        for (; size >= sizeof(size_t); size -= sizeof(size_t), destc += sizeof(size_t), srcc += sizeof(size_t)) {
-            *(size_t *)destc = *(size_t *)srcc;
-        }
-    }
-
-    // Finish by copying the leftovers
-    while (size--) {
-        *destc++ = *srcc++;
+	for(size_t i=0; i < size; i++) {
+        destc[i] = srcc[i];
     }
 }
 
@@ -64,25 +51,12 @@ memmove(void *dest, const void *src, size_t size)
     }
 
     // Moving forward is just a reverse memcpy
-    char *destc = (char *)dest;
-    const char *srcc = (const char *)src;
-
-    // If we can align both dest and src together...
-    if ((uintptr_t)srcc % sizeof(size_t) == (uintptr_t)destc % sizeof(size_t)) {
-        // Align them and copy faster
-        while ((uintptr_t)(destc + size) % sizeof(size_t) && size--) {
-            destc[size] = srcc[size];
-        }
-
-        while (size >= sizeof(size_t)) {
-            size -= sizeof(size_t);
-            *(size_t *)(destc + size) = *(size_t *)(srcc + size);
-        }
-    }
+    uint8_t *destc = (uint8_t *)dest;
+    const uint8_t *srcc = (const uint8_t *)src;
 
     // Finish by copying the leftovers
-    while (size--) {
-        destc[size] = srcc[size];
+	for(size_t i=size; i > 0; i--) {
+        destc[i-1] = srcc[i-1];
     }
 }
 
@@ -91,19 +65,9 @@ memset(void *dest, const int filler, size_t size)
 {
     char *destc = (char *)dest;
 
-    // Align dest to 4 bytes
-    while ((uintptr_t)destc % sizeof(size_t) && size--) {
-        *destc++ = filler;
-    }
-
-    // Set 32 bytes at a time
-    for (; size >= sizeof(size_t); size -= sizeof(size_t), destc += sizeof(size_t)) {
-        *(size_t *)destc = filler;
-    }
-
     // Finish
-    while (size--) {
-        *destc++ = filler;
+	for(size_t i = 0; i < size; i++) {
+        destc[i] = filler;
     }
 }
 
@@ -163,8 +127,8 @@ int
 atoi(const char *str)
 {
     int res = 0;
-    while (*str && *str >= '0' && *str <= '9') {
-        res = *str - '0' + res * 10;
+    while (str[0] && str[0] >= '0' && str[0] <= '9') {
+        res = str[0] - '0' + res * 10;
         str++;
     }
 

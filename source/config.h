@@ -30,13 +30,16 @@ extern struct config_file config;
 
 enum type
 {
-    boolean_val = 0,     // Toggle
-    ranged_val = 1,      // N1 - N2, left and right to pick.
-    mask_val = 2,        // Bitmask allowed values.
-    not_option = 3,      // Skip over this.
-    call_fun = 4,        // Call a function. Treat (a) as (void)(*)(void).
-    boolean_val_n3ds = 5 // Toggle, but only show on n3DS
+    boolean_val = 0,      // Toggle
+    ranged_val = 1,       // N1 - N2, left and right to pick.
+    mask_val = 2,         // Bitmask allowed values.
+    not_option = 3,       // Skip over this.
+    call_fun = 4,         // Call a function. Treat (a) as (void)(*)(void).
+    boolean_val_n3ds = 5, // Toggle, but only show on n3DS
+    break_menu = 6
 };
+
+typedef void (*func_call_t)(void);
 
 struct range_str
 {
@@ -58,7 +61,7 @@ struct options_s
 // Inject svc calls (including backdoor for 11)
 #define OPTION_SVCS 3
 
-// Use builtin ARM9 thread injector.
+// Use builtin ARM9 thread injector. (NYI)
 #define OPTION_ARM9THREAD 4
 
 // Skip menu unless L is held.
@@ -70,14 +73,8 @@ struct options_s
 // Pause for A key on each step.
 #define OPTION_TRACE 7
 
-// Background color is not drawn under text.
-#define OPTION_TRANSP_BG 8
-
-// Framebuffer is preserved from whatever ran before us.
-#define OPTION_NO_CLEAR_BG 9
-
-// Remove Help/Readme from menu.
-#define OPTION_READ_ME 10
+// Freed up options due to code changes.
+// 8, 9, 10
 
 // Enable L2 cache.
 #define OPTION_LOADER_CPU_L2 11
@@ -87,9 +84,6 @@ struct options_s
 
 // Enable language emulation.
 #define OPTION_LOADER_LANGEMU 13
-
-// Force replacement of non-null svcs. Normally you don't want this.
-#define OPTION_REPLACE_ALLOCATED_SVC 14
 
 // Ignore patch UUID dependencies. Not recommended.
 #define IGNORE_PATCH_DEPS 14
@@ -113,7 +107,19 @@ struct options_s
 #define OPTION_LOADER_DUMPCODE_ALL 20
 
 // Load *all* code sections. This is intended for big patches that are currently not implementable and quick testing.
+// (e.g. SaltySD)
 #define OPTION_LOADER_LOADCODE 21
+
+// Calculate EmuNAND at the back of the disk, rather than the front.
+// There's many good reasons for this to be supported:
+//   - Resizable FAT partition
+//     - Shrink to add EmuNAND
+//     = Grow to delete EmuNAND
+//   - Doesn't require copying fucktons of data to manage multiemunand
+// This isn't supported by ANY tools like D9 at the moment
+// (Though I hope they'll consider it -
+//  there's only benefits to users with multiple EmuNANDs)
+#define OPTION_EMUNAND_REVERSE 22
 
 // Save log files during boot and from loader.
 // This will slow things down a bit.

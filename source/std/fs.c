@@ -4,6 +4,7 @@
 #include "../fatfs/ff.h"
 #include "draw.h"
 #include "memory.h"
+#include "../config.h"
 
 static FATFS fs;
 
@@ -26,7 +27,8 @@ rrmdir_back(char *fpath)
         if (f_opendir(&pdir, fpath) != FR_OK)
             return 1;
 
-        *(fname++) = '/';
+        fname[0] = '/';
+        fname++;
         fno.lfname = fname;
         fno.lfsize = fpath + 255 - fname;
 
@@ -42,7 +44,8 @@ rrmdir_back(char *fpath)
         }
 
         f_closedir(&pdir);
-        *(--fname) = '\0';
+        --fname;
+        fname[0] = 0;
     }
 
     return f_unlink(fpath);
@@ -78,13 +81,15 @@ fumount(void)
     if (f_mount(NULL, "0:", 1))
         return 1;
 
+    config.options[OPTION_SAVE_LOGS] = 0; // FS unmounted, can't log anymore
+
     return 0;
 }
 
 FILE *
 fopen(const char *filename, const char *mode)
 {
-    if (*mode != 'r' && *mode != 'w' && *mode != 'a')
+    if (mode[0] != 'r' && mode[0] != 'w' && mode[0] != 'a')
         return NULL; // Mode not valid.
 
     FILE *fp;
@@ -99,7 +104,7 @@ fopen(const char *filename, const char *mode)
     if (i == MAX_FILES_OPEN)
         return NULL; // Out of handles.
 
-    fp->mode = (*mode == 'r' ? FA_READ : (FA_WRITE | FA_OPEN_ALWAYS));
+    fp->mode = (mode[0] == 'r' ? FA_READ : (FA_WRITE | FA_OPEN_ALWAYS));
 
     if (f_open(&(fp->handle), filename, fp->mode))
         return NULL;

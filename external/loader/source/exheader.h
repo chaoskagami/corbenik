@@ -5,8 +5,19 @@
 
 typedef struct
 {
+    u32 text_addr;
+    u32 text_size;
+    u32 ro_addr;
+    u32 ro_size;
+    u32 data_addr;
+    u32 data_size;
+    u32 total_size;
+} prog_addrs_t;
+
+typedef struct
+{
     u8 reserved[5];
-    u8 flag;
+    u8 flag; // Maybe a feature - Bits 2-7 are unused. We could allow uh, custom flags here. Like zlib compression on code rather than lzss.
     u8 remasterversion[2];
 } PACKED exheader_systeminfoflags;
 
@@ -56,7 +67,11 @@ typedef struct
 typedef struct
 {
     u64 programid;
-    u8 flags[8];
+    u8 coreVersion[4]; // Kernel version required for this.
+    u8 flag2;
+    u8 flag1;
+    u8 flag0; // CPU speed settings.
+    u8 priority;
     u16 resourcelimitdescriptor[0x10];
     exheader_storageinfo storageinfo;
     u64 serviceaccesscontrol[0x20];

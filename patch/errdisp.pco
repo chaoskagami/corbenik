@@ -1,7 +1,7 @@
-# $name  ErrDisp devmode
+# $name  ErrDisp devmode (Loader)
 # $desc  Forces ErrDisp into displaying developer info without developer UNITINFO. Doesn't break eShop.
 # $title 0004003000008A02
-# $ver   01
+# $ver   09
 # $uuid  04
 # $flags devmode
 
@@ -10,11 +10,17 @@ rel exe_text
 # Status: needs loader
 
 find 1400D0E5DB9A9FED
+abortnf
 set  0000A0E3
 
 find 1400D0E5010010E3
+abortnf
 set  0000A0E3
+
 find 1400D0E5010010E3
+abortnf
 set  0000A0E3
+
 find 1400D0E5010010E3
+abortnf
 set  0000A0E3

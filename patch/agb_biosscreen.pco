@@ -1,10 +1,9 @@
 # $name  AGB Bootscreen
 # $desc  Force usage of GBA bios in AGB_FIRM.
-# $ver   01
+# $ver   09
 # $uuid  35
 
-# TODO - Make dynamic.
-#        This is also terribly inconvienent without labels.
+# TODO - Make dynamic. Also broken on O3DS.
 
 # Note - The bootscreen patch literally boots the GBA BIOS,
 #        so games have to pass the Nintendo logo check. If
@@ -15,19 +14,7 @@ rel agb
 # #############################
 
 # Bootscreen (1)
-seek  000D8B8A
-test  01
-jmpne 6
+find  000001ef
+abortnf
+fwd   02
 set   26
-
-jmp   8
-
-#########################
-
-# OLD3ds bootscreen (6)
-seek  000D7A12
-set   26
-
-# #######################
-
-# End (8)

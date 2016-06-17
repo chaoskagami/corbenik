@@ -9,9 +9,7 @@ dev=/dev/sdb
 mnt=/mnt/ext1
 
 mount ${dev}1 $mnt || exit 0
-cp out/arm9loaderhax.bin $mnt/anim/boot/none.bin || exit 0
-cp out/arm9loaderhax.bin $mnt/anim/boot/r.bin || exit 0
-cp out/arm9loaderhax.bin $mnt/anim/boot/l.bin || exit 0
+cp out/arm9loaderhax.bin $mnt/arm9loaderhax.bin || exit 0
 rm -rf $mnt/corbenik
 cp -r out/corbenik $mnt/ || exit 0
 cp -r input/corbenik $mnt/ || exit 0

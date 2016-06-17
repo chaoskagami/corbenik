@@ -11,8 +11,8 @@ PATCH(modules)
         return 2;
     }
 
-    uint32_t size = fsize(f);
-    fread((uint8_t *)FCRAM_JUNK_LOC, 1, size, f);
+    size_t size = fsize(f);
+    fread((void *)FCRAM_JUNK_LOC, 1, size, f);
     fclose(f);
 
     // Look for the section that holds all the sysmodules
@@ -70,7 +70,6 @@ PATCH(modules)
             fprintf(stderr, "Module: Injecting %llu\n", module->programID);
             // Copy the module into the firm
             memcpy(sysmodule, module, module->contentSize * 0x200);
-            break;
         }
         sysmodule = (ncch_h *)((uintptr_t)sysmodule + sysmodule->contentSize * 0x200);
     }

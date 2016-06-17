@@ -9,7 +9,7 @@
 
 // TODO - Basically all this needs to move to patcher programs.
 
-uint32_t wait_key();
+uint32_t wait_key(int sleep);
 
 extern int patch_services();
 extern int patch_modules();
@@ -23,10 +23,10 @@ void
 wait()
 {
     if (config.options[OPTION_TRACE] && !doing_autoboot) {
-        fprintf(stderr, "                                 [WAIT]");
-        wait_key();
+        fprintf(stderr, "[Waiting...]");
+        wait_key(0); // No delay on traces.
     }
-    fprintf(stderr, "\r                                       \r");
+    fprintf(stderr, "            \r");
 }
 
 void list_patches_build(char *name, int desc_is_fname);
@@ -61,18 +61,19 @@ patch_firm_all()
 {
     execb(PATH_LOADER_CACHE "/BOOT", 0);
 
-    // Replace loader?
-    if (config.options[OPTION_LOADER]) {
-        if (patch_modules()) {
-            abort("Fatal. Loader inject has failed.");
-        }
-        // This requires OPTION_SIGPATCH.
-        wait();
-    }
+    fprintf(stderr, "VM exited without issue\n");
 
     // Hook firmlaunch?
     if (config.options[OPTION_REBOOT]) {
         patch_reboot();
+
+        wait();
+    }
+
+    // Use EmuNAND?
+    if (config.options[OPTION_EMUNAND]) {
+        // Yes.
+        patch_emunand(config.options[OPTION_EMUNAND_INDEX]);
 
         wait();
     }
@@ -85,19 +86,20 @@ patch_firm_all()
         wait();
     }
 
+    // Replace loader?
+    if (config.options[OPTION_LOADER]) {
+        if (patch_modules()) {
+            abort("Fatal. Loader inject has failed.");
+        }
+        // This requires OPTION_SIGPATCH.
+        wait();
+    }
+
     // Use ARM9 hook thread?
     if (config.options[OPTION_ARM9THREAD]) {
         // Yes.
 
         // FIXME - NYI
-        wait();
-    }
-
-    // Use EmuNAND?
-    if (config.options[OPTION_EMUNAND]) {
-        // Yes.
-        patch_emunand(config.options[OPTION_EMUNAND_INDEX]);
-
         wait();
     }
 

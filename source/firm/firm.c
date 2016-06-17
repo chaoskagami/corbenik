@@ -335,6 +335,8 @@ boot_firm()
     clear_disp(BOTTOM_SCREEN);
     set_cursor(BOTTOM_SCREEN, 0, 0);
 
+    fflush(stderr); // Flush logs if need be before unmount.
+
     fumount(); // Unmount SD. No longer needed.
 
     // No fprintf will work from here on out.
@@ -395,14 +397,17 @@ load_firms()
         abort("]\n  Failed to load NATIVE_FIRM.\n");
     }
     find_proc9(firm_loc, &firm_proc9, &firm_p9_exefs);
+    fprintf(stderr, "]\n");
+    fprintf(stderr, "Ver: %x, %u\n", get_firm_info(firm_loc)->version, get_firm_info(firm_loc)->console );
 
-    fprintf(BOTTOM_SCREEN, "]\nTWL_FIRM\n  [");
+    fprintf(BOTTOM_SCREEN, "TWL_FIRM\n  [");
     if (load_firm(twl_firm_loc, PATH_TWL_F, PATH_TWL_FIRMKEY, PATH_TWL_CETK, &twl_firm_size, TWL_FIRM_TITLEID) != 0) {
         fprintf(BOTTOM_SCREEN, "]\n  TWL_FIRM failed to load.\n");
         state = 1;
     } else {
         find_proc9(twl_firm_loc, &twl_firm_proc9, &twl_firm_p9_exefs);
         fprintf(stderr, "]\n");
+        fprintf(stderr, "Ver: %x, %u\n", get_firm_info(twl_firm_loc)->version, get_firm_info(twl_firm_loc)->console );
     }
 
     fprintf(BOTTOM_SCREEN, "AGB_FIRM\n  [");
@@ -412,6 +417,7 @@ load_firms()
     } else {
         find_proc9(agb_firm_loc, &agb_firm_proc9, &agb_firm_p9_exefs);
         fprintf(stderr, "]\n");
+        fprintf(stderr, "Ver: %x, %u\n", get_firm_info(agb_firm_loc)->version, get_firm_info(agb_firm_loc)->console );
     }
 
     firm_loaded = 1; // Loaded.
@@ -423,12 +429,6 @@ void
 boot_cfw()
 {
     fprintf(BOTTOM_SCREEN, "Loading firmware...\n");
-
-    if (config.options[OPTION_RECONFIGURED]) {
-        config.options[OPTION_RECONFIGURED] = 0;
-        save_config();
-        config.options[OPTION_RECONFIGURED] = 1;
-    }
 
     load_firms();
 

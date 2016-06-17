@@ -4,8 +4,8 @@
 #include <assert.h>
 #include <stdarg.h>
 #include "memory.h"
-#include "font.h"
 #include "../fatfs/ff.h"
+#include "../firm/fcram.h"
 #include "fs.h"
 #include "unused.h"
 #include "../config.h"
@@ -14,13 +14,51 @@
 static unsigned int top_cursor_x = 0, top_cursor_y = 0;
 static unsigned int bottom_cursor_x = 0, bottom_cursor_y = 0;
 
-static char text_buffer_bottom[TEXT_BOTTOM_HEIGHT * TEXT_BOTTOM_WIDTH + 1];
+static size_t  log_size = 0;
+static char    log_buffer[4096]; // Log buffer.
 
-#ifdef BUFFER
-static char text_buffer_top[TEXT_TOP_HEIGHT * TEXT_TOP_WIDTH + 1];
-static char color_buffer_top[TEXT_TOP_HEIGHT * TEXT_TOP_WIDTH + 1];
-static char color_buffer_bottom[TEXT_BOTTOM_HEIGHT * TEXT_BOTTOM_WIDTH + 1];
-#endif
+unsigned int font_w = 8;
+unsigned int font_h = 8;
+static unsigned int font_kern = 0;
+
+static unsigned int text_top_width = 20;
+static unsigned int text_top_height = 10;
+
+static unsigned int text_bottom_width = 20;
+static unsigned int text_bottom_height = 10;
+
+void set_font(const char* filename) {
+    // TODO - Unicode support. Right now, we only load 32
+
+    FILE* f = fopen(filename, "r");
+
+    if (!f) return;
+
+    unsigned int new_w, new_h;
+
+    fread(&new_w, 1, 4, f);
+    fread(&new_h, 1, 4, f);
+
+    if (new_w == 0 || new_h == 0) {
+        fprintf(stderr, "Invalid font file: w/h is 0 - not loaded\n");
+        return;
+    }
+
+    unsigned int c_font_w = (new_w / 8) + (new_w % 8 ? 1 : 0);
+
+    fread((void*)FCRAM_FONT_LOC, 1, c_font_w * new_h * (256 - ' '), f); // Skip non-printing chars.
+
+    fclose(f);
+
+    font_w = new_w;
+    font_h = new_h;
+
+    text_top_width  = TOP_WIDTH  / (font_w + font_kern);
+    text_top_height = TOP_HEIGHT / font_h;
+
+    text_bottom_width  = BOTTOM_WIDTH / (font_w + font_kern);
+    text_bottom_height = BOTTOM_HEIGHT / font_h;
+}
 
 static uint32_t colors[16] = {
     0x000000, // Black
@@ -39,71 +77,46 @@ static uint32_t colors[16] = {
     0xff55ff, // Bright megenta
     0x55ffff, // Yellow
     0xffffff  // White
-};
+}; // VGA color table.
+
+void dump_log(unsigned int force) {
+    if(!config.options[OPTION_SAVE_LOGS])
+        return;
+
+    if (force == 0 && log_size < sizeof(log_buffer)-1)
+        return;
+
+    if (log_size == 0)
+        return;
+
+    FILE *f = fopen(PATH_CFW "/boot.log", "w");
+    fseek(f, 0, SEEK_END);
+
+    fwrite(log_buffer, 1, log_size, f);
+
+    fclose(f);
+    log_size = 0;
+}
 
 void
 clear_disp(uint8_t *screen)
 {
-    // There's a reason the logging code is here rather than putc:
-    // writing a batch is faster.
-    if (screen == BOTTOM_SCREEN && config.options[OPTION_SAVE_LOGS]) {
-        FILE *f = fopen(PATH_CFW "/boot.log", "w");
-        fseek(f, 0, SEEK_END);
-        for (int i = 0; i < TEXT_BOTTOM_HEIGHT - 1; i++) {
-            char *text = text_buffer_bottom + (TEXT_BOTTOM_WIDTH * i);
-            for (int j = 0; j < TEXT_BOTTOM_WIDTH; j++) {
-                if (text[j] == 0)
-                    text[j] = ' ';
-            }
-            fwrite(text, 1, strnlen(text, TEXT_BOTTOM_WIDTH), f);
-            fwrite("\n", 1, 1, f);
-        }
-        fclose(f);
-        memset(text_buffer_bottom, 0, TEXT_BOTTOM_WIDTH * TEXT_BOTTOM_HEIGHT);
-    }
-
     if (screen == TOP_SCREEN)
         screen = framebuffers->top_left;
     else if (screen == BOTTOM_SCREEN)
         screen = framebuffers->bottom;
 
     if (screen == framebuffers->top_left || screen == framebuffers->top_right) {
-        memset(screen, 0, SCREEN_TOP_SIZE);
+        memset(screen, 0, TOP_SIZE);
     } else if (screen == framebuffers->bottom) {
-        memset(screen, 0, SCREEN_BOTTOM_SIZE);
+        memset(screen, 0, BOTTOM_SIZE);
     }
 }
-
-#ifdef BUFFER
-void
-clear_text(uint8_t *screen)
-{
-    if (screen == TOP_SCREEN)
-        screen = framebuffers->top_left;
-    else if (screen == BOTTOM_SCREEN)
-        screen = framebuffers->bottom;
-
-    if (screen == framebuffers->top_left || screen == framebuffers->top_right) {
-        for (int i = 0; i < TEXT_TOP_HEIGHT; i++) {
-            text_buffer_top[i * TEXT_TOP_WIDTH] = 0;
-            color_buffer_top[i * TEXT_TOP_WIDTH] = 0;
-        }
-    } else if (screen == framebuffers->bottom) {
-        for (int i = 0; i < TEXT_BOTTOM_HEIGHT; i++) {
-            text_buffer_bottom[i * TEXT_BOTTOM_WIDTH] = 0;
-            color_buffer_bottom[i * TEXT_BOTTOM_WIDTH] = 0;
-        }
-    }
-}
-#endif
 
 void
 clear_screen(uint8_t *screen)
 {
     clear_disp(screen);
-#ifdef BUFFER
-    clear_text(screen);
-#endif
 }
 
 void
@@ -126,7 +139,7 @@ clear_screens()
 }
 
 void
-draw_character(uint8_t *screen, const char character, const unsigned int buf_x, const unsigned int buf_y, const uint32_t color_fg, const uint32_t color_bg)
+draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, const uint32_t color_fg, const uint32_t color_bg)
 {
     if (!isprint(character))
         return; // Don't output non-printables.
@@ -134,35 +147,43 @@ draw_character(uint8_t *screen, const char character, const unsigned int buf_x, 
     _UNUSED int width = 0;
     int height = 0;
     if (screen == framebuffers->top_left || screen == framebuffers->top_right) {
-        width = SCREEN_TOP_WIDTH;
-        height = SCREEN_TOP_HEIGHT;
+        width = TOP_WIDTH;
+        height = TOP_HEIGHT;
     } else if (screen == framebuffers->bottom) {
-        width = SCREEN_BOTTOM_WIDTH;
-        height = SCREEN_BOTTOM_HEIGHT;
+        width = BOTTOM_WIDTH;
+        height = BOTTOM_HEIGHT;
     } else {
         return; // Invalid buffer.
     }
 
-    unsigned int pos_x = buf_x * 8;
-    unsigned int pos_y = buf_y * 8;
+    int x = (font_w + font_kern) * ch_x;
+    int y = font_h * ch_y;
 
-    for (int y = 0; y < 8; y++) {
-        unsigned char char_pos = font[character * 8 + y];
+    if (x >= width || y >= height)
+        return; // OOB
 
-        for (int x = 7; x >= 0; x--) {
-            int screen_pos = (pos_x * height * 3 + (height - y - pos_y - 1) * 3) + (7 - x) * 3 * height;
+    unsigned int c_font_w = (font_w / 8) + (font_w % 8 ? 1 : 0);
 
-            screen[screen_pos] = color_bg >> 16;
-            screen[screen_pos + 1] = color_bg >> 8;
-            screen[screen_pos + 2] = color_bg;
+	for (unsigned int yy = 0; yy < font_h; yy++) {
+		int xDisplacement = (x * SCREEN_DEPTH * height);
+		int yDisplacement = ((height - (y + yy) - 1) * SCREEN_DEPTH);
+		unsigned int pos = xDisplacement + yDisplacement;
+        unsigned char char_dat = ((char*)FCRAM_FONT_LOC)[(character - ' ') * (c_font_w * font_h) + yy];
+        for(unsigned int i=0; i < font_w + font_kern; i++) {
+            screen[pos]     = color_bg >> 16;
+            screen[pos + 1] = color_bg >> 8;
+            screen[pos + 2] = color_bg;
 
-            if ((char_pos >> x) & 1) {
-                screen[screen_pos] = color_fg >> 16;
-                screen[screen_pos + 1] = color_fg >> 8;
-                screen[screen_pos + 2] = color_fg;
-            }
+			if (char_dat & 0x80) {
+                screen[pos]     = color_fg >> 16;
+                screen[pos + 1] = color_fg >> 8;
+                screen[pos + 2] = color_fg;
+			}
+
+            char_dat <<= 1;
+			pos += SCREEN_DEPTH * height;
         }
-    }
+	}
 }
 
 unsigned char color_top = 0xf0;
@@ -186,35 +207,20 @@ putc(void *buf, const int c)
         _UNUSED unsigned int height = 0;
         unsigned int *cursor_x = NULL;
         unsigned int *cursor_y = NULL;
-#ifdef BUFFER
-        char *colorbuf = NULL;
-        char *strbuf = NULL;
-#else
         uint8_t *screen = NULL;
-#endif
         unsigned char *color = NULL;
 
         if (buf == TOP_SCREEN) {
-            width = TEXT_TOP_WIDTH;
-            height = TEXT_TOP_HEIGHT;
-#ifdef BUFFER
-            colorbuf = color_buffer_top;
-            strbuf = text_buffer_top;
-#else
+            width = text_top_width;
+            height = text_top_height;
             screen = framebuffers->top_left;
-#endif
             cursor_x = &top_cursor_x;
             cursor_y = &top_cursor_y;
             color = &color_top;
         } else if (buf == BOTTOM_SCREEN) {
-            width = TEXT_BOTTOM_WIDTH;
-            height = TEXT_BOTTOM_HEIGHT;
-#ifdef BUFFER
-            colorbuf = color_buffer_bottom;
-            strbuf = text_buffer_bottom;
-#else
+            width = text_bottom_width;
+            height = text_bottom_height;
             screen = framebuffers->bottom;
-#endif
             cursor_x = &bottom_cursor_x;
             cursor_y = &bottom_cursor_y;
             color = &color_bottom;
@@ -225,22 +231,7 @@ putc(void *buf, const int c)
             cursor_y[0]++;
         }
 
-        while (cursor_y[0] >= height - 1) {
-#ifdef BUFFER
-            // Scroll.
-            for (unsigned int y = 0; y < height - 1; y++) {
-                memset(&strbuf[y * width], 0, width);
-                memset(&colorbuf[y * width], 0, width);
-                strncpy(&strbuf[y * width], &strbuf[(y + 1) * width], width);
-                strncpy(&colorbuf[y * width], &colorbuf[(y + 1) * width], width);
-            }
-            memset(&strbuf[(height - 1) * width], 0, width);
-            memset(&colorbuf[(height - 1) * width], 0, width);
-
-            clear_disp(buf); // Clear screen.
-
-            cursor_y[0]--;
-#else
+        while (cursor_y[0] >= height) {
             clear_disp(buf);
             cursor_x[0] = 0;
             cursor_y[0] = 0;
@@ -250,35 +241,23 @@ putc(void *buf, const int c)
             for (unsigned int x = 0; x < width * 8; x++) {
                 memmove(&screen[x * col + one_c], &screen[x * col + one_c], col - one_c);
             } */
-#endif
+        }
+
+        if ((isprint(c) || c == '\n') && buf == BOTTOM_SCREEN) {
+            log_buffer[log_size] = c;
+            log_size++;
+            dump_log(0);
         }
 
         switch (c) {
             case '\n':
-#ifdef BUFFER
-                strbuf[cursor_y[0] * width + cursor_x[0]] = 0;
-                colorbuf[cursor_y[0] * width + cursor_x[0]] = 0;
-#endif
                 cursor_y[0]++;
             // Fall through intentional.
             case '\r':
                 cursor_x[0] = 0; // Reset to beginning of line.
                 break;
             default:
-#ifdef BUFFER
-                strbuf[cursor_y[0] * width + cursor_x[0]] = c;
-                colorbuf[cursor_y[0] * width + cursor_x[0]] = *color;
-
-                if (cursor_x[0] + 1 < width) {
-                    strbuf[cursor_y[0] * width + cursor_x[0] + 1] = 0; // Terminate.
-                    colorbuf[cursor_y[0] * width + cursor_x[0] + 1] = 0;
-                }
-
-#else
-                if (buf == BOTTOM_SCREEN)
-                    text_buffer_bottom[cursor_y[0] * width + cursor_x[0]] = c;
-                draw_character(screen, c, cursor_x[0], cursor_y[0], colors[(*color >> 4) & 0xF], colors[*color & 0xF]);
-#endif
+                draw_character(screen, c, cursor_x[0], cursor_y[0], colors[(color[0] >> 4) & 0xF], colors[color[0] & 0xF]);
 
                 cursor_x[0]++;
 
@@ -298,8 +277,8 @@ puts(void *buf, const char *string)
 
     char *ref = (char *)string;
 
-    while (*ref != '\0') {
-        putc(buf, *ref);
+    while (ref[0] != 0) {
+        putc(buf, ref[0]);
         ref++;
     }
 }
@@ -385,39 +364,9 @@ put_int(void *channel, int n, int length)
 void
 fflush(void *channel)
 {
-    if (channel == TOP_SCREEN) {
-#ifdef BUFFER
-        if (kill_output)
-            return;
-
-        for (int y = 0; y < TEXT_TOP_HEIGHT; y++) {
-            for (int x = 0; x < TEXT_TOP_WIDTH; x++) {
-                char c = text_buffer_top[y * TEXT_TOP_WIDTH + x];
-                if (c == 0)
-                    break;
-                uint32_t color_fg = colors[((color_buffer_top[y * TEXT_TOP_WIDTH + x] >> 4) & 0x0f)];
-                uint32_t color_bg = colors[(color_buffer_top[y * TEXT_TOP_WIDTH + x] & 0x0f)];
-                draw_character(framebuffers->top_left, c, x, y, color_fg, color_bg);
-            }
-        }
-#endif
-    } else if (channel == BOTTOM_SCREEN) {
-#ifdef BUFFER
-        if (kill_output)
-            return;
-
-        for (int y = 0; y < TEXT_BOTTOM_HEIGHT; y++) {
-            for (int x = 0; x < TEXT_BOTTOM_WIDTH; x++) {
-                char c = text_buffer_bottom[y * TEXT_BOTTOM_WIDTH + x];
-                if (c == 0)
-                    break;
-                uint32_t color_fg = colors[((color_buffer_bottom[y * TEXT_BOTTOM_WIDTH + x] >> 4) & 0x0f)];
-                uint32_t color_bg = colors[(color_buffer_bottom[y * TEXT_BOTTOM_WIDTH + x] & 0x0f)];
-                draw_character(framebuffers->bottom, c, x, y, color_fg, color_bg);
-            }
-        }
-#endif
-    } else {
+    if (channel == BOTTOM_SCREEN) {
+        dump_log(1);
+    } if (channel != TOP_SCREEN && channel != BOTTOM_SCREEN) {
         f_sync(&(((FILE *)channel)->handle)); // Sync to disk.
     }
 }
@@ -432,56 +381,56 @@ vfprintf(void *channel, const char *format, va_list ap)
 
     char *ref = (char *)format;
 
-    unsigned char *color;
+    unsigned char *color = NULL;
     if (channel == TOP_SCREEN)
         color = &color_top;
-    else if (channel == TOP_SCREEN)
+    else if (channel == BOTTOM_SCREEN)
         color = &color_bottom;
 
-    while (*ref != '\0') {
-        if (*ref == 0x1B && *(++ref) == '[' && (channel == stdout || channel == stderr)) {
+    while (ref[0] != '\0') {
+        if (ref[0] == 0x1B && (++ref)[0] == '[' && (channel == stdout || channel == stderr)) {
         ansi_codes:
             // Ansi escape code.
             ++ref;
             // [30-37] Set text color
-            if (*ref == '3') {
+            if (ref[0] == '3') {
                 ++ref;
-                if (*ref >= '0' && *ref <= '7') {
+                if (ref[0] >= '0' && ref[0] <= '7') {
                     // Valid FG color.
-                    *color &= 0x0f; // Remove fg color.
-                    *color |= (*ref - '0') << 4;
+                    color[0] &= 0x0f; // Remove fg color.
+                    color[0] |= (ref[0] - '0') << 4;
                 }
             }
             // [40-47] Set bg color
-            else if (*ref == '4') {
+            else if (ref[0] == '4') {
                 ++ref;
-                if (*ref >= '0' && *ref <= '7') {
+                if (ref[0] >= '0' && ref[0] <= '7') {
                     // Valid BG color.
-                    *color &= 0xf0; // Remove bg color.
-                    *color |= *ref - '0';
+                    color[0] &= 0xf0; // Remove bg color.
+                    color[0] |= ref[0] - '0';
                 }
-            } else if (*ref == '0') {
+            } else if (ref[0] == '0') {
                 // Reset.
-                *color = 0xf0;
+                color[0] = 0xf0;
             }
 
             ++ref;
 
-            if (*ref == ';') {
+            if (ref[0] == ';') {
                 goto ansi_codes; // Another code.
             }
 
             // Loop until the character is somewhere 0x40 - 0x7E, which
             // terminates an ANSI sequence
-            while (!(*ref >= 0x40 && *ref <= 0x7E))
+            while (!(ref[0] >= 0x40 && ref[0] <= 0x7E))
                 ref++;
-        } else if (*ref == '%' && !disable_format) {
+        } else if (ref[0] == '%' && !disable_format) {
             int type_size = 0;
             int length = -1;
         check_format:
             // Format string.
             ++ref;
-            switch (*ref) {
+            switch (ref[0]) {
                 case 'd':
                     switch (type_size) {
                         case 2:
@@ -526,19 +475,17 @@ vfprintf(void *channel, const char *format, va_list ap)
                     put_hexdump(channel, va_arg(ap, unsigned int));
                     break;
                 default:
-                    if (*ref >= '0' && *ref <= '9') {
-                        length = *ref - '0';
+                    if (ref[0] >= '0' && ref[0] <= '9') {
+                        length = ref[0] - '0';
                         goto check_format;
                     }
                     break;
             }
         } else {
-            putc(channel, *ref);
+            putc(channel, ref[0]);
         }
         ++ref;
     }
-
-    fflush(channel);
 }
 
 void

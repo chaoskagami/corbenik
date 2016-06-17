@@ -16,17 +16,6 @@
 
 const char CODE_PATH[] = { 0x01, 0x00, 0x00, 0x00, 0x2E, 0x63, 0x6F, 0x64, 0x65, 0x00, 0x00, 0x00 };
 
-typedef struct
-{
-    u32 text_addr;
-    u32 text_size;
-    u32 ro_addr;
-    u32 ro_size;
-    u32 data_addr;
-    u32 data_size;
-    u32 total_size;
-} prog_addrs_t;
-
 static Handle g_handles[MAX_SESSIONS + 2];
 static int g_active_handles;
 static u64 g_cached_prog_handle;
@@ -94,8 +83,8 @@ load_code(u64 progid, u16 progver, prog_addrs_t *shared, prog_addrs_t *original,
         lzss_decompress((u8 *)shared->text_addr + size);
     }
 
-    // Load/Dump code section
-    sd_code(progid, (u8 *)shared->text_addr, shared->total_size << 12);
+    // Load/Dump code sections
+    code_handler(progid, shared);
 
     // Patch segments
     patch_exe(progid, progver, (u8 *)shared->text_addr, shared->text_size << 12, original->text_size << 12, (u8 *)shared->data_addr, shared->data_size << 12,
@@ -123,18 +112,6 @@ loader_GetProgramInfo(exheader_header *exheader, u64 prog_handle)
             return FSREG_GetProgramInfo(exheader, 1, prog_handle);
         }
     }
-}
-
-extern void KernelSetState(unsigned int, unsigned int, unsigned int, unsigned int);
-
-static void
-ConfigureNew3DSCPU(u8 mode)
-{
-    // 10 -> r0 (Type)
-    // mode -> r1 (Mode)
-    // svc 0x7C
-
-    KernelSetState(10, mode, 0, 0); // Yes, we syscall directly. Problem?
 }
 
 static Result
@@ -187,18 +164,6 @@ loader_LoadProcess(Handle *process, u64 prog_handle)
     logu64(progid);
     logstr("  validated params\n");
 
-    // Check and set the CPU mode. Possible values: 0 - Keep o3ds speed, 1 -
-    // n3ds speed, -1 force o3ds
-    // This is A-OK because the CPU speed parameter isn't passed through to any
-    // kernel function; meaning it has already been set.
-    u8 n3ds_mode = g_exheader.arm11systemlocalcaps.flags[1] & 0x3; // 0x3 -> L2+800Mhz
-    u8 cpu_mode = get_cpumode(progid);
-    if (cpu_mode != 0xFF) {             // Skip?
-        u8 mode = n3ds_mode | cpu_mode; // Keep flags set by exheader.
-        ConfigureNew3DSCPU(mode);       // We do not use PXIPM because we are a
-                                        // sysmodule. It doesn't make sense.
-    }
-
     // TODO - clean up this shit below. Not only is it unoptimized but it reads like garbage.
 
     // What the addressing info would be if not for expansion. This is passed to
@@ -243,16 +208,20 @@ loader_LoadProcess(Handle *process, u64 prog_handle)
         codesetinfo.rw_size_total = data_mem_size;
         res = svcCreateCodeSet(&codeset, &codesetinfo, (void *)shared_addr.text_addr, (void *)shared_addr.ro_addr, (void *)shared_addr.data_addr);
         if (res >= 0) {
+            res = svcCreateProcess(process, codeset, g_exheader.arm11kernelcaps.descriptors, count);
+
+            logstr("Created process\n");
+
             closeLogger();
 
-            res = svcCreateProcess(process, codeset, g_exheader.arm11kernelcaps.descriptors, count);
             svcCloseHandle(codeset);
             if (res >= 0) {
-                return 0;
+                return 0; // Succeeded in loading process.
             }
         }
     }
 
+    // Failed to load process, unmap shared memory and return error.
     svcControlMemory(&dummy, shared_addr.text_addr, 0, shared_addr.total_size << 12, MEMOP_FREE, 0);
     return res;
 }
@@ -266,8 +235,6 @@ loader_RegisterProgram(u64 *prog_handle, FS_ProgramInfo *title, FS_ProgramInfo *
     prog_id = title->programId;
     if (prog_id >> 32 != 0xFFFF0000) {
         res = FSREG_CheckHostLoadId(prog_id);
-        // if ((res >= 0 && (unsigned)res >> 27) || (res < 0 && ((unsigned)res
-        // >> 27)-32))
         if (R_FAILED(res) || (R_SUCCEEDED(res) && R_LEVEL(res) != RL_SUCCESS)) {
             res = PXIPM_RegisterProgram(prog_handle, title, update);
             if (res < 0) {
@@ -275,8 +242,6 @@ loader_RegisterProgram(u64 *prog_handle, FS_ProgramInfo *title, FS_ProgramInfo *
             }
             if (*prog_handle >> 32 != 0xFFFF0000) {
                 res = FSREG_CheckHostLoadId(*prog_handle);
-                // if ((res >= 0 && (unsigned)res >> 27) || (res < 0 &&
-                // ((unsigned)res >> 27)-32))
                 if (R_FAILED(res) || (R_SUCCEEDED(res) && R_LEVEL(res) != RL_SUCCESS)) {
                     return 0;
                 }
@@ -294,8 +259,6 @@ loader_RegisterProgram(u64 *prog_handle, FS_ProgramInfo *title, FS_ProgramInfo *
             return 0;
         }
         res = FSREG_CheckHostLoadId(*prog_handle);
-        // if ((res >= 0 && (unsigned)res >> 27) || (res < 0 && ((unsigned)res
-        // >> 27)-32))
         if (R_FAILED(res) || (R_SUCCEEDED(res) && R_LEVEL(res) != RL_SUCCESS)) {
             svcBreak(USERBREAK_ASSERT);
         }
@@ -312,8 +275,6 @@ loader_UnregisterProgram(u64 prog_handle)
         return FSREG_UnloadProgram(prog_handle);
     } else {
         res = FSREG_CheckHostLoadId(prog_handle);
-        // if ((res >= 0 && (unsigned)res >> 27) || (res < 0 && ((unsigned)res
-        // >> 27)-32))
         if (R_FAILED(res) || (R_SUCCEEDED(res) && R_LEVEL(res) != RL_SUCCESS)) {
             return PXIPM_UnregisterProgram(prog_handle);
         } else {
@@ -321,6 +282,11 @@ loader_UnregisterProgram(u64 prog_handle)
         }
     }
 }
+
+#define LoadProcess       1
+#define RegisterProgram   2
+#define UnregisterProgram 3
+#define GetProgramInfo    4
 
 static void
 handle_commands(void)
@@ -337,7 +303,7 @@ handle_commands(void)
     cmdid = cmdbuf[0] >> 16;
     res = 0;
     switch (cmdid) {
-        case 1: // LoadProcess
+        case LoadProcess:
         {
             res = loader_LoadProcess(&handle, *(u64 *)&cmdbuf[1]);
             cmdbuf[0] = 0x10042;
@@ -346,7 +312,7 @@ handle_commands(void)
             cmdbuf[3] = handle;
             break;
         }
-        case 2: // RegisterProgram
+        case RegisterProgram:
         {
             memcpy(&title, &cmdbuf[1], sizeof(FS_ProgramInfo));
             memcpy(&update, &cmdbuf[5], sizeof(FS_ProgramInfo));
@@ -356,7 +322,7 @@ handle_commands(void)
             *(u64 *)&cmdbuf[2] = prog_handle;
             break;
         }
-        case 3: // UnregisterProgram
+        case UnregisterProgram:
         {
             if (g_cached_prog_handle == prog_handle) {
                 g_cached_prog_handle = 0;
@@ -365,7 +331,7 @@ handle_commands(void)
             cmdbuf[1] = loader_UnregisterProgram(*(u64 *)&cmdbuf[1]);
             break;
         }
-        case 4: // GetProgramInfo
+        case GetProgramInfo:
         {
             prog_handle = *(u64 *)&cmdbuf[1];
             if (prog_handle != g_cached_prog_handle) {
@@ -389,6 +355,8 @@ handle_commands(void)
             cmdbuf[1] = 0xD900182F;
             break;
         }
+        // I don't see why it shouldn't be possible to add extra
+        // functions callable by threadbuf. This can be used. ;)
     }
 }
 

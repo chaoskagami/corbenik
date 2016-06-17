@@ -1,6 +1,6 @@
 PATH := $(PATH):$(DEVKITARM)/bin
 
-all: 7b.bin stub.bin emunand.bin reboot_hook.bin reboot_code.bin
+all: backdoor.bin stub.bin emunand.bin reboot_hook.bin reboot_code.bin
 
 %.o: %.s
 	arm-none-eabi-as -o $@ $<

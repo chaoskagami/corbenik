@@ -1,34 +1,30 @@
 #include "common.h"
 #include "firm/firm.h"
 #include "firm/headers.h"
-#define MENU_MAIN 1
-
-#define MENU_OPTIONS 2
-#define MENU_PATCHES 3
-#define MENU_INFO 4
-#define MENU_HELP 5
-#define MENU_RESET 6
-#define MENU_POWER 7
-#define MENU_BOOTME 8
 
 void header(char *append);
 
 extern int is_n3ds;
 
+extern unsigned int font_h;
+
 int
 show_menu(struct options_s *options, uint8_t *toggles)
 {
     int cursor_y = 0;
-    int need_redraw = 1;
     int cursor_min = -1;
     int cursor_max = -1;
     int exit = 0;
+    int window_size = (TOP_HEIGHT / font_h) - 3;
+    int window_top = 0, window_bottom = window_size;
+
+    clear_screen(TOP_SCREEN);
 
     if (options[0].index == -1) {
         set_cursor(TOP_SCREEN, 0, 0);
         header("Any:Back");
         fprintf(stdout, "No entries.\n");
-        wait_key();
+        wait_key(1);
         return 0;
     }
 
@@ -55,41 +51,41 @@ show_menu(struct options_s *options, uint8_t *toggles)
 
         header("A:Enter B:Back DPAD:Nav");
 
-        int i = 0;
+        int i = window_top;
         while (options[i].index != -1) { // -1 Sentinel.
+            if (i > window_bottom)
+                break;
+
+            set_cursor(TOP_SCREEN, 0, i-window_top+2);
+
             if (options[i].allowed == boolean_val || (is_n3ds && options[i].allowed == boolean_val_n3ds)) {
                 if (cursor_y == i)
                     fprintf(TOP_SCREEN, "\x1b[32m>>\x1b[0m ");
                 else
                     fprintf(TOP_SCREEN, "   ");
 
-                if (need_redraw)
-                    fprintf(TOP_SCREEN, "[%c]  %s\n", (toggles[options[i].index] ? 'X' : ' '), options[i].name);
-                else {
-                    // Yes, this is weird. printf does a large number of extra things we
-                    // don't
-                    // want computed at the moment; this is faster.
-                    putc(TOP_SCREEN, '[');
-                    putc(TOP_SCREEN, (toggles[options[i].index] ? 'X' : ' '));
-                    putc(TOP_SCREEN, ']');
-                    putc(TOP_SCREEN, '\n');
-                }
+                fprintf(TOP_SCREEN, "[%c]  %s", (toggles[options[i].index] ? '*' : ' '), options[i].name);
+            } else if (options[i].allowed == call_fun || options[i].allowed == break_menu) {
+                if (cursor_y == i)
+                    fprintf(TOP_SCREEN, "\x1b[32m>>\x1b[0m ");
+                else
+                    fprintf(TOP_SCREEN, "   ");
+
+                fprintf(TOP_SCREEN, "%s", options[i].name);
             } else if (options[i].allowed == ranged_val) {
                 if (cursor_y == i)
                     fprintf(TOP_SCREEN, "\x1b[32m>>\x1b[0m ");
                 else
                     fprintf(TOP_SCREEN, "   ");
 
-                fprintf(TOP_SCREEN, "[%u]  %s  \n", toggles[options[i].index], options[i].name);
+                fprintf(TOP_SCREEN, "[%u]  %s  ", toggles[options[i].index], options[i].name);
             } else if (options[i].allowed == not_option) {
-                fprintf(TOP_SCREEN, "%s\n", options[i].name);
+                fprintf(TOP_SCREEN, "%s", options[i].name);
             }
             ++i;
         }
 
-        need_redraw = 0;
-
-        uint32_t key = wait_key();
+        uint32_t key = wait_key(1);
 
         switch (key) {
             case BUTTON_UP:
@@ -120,6 +116,10 @@ show_menu(struct options_s *options, uint8_t *toggles)
                         toggles[options[cursor_y].index] = options[cursor_y].a;
                     else
                         toggles[options[cursor_y].index]++;
+                } else if (options[cursor_y].allowed == call_fun) {
+                    ((func_call_t)(options[cursor_y].a))(); // Call 'a' as a function.
+                } else if (options[cursor_y].allowed == break_menu) {
+                    exit = 1;
                 }
                 break;
             case BUTTON_X:
@@ -132,7 +132,6 @@ show_menu(struct options_s *options, uint8_t *toggles)
                 break;
             case BUTTON_B:
                 exit = 1;
-                need_redraw = 1;
                 clear_screen(TOP_SCREEN);
                 cursor_y = cursor_min;
                 break;
@@ -142,6 +141,17 @@ show_menu(struct options_s *options, uint8_t *toggles)
             cursor_y = cursor_max - 1;
         else if (cursor_y > cursor_max - 1)
             cursor_y = cursor_min;
+
+        if (cursor_y < window_top + cursor_min) {
+            window_top = cursor_y - cursor_min;
+            window_bottom = window_top + window_size;
+            clear_screen(TOP_SCREEN);
+
+        } else if (cursor_y > window_bottom - cursor_min) {
+            window_bottom = cursor_y + cursor_min;
+            window_top = window_bottom - window_size;
+            clear_screen(TOP_SCREEN);
+        }
     }
 
     return 0;

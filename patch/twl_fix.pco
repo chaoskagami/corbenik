@@ -1,6 +1,6 @@
 # $name TWL Patches
 # $desc 
-# $ver  01
+# $ver  09
 # $uuid 34
 
 # TODO - Make dynamic. Not that hard, but some 
@@ -13,10 +13,11 @@ rel  twl
 ###########################################
 # New3ds
 
+n3ds
+jmpne old
+
 # Disable main signature checks (1)
 seek  00165D64
-test  C117491C31D0
-jmpne 20
 set   00204EB070BD
 
 # Patch RSA function to not report invalid signatures (5)
@@ -47,10 +48,12 @@ set  01200000
 seek 00175B92
 set  01207047
 
-jmp  36
+jmp  end
 
 ###########################################
 # Old3ds
+
+old:
 
 # Disable main signature checks (20)
 seek 001650C0
@@ -84,5 +87,4 @@ set  01200000
 seek 00174E56
 set  01207047
 
-# end (36)
-
+end:

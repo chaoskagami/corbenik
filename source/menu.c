@@ -1,37 +1,25 @@
 #include "common.h"
 #include "firm/firm.h"
 #include "firm/headers.h"
-#define MENU_MAIN 1
-
-#define MENU_OPTIONS 2
-#define MENU_PATCHES 3
-#define MENU_INFO 4
-#define MENU_HELP 5
-#define MENU_RESET 6
-#define MENU_POWER 7
-#define MENU_BOOTME 8
 
 #define MAX_PATCHES ((FCRAM_SPACING / 2) / sizeof(struct options_s))
 struct options_s *patches = (struct options_s *)FCRAM_MENU_LOC;
 uint8_t *enable_list = (uint8_t *)FCRAM_PATCHLIST_LOC;
 
 static struct options_s options[] = {
-    // space
-    { 0, "", "", not_option, 0, 0 },
     // Patches.
     { 0, "\x1b[32;40mGeneral Options\x1b[0m", "", not_option, 0, 0 },
 
-    { OPTION_SVCS, "SVC Replacement", "Replaces ARM11 svc calls, including svcBackdoor. With 11.0 NATIVE_FIRM, you probably want this.", boolean_val, 0, 0 },
+    { OPTION_SVCS, "svcBackdoor Fixup", "Reinserts svcBackdoor on 11.0 NATIVE_FIRM.", boolean_val, 0, 0 },
 
     { OPTION_REBOOT, "Reboot Hook", "Hooks firmlaunch to allow largemem games on o3DS (and allow patching TWL/AGB on all consoles)", boolean_val, 0, 0 },
 
     { OPTION_EMUNAND, "Use EmuNAND", "Redirects NAND write/read to the SD.", boolean_val, 0, 0 },
     { OPTION_EMUNAND_INDEX, "  Index", "Which EmuNAND to use. Currently, 10 maximum (but this is arbitrary)", ranged_val, 0, 0x9 },
+    { OPTION_EMUNAND_REVERSE, "  Reverse layout", "EmuNAND is at the back of the disk, not the front.", boolean_val, 0, 0x9 },
 
     { OPTION_AUTOBOOT, "Autoboot", "Boot the system automatically, unless the R key is held.", boolean_val, 0, 0 },
     { OPTION_SILENCE, "  Silent mode", "Suppress all debug output during autoboot. You'll see the screen turn on, then off.", boolean_val, 0, 0 },
-
-    { OPTION_READ_ME, "Hide `Help`", "Hides the help option from the main menu.", boolean_val, 0, 0 },
 
     // space
     { 0, "", "", not_option, 0, 0 },
@@ -55,8 +43,6 @@ static struct options_s options[] = {
     // Patches.
     { 0, "\x1b[32;40mDeveloper Options\x1b[0m", "", not_option, 0, 0 },
 
-    { OPTION_REPLACE_ALLOCATED_SVC, "Force svc replace", "Replace ARM11 svc calls even if they exist. Don't use this unless you know what you're doing.",
-      boolean_val, 0, 0 },
     { OPTION_TRACE, "Step Through", "After each important step, [WAIT] will be shown and you'll need to press a key. Debug.", boolean_val, 0, 0 },
     { OPTION_OVERLY_VERBOSE, "Verbose", "Output more debug information than the average user needs.", boolean_val, 0, 0 },
     { OPTION_SAVE_LOGS, "Logging", "Save logs to the corbenik folder. Slows operation a bit.", boolean_val, 0, 0 },
@@ -69,39 +55,53 @@ static struct options_s options[] = {
     { -1, "", "", 0, -1, -1 }, // cursor_min and cursor_max are stored in the last two.
 };
 
-static int cursor_y = 0;
-static int which_menu = 1;
 static int need_redraw = 1;
 
+extern void waitcycles(uint32_t cycles);
+
 uint32_t
-wait_key()
+wait_key(int sleep)
 {
-    uint32_t get = 0;
-    while (get == 0) {
-        if (HID_PAD & BUTTON_UP)
-            get = BUTTON_UP;
-        else if (HID_PAD & BUTTON_DOWN)
-            get = BUTTON_DOWN;
-        else if (HID_PAD & BUTTON_RIGHT)
-            get = BUTTON_RIGHT;
-        else if (HID_PAD & BUTTON_LEFT)
-            get = BUTTON_LEFT;
-        else if (HID_PAD & BUTTON_A)
-            get = BUTTON_A;
-        else if (HID_PAD & BUTTON_B)
-            get = BUTTON_B;
-        else if (HID_PAD & BUTTON_X)
-            get = BUTTON_X;
+    if (sleep) {
+        #define ARM9_APPROX_DELAY_MAX 134058675 / 85
+        waitcycles(ARM9_APPROX_DELAY_MAX); // Approximately what a human can input - fine tuning needed (sorry, TASers!)
     }
-    while (HID_PAD & get)
-        ;
-    return get;
+
+    uint32_t ret = 0, get = 0;
+    while (ret == 0) {
+        get = HID_PAD;
+
+        if (get & BUTTON_UP)
+            ret = BUTTON_UP;
+        else if (get & BUTTON_DOWN)
+            ret = BUTTON_DOWN;
+        else if (get & BUTTON_RIGHT)
+            ret = BUTTON_RIGHT;
+        else if (get & BUTTON_LEFT)
+            ret = BUTTON_LEFT;
+        else if (get & BUTTON_A)
+            ret = BUTTON_A;
+        else if (get & BUTTON_B)
+            ret = BUTTON_B;
+        else if (get & BUTTON_X)
+            ret = BUTTON_X;
+
+    }
+    while (HID_PAD & ret);
+
+    return ret;
 }
+
+extern unsigned int font_w;
 
 void
 header(char *append)
 {
-    fprintf(stdout, "\x1b[30;42m.corbenik//%s %s\x1b[0m\n", VERSION, append);
+    for (unsigned int i = 0; i < TOP_WIDTH / font_w; i++) {
+        fprintf(stdout, "\x1b[30;42m ");
+    }
+    set_cursor(TOP_SCREEN, 0, 0);
+    fprintf(stdout, "\x1b[30;42m Corbenik//%s %s\x1b[0m\n\n", VERSION, append);
 }
 
 static int current_menu_index_patches = 0;
@@ -165,12 +165,27 @@ list_patches_build_back(char *fpath, int desc_is_path)
     return 0;
 }
 
+// This is dual purpose. When we actually list
+// patches to build the cache - desc_is_fname
+// will be set to 1.
+
 void
 list_patches_build(char *name, int desc_is_fname)
 {
     current_menu_index_patches = 0;
 
     memset(enable_list, 0, FCRAM_SPACING / 2);
+
+    if (!desc_is_fname) {
+        strncpy(patches[0].name, "\x1b[40;32mPatches\x1b[0m", 64);
+        strncpy(patches[0].desc, "", 255);
+        patches[0].index = 0;
+        patches[0].allowed = not_option;
+        patches[0].a = 0;
+        patches[0].b = 0;
+
+        current_menu_index_patches += 1;
+    }
 
     char fpath[256];
     strncpy(fpath, name, 256);
@@ -186,35 +201,19 @@ list_patches_build(char *name, int desc_is_fname)
 
 int show_menu(struct options_s *options, uint8_t *toggles);
 
-int
+void
 menu_patches()
 {
-    list_patches_build(PATH_PATCHES, 0);
-
     show_menu(patches, enable_list);
-
-    // Remove old settings, save new
-    f_unlink(PATH_TEMP "/PATCHENABLE");
-    write_file(enable_list, PATH_TEMP "/PATCHENABLE", FCRAM_SPACING / 2);
-
-    // TODO - Determine whether it actually changed.
-    config.options[OPTION_RECONFIGURED] = 1;
-
-    return MENU_MAIN;
 }
 
-int
+void
 menu_options()
 {
     show_menu(options, config.options);
-
-    // TODO - Determine whether it actually changed.
-    config.options[OPTION_RECONFIGURED] = 1;
-
-    return MENU_MAIN;
 }
 
-int
+void
 menu_info()
 {
     // This menu requres firm to be loaded. Unfortunately.
@@ -229,7 +228,7 @@ menu_info()
     struct firm_signature *agb = get_firm_info(agb_firm_loc);
     struct firm_signature *twl = get_firm_info(twl_firm_loc);
 
-    fprintf(stdout, "\nNATIVE_FIRM / Firmware:\n"
+    fprintf(stdout, "NATIVE_FIRM / Firmware:\n"
                     "  Version: %s (%x)\n"
                     "AGB_FIRM / GBA Firmware:\n"
                     "  Version: %s (%x)\n"
@@ -237,15 +236,13 @@ menu_info()
                     "  Version: %s (%x)\n",
             native->version_string, native->version, agb->version_string, agb->version, twl->version_string, twl->version);
 
-    wait_key();
+    wait_key(1);
 
     need_redraw = 1;
     clear_screen(TOP_SCREEN);
-
-    return MENU_MAIN;
 }
 
-int
+void
 menu_help()
 {
     clear_screen(TOP_SCREEN);
@@ -254,7 +251,7 @@ menu_help()
 
     header("Any:Back");
 
-    fprintf(stdout, "\nCorbenik is another 3DS CFW for power users.\n"
+    fprintf(stdout, "Corbenik is another 3DS CFW for power users.\n"
                     "  It seeks to address some faults in other\n"
                     "  CFWs and is generally just another choice\n"
                     "  for users - but primarily is intended for\n"
@@ -266,25 +263,19 @@ menu_help()
                     "  @d0k3, @TuxSH, @Steveice10, @delebile,\n"
                     "  @Normmatt, @b1l1s, @dark-samus, @TiniVi, etc\n"
                     "\n"
-                    "[PROTECT BREAK] DATA DRAIN: OK\n"
-                    "\n"
                     " <https://github.com/chaoskagami/corbenik>\n"
                     "\n");
 
-    wait_key();
+    wait_key(1);
 
     need_redraw = 1;
     clear_screen(TOP_SCREEN);
-
-    return MENU_MAIN;
 }
 
-int
-menu_reset()
+void
+reset()
 {
-    write_file(enable_list, PATH_TEMP "/PATCHENABLE", FCRAM_SPACING / 2);
-    config.options[OPTION_RECONFIGURED] = 1;
-    save_config(); // Save config, including the reconfigured flag.
+    fflush(stderr);
 
     fumount(); // Unmount SD.
 
@@ -295,12 +286,10 @@ menu_reset()
         ;
 }
 
-int
-menu_poweroff()
+void
+poweroff()
 {
-    write_file(enable_list, PATH_TEMP "/PATCHENABLE", FCRAM_SPACING / 2);
-    config.options[OPTION_RECONFIGURED] = 1;
-    save_config(); // Save config, including the reconfigured flag.
+    fflush(stderr);
 
     fumount(); // Unmount SD.
 
@@ -311,101 +300,22 @@ menu_poweroff()
         ;
 }
 
-int
-menu_main()
-{
-    // TODO - Stop using different menu code here.
-    set_cursor(TOP_SCREEN, 0, 0);
+static struct options_s main_s[] = {
+    { 0, "Options",            "", call_fun, (uint32_t)menu_options, 0 },
+    { 0, "Patches",            "", call_fun, (uint32_t)menu_patches, 0 },
+    { 0, "Info",               "", call_fun, (uint32_t)menu_info,    0 },
+    { 0, "Help/Readme",        "", call_fun, (uint32_t)menu_help,    0 },
+    { 0, "Reboot",             "", call_fun, (uint32_t)reset,        0 },
+    { 0, "Power off",          "", call_fun, (uint32_t)poweroff,     0 },
+    { 0, "Save Configuration", "", call_fun, (uint32_t)save_config,  0 },
+    { 0, "Boot Firmware",      "", break_menu, 0, 0 },
 
-    const char *list[] = { "Options", "Patches", "Info", "Help/Readme", "Reboot", "Power off", "Boot Firmware" };
-    int menu_max = 7;
+    // Sentinel.
+    { -1, "", "", 0, -1, -1 }, // cursor_min and cursor_max are stored in the last two.
+};
 
-    header("A:Enter DPAD:Nav");
-
-    for (int i = 0; i < menu_max; i++) {
-        if (!(i + 2 == MENU_HELP && config.options[OPTION_READ_ME])) {
-            if (cursor_y == i)
-                fprintf(TOP_SCREEN, "\x1b[32m>>\x1b[0m ");
-            else
-                fprintf(TOP_SCREEN, "   ");
-
-            if (need_redraw)
-                fprintf(TOP_SCREEN, "%s\n", list[i]);
-            else
-                putc(TOP_SCREEN, '\n');
-        }
-    }
-
-    need_redraw = 0;
-
-    uint32_t key = wait_key();
-
-    int ret = cursor_y + 2;
-
-    switch (key) {
-        case BUTTON_UP:
-            cursor_y -= 1;
-            if (config.options[OPTION_READ_ME] && cursor_y + 2 == MENU_HELP)
-                cursor_y -= 1; // Disable help.
-            break;
-        case BUTTON_DOWN:
-            cursor_y += 1;
-            if (config.options[OPTION_READ_ME] && cursor_y + 2 == MENU_HELP)
-                cursor_y += 1; // Disable help.
-            break;
-        case BUTTON_A:
-            need_redraw = 1;
-            cursor_y = 0;
-            if (ret == MENU_BOOTME)
-                return MENU_BOOTME; // Boot meh, damnit!
-            clear_screen(TOP_SCREEN);
-            if (ret == MENU_OPTIONS)
-                cursor_y = 0; // Fixup positions
-            return ret;
-    }
-
-    // Loop around the cursor.
-    if (cursor_y < 0)
-        cursor_y = menu_max - 1;
-    if (cursor_y > menu_max - 1)
-        cursor_y = 0;
-
-    return 0;
-}
-
-int
+void
 menu_handler()
 {
-    int to_menu = 0;
-    switch (which_menu) {
-        case MENU_MAIN:
-            to_menu = menu_main();
-            break;
-        case MENU_OPTIONS:
-            to_menu = menu_options();
-            break;
-        case MENU_PATCHES:
-            to_menu = menu_patches();
-            break;
-        case MENU_INFO:
-            to_menu = menu_info();
-            break;
-        case MENU_HELP:
-            to_menu = menu_help();
-            break;
-        case MENU_BOOTME:
-            return 0;
-        case MENU_RESET:
-            menu_reset();
-        case MENU_POWER:
-            menu_poweroff();
-        default:
-            fprintf(stderr, "Attempt to enter wrong menu!\n");
-            to_menu = MENU_MAIN;
-    }
-
-    if (to_menu != 0)
-        which_menu = to_menu;
-
-    return 1;
+    show_menu(main_s, NULL);
 }

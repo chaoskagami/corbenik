@@ -1,7 +1,7 @@
-# $name  Force TestMenu
+# $name  Force TestMenu (Loader)
 # $desc  Force NS to boot TestMenu rather than HOME (TestMenu must be installed)
 # $title 0004013000008002
-# $ver   01
+# $ver   09
 # $uuid  1e
 
 rel exe_text
@@ -12,6 +12,7 @@ rel exe_text
 # Searching for a relative bl is error prone,
 # so find the code before the bl and seek forward instead
 find 1b00000abc009fe5
+abortnf
 fwd  04
 
 # mov r0, r9 (== 0x00008102)

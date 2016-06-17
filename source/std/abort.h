@@ -3,16 +3,16 @@
 
 #include "draw.h"
 
-int menu_poweroff();
-uint32_t wait_key();
+void poweroff();
+uint32_t wait_key(int sleep);
 
 #define abort(x...)                                                                                                                                            \
     {                                                                                                                                                          \
         fprintf(stderr, x);                                                                                                                                    \
-        wait_key();                                                                                                                                            \
+        wait_key(1);                                                                                                                                           \
         clear_disp(stderr);                                                                                                                                    \
         set_cursor(stderr, 0, 0);                                                                                                                              \
-        menu_poweroff();                                                                                                                                       \
+        poweroff();                                                                                                                                            \
     }
 
 #endif

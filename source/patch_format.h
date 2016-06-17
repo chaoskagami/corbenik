@@ -32,8 +32,9 @@
 
 #define PATH_CONFIG_DIR PATH_CFW "/config"       // Config file directory.
 #define PATH_CONFIG PATH_CONFIG_DIR "/main.conf" // Config file.
-#define PATH_LOCEMU PATH_CONFIG_DIR "/locale"    // Locale emulation config
 #define PATH_CPU_CFG PATH_CONFIG_DIR "/cpu.conf" // CPU settings config
+
+#define PATH_LOCEMU PATH_CFW "/locale"    // Locale emulation config
 
 #define PATH_PATCHES PATH_CFW "/patch"      // Patch binary folder.
 #define PATH_FIRMWARES PATH_CFW "/firmware" // Firmware folder.
@@ -50,12 +51,18 @@
 #define PATH_KEYS PATH_CFW "/keys" // Keyfiles will be loaded from this dir, and
                                    // additionally the root if not found.
 
-#define PATH_EXEFS PATH_CFW "/exe" // ExeFS overrides, named by titleid
+#define PATH_EXEFS PATH_CFW "/exe"         // ExeFS overrides/dumps, named by titleid
+#define PATH_EXEFS_TEXT PATH_EXEFS "/text" // Text segment overrides/dumps, named by titleid
+#define PATH_EXEFS_RO PATH_EXEFS "/ro"     // RO segment overrides/dumps, named by titleid
+#define PATH_EXEFS_DATA PATH_EXEFS "/data" // Data segment overrides/dumps, named by titleid
 
 #define PATH_BITS PATH_CFW "/bits" // Path to misc bits we need (emunand code, reboot code, etc)
 
 #define PATH_EMUNAND_CODE PATH_BITS "/emunand.bin"       // Emunand hook.
 #define PATH_SCREENINIT_CODE PATH_BITS "/screeninit.bin" // Screeninit code (ARM11)
+#define PATH_BACKDOOR PATH_BITS "/backdoor.bin"   // svcBackdoor
+#define PATH_REBOOT_HOOK PATH_BITS "/reboot_hook.bin"   // Reboot hook
+#define PATH_REBOOT_CODE PATH_BITS "/reboot_code.bin"   // Reboot entry code
 
 #define PATH_NATIVE_F PATH_FIRMWARES "/native"
 #define PATH_AGB_F PATH_FIRMWARES "/agb"
@@ -84,8 +91,11 @@ struct system_patch
     char magic[4];   // "AIDA" for shits and giggles and because we like .hack.
     uint8_t version; // Version of the patch itself.
 
-    char name[64];  // User-readable name for patch in menu.
-    char desc[256]; // User-readable description for patch in menu.
+	// NOTE - This metadata stuff is temporary, I eventually plan to move it down
+    // to the same 'variable' width section as tids.
+    char name[64];   // User-readable name for patch in menu.
+    char desc[256];  // User-readable description for patch in menu.
+
     uint64_t uuid;  // Unique ID for patch. Each unique patch should provide
                     // a unique ID.
 

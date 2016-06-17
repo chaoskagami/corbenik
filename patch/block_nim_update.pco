@@ -1,7 +1,7 @@
-# $name  Block NIM updates
+# $name  Block NIM updates (Loader)
 # $desc  Prevents NIM from downloading system updates.
 # $title 0004013000002C02
-# $ver   01
+# $ver   09
 # $uuid  03
 
 rel exe_text
@@ -9,4 +9,5 @@ rel exe_text
 # Status: needs loader
 
 find 25790B99
+abortnf
 set  E3A0

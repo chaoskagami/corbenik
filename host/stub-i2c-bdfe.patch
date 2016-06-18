@@ -1,6 +1,6 @@
 diff -urN bdfe/li2c.c bdfe-stubi2c/li2c.c
---- bdfe/li2c.c	2016-06-18 23:35:56.639775500 +0000
-+++ bdfe-stubi2c/li2c.c	2016-06-18 23:35:15.467047200 +0000
+--- a/host/bdfe/li2c.c	2016-06-18 23:35:56.639775500 +0000
++++ b/host/bdfe/li2c.c	2016-06-18 23:35:15.467047200 +0000
 @@ -38,95 +38,34 @@
  	options i2c_bcm2708 baudrate=400000
  */

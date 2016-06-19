@@ -1,5 +1,5 @@
 # $name Developer UNITINFO
-# $desc Imitates a panda's configuration. For the average user, loader ErrDisp is enough. This will break eShop/online access as long as it is enabled.
+# $desc Pretend to be a developer console. For the average user, loader ErrDisp is enough. This will break eShop/online access as long as it is enabled.
 # $ver  09
 # $uuid 0d
 # $flags devmode

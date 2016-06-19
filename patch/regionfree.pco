@@ -1,5 +1,5 @@
-# $name  Region free HOME (Loader)
-# $desc  Allows launching installed software from any region. This is only for CIA titles.
+# $name  Region Free HOME (Loader)
+# $desc  Allows launching installed software from any region. This is only for CIA titles, not carts.
 # $title 0004003000008F02 0004003000008202 0004003000009802 000400300000A102 000400300000A902 000400300000B102
 # $ver   09
 # $uuid  09

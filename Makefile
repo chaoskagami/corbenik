@@ -1,5 +1,6 @@
 rwildcard = $(foreach d, $(wildcard $1*), $(filter $(subst *, %, $2), $d) $(call rwildcard, $d/, $2))
 
+# Only cygwin is maybe working on windows.
 PATH := $(PATH):$(DEVKITARM)/bin
 
 CROSS_CC := arm-none-eabi-gcc

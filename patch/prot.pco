@@ -1,10 +1,10 @@
-# $name FIRM Protect
-# $desc Prevents writing FIRM to the NAND during updates.
+# $name FIRM Protection
+# $desc Prevents writing FIRM to the NAND during updates. Enable this if booting sysNAND.
 # $ver  09
 # $uuid 08
 # $flags require
 
-# Status: Working
+# Status: Untested, but theoretically fine (Next system update I'll either brick or I won't.)
 
 rel native_p9
 # String: 'exe:'

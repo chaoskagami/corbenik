@@ -1,6 +1,6 @@
-[submodule "host/bdfe"]
-	path = host/bdfe
-	url = https://github.com/achilikin/bdfe
 [submodule "external/tewi-font"]
 	path = external/tewi-font
 	url = https://github.com/Lucy/tewi-font
+[submodule "host/bdfe"]
+	path = host/bdfe
+	url = https://github.com/chaoskagami/bdfe

@@ -71,6 +71,14 @@ struct firm_signature firm_signatures[] = {
      .version = 0x00,
      .version_string = "9.0.0",
      .console = console_n3ds },
+
+    // I don't actually know what legitimate situation the below firmware would be encountered in.
+    // Better safe than sorry.
+    {.sig = { 0x16, 0x3B, 0x88, 0xD1, 0x7D, 0x7C, 0x13, 0x19, 0xB5, 0x8C, 0x7D, 0x59, 0x16, 0x81, 0x02, 0x03 },
+     .version = 0x50, // I don't actually know, honestly. Developer 11.4 seems to be 10.X based.
+     .version_string = "Dev 11.4",
+     .console = console_o3ds },
+
     {.version = 0xFF, .version_string = "Not found" } // Terminate list
 };
 

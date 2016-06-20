@@ -2,10 +2,10 @@
 all: loader bits screeninit
 	mkdir -p ../out/corbenik/module
 	mkdir -p ../out/corbenik/bits
-	mkdir -p ../out/corbenik/bits
 	cp loader/loader.cxi ../out/corbenik/module/loader.cxi
 	cp bits/backdoor.bin ../out/corbenik/bits/backdoor.bin
 	cp bits/emunand.bin ../out/corbenik/bits/emunand.bin
+	cp bits/chain.bin ../out/corbenik/bits/chain.bin
 	cp bits/reboot_hook.bin ../out/corbenik/bits/reboot_hook.bin
 	cp bits/reboot_code.bin ../out/corbenik/bits/reboot_code.bin
 	cp screeninit/build/screeninit.bin ../out/corbenik/bits/screeninit.bin

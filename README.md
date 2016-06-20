@@ -6,7 +6,7 @@ It's mainly intended for developers; so if you don't know your way around the 3D
 
 Not every feature has been implemented/tested yet, but at the moment it offers a rather comprehensive experience for people who know what they're doing.
 
-Corbenik is licensed under the terms of the GPLv3. Please obey it. You should have recieved a copy either as part of the git repository, or as part of the tarball/zipfile you downloaded. If not, get a copy here: `http://www.gnu.org/licenses/gpl-3.0.txt`
+Corbenik is licensed under the terms of the GPLv3. Please obey it. You should have received a copy either as part of the git repository, or as part of the tarball/zipfile you downloaded. If not, get a copy here: `http://www.gnu.org/licenses/gpl-3.0.txt`
 
 Upgrading
 -------------------------

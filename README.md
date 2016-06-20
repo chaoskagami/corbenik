@@ -1,12 +1,12 @@
 ![Corbenik](https://raw.github.com/wiki/chaoskagami/corbenik/corbenik-logo.png)
 
-Corbenik is another CFW for the 3DS somewhat like cakes, but using bytecode-based patches. This allows for doing most of what it does, but taking the control level to its' logical extreme.
+Corbenik is another CFW for the 3DS somewhat like cakes, but using bytecode-based patches. This allows for doing most of what it does, but taking the control level to its logical extreme.
 
 It's mainly intended for developers; so if you don't know your way around the 3DS, chances are this isn't for you.
 
 Not every feature has been implemented/tested yet, but at the moment it offers a rather comprehensive experience for people who know what they're doing.
 
-Corbenik is licensed under the terms of the GPLv3. Please obey it. You should have recieved a copy either as part of the git repository, or as part of the tarball/zipfile you downloaded. If not, get a copy here: `http://www.gnu.org/licenses/gpl-3.0.txt`
+Corbenik is licensed under the terms of the GPLv3. Please obey it. You should have received a copy either as part of the git repository, or as part of the tarball/zipfile you downloaded. If not, get a copy here: `http://www.gnu.org/licenses/gpl-3.0.txt`
 
 Upgrading
 -------------------------
@@ -74,7 +74,7 @@ New 3DS AGB_FIRM (Firmware for GBA games):
  * cetk: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000202/cetk
  * firm: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000202/00000000
 
-On New3DS units, there's additional crypto on arm9loader which requires the 9.6 key to decrypt. It usually is named `Slot0x11Key96.bin`, and I also can't tell you where to find this, aside from "check Plailect's guide." Corbenik will attempt to read this from the root as well as `/corbenik/keys/11.key`. In a future version, keydb reading may be implemented, but no guarantees.
+On New3DS units, there's additional encryption on arm9loader which requires the 9.6 key to decrypt. It usually is named `Slot0x11Key96.bin`, and I also can't tell you where to find this, aside from "check Plailect's guide." Corbenik will attempt to read this from the root as well as `/corbenik/keys/11.key`. In a future version, keydb reading may be implemented, but no guarantees.
 
 The folder `/corbenik/locale` is automatically generated language emulation files from 3dbrew for games that only specify one region and one language. Games which support more than one language are not generated, because there's no 'correct' language. You can remove this if the number of files unnerves you. It isn't required. You can also add new files if you have specific needs.
 
@@ -93,7 +93,7 @@ Unless otherwise noted, menu controls are always shown at the top, but for refer
  * Right  -> Down five
  * Select -> Help
 
-For starters, you'll want to go into options and enable `Loader Replacement` to get loader to run patches as well. Even if you don't plan to run any loader patches, this will at very least kill ASLR and anti-OOThax/anti-ninjhax features in the official Nintendo loader.
+For starters, you'll want to go into options and enable `Loader Replacement` to get loader to run patches as well. Even if you don't plan to run any loader patches, this will at very least kill ASLR and anti-OoThax/anti-Ninjhax features in the official Nintendo loader.
 
 If you're using 11.0 NATIVE_FIRM like I suggested, you may want to tick `svcBackdoor Fixup` to fix the broken svcBackdoor if you plan on using anything which requires it. This includes HBMenu, some Retroarch cores, etc. Your system will be more secure (as in against malicious code, not as in Nintendo) if you leave it off.
 
@@ -118,7 +118,7 @@ If you're using the reboot hook, you might want these:
  * AGB Signature fix
  * AGB Bootscreen
    * Will stop games with corrupted Nintendo logos from running. Disable for
-     romhacks if this occurs.
+     ROMhacks if this occurs.
  * TWL Patches
 
 If you're on 11.0, you also want these:

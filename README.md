@@ -37,7 +37,9 @@ Installing
 
 Copy the files to the root of your SD (and optionally, rename arm9loaderhax.bin and set it up with a bootloader.)
 
-Without the FIRMs, it cannot boot up your system. You'll need to fetch the following at minimum, and put it at `/corbenik/firmware/native`:
+Without the FIRMs, it cannot boot up your system. You'll need to fetch the following urls at minimum, rename, and put it at
+ * native firm: `/corbenik/firmware/native`:
+ * native cetk: `/corbenik/keys/native.cetk`:
 
 Old 3DS (Native FIRM, 11.0):
  * firm: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000002/00000052
@@ -49,14 +51,25 @@ New 3DS (Native FIRM, 11.0):
 
 Note that this is only a recommendation - you can supply near any valid firmware file for your console.
 
-You'll need the firmkey for it as well unless you have decrypted your firmware, and it should be placed at `/corbenik/keys/native.key`. I can't tell you where to get it obviously, but there are a few ways to get valid firmware with/without a firmkey and not involving a download from a questionable place:
+You'll need the firmkey for it as well unless you have decrypted your firmware, and it should be placed at
+ * native firm key: `/corbenik/keys/native.key`
+
+I can't tell you where to get it obviously, but there are a few ways to get valid firmware with/without a firmkey and not involving a download from a questionable place:
 
  * Decrypt the CETK using D9 and extract the firmkey using D9's scripts
  * Extract the encTitleKey using D9's scripts, and have D9 convert it
  * Decrypt the firmware with D9 directly
  * Boot another CFW, then reboot into Corbenik with a cetk for native at `/corbenik/keys/native.cetk`
 
-You can also fetch the agb firm and twl firms to `/corbenik/firmware/agb` and `/corbenik/firmware/twl` respectively. If you don't have the firmkeys for these, you can fetch the cetk for each of them to `/corbenik/keys/agb.cetk` and `/corbenik/keys/twl.cetk`. Boot up the system, go to system settings, and it will extract the firm keys for them after rebooting.
+You can also fetch and rename the agb firm and twl firms to
+ * agb firm: `/corbenik/firmware/agb`
+ * twl firm: `/corbenik/firmware/twl`
+
+If you don't have the firmkeys for these, you can fetch and rename the cetk for each of them to
+ * agb cetk: `/corbenik/keys/agb.cetk`
+ * twl cetk: `/corbenik/keys/twl.cetk`
+
+Boot up the system, go to system settings, and it will extract the firm keys for them after rebooting.
 
 Old 3DS TWL_FIRM (Firmware for DS/DSi games):
  * cetk: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000102/cetk

@@ -66,8 +66,8 @@ You can also fetch and rename the agb firm and twl firms to
  * twl firm: `/corbenik/firmware/twl`
 
 If you don't have the firmkeys for these, you can fetch and rename the cetk for each of them to
- * agb cetk key: `/corbenik/keys/agb.cetk`
- * twl cetk key: `/corbenik/keys/twl.cetk`
+ * agb cetk: `/corbenik/keys/agb.cetk`
+ * twl cetk: `/corbenik/keys/twl.cetk`
 
 Boot up the system, go to system settings, and it will extract the firm keys for them after rebooting.
 

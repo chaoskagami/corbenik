@@ -36,4 +36,7 @@ extern void *fcram_temp;
 // Path that the font will be loaded at.
 #define FCRAM_FONT_LOC (FCRAM_PATCHLIST_LOC + (FCRAM_SPACING / 2))
 
+// Path that the menu for chains will be at
+#define FCRAM_CHAIN_LOC (FCRAM_FONT_LOC + FCRAM_SPACING)
+
 #endif

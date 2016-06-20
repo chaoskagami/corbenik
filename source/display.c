@@ -154,7 +154,7 @@ show_menu(struct options_s *options, uint8_t *toggles)
                     else
                         toggles[options[cursor_y].index]++;
                 } else if (options[cursor_y].allowed == call_fun) {
-                    ((func_call_t)(options[cursor_y].a))(); // Call 'a' as a function.
+                    ((func_call_t)(options[cursor_y].a))(options[cursor_y].b); // Call 'a' as a function.
                 } else if (options[cursor_y].allowed == break_menu) {
                     exit = 1;
                     clear_screen(TOP_SCREEN);

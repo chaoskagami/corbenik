@@ -16,7 +16,7 @@ static struct options_s options[] = {
 
     { OPTION_EMUNAND, "Use EmuNAND", "Redirects NAND write/read to the SD. This supports both Gateway and redirected layouts.", boolean_val, 0, 0 },
     { OPTION_EMUNAND_INDEX, "  Index", "Which EmuNAND to use. If you only have one, you want 0. Currently the maximum supported is 10 (0-9), but this is arbitrary.", ranged_val, 0, 0x9 },
-    { OPTION_EMUNAND_REVERSE, "  Reverse layout", "(Warning - Experimental!) Calculate EmuNAND sector from the end of the disk, not the start. This isn't supported by tools like Decrypt9, but has some advantages.", boolean_val, 0, 0x9 },
+//    { OPTION_EMUNAND_REVERSE, "  Reverse layout", "(Warning - Experimental!) Calculate EmuNAND sector from the end of the disk, not the start. This isn't supported by tools like Decrypt9, but has some advantages.", boolean_val, 0, 0x9 },
 
     { OPTION_AUTOBOOT, "Autoboot", "Boot the system automatically, unless the R key is held while booting.", boolean_val, 0, 0 },
     { OPTION_SILENCE, "  Silent mode", "Suppress all debug output during autoboot. You'll see the screen turn on and then off once.", boolean_val, 0, 0 },
@@ -300,6 +300,8 @@ poweroff()
         ;
 }
 
+void chainload_menu();
+
 static struct options_s main_s[] = {
     { 0, "Options",            "Internal options for the CFW. These are part of Corbenik itself.", call_fun, (uint32_t)menu_options, 0 },
     { 0, "Patches",            "External bytecode patches found in `" PATH_PATCHES "`. You can choose which to enable.", call_fun, (uint32_t)menu_patches, 0 },
@@ -308,6 +310,7 @@ static struct options_s main_s[] = {
     { 0, "Reboot",             "Reboots the console.", call_fun, (uint32_t)reset,        0 },
     { 0, "Power off",          "Powers off the console.", call_fun, (uint32_t)poweroff,     0 },
     { 0, "Save Configuration", "Save the configuration. You must do this prior to booting, otherwise nothing is done.", call_fun, (uint32_t)save_config,  0 },
+    { 0, "Chainload",          "Boot another ARM9 payload file.", call_fun, (uint32_t)chainload_menu, 0 },
     { 0, "Boot Firmware",      "Generates caches, patches the firmware, and boots it.", break_menu, 0, 0 },
 
     // Sentinel.

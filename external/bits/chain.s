@@ -1,7 +1,23 @@
+// This is a tiny chainloader. It expects r0 to be the
+// code to copy, and r1 to be the code's size.
+
+// As long as GCC follows standard calling conventions, you
+// can call it from C once in memory like:
+
+//   void copy(uint8_t* data, uint32_t size)
+
+// This means NO need to use fatfs with the chainloader since the
+// caller itself handles the disk read.
+
+// The code below is also all PC-relative, meaning you can actually
+// run the chainloader from anywhere (as long as it is aligned to
+// instruction boundaries/the chainloader isn't overwritten/the
+// code isn't copied wrong over itself)
+
 .syntax unified
 .section .text
 .global copy
-copy: // void copy(uint8_t* data, uint32_t size)
+copy:
     ldr r3, value
     add r1, r0, r1
 

@@ -300,7 +300,9 @@ poweroff()
         ;
 }
 
+#ifdef CHAINLOADER
 void chainload_menu();
+#endif
 
 static struct options_s main_s[] = {
     { 0, "Options",            "Internal options for the CFW. These are part of Corbenik itself.", call_fun, (uint32_t)menu_options, 0 },
@@ -310,7 +312,9 @@ static struct options_s main_s[] = {
     { 0, "Reboot",             "Reboots the console.", call_fun, (uint32_t)reset,        0 },
     { 0, "Power off",          "Powers off the console.", call_fun, (uint32_t)poweroff,     0 },
     { 0, "Save Configuration", "Save the configuration. You must do this prior to booting, otherwise nothing is done.", call_fun, (uint32_t)save_config,  0 },
+#ifdef CHAINLOADER
     { 0, "Chainload",          "Boot another ARM9 payload file.", call_fun, (uint32_t)chainload_menu, 0 },
+#endif
     { 0, "Boot Firmware",      "Generates caches, patches the firmware, and boots it.", break_menu, 0, 0 },
 
     // Sentinel.

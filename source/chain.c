@@ -1,3 +1,5 @@
+#ifdef CHAINLOADER
+
 #include "common.h"
 #include "firm/firm.h"
 #include "firm/headers.h"
@@ -135,3 +137,5 @@ void chainload_menu() {
 
     show_menu(chains, NULL);
 }
+
+#endif

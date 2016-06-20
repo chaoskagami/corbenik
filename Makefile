@@ -26,8 +26,10 @@ dir_out    := out
 REVISION := $(shell git rev-parse HEAD | head -c10)+$(shell git rev-list --count HEAD)
 REL ?= master
 
+EXTRA ?= -DCHAINLOADER=1
+
 CROSS_ASFLAGS := -mlittle-endian -mcpu=arm946e-s -march=armv5te
-CROSS_CFLAGS  := -MMD -MP -Wall -Wextra -Werror -fomit-frame-pointer -Os $(ASFLAGS) -fshort-wchar -fno-builtin -std=gnu11 -DVERSION=\"$(REVISION)\" -DREL=\"$(REL)\"
+CROSS_CFLAGS  := -MMD -MP -Wall -Wextra -Werror -fomit-frame-pointer -Os $(ASFLAGS) -fshort-wchar -fno-builtin -std=gnu11 -DVERSION=\"$(REVISION)\" -DREL=\"$(REL)\" $(EXTRA)
 CROSS_FLAGS   := dir_out=$(abspath $(dir_out)) --no-print-directory
 CROSS_LDFLAGS := -nostdlib -Wl,-z,defs -lgcc -Wl,-Map,$(dir_build)/link.map
 

@@ -49,6 +49,7 @@
 #define PATH_AGB_P PATH_TEMP "/p_agb"
 #define PATH_TWL_P PATH_TEMP "/p_twl"
 
+#define PATH_CETK PATH_CFW "/cetk" // Cetk files will be loaded from this dir
 #define PATH_KEYS PATH_CFW "/keys" // Keyfiles will be loaded from this dir, and
                                    // additionally the root if not found.
 
@@ -69,9 +70,9 @@
 #define PATH_AGB_F PATH_FIRMWARES "/agb"
 #define PATH_TWL_F PATH_FIRMWARES "/twl"
 
-#define PATH_NATIVE_CETK PATH_KEYS "/native.cetk"
-#define PATH_TWL_CETK PATH_KEYS "/twl.cetk"
-#define PATH_AGB_CETK PATH_KEYS "/agb.cetk"
+#define PATH_NATIVE_CETK PATH_CETK "/native.cetk"
+#define PATH_TWL_CETK PATH_CETK "/twl.cetk"
+#define PATH_AGB_CETK PATH_CETK "/agb.cetk"
 
 #define PATH_NATIVE_FIRMKEY PATH_KEYS "/native.key"
 #define PATH_TWL_FIRMKEY PATH_KEYS "/twl.key"

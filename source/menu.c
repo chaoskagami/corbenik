@@ -28,7 +28,7 @@ static struct options_s options[] = {
 
     { OPTION_LOADER, "Use Loader Replacement", "Replaces loader with one capable of extra features. You should enable this even if you don't plan to use loader-based patches to kill ASLR and the Ninjhax/OOThax checks.", boolean_val, 0, 0 },
     { OPTION_LOADER_CPU_L2, "  CPU - L2 cache", "Forces the system to use the L2 cache on all applications. If you have issues with crashes, try turning this off.", boolean_val_n3ds, 0, 0 },
-    { OPTION_LOADER_CPU_800MHZ, "  CPU - 800Mhz", "Forces the system to run in 800Mhz mode on all applications.", boolean_val_n3ds, 0, 0 },
+    { OPTION_LOADER_CPU_800MHZ, "  CPU - 804Mhz", "Forces the system to run in 804Mhz mode on all applications.", boolean_val_n3ds, 0, 0 },
     { OPTION_LOADER_LANGEMU, "  Language Emulation", "Reads language emulation configuration from `" PATH_LOCEMU "` and imitates the region/language.", boolean_val, 0, 0 },
     { OPTION_LOADER_LOADCODE, "  Load Code Sections", "Loads code sections (text/ro/data) from SD card and patches afterwards.", boolean_val, 0, 0 },
 
@@ -220,7 +220,7 @@ menu_options()
 static struct options_s info_d[] = {
 	{ 0, "  Native FIRM: ", "The version of NATIVE_FIRM in use.", not_option, 0, 0},
 	{ 0, "  AGB FIRM:    ", "The version of AGB_FIRM in use. This is used to run GBA games.", not_option, 0, 0},
-	{ 0, "  TWL FIRM:    ", "The version of TWL_FIRM in use. This is used to run DS games and DSiware.", not_option, 0, 0},
+	{ 0, "  TWL FIRM:    ", "The version of TWL_FIRM in use. This is used to run DS games and DSiWare.", not_option, 0, 0},
 	{ 0, "  Corbenik:    " VERSION " (" REL ")", "Corbenik's version.", not_option, 0, 0},
 	{ -1, "", "", not_option, 0, 0 }
 };
@@ -280,7 +280,7 @@ reset()
     fumount(); // Unmount SD.
 
     // Reboot.
-    fprintf(BOTTOM_SCREEN, "Rebooting system.\n");
+    fprintf(BOTTOM_SCREEN, "Rebooting system...\n");
     i2cWriteRegister(I2C_DEV_MCU, 0x20, 1 << 2);
     while (1)
         ;
@@ -294,7 +294,7 @@ poweroff()
     fumount(); // Unmount SD.
 
     // Reboot.
-    fprintf(BOTTOM_SCREEN, "Powering off system.\n");
+    fprintf(BOTTOM_SCREEN, "Powering off system...\n");
     i2cWriteRegister(I2C_DEV_MCU, 0x20, 1 << 0);
     while (1)
         ;

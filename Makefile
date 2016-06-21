@@ -26,16 +26,28 @@ dir_out    := out
 REVISION := $(shell git rev-parse HEAD | head -c10)+$(shell git rev-list --count HEAD)
 REL ?= master
 
-EXTRA ?= -DCHAINLOADER=1
+# Default to enabling chainloader.
+CHAINLOADER ?= 1
 
 CROSS_ASFLAGS := -mlittle-endian -mcpu=arm946e-s -march=armv5te
-CROSS_CFLAGS  := -MMD -MP -Wall -Wextra -Werror -fomit-frame-pointer -Os $(ASFLAGS) -fshort-wchar -fno-builtin -std=gnu11 -DVERSION=\"$(REVISION)\" -DREL=\"$(REL)\" $(EXTRA)
+CROSS_CFLAGS  := -MMD -MP -Wall -Wextra -Werror -fomit-frame-pointer -Os $(ASFLAGS) -fshort-wchar -fno-builtin -std=gnu11 -DVERSION=\"$(REVISION)\" -DREL=\"$(REL)\" -DCHAINLOADER=$(CHAINLOADER)
 CROSS_FLAGS   := dir_out=$(abspath $(dir_out)) --no-print-directory
 CROSS_LDFLAGS := -nostdlib -Wl,-z,defs -lgcc -Wl,-Map,$(dir_build)/link.map
 
 objects_cfw = $(patsubst $(dir_source)/%.s, $(dir_build)/%.o, \
 			  $(patsubst $(dir_source)/%.c, $(dir_build)/%.o, \
 			  $(call rwildcard, $(dir_source), *.s *.c)))
+
+.PHONY: release
+release:
+	mkdir -p rel
+	make clean
+	make CHAINLOADER=0 REL=$(REL) full
+	mv out/release.zip rel/release-nochain.zip
+	cat out/release.zip.sha512 | sed 's/release.zip/release-nochain.zip/' > rel/release-nochain.zip.sha512
+	make clean
+	make CHAINLOADER=1 REL=$(REL) full
+	mv out/release.zip out/release.zip.sha512 rel/
 
 .PHONY: all
 all: hosttools font a9lh patch external
@@ -62,7 +74,7 @@ contrib:
 
 .PHONY: external
 external:
-	make -C external dir_out=$(dir_out) fw_folder=$(fw_folder)
+	make -C external dir_out=$(dir_out) fw_folder=$(fw_folder) CHAINLOADER=$(CHAINLOADER)
 
 .PHONY: patch
 patch:

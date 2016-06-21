@@ -1,4 +1,4 @@
-#ifdef CHAINLOADER
+#if defined(CHAINLOADER) && CHAINLOADER == 1
 
 #include "common.h"
 #include "firm/firm.h"

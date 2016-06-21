@@ -518,7 +518,7 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                                 "  Opcode:    %u\n",
                         set_mode, current_mode->memory, current_mode->size, offset, current_mode->memory + offset, code - bytecode, code, *code);
 #endif
-                abort("Halting startup.\n");
+                abort("Halting startup...\n");
                 break;
         }
 

@@ -47,7 +47,7 @@ void chainload_file(char* chain_file_data) {
     fread(chain_data, 1, size, f);
     fclose(f);
 
-    fprintf(stderr, "Chaining to copy payload.\n");
+    fprintf(stderr, "Chaining to copy payload...\n");
 
     ((void(*)())0x24F00000)(chain_data, size);
 }

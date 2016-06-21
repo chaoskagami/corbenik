@@ -31,7 +31,7 @@ main()
     load_config(); // Load configuration.
 
     if (CFG_BOOTENV == 7) {
-        fprintf(stderr, "Rebooted from AGB, disabling EmuNAND\n");
+        fprintf(stderr, "Rebooted from AGB, disabling EmuNAND...\n");
         config.options[OPTION_EMUNAND] = 0;
     }
 

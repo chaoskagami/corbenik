@@ -40,6 +40,7 @@ objects_cfw = $(patsubst $(dir_source)/%.s, $(dir_build)/%.o, \
 
 .PHONY: release
 release:
+	rm -rf rel
 	mkdir -p rel
 	make clean
 	make CHAINLOADER=0 REL=$(REL) full

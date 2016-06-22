@@ -16,7 +16,6 @@
 
 .syntax unified
 .section .text
-.global copy
 copy:
     ldr r3, value
     add r1, r0, r1
@@ -51,9 +50,17 @@ boot:
         cmp r2, #4
         bcc flush_dcache
 
+    // Reload argc and argv.
+    ldr r0, argc
+    ldr r1, argv
+
     // Actually boot payload.
     ldr r3, offset
     bx r3
 
+.align 4
+
 value:  .int 0x23efffff
 offset: .int 0x23f00000
+argc:   .ascii "ARGC"
+argv:   .ascii "ARGV"

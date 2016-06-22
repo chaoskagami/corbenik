@@ -25,8 +25,8 @@ screen_init()
 
         // Turn on backlight
         i2cWriteRegister(I2C_DEV_MCU, 0x22, 0x2A);
-
-        // Flush garbage off the FB.
-        clear_screens();
     }
+
+    // Flush garbage off the FB.
+    clear_screens();
 }

@@ -22,7 +22,7 @@ void chainload_file(char* chain_file_data) {
     char code_file[] = PATH_BITS "/chain.bin";
 
     uint8_t* bootstrap = (uint8_t*)0x24F00000;
-    uint32_t size = 0;
+    uint32_t size = 0, b_size = 0;
     uint8_t* chain_data;
 
     FILE* f = fopen(code_file, "r");
@@ -31,11 +31,11 @@ void chainload_file(char* chain_file_data) {
         abort("Missing chainloader.\n");
     }
 
-    size = fsize(f);
-    fread(bootstrap, 1, size, f);
+    b_size = fsize(f);
+    fread(bootstrap, 1, b_size, f);
     fclose(f);
 
-    chain_data = bootstrap + size;
+    chain_data = bootstrap + b_size;
 
     f = fopen(chain_file, "r");
     if (!f) {
@@ -47,9 +47,27 @@ void chainload_file(char* chain_file_data) {
     fread(chain_data, 1, size, f);
     fclose(f);
 
+    fprintf(stderr, "Setting argc, argv...\n");
+
+    size = size - (size % 4) + 4;
+
+    uint32_t* off = (uint32_t*) &chain_data[size];
+
+    off[0] = (uint32_t)off + 4; // char**
+    off[1] = (uint32_t)off + 8; // char*
+
+    char* arg0 = (char*)&off[1];
+    memcpy(arg0, chain_file, strlen(chain_file) + 1);
+
+    uint32_t* argc_off = (uint32_t*)memfind(bootstrap, b_size, "ARGC", 4);
+    uint32_t* argv_off = (uint32_t*)memfind(bootstrap, b_size, "ARGV", 4);
+
+    argc_off[0] = 1;
+    argv_off[0] = (uint32_t)off;
+
     fprintf(stderr, "Chaining to copy payload...\n");
 
-    ((void(*)())0x24F00000)(chain_data, size);
+    ((void(*)(void*, uint32_t))0x24F00000)(chain_data, size + 256 + 8); // Size of payload + argv.
 }
 
 // This function is based on PathDeleteWorker from GodMode9.

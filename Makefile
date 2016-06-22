@@ -38,6 +38,9 @@ objects_cfw = $(patsubst $(dir_source)/%.s, $(dir_build)/%.o, \
 			  $(patsubst $(dir_source)/%.c, $(dir_build)/%.o, \
 			  $(call rwildcard, $(dir_source), *.s *.c)))
 
+.PHONY: all
+all: hosttools font a9lh patch external
+
 .PHONY: release
 release:
 	rm -rf rel
@@ -49,9 +52,6 @@ release:
 	make clean
 	make CHAINLOADER=1 REL=$(REL) full
 	mv out/release.zip out/release.zip.sha512 rel/
-
-.PHONY: all
-all: hosttools font a9lh patch external
 
 .PHONY: hosttools
 hosttools:

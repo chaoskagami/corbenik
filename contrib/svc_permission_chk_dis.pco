@@ -7,9 +7,8 @@
 
 # Original patch by Subv. Conversion by @Wolfvak.
 
-rel  native_s0
+rel  native_s1
 
 find EAFFFF0A
 abortnf
 set  00F020E3
-

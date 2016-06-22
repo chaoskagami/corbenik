@@ -13,7 +13,7 @@ int doing_autoboot = 0;
 void shut_up();
 
 int
-main()
+main(int argc, char** argv)
 {
     if (PDN_MPCORE_CFG == 7)
         is_n3ds = 1; // Enable n3ds specific options.
@@ -26,6 +26,11 @@ main()
     if (c) {
         // Failed to mount SD. Bomb out.
         abort("Failed to mount SD card.\n");
+    }
+
+    if (argc >= 1 && argc < 2) {
+        // Valid argc passed.
+        fprintf(stderr, "Chainloaded. Path: %s\n", argv[0]);
     }
 
     load_config(); // Load configuration.

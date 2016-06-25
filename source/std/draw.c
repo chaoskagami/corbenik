@@ -27,6 +27,32 @@ static unsigned int text_top_height = 10;
 static unsigned int text_bottom_width = 20;
 static unsigned int text_bottom_height = 10;
 
+uint8_t top_bg[TOP_SIZE];
+uint8_t bottom_bg[BOTTOM_SIZE];
+
+void clear_bg() {
+    memset(top_bg, 0, TOP_SIZE);
+    memset(bottom_bg, 0, BOTTOM_SIZE);
+}
+
+void load_bg_top(char* fname_top) {
+    FILE* f = fopen(fname_top, "r");
+    if (!f) return;
+
+    fread(top_bg, 1, TOP_SIZE, f);
+
+    fclose(f);
+}
+
+void load_bg_bottom(char* fname_bottom) {
+    FILE* f = fopen(fname_bottom, "r");
+    if (!f)
+        return;
+
+    fread(bottom_bg, 1, BOTTOM_SIZE, f);
+    fclose(f);
+}
+
 void set_font(const char* filename) {
     // TODO - Unicode support. Right now, we only load 32
 
@@ -107,15 +133,16 @@ clear_disp(uint8_t *screen)
         screen = framebuffers->bottom;
 
     if (screen == framebuffers->top_left || screen == framebuffers->top_right) {
-        memset(screen, 0, TOP_SIZE);
+        memcpy(screen, top_bg, TOP_SIZE);
     } else if (screen == framebuffers->bottom) {
-        memset(screen, 0, BOTTOM_SIZE);
+        memcpy(screen, bottom_bg, BOTTOM_SIZE);
     }
 }
 
 void
 clear_screen(uint8_t *screen)
 {
+    // TODO - remove. This is a stub now.
     clear_disp(screen);
 }
 
@@ -146,12 +173,15 @@ draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, co
 
     _UNUSED int width = 0;
     int height = 0;
+    uint8_t* buffer_bg;
     if (screen == framebuffers->top_left || screen == framebuffers->top_right) {
         width = TOP_WIDTH;
         height = TOP_HEIGHT;
+        buffer_bg = top_bg;
     } else if (screen == framebuffers->bottom) {
         width = BOTTOM_WIDTH;
         height = BOTTOM_HEIGHT;
+        buffer_bg = bottom_bg;
     } else {
         return; // Invalid buffer.
     }
@@ -170,14 +200,26 @@ draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, co
 		unsigned int pos = xDisplacement + yDisplacement;
         unsigned char char_dat = ((char*)FCRAM_FONT_LOC)[(character - ' ') * (c_font_w * font_h) + yy];
         for(unsigned int i=0; i < font_w + font_kern; i++) {
-            screen[pos]     = color_bg >> 16;
-            screen[pos + 1] = color_bg >> 8;
-            screen[pos + 2] = color_bg;
+            if (color_bg == 0) {
+                screen[pos]     = buffer_bg[pos];
+                screen[pos + 1] = buffer_bg[pos + 1];
+                screen[pos + 2] = buffer_bg[pos + 2];
+            } else {
+                screen[pos]     = color_bg >> 16;
+                screen[pos + 1] = color_bg >> 8;
+                screen[pos + 2] = color_bg;
+            }
 
 			if (char_dat & 0x80) {
-                screen[pos]     = color_fg >> 16;
-                screen[pos + 1] = color_fg >> 8;
-                screen[pos + 2] = color_fg;
+                if (color_fg == 0) {
+                    screen[pos]     = buffer_bg[pos];
+                    screen[pos + 1] = buffer_bg[pos + 1];
+                    screen[pos + 2] = buffer_bg[pos + 2];
+                } else {
+                    screen[pos]     = color_fg >> 16;
+                    screen[pos + 1] = color_fg >> 8;
+                    screen[pos + 2] = color_fg;
+                }
 			}
 
             char_dat <<= 1;

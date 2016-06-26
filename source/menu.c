@@ -1,6 +1,7 @@
 #include "common.h"
 #include "firm/firm.h"
 #include "firm/headers.h"
+#include "std/unused.h"
 
 #define MAX_PATCHES ((FCRAM_SPACING / 2) / sizeof(struct options_s))
 struct options_s *patches = (struct options_s *)FCRAM_MENU_LOC;
@@ -58,10 +59,11 @@ static struct options_s options[] = {
 extern void waitcycles(uint32_t cycles);
 
 uint32_t
-wait_key(int sleep)
+wait_key(_UNUSED int sleep)
 {
+    // If your dpad has issues, please add this to the makefile.
     if (sleep) {
-        #define ARM9_APPROX_DELAY_MAX 134058675 / 85
+        #define ARM9_APPROX_DELAY_MAX 134058675 / 95
         waitcycles(ARM9_APPROX_DELAY_MAX); // Approximately what a human can input - fine tuning needed (sorry, TASers!)
     }
 
@@ -69,7 +71,10 @@ wait_key(int sleep)
     while (ret == 0) {
         get = HID_PAD;
 
-        if (get & BUTTON_UP)
+        if ((get & (BUTTON_L | BUTTON_R | BUTTON_STA)) == (BUTTON_L | BUTTON_R | BUTTON_STA)) {
+            screenshot();
+            waitcycles(ARM9_APPROX_DELAY_MAX); // Approximately what a human can input - fine tuning needed (sorry, TASers!)
+        } else if (get & BUTTON_UP)
             ret = BUTTON_UP;
         else if (get & BUTTON_DOWN)
             ret = BUTTON_DOWN;

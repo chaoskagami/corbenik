@@ -37,6 +37,8 @@ _UNUSED static struct framebuffers
 #define TOP_FB framebuffers->top_left
 #define BOTTOM_FB framebuffers->bottom
 
+void screenshot();
+
 void clear_bg();
 void load_bg_top(char* fname_top);
 void load_bg_bottom(char* fname_bottom);

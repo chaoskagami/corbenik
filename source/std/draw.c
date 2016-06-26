@@ -30,6 +30,54 @@ static unsigned int text_bottom_height = 10;
 uint8_t top_bg[TOP_SIZE];
 uint8_t bottom_bg[BOTTOM_SIZE];
 
+// This is (roughly) the screenshot specs as used by smeas scrtool.
+void screenshot() {
+    f_unlink(PATH_TEMP "/screenshot.ppm");
+
+    // Open the screenshot blob used by hbmenu et al
+    FILE* f = fopen(PATH_TEMP "/screenshot.ppm", "w");
+
+    if (!f) return;
+
+    fwrite("P6 400 480 255 ", 1, 15, f);
+
+    for(int y = 0; y < 240; y++) {
+        for(int x = 0; x < 400; x++) {
+            int xDisplacement = (x * SCREEN_DEPTH * 240);
+            int yDisplacement = ((240 - y - 1) * SCREEN_DEPTH);
+            int pos = xDisplacement + yDisplacement;
+
+            fwrite(& framebuffers->top_left[pos + 2], 1, 1, f);
+            fwrite(& framebuffers->top_left[pos + 1], 1, 1, f);
+            fwrite(& framebuffers->top_left[pos],     1, 1, f);
+        }
+    }
+
+    uint8_t zero = 0;
+
+    for(int y = 0; y < 240; y++) {
+        for (int i = 0; i < 40 * 3; i++)
+            fwrite(& zero, 1, 1, f);
+
+        for (int x = 0; x < 320; x++) {
+            int xDisplacement = (x * SCREEN_DEPTH * 240);
+            int yDisplacement = ((240 - y - 1) * SCREEN_DEPTH);
+            int pos = xDisplacement + yDisplacement;
+
+            fwrite(& framebuffers->bottom[pos + 2], 1, 1, f);
+            fwrite(& framebuffers->bottom[pos + 1], 1, 1, f);
+            fwrite(& framebuffers->bottom[pos],     1, 1, f);
+        }
+
+        for (int i = 0; i < 40 * 3; i++)
+            fwrite(& zero, 1, 1, f);
+    }
+
+    fclose(f);
+
+    fprintf(stderr, "Screenshot: %s\n", PATH_TEMP "/screenshot.ppm");
+}
+
 void clear_bg() {
     memset(top_bg, 0, TOP_SIZE);
     memset(bottom_bg, 0, BOTTOM_SIZE);

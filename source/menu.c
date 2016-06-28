@@ -102,10 +102,8 @@ extern unsigned int font_w;
 void
 header(char *append)
 {
-    for (unsigned int i = 0; i < TOP_WIDTH / font_w; i++) {
-        fprintf(stdout, "\x1b[30;42m ");
-    }
     set_cursor(TOP_SCREEN, 0, 0);
+    fill_line(stdout, 0, 0x2);
     fprintf(stdout, "\x1b[30;42m .Corbenik // %s\x1b[0m\n\n", append);
 }
 

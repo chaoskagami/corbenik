@@ -30,6 +30,61 @@ static unsigned int text_bottom_height = 10;
 uint8_t top_bg[TOP_SIZE];
 uint8_t bottom_bg[BOTTOM_SIZE];
 
+static uint32_t colors[16] = {
+    0x000000, // Black
+    0xaa0000, // Blue
+    0x00aa00, // Green
+    0xaaaa00, // Cyan
+    0x0000aa, // Red
+    0xaa00aa, // Magenta
+    0x0055aa, // Brown
+    0xaaaaaa, // Gray
+    0x555555, // Dark gray
+    0xff5555, // Bright blue
+    0x55ff55, // Bright green
+    0xffff55, // Bright cyan
+    0x5555ff, // Bright red
+    0xff55ff, // Bright megenta
+    0x55ffff, // Yellow
+    0xffffff  // White
+}; // VGA color table.
+
+void rect(void* channel, int x, int y, int x2, int y2, uint8_t color) {
+    uint8_t* screen = NULL;
+    int height = 0;
+    if (channel == stdout) {
+        screen = framebuffers->top_left;
+        height = TOP_HEIGHT;
+    } else if (channel == stderr) {
+        screen = framebuffers->bottom;
+        height = BOTTOM_HEIGHT;
+    } else {
+        return; // Invalid on non-screen displays.
+    }
+
+    for(int y_a = y; y_a < y2; y_a++) {
+        for(int x_a = x; x_a < x2; x_a++) {
+            int xDisplacement = (x_a * SCREEN_DEPTH * height);
+            int yDisplacement = ((height - y_a - 1) * SCREEN_DEPTH);
+            int pos = xDisplacement + yDisplacement;
+
+            screen[pos]     = colors[color & 0xF];
+            screen[pos + 1] = colors[color & 0xF] >> 8;
+            screen[pos + 2] = colors[color & 0xF] >> 16;
+        }
+    }
+}
+
+void fill_line(void* channel, int y, uint8_t color) {
+    int x2 = 0;
+    if (channel == stdout)
+        x2 = TOP_WIDTH;
+    else if (channel == stderr)
+        x2 = BOTTOM_WIDTH;
+
+    rect(channel, 0, (y * font_h), x2, ((y+1) * font_h), color);
+}
+
 // This is (roughly) the screenshot specs as used by smeas scrtool.
 void screenshot() {
     f_unlink(PATH_TEMP "/screenshot.ppm");
@@ -133,25 +188,6 @@ void set_font(const char* filename) {
     text_bottom_width  = BOTTOM_WIDTH / (font_w + font_kern);
     text_bottom_height = BOTTOM_HEIGHT / font_h;
 }
-
-static uint32_t colors[16] = {
-    0x000000, // Black
-    0xaa0000, // Blue
-    0x00aa00, // Green
-    0xaaaa00, // Cyan
-    0x0000aa, // Red
-    0xaa00aa, // Magenta
-    0x0055aa, // Brown
-    0xaaaaaa, // Gray
-    0x555555, // Dark gray
-    0xff5555, // Bright blue
-    0x55ff55, // Bright green
-    0xffff55, // Bright cyan
-    0x5555ff, // Bright red
-    0xff55ff, // Bright megenta
-    0x55ffff, // Yellow
-    0xffffff  // White
-}; // VGA color table.
 
 void dump_log(unsigned int force) {
     if(!config.options[OPTION_SAVE_LOGS])

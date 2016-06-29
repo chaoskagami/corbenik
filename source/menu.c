@@ -264,7 +264,7 @@ static struct options_s help_d[] = {
 	ln("  @mid-kid, @Wolfvak, @Reisyukaku, @AuroraWright"),
 	ln("  @d0k3, @TuxSH, @Steveice10, @delebile,"),
 	ln("  @Normmatt, @b1l1s, @dark-samus, @TiniVi, etc"),
-    ln(""),
+    	ln(""),
 	ln("  <https://github.com/chaoskagami/corbenik>"),
 	{ -1, "", "", not_option, 0, 0 }
 };

@@ -7,4 +7,8 @@ If you want your patch in the release zips, submit a PR! As long as it does what
 
 Current contrib patches:
 
- * mysterymachine.pco - Patches mystery gift in ORAS/XY to point to SALT servers (Original patch: @Wolfvak)
+ * mysterymachine.pco
+   * Patches mystery gift in ORAS/XY to point to SALT servers (Based on work by @shinyquagsire23, contributed by @Wolfvak)
+
+ * svc_permission_chk_dis.pco
+   * Disables SVC call permission checks. Potential security hazard. (Based on work by @Subv, contributed by @Wolfvak)

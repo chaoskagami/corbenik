@@ -73,7 +73,12 @@ patch_reboot()
     fprintf(stderr, "reboot: TWLF @ %x\n", pos_twl);
     fprintf(stderr, "reboot: AGBF @ %x\n", pos_agb);
 
-    uint8_t *mem = (uint8_t *)0x01FF8000; // 0x8000 space that will be resident.
+    uint8_t *mem = (uint8_t *)0x01FF8000; // 0x8000 space that will be resident. This is AXI WRAM. We have about 0x3700 bytes here.
+    // According to 3dbrew, this space's props from userland:
+    //   [L2L] VA fff00000..fff20000 -> PA 1ff80000..1ffa0000 [  X ] [ Priv: R-, User: -- ]
+    // It can be executed by the system but not written (and can only be executed with privs)
+    // This seems to be the perfect place to stick some code to be resident in memory. Beyond this,
+    // it might be needed to replace a svc call to access it. I'm rather sure that NTR does this.
 
     *pos_native = (uint32_t)mem;
     memcpy(mem, L"sdmc:", 10);

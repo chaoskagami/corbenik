@@ -37,6 +37,16 @@ _UNUSED static struct framebuffers
 #define TOP_FB framebuffers->top_left
 #define BOTTOM_FB framebuffers->bottom
 
+void screenshot();
+void rect(void* channel, int x, int y, int x2, int y2, uint8_t color);
+void fill_line(void* channel, int y, uint8_t color);
+
+void std_init();
+
+void clear_bg();
+void load_bg_top(char* fname_top);
+void load_bg_bottom(char* fname_bottom);
+
 void clear_screen(uint8_t *screen);
 void clear_screens();
 void draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, const uint32_t color_fg, const uint32_t color_bg);

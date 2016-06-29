@@ -14,8 +14,10 @@
 static unsigned int top_cursor_x = 0, top_cursor_y = 0;
 static unsigned int bottom_cursor_x = 0, bottom_cursor_y = 0;
 
+#define LOG_BUFFER_SIZE 4096
+
 static size_t  log_size = 0;
-static char    log_buffer[4096]; // Log buffer.
+static char*   log_buffer; // Log buffer.
 
 unsigned int font_w = 8;
 unsigned int font_h = 8;
@@ -26,6 +28,141 @@ static unsigned int text_top_height = 10;
 
 static unsigned int text_bottom_width = 20;
 static unsigned int text_bottom_height = 10;
+
+uint8_t *top_bg;
+uint8_t *bottom_bg;
+
+void std_init() {
+    top_bg     = static_allocate(TOP_SIZE);
+    bottom_bg  = static_allocate(BOTTOM_SIZE);
+    log_buffer = static_allocate(LOG_BUFFER_SIZE);
+}
+
+static uint32_t colors[16] = {
+    0x000000, // Black
+    0xaa0000, // Blue
+    0x00aa00, // Green
+    0xaaaa00, // Cyan
+    0x0000aa, // Red
+    0xaa00aa, // Magenta
+    0x0055aa, // Brown
+    0xaaaaaa, // Gray
+    0x555555, // Dark gray
+    0xff5555, // Bright blue
+    0x55ff55, // Bright green
+    0xffff55, // Bright cyan
+    0x5555ff, // Bright red
+    0xff55ff, // Bright megenta
+    0x55ffff, // Yellow
+    0xffffff  // White
+}; // VGA color table.
+
+void rect(void* channel, int x, int y, int x2, int y2, uint8_t color) {
+    uint8_t* screen = NULL;
+    int height = 0;
+    if (channel == stdout) {
+        screen = framebuffers->top_left;
+        height = TOP_HEIGHT;
+    } else if (channel == stderr) {
+        screen = framebuffers->bottom;
+        height = BOTTOM_HEIGHT;
+    } else {
+        return; // Invalid on non-screen displays.
+    }
+
+    for(int y_a = y; y_a < y2; y_a++) {
+        for(int x_a = x; x_a < x2; x_a++) {
+            int xDisplacement = (x_a * SCREEN_DEPTH * height);
+            int yDisplacement = ((height - y_a - 1) * SCREEN_DEPTH);
+            int pos = xDisplacement + yDisplacement;
+
+            screen[pos]     = colors[color & 0xF];
+            screen[pos + 1] = colors[color & 0xF] >> 8;
+            screen[pos + 2] = colors[color & 0xF] >> 16;
+        }
+    }
+}
+
+void fill_line(void* channel, int y, uint8_t color) {
+    int x2 = 0;
+    if (channel == stdout)
+        x2 = TOP_WIDTH;
+    else if (channel == stderr)
+        x2 = BOTTOM_WIDTH;
+
+    rect(channel, 0, (y * font_h), x2, ((y+1) * font_h), color);
+}
+
+// This is (roughly) the screenshot specs as used by smeas scrtool.
+void screenshot() {
+    f_unlink(PATH_TEMP "/screenshot.ppm");
+
+    // Open the screenshot blob used by hbmenu et al
+    FILE* f = fopen(PATH_TEMP "/screenshot.ppm", "w");
+
+    if (!f) return;
+
+    fwrite("P6 400 480 255 ", 1, 15, f);
+
+    for(int y = 0; y < 240; y++) {
+        for(int x = 0; x < 400; x++) {
+            int xDisplacement = (x * SCREEN_DEPTH * 240);
+            int yDisplacement = ((240 - y - 1) * SCREEN_DEPTH);
+            int pos = xDisplacement + yDisplacement;
+
+            fwrite(& framebuffers->top_left[pos + 2], 1, 1, f);
+            fwrite(& framebuffers->top_left[pos + 1], 1, 1, f);
+            fwrite(& framebuffers->top_left[pos],     1, 1, f);
+        }
+    }
+
+    uint8_t zero = 0;
+
+    for(int y = 0; y < 240; y++) {
+        for (int i = 0; i < 40 * 3; i++)
+            fwrite(& zero, 1, 1, f);
+
+        for (int x = 0; x < 320; x++) {
+            int xDisplacement = (x * SCREEN_DEPTH * 240);
+            int yDisplacement = ((240 - y - 1) * SCREEN_DEPTH);
+            int pos = xDisplacement + yDisplacement;
+
+            fwrite(& framebuffers->bottom[pos + 2], 1, 1, f);
+            fwrite(& framebuffers->bottom[pos + 1], 1, 1, f);
+            fwrite(& framebuffers->bottom[pos],     1, 1, f);
+        }
+
+        for (int i = 0; i < 40 * 3; i++)
+            fwrite(& zero, 1, 1, f);
+    }
+
+    fclose(f);
+
+    fprintf(stderr, "Screenshot: %s\n", PATH_TEMP "/screenshot.ppm");
+}
+
+void clear_bg() {
+    memset(top_bg, 0, TOP_SIZE);
+    memset(bottom_bg, 0, BOTTOM_SIZE);
+}
+
+void load_bg_top(char* fname_top) {
+    FILE* f = fopen(fname_top, "r");
+    if (!f) return;
+
+    fread(top_bg, 1, TOP_SIZE, f);
+
+    fclose(f);
+}
+
+void load_bg_bottom(char* fname_bottom) {
+    FILE* f = fopen(fname_bottom, "r");
+    if (!f)
+        return;
+
+    fread(bottom_bg, 1, BOTTOM_SIZE, f);
+    fclose(f);
+}
 
 void set_font(const char* filename) {
     // TODO - Unicode support. Right now, we only load 32
@@ -60,30 +197,11 @@ void set_font(const char* filename) {
     text_bottom_height = BOTTOM_HEIGHT / font_h;
 }
 
-static uint32_t colors[16] = {
-    0x000000, // Black
-    0xaa0000, // Blue
-    0x00aa00, // Green
-    0xaaaa00, // Cyan
-    0x0000aa, // Red
-    0xaa00aa, // Magenta
-    0x0055aa, // Brown
-    0xaaaaaa, // Gray
-    0x555555, // Dark gray
-    0xff5555, // Bright blue
-    0x55ff55, // Bright green
-    0xffff55, // Bright cyan
-    0x5555ff, // Bright red
-    0xff55ff, // Bright megenta
-    0x55ffff, // Yellow
-    0xffffff  // White
-}; // VGA color table.
-
 void dump_log(unsigned int force) {
     if(!config.options[OPTION_SAVE_LOGS])
         return;
 
-    if (force == 0 && log_size < sizeof(log_buffer)-1)
+    if (force == 0 && log_size < LOG_BUFFER_SIZE-1)
         return;
 
     if (log_size == 0)
@@ -107,15 +225,16 @@ clear_disp(uint8_t *screen)
         screen = framebuffers->bottom;
 
     if (screen == framebuffers->top_left || screen == framebuffers->top_right) {
-        memset(screen, 0, TOP_SIZE);
+        memcpy(screen, top_bg, TOP_SIZE);
     } else if (screen == framebuffers->bottom) {
-        memset(screen, 0, BOTTOM_SIZE);
+        memcpy(screen, bottom_bg, BOTTOM_SIZE);
     }
 }
 
 void
 clear_screen(uint8_t *screen)
 {
+    // TODO - remove. This is a stub now.
     clear_disp(screen);
 }
 
@@ -146,12 +265,15 @@ draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, co
 
     _UNUSED int width = 0;
     int height = 0;
+    uint8_t* buffer_bg;
     if (screen == framebuffers->top_left || screen == framebuffers->top_right) {
         width = TOP_WIDTH;
         height = TOP_HEIGHT;
+        buffer_bg = top_bg;
     } else if (screen == framebuffers->bottom) {
         width = BOTTOM_WIDTH;
         height = BOTTOM_HEIGHT;
+        buffer_bg = bottom_bg;
     } else {
         return; // Invalid buffer.
     }
@@ -170,14 +292,26 @@ draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, co
 		unsigned int pos = xDisplacement + yDisplacement;
         unsigned char char_dat = ((char*)FCRAM_FONT_LOC)[(character - ' ') * (c_font_w * font_h) + yy];
         for(unsigned int i=0; i < font_w + font_kern; i++) {
-            screen[pos]     = color_bg >> 16;
-            screen[pos + 1] = color_bg >> 8;
-            screen[pos + 2] = color_bg;
+            if (color_bg == 0) {
+                screen[pos]     = buffer_bg[pos];
+                screen[pos + 1] = buffer_bg[pos + 1];
+                screen[pos + 2] = buffer_bg[pos + 2];
+            } else {
+                screen[pos]     = color_bg >> 16;
+                screen[pos + 1] = color_bg >> 8;
+                screen[pos + 2] = color_bg;
+            }
 
 			if (char_dat & 0x80) {
-                screen[pos]     = color_fg >> 16;
-                screen[pos + 1] = color_fg >> 8;
-                screen[pos + 2] = color_fg;
+                if (color_fg == 0) {
+                    screen[pos]     = buffer_bg[pos];
+                    screen[pos + 1] = buffer_bg[pos + 1];
+                    screen[pos + 2] = buffer_bg[pos + 2];
+                } else {
+                    screen[pos]     = color_fg >> 16;
+                    screen[pos + 1] = color_fg >> 8;
+                    screen[pos + 2] = color_fg;
+                }
 			}
 
             char_dat <<= 1;

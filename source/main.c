@@ -13,13 +13,19 @@ int doing_autoboot = 0;
 void shut_up();
 
 int
-main()
+main(int argc, char** argv)
 {
     if (PDN_MPCORE_CFG == 7)
         is_n3ds = 1; // Enable n3ds specific options.
 
+    std_init();
+
     int c = fmount();
     screen_init();
+    clear_bg();
+    load_bg_top(PATH_BITS "/top.bin");
+    load_bg_bottom(PATH_BITS "/bottom.bin"); // This is basically a menuhax splash (90deg rotated RGB8 pixel data)
+    clear_screens();
 
     set_font(PATH_BITS "/termfont.bin");
 
@@ -28,10 +34,15 @@ main()
         abort("Failed to mount SD card.\n");
     }
 
+    if (argc >= 1 && argc < 2) {
+        // Valid argc passed.
+        fprintf(stderr, "Chainloaded. Path: %s\n", argv[0]);
+    }
+
     load_config(); // Load configuration.
 
     if (CFG_BOOTENV == 7) {
-        fprintf(stderr, "Rebooted from AGB, disabling EmuNAND\n");
+        fprintf(stderr, "Rebooted from AGB, disabling EmuNAND.\n");
         config.options[OPTION_EMUNAND] = 0;
     }
 

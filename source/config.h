@@ -39,7 +39,7 @@ enum type
     break_menu = 6
 };
 
-typedef void (*func_call_t)(void);
+typedef void (*func_call_t)(uint32_t data);
 
 struct range_str
 {
@@ -119,7 +119,9 @@ struct options_s
 // This isn't supported by ANY tools like D9 at the moment
 // (Though I hope they'll consider it -
 //  there's only benefits to users with multiple EmuNANDs)
-#define OPTION_EMUNAND_REVERSE 22
+
+// Disable Reverse. We're going to implement an actual filesystem.
+// #define OPTION_EMUNAND_REVERSE 22
 
 // Save log files during boot and from loader.
 // This will slow things down a bit.

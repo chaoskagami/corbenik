@@ -1,5 +1,5 @@
 # $name TWL Patches
-# $desc 
+# $desc Disables a large number of validity checks on DS, DSi and DSiware titles.
 # $ver  09
 # $uuid 34
 

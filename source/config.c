@@ -30,7 +30,6 @@ mk_structure()
     f_mkdir(PATH_PATCHES);
     f_mkdir(PATH_FIRMWARES);
     f_mkdir(PATH_MODULES);
-    f_mkdir(PATH_SVC);
     f_mkdir(PATH_KEYS);
     f_mkdir(PATH_EXEFS);
     f_mkdir(PATH_EXEFS_TEXT);
@@ -70,7 +69,7 @@ load_config()
         if (config.config_ver < config_version) {
             fprintf(BOTTOM_SCREEN, "Config file has outdated version:\n"
                                    "  %s\n"
-                                   "Regenerating with defaults.\n",
+                                   "Regenerating with defaults...\n",
                     PATH_CONFIG);
             f_unlink(PATH_CONFIG);
             regenerate_config();
@@ -86,7 +85,7 @@ load_config()
 void
 save_config()
 {
-    fprintf(stderr, "Saving config.\n");
+    fprintf(stderr, "Saving config...\n");
 
     write_file(enable_list, PATH_TEMP "/PATCHENABLE", FCRAM_SPACING / 2);
 

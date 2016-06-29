@@ -1,5 +1,5 @@
-# $name  AGB Signature fix
-# $desc  Patches signatures in AGB_FIRM
+# $name  AGB Signature Fix
+# $desc  Patches signatures in AGB_FIRM. This allows booting unsigned GBA games.
 # $ver   09
 # $uuid  39
 

@@ -8,11 +8,12 @@ dev=/dev/sdb
 
 mnt=/mnt/ext1
 
-mount ${dev}1 $mnt || exit 0
+mount -t vfat ${dev}1 $mnt || exit 0
 cp out/arm9loaderhax.bin $mnt/arm9loaderhax.bin || exit 0
 rm -rf $mnt/corbenik
 cp -r out/corbenik $mnt/ || exit 0
 cp -r input/corbenik $mnt/ || exit 0
+cp out/arm9loaderhax.bin $mnt/corbenik/chain/Corbenik || exit 0
 umount $mnt || exit 0
 sync || exit 0
 eject ${dev} || exit 0

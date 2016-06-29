@@ -5,6 +5,7 @@
 // It provides an easy overview of all that is used.
 
 #include <stdint.h>
+#include <stddef.h>
 
 #include "../std/unused.h"
 
@@ -35,5 +36,14 @@ extern void *fcram_temp;
 
 // Path that the font will be loaded at.
 #define FCRAM_FONT_LOC (FCRAM_PATCHLIST_LOC + (FCRAM_SPACING / 2))
+
+// Path that the menu for chains will be at
+#define FCRAM_CHAIN_LOC (FCRAM_FONT_LOC + FCRAM_SPACING)
+
+// Location to perform static allocations at.
+#define FCRAM_STATIC_ALLOC_LOC (0x25000000)
+
+// Allocate static memory.
+void *static_allocate(size_t bytes);
 
 #endif

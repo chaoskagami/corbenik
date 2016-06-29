@@ -18,6 +18,8 @@ main(int argc, char** argv)
     if (PDN_MPCORE_CFG == 7)
         is_n3ds = 1; // Enable n3ds specific options.
 
+    std_init();
+
     int c = fmount();
     screen_init();
     clear_bg();

@@ -8,7 +8,7 @@
 
 static FATFS fs;
 
-static FILE files[MAX_FILES_OPEN];
+FILE files[MAX_FILES_OPEN];
 
 // This function is based on PathDeleteWorker from GodMode9.
 // It was easier to just import it.

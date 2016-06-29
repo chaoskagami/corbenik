@@ -14,8 +14,10 @@
 static unsigned int top_cursor_x = 0, top_cursor_y = 0;
 static unsigned int bottom_cursor_x = 0, bottom_cursor_y = 0;
 
+#define LOG_BUFFER_SIZE 4096
+
 static size_t  log_size = 0;
-static char    log_buffer[4096]; // Log buffer.
+static char*   log_buffer; // Log buffer.
 
 unsigned int font_w = 8;
 unsigned int font_h = 8;
@@ -27,8 +29,14 @@ static unsigned int text_top_height = 10;
 static unsigned int text_bottom_width = 20;
 static unsigned int text_bottom_height = 10;
 
-uint8_t top_bg[TOP_SIZE];
-uint8_t bottom_bg[BOTTOM_SIZE];
+uint8_t *top_bg;
+uint8_t *bottom_bg;
+
+void std_init() {
+    top_bg     = static_allocate(TOP_SIZE);
+    bottom_bg  = static_allocate(BOTTOM_SIZE);
+    log_buffer = static_allocate(LOG_BUFFER_SIZE);
+}
 
 static uint32_t colors[16] = {
     0x000000, // Black
@@ -193,7 +201,7 @@ void dump_log(unsigned int force) {
     if(!config.options[OPTION_SAVE_LOGS])
         return;
 
-    if (force == 0 && log_size < sizeof(log_buffer)-1)
+    if (force == 0 && log_size < LOG_BUFFER_SIZE-1)
         return;
 
     if (log_size == 0)

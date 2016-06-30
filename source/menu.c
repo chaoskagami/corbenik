@@ -221,11 +221,11 @@ menu_options()
 #endif
 
 static struct options_s info_d[] = {
-	{ 0, "  Native FIRM: ", "The version of NATIVE_FIRM in use.", not_option, 0, 0},
-	{ 0, "  AGB FIRM:    ", "The version of AGB_FIRM in use. This is used to run GBA games.", not_option, 0, 0},
-	{ 0, "  TWL FIRM:    ", "The version of TWL_FIRM in use. This is used to run DS games and DSiWare.", not_option, 0, 0},
-	{ 0, "  Corbenik:    " VERSION " (" REL ")", "Corbenik's version.", not_option, 0, 0},
-	{ -1, "", "", not_option, 0, 0 }
+    { 0, "  Native FIRM: ", "The version of NATIVE_FIRM in use.", not_option, 0, 0},
+    { 0, "  AGB FIRM:    ", "The version of AGB_FIRM in use. This is used to run GBA games.", not_option, 0, 0},
+    { 0, "  TWL FIRM:    ", "The version of TWL_FIRM in use. This is used to run DS games and DSiWare.", not_option, 0, 0},
+    { 0, "  Corbenik:    " VERSION " (" REL ")", "Corbenik's version.", not_option, 0, 0},
+    { -1, "", "", not_option, 0, 0 }
 };
 static int is_setup_info = 0;
 
@@ -233,19 +233,19 @@ void
 menu_info()
 {
     if (!is_setup_info) {
-	    // This menu requres firm to be loaded. Unfortunately.
-    	load_firms(); // Lazy load!
+        // This menu requres firm to be loaded. Unfortunately.
+        load_firms(); // Lazy load!
 
-	    struct firm_signature *native = get_firm_info(firm_loc);
-    	struct firm_signature *agb = get_firm_info(agb_firm_loc);
-    	struct firm_signature *twl = get_firm_info(twl_firm_loc);
+        struct firm_signature *native = get_firm_info(firm_loc);
+        struct firm_signature *agb = get_firm_info(agb_firm_loc);
+        struct firm_signature *twl = get_firm_info(twl_firm_loc);
 
-	    memcpy(&info_d[0].name[strlen(info_d[0].name)], native->version_string, strlen(native->version_string));
-    	memcpy(&info_d[1].name[strlen(info_d[1].name)], agb->version_string, strlen(agb->version_string));
-    	memcpy(&info_d[2].name[strlen(info_d[2].name)], twl->version_string, strlen(twl->version_string));
+        memcpy(&info_d[0].name[strlen(info_d[0].name)], native->version_string, strlen(native->version_string));
+        memcpy(&info_d[1].name[strlen(info_d[1].name)], agb->version_string, strlen(agb->version_string));
+        memcpy(&info_d[2].name[strlen(info_d[2].name)], twl->version_string, strlen(twl->version_string));
 
-		is_setup_info = 1;
-	}
+        is_setup_info = 1;
+    }
 
     show_menu(info_d, NULL);
 }
@@ -253,20 +253,20 @@ menu_info()
 #define ln(s) { 0, s, "", not_option, 0, 0 }
 
 static struct options_s help_d[] = {
-	ln("Corbenik is another 3DS CFW for power users."),
-	ln("  It seeks to address some faults in other"),
-	ln("  CFWs and is generally just another choice"),
-	ln("  for users - but primarily is intended for"),
-	ln("  developers and is not for the faint of heart."),
-	ln(""),
-	ln("Credits to people who've helped me put this"),
-	ln("  together by code, documentation, or help:"),
-	ln("  @mid-kid, @Wolfvak, @Reisyukaku, @AuroraWright"),
-	ln("  @d0k3, @TuxSH, @Steveice10, @delebile,"),
-	ln("  @Normmatt, @b1l1s, @dark-samus, @TiniVi, etc"),
+    ln("Corbenik is another 3DS CFW for power users."),
+    ln("  It seeks to address some faults in other"),
+    ln("  CFWs and is generally just another choice"),
+    ln("  for users - but primarily is intended for"),
+    ln("  developers and is not for the faint of heart."),
     ln(""),
-	ln("  <https://github.com/chaoskagami/corbenik>"),
-	{ -1, "", "", not_option, 0, 0 }
+    ln("Credits to people who've helped me put this"),
+    ln("  together by code, documentation, or help:"),
+    ln("  @mid-kid, @Wolfvak, @Reisyukaku, @AuroraWright"),
+    ln("  @d0k3, @TuxSH, @Steveice10, @delebile,"),
+    ln("  @Normmatt, @b1l1s, @dark-samus, @TiniVi, etc"),
+    ln(""),
+    ln("  <https://github.com/chaoskagami/corbenik>"),
+    { -1, "", "", not_option, 0, 0 }
 };
 
 void

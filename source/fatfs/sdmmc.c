@@ -121,9 +121,9 @@ sdmmc_send_command(struct mmcdevice *ctx, uint32_t cmd, uint32_t args)
     sdmmc_write16(REG_SDSTATUS0, 0);
     sdmmc_write16(REG_SDSTATUS1, 0);
 #ifdef DATA32_SUPPORT
-//	if(readdata)sdmmc_mask16(REG_DATACTL32, 0x1000, 0x800);
-//	if(writedata)sdmmc_mask16(REG_DATACTL32, 0x800, 0x1000);
-//	sdmmc_mask16(REG_DATACTL32,0x1800,2);
+//    if(readdata)sdmmc_mask16(REG_DATACTL32, 0x1000, 0x800);
+//    if(writedata)sdmmc_mask16(REG_DATACTL32, 0x800, 0x1000);
+//    sdmmc_mask16(REG_DATACTL32,0x1800,2);
 #else
     sdmmc_mask16(REG_DATACTL32, 0x1800, 0);
 #endif
@@ -535,12 +535,12 @@ SD_Init()
     } while ((handelSD.ret[0] & 0x80000000) == 0);
     // do
     //{
-    //	sdmmc_send_command(&handelSD,0x10437,handelSD.initarg << 0x10);
-    //	sdmmc_send_command(&handelSD,0x10769,0x00FF8000 | temp);
+    //    sdmmc_send_command(&handelSD,0x10437,handelSD.initarg << 0x10);
+    //    sdmmc_send_command(&handelSD,0x10769,0x00FF8000 | temp);
     //
-    //	DEBUGPRINT(topScreen, "sd error ", handelSD.error, 10, 20 + 17*8, RGB(40, 40, 40), RGB(208, 208, 208));
-    //	DEBUGPRINT(topScreen, "sd ret: ", handelSD.ret[0], 10, 20 + 18*8, RGB(40, 40, 40), RGB(208, 208, 208));
-    //	DEBUGPRINT(topScreen, "count: ", count++, 10, 20 + 19*8, RGB(40, 40, 40), RGB(208, 208, 208));
+    //    DEBUGPRINT(topScreen, "sd error ", handelSD.error, 10, 20 + 17*8, RGB(40, 40, 40), RGB(208, 208, 208));
+    //    DEBUGPRINT(topScreen, "sd ret: ", handelSD.ret[0], 10, 20 + 18*8, RGB(40, 40, 40), RGB(208, 208, 208));
+    //    DEBUGPRINT(topScreen, "count: ", count++, 10, 20 + 19*8, RGB(40, 40, 40), RGB(208, 208, 208));
     //}
     // while(!(handelSD.ret[0] & 0x80000000));
 

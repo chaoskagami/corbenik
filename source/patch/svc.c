@@ -40,7 +40,7 @@ PATCH(services)
 
         fclose(data);
 
-        //		memcpy(svc_tab_open, svcbackdoor, sizeof(svcbackdoor));
+        //        memcpy(svc_tab_open, svcbackdoor, sizeof(svcbackdoor));
         svcTable[0x7B] = 0xFFFF0000 + ((uint8_t *)svc_tab_open - (uint8_t *)exceptionsPage);
 
         svc_tab_open += size;

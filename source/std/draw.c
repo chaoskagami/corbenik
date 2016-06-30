@@ -286,10 +286,10 @@ draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, co
 
     unsigned int c_font_w = (font_w / 8) + (font_w % 8 ? 1 : 0);
 
-	for (unsigned int yy = 0; yy < font_h; yy++) {
-		int xDisplacement = (x * SCREEN_DEPTH * height);
-		int yDisplacement = ((height - (y + yy) - 1) * SCREEN_DEPTH);
-		unsigned int pos = xDisplacement + yDisplacement;
+    for (unsigned int yy = 0; yy < font_h; yy++) {
+        int xDisplacement = (x * SCREEN_DEPTH * height);
+        int yDisplacement = ((height - (y + yy) - 1) * SCREEN_DEPTH);
+        unsigned int pos = xDisplacement + yDisplacement;
         unsigned char char_dat = ((char*)FCRAM_FONT_LOC)[(character - ' ') * (c_font_w * font_h) + yy];
         for(unsigned int i=0; i < font_w + font_kern; i++) {
             if (color_bg == 0) {
@@ -302,7 +302,7 @@ draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, co
                 screen[pos + 2] = color_bg;
             }
 
-			if (char_dat & 0x80) {
+            if (char_dat & 0x80) {
                 if (color_fg == 0) {
                     screen[pos]     = buffer_bg[pos];
                     screen[pos + 1] = buffer_bg[pos + 1];
@@ -312,12 +312,12 @@ draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, co
                     screen[pos + 1] = color_fg >> 8;
                     screen[pos + 2] = color_fg;
                 }
-			}
+            }
 
             char_dat <<= 1;
-			pos += SCREEN_DEPTH * height;
+            pos += SCREEN_DEPTH * height;
         }
-	}
+    }
 }
 
 unsigned char color_top = 0xf0;
@@ -370,7 +370,7 @@ putc(void *buf, const int c)
             cursor_x[0] = 0;
             cursor_y[0] = 0;
 
-/*			uint32_t col = SCREEN_TOP_HEIGHT * SCREEN_DEPTH;
+/*            uint32_t col = SCREEN_TOP_HEIGHT * SCREEN_DEPTH;
             uint32_t one_c = 8 * SCREEN_DEPTH;
             for (unsigned int x = 0; x < width * 8; x++) {
                 memmove(&screen[x * col + one_c], &screen[x * col + one_c], col - one_c);

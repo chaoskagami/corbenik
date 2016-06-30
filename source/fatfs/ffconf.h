@@ -182,7 +182,7 @@
 /  an RTC function or valid timestamp is not needed, set _FS_NORTC to 1 to disable
 /  the timestamp feature. All objects modified by FatFs will have a fixed timestamp
 /  defined by _NORTC_MON, _NORTC_MDAY and _NORTC_YEAR.
-/  When timestamp feature is enabled (_FS_NORTC	== 0), get_fattime() function need
+/  When timestamp feature is enabled (_FS_NORTC    == 0), get_fattime() function need
 /  to be added to the project to read current time form RTC. _NORTC_MON,
 /  _NORTC_MDAY and _NORTC_YEAR have no effect.
 /  These options have no effect at read-only configuration (_FS_READONLY == 1). */

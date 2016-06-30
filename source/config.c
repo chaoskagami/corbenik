@@ -94,10 +94,10 @@ save_config()
     if (!(conf_handle = fopen(PATH_CONFIG, "w")))
         abort("Failed to open config for write?\n");
 
-	config.options[OPTION_RECONFIGURED] = 0; // This should not persist to disk.
+    config.options[OPTION_RECONFIGURED] = 0; // This should not persist to disk.
 
     fwrite(&config, 1, sizeof(config), conf_handle);
     fclose(conf_handle);
 
-	config.options[OPTION_RECONFIGURED] = 1; // Save caches on boot.
+    config.options[OPTION_RECONFIGURED] = 1; // Save caches on boot.
 }

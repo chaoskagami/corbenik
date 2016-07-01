@@ -13,7 +13,7 @@ AS ?= as
 LD ?= ld
 OC ?= objcopy
 
-name ?= Corbenik
+fw_name ?= Corbenik
 
 # If unset, the primary folder is /corbenik.
 fw_folder ?= corbenik
@@ -30,7 +30,7 @@ REL ?= master
 CHAINLOADER ?= 1
 
 CROSS_ASFLAGS := -mlittle-endian -mcpu=arm946e-s -march=armv5te
-CROSS_CFLAGS  := -MMD -MP -Wall -Wextra -Werror -fomit-frame-pointer -Os $(ASFLAGS) -fshort-wchar -fno-builtin -std=gnu11 -DVERSION=\"$(REVISION)\" -DREL=\"$(REL)\" -DCHAINLOADER=$(CHAINLOADER)
+CROSS_CFLAGS  := -MMD -MP -Wall -Wextra -Werror -fomit-frame-pointer -Os $(ASFLAGS) -fshort-wchar -fno-builtin -std=gnu11 -DVERSION=\"$(REVISION)\" -DREL=\"$(REL)\" -DCHAINLOADER=$(CHAINLOADER) -DPATH_CFW=\"/$(fw_folder)\"
 CROSS_FLAGS   := dir_out=$(abspath $(dir_out)) --no-print-directory
 CROSS_LDFLAGS := -nostdlib -Wl,-z,defs -lgcc -Wl,-Map,$(dir_build)/link.map
 
@@ -71,15 +71,15 @@ full: all contrib $(dir_out)/$(fw_folder)/locale
 
 .PHONY: contrib
 contrib:
-	make -C contrib dir_out=$(dir_out) fw_folder=$(fw_folder)
+	make -C contrib dir_out=$(dir_out) fw_name=$(fw_name) fw_folder=$(fw_folder)
 
 .PHONY: external
 external:
-	make -C external dir_out=$(dir_out) fw_folder=$(fw_folder) CHAINLOADER=$(CHAINLOADER)
+	make -C external dir_out=$(dir_out) fw_name=$(fw_name) fw_folder=$(fw_folder) CHAINLOADER=$(CHAINLOADER)
 
 .PHONY: patch
 patch:
-	make -C patch dir_out=$(dir_out) fw_folder=$(fw_folder)
+	make -C patch dir_out=$(dir_out) fw_name=$(fw_name) fw_folder=$(fw_folder)
 
 .PHONY: a9lh
 a9lh: $(dir_out)/arm9loaderhax.bin

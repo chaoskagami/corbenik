@@ -36,7 +36,7 @@ CFLAGS	:= -flto -Wall -Os -mword-relocations $(ERROR) \
 			-fomit-frame-pointer -ffunction-sections -fdata-sections -fshort-wchar \
 			$(ARCH)
 
-CFLAGS	+=	$(INCLUDE) -DARM11 -D_3DS -DLOADER=1
+CFLAGS	+=	$(INCLUDE) -DARM11 -D_3DS -DLOADER=1 -DPATH_CFW=\"/$(fw_folder)\"
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu99
 

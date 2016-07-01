@@ -9,7 +9,7 @@ extern int is_n3ds;
 extern unsigned int font_h;
 
 void show_help(char* help) {
-    clear_screen(TOP_SCREEN);
+    clear_disp(TOP_SCREEN);
     set_cursor(TOP_SCREEN, 0, 0);
     header("Any:Back");
     fprintf(stdout, "%s", help);
@@ -27,7 +27,7 @@ show_menu(struct options_s *options, uint8_t *toggles)
     int window_top = 0, window_bottom = window_size;
     int less_mode = 0;
 
-    clear_screen(TOP_SCREEN);
+    clear_disp(TOP_SCREEN);
 
     if (options[0].index == -1) {
         set_cursor(TOP_SCREEN, 0, 0);
@@ -157,7 +157,7 @@ show_menu(struct options_s *options, uint8_t *toggles)
                     ((func_call_t)(options[cursor_y].a))(options[cursor_y].b); // Call 'a' as a function.
                 } else if (options[cursor_y].allowed == break_menu) {
                     exit = 1;
-                    clear_screen(TOP_SCREEN);
+                    clear_disp(TOP_SCREEN);
                     cursor_y = cursor_min;
                 }
                 break;
@@ -171,13 +171,13 @@ show_menu(struct options_s *options, uint8_t *toggles)
                 break;
             case BUTTON_B:
                 exit = 1;
-                clear_screen(TOP_SCREEN);
+                clear_disp(TOP_SCREEN);
                 cursor_y = cursor_min;
                 break;
             case BUTTON_SEL:
                 if (options[cursor_y].desc[0] != 0) {
                     show_help(options[cursor_y].desc);
-                    clear_screen(TOP_SCREEN);
+                    clear_disp(TOP_SCREEN);
                 }
                 break;
         }
@@ -190,12 +190,12 @@ show_menu(struct options_s *options, uint8_t *toggles)
         if (cursor_y < window_top + cursor_min) {
             window_top = cursor_y - cursor_min;
             window_bottom = window_top + window_size;
-            clear_screen(TOP_SCREEN);
+            clear_disp(TOP_SCREEN);
 
         } else if (cursor_y > window_bottom - cursor_min) {
             window_bottom = cursor_y + cursor_min;
             window_top = window_bottom - window_size;
-            clear_screen(TOP_SCREEN);
+            clear_disp(TOP_SCREEN);
         }
     }
 

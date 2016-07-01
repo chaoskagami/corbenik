@@ -47,7 +47,6 @@ void clear_bg();
 void load_bg_top(char* fname_top);
 void load_bg_bottom(char* fname_bottom);
 
-void clear_screen(uint8_t *screen);
 void clear_screens();
 void draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, const uint32_t color_fg, const uint32_t color_bg);
 

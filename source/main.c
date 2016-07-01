@@ -25,7 +25,8 @@ main(int argc, char** argv)
     clear_bg();
     load_bg_top(PATH_BITS "/top.bin");
     load_bg_bottom(PATH_BITS "/bottom.bin"); // This is basically a menuhax splash (90deg rotated RGB8 pixel data)
-    clear_screens();
+    clear_disp(TOP_SCREEN);
+    clear_disp(BOTTOM_SCREEN);
 
     set_font(PATH_BITS "/termfont.bin");
 

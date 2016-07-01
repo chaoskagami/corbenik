@@ -11,7 +11,7 @@ AS := arm-none-eabi-as
 LD := arm-none-eabi-ld
 OC := arm-none-eabi-objcopy
 
-name := $(shell basename $(CURDIR))
+name = $(shell basename $(CURDIR))
 
 dir_source := source
 dir_build := build

@@ -1,3 +1,5 @@
+out := ../$(dir_out)/$(fw_folder)
+
 .PHONY: all
 all: build install
 

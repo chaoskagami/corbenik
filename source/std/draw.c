@@ -29,6 +29,8 @@ static unsigned int text_top_height = 10;
 static unsigned int text_bottom_width = 20;
 static unsigned int text_bottom_height = 10;
 
+static int dim_factor = 60;
+
 uint8_t *top_bg;
 uint8_t *bottom_bg;
 
@@ -293,9 +295,15 @@ draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, co
         unsigned char char_dat = ((char*)FCRAM_FONT_LOC)[(character - ' ') * (c_font_w * font_h) + yy];
         for(unsigned int i=0; i < font_w + font_kern; i++) {
             if (color_bg == 0) {
-                screen[pos]     = buffer_bg[pos];
-                screen[pos + 1] = buffer_bg[pos + 1];
-                screen[pos + 2] = buffer_bg[pos + 2];
+                screen[pos]     = 0;
+                screen[pos + 1] = 0;
+                screen[pos + 2] = 0;
+                if (buffer_bg[pos] >= dim_factor)
+                    screen[pos]     = buffer_bg[pos] - dim_factor;
+                if (buffer_bg[pos + 1] >= dim_factor)
+                    screen[pos + 1]     = buffer_bg[pos + 1] - dim_factor;
+                if (buffer_bg[pos + 2] >= dim_factor)
+                    screen[pos + 2] = buffer_bg[pos + 2] - dim_factor;
             } else {
                 screen[pos]     = color_bg >> 16;
                 screen[pos + 1] = color_bg >> 8;
@@ -304,9 +312,15 @@ draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, co
 
             if (char_dat & 0x80) {
                 if (color_fg == 0) {
-                    screen[pos]     = buffer_bg[pos];
-                    screen[pos + 1] = buffer_bg[pos + 1];
-                    screen[pos + 2] = buffer_bg[pos + 2];
+                    screen[pos]     = 0;
+                    screen[pos + 1] = 0;
+                    screen[pos + 2] = 0;
+                    if (buffer_bg[pos] >= dim_factor)
+                        screen[pos]     = buffer_bg[pos] - dim_factor;
+                    if (buffer_bg[pos + 1] >= dim_factor)
+                        screen[pos + 1]     = buffer_bg[pos + 1] - dim_factor;
+                    if (buffer_bg[pos + 2] >= dim_factor)
+                        screen[pos + 2] = buffer_bg[pos + 2] - dim_factor;
                 } else {
                     screen[pos]     = color_fg >> 16;
                     screen[pos + 1] = color_fg >> 8;

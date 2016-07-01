@@ -83,9 +83,7 @@ patch:
 
 .PHONY: a9lh
 a9lh: $(dir_out)/arm9loaderhax.bin
-	# For the reboot patch.
 	mkdir -p $(dir_out)/$(fw_folder)/bits
-	cp $(dir_out)/arm9loaderhax.bin $(dir_out)/$(fw_folder)/bits/corbenik.bin
 
 .PHONY: reformat
 reformat:
@@ -93,7 +91,7 @@ reformat:
 
 $(dir_out)/$(fw_folder)/locale: all
 	echo "Generating langemu data from 3dsdb - may take a bit"
-	cd out/corbenik && ../../host/generate_langemu_conf.sh
+	cd out/$(fw_folder) && ../../host/generate_langemu_conf.sh
 
 .PHONY: clean
 clean:

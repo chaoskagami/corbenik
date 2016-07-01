@@ -35,6 +35,10 @@ static int dim_factor_bottom = 0;
 uint8_t *top_bg;
 uint8_t *bottom_bg;
 
+unsigned char color_top = 0xf0;
+unsigned char color_bottom = 0xf0;
+int kill_output = 0;
+
 void std_init() {
     top_bg     = static_allocate(TOP_SIZE);
     bottom_bg  = static_allocate(BOTTOM_SIZE);
@@ -165,10 +169,9 @@ void load_bg_top(char* fname_top) {
     }
 
     // See load_bg_bottom for an explanation on the magic value.
-    dim_factor_top = (max - 178);
-
-    if (dim_factor_top < 0)
-        dim_factor_top = 0;
+    dim_factor_top = 0;
+    if (max > 178)
+        dim_factor_top = max - 178;
 }
 
 void load_bg_bottom(char* fname_bottom) {
@@ -192,10 +195,9 @@ void load_bg_bottom(char* fname_bottom) {
     //   The minimum transparency with pure black overlay (I find) is 70% to be readable.
     //   70% of 255 is approximately 178, and 255 - 178 is 77. That's therefore the maximum we want to subtract.
     //   Thus this is the value for 70% transparency.
-    dim_factor_bottom = (max - 178);
-
-    if (dim_factor_bottom < 0)
-        dim_factor_bottom = 0;
+    dim_factor_bottom = 0;
+    if (max > 178)
+        dim_factor_bottom = max - 178;
 }
 
 void set_font(const char* filename) {
@@ -368,10 +370,6 @@ draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, co
         }
     }
 }
-
-unsigned char color_top = 0xf0;
-unsigned char color_bottom = 0xf0;
-int kill_output = 0;
 
 void
 shut_up()

@@ -16,8 +16,8 @@ endif
 
 .PHONY: clean
 clean: clean_loader clean_bits clean_screeninit
-	rm -rf ../out/corbenik/bits
-	rm -rf ../out/corbenik/module
+	rm -rf $(out)/bits
+	rm -rf $(out)/module
 
 .PHONY: loader
 loader:

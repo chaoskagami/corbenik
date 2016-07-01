@@ -13,7 +13,7 @@ AS ?= as
 LD ?= ld
 OC ?= objcopy
 
-name := Corbenik
+name ?= Corbenik
 
 # If unset, the primary folder is /corbenik.
 fw_folder ?= corbenik

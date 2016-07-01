@@ -35,6 +35,10 @@ static int dim_factor_bottom = 0;
 uint8_t *top_bg;
 uint8_t *bottom_bg;
 
+unsigned char color_top = 0xf0;
+unsigned char color_bottom = 0xf0;
+int kill_output = 0;
+
 void std_init() {
     top_bg     = static_allocate(TOP_SIZE);
     bottom_bg  = static_allocate(BOTTOM_SIZE);
@@ -330,9 +334,9 @@ draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, co
         unsigned char char_dat = ((char*)FCRAM_FONT_LOC)[(character - ' ') * (c_font_w * font_h) + yy];
         for(unsigned int i=0; i < font_w + font_kern; i++) {
             if (color_bg == 0) {
-                screen[pos]     = 0;
-                screen[pos + 1] = 0;
-                screen[pos + 2] = 0;
+                screen[pos]     = buffer_bg[pos];
+                screen[pos + 1] = buffer_bg[pos + 1];
+                screen[pos + 2] = buffer_bg[pos + 2];
                 if (buffer_bg[pos] >= dim_factor)
                     screen[pos]     = buffer_bg[pos] - dim_factor;
                 if (buffer_bg[pos + 1] >= dim_factor)
@@ -347,9 +351,9 @@ draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, co
 
             if (char_dat & 0x80) {
                 if (color_fg == 0) {
-                    screen[pos]     = 0;
-                    screen[pos + 1] = 0;
-                    screen[pos + 2] = 0;
+                    screen[pos]     = buffer_bg[pos];
+                    screen[pos + 1] = buffer_bg[pos + 1];
+                    screen[pos + 2] = buffer_bg[pos + 2];
                     if (buffer_bg[pos] >= dim_factor)
                         screen[pos]     = buffer_bg[pos] - dim_factor;
                     if (buffer_bg[pos + 1] >= dim_factor)
@@ -368,10 +372,6 @@ draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, co
         }
     }
 }
-
-unsigned char color_top = 0xf0;
-unsigned char color_bottom = 0xf0;
-int kill_output = 0;
 
 void
 shut_up()

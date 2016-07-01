@@ -29,7 +29,8 @@ static unsigned int text_top_height = 10;
 static unsigned int text_bottom_width = 20;
 static unsigned int text_bottom_height = 10;
 
-static int dim_factor = 60;
+static int dim_factor_top = 0;
+static int dim_factor_bottom = 0;
 
 uint8_t *top_bg;
 uint8_t *bottom_bg;
@@ -155,6 +156,19 @@ void load_bg_top(char* fname_top) {
     fread(top_bg, 1, TOP_SIZE, f);
 
     fclose(f);
+
+    // TODO - Needs finetuning. Median color intensity isn't exactly accurate.
+    int max = 0;
+    for(int i=0; i < TOP_SIZE; i++) {
+        if (max < top_bg[i])
+            max = top_bg[i];
+    }
+
+    // See load_bg_bottom for an explanation on the magic value.
+    dim_factor_top = (max - 178);
+
+    if (dim_factor_top < 0)
+        dim_factor_top = 0;
 }
 
 void load_bg_bottom(char* fname_bottom) {
@@ -164,6 +178,24 @@ void load_bg_bottom(char* fname_bottom) {
 
     fread(bottom_bg, 1, BOTTOM_SIZE, f);
     fclose(f);
+
+    // TODO - Needs finetuning. Median color intensity isn't exactly accurate.
+    //        It's good enough for right now, though.
+    int max = 0;
+    for(int i=0; i < BOTTOM_SIZE; i++) {
+        if (max < bottom_bg[i])
+            max = bottom_bg[i];
+    }
+
+    // Why 178? Quick explanation:
+    //   A pixel color channel is 255 at absolute white here.
+    //   The minimum transparency with pure black overlay (I find) is 70% to be readable.
+    //   70% of 255 is approximately 178, and 255 - 178 is 77. That's therefore the maximum we want to subtract.
+    //   Thus this is the value for 70% transparency.
+    dim_factor_bottom = (max - 178);
+
+    if (dim_factor_bottom < 0)
+        dim_factor_bottom = 0;
 }
 
 void set_font(const char* filename) {
@@ -268,14 +300,17 @@ draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, co
     _UNUSED int width = 0;
     int height = 0;
     uint8_t* buffer_bg;
+    int dim_factor;
     if (screen == framebuffers->top_left || screen == framebuffers->top_right) {
         width = TOP_WIDTH;
         height = TOP_HEIGHT;
         buffer_bg = top_bg;
+        dim_factor = dim_factor_top;
     } else if (screen == framebuffers->bottom) {
         width = BOTTOM_WIDTH;
         height = BOTTOM_HEIGHT;
         buffer_bg = bottom_bg;
+        dim_factor = dim_factor_bottom;
     } else {
         return; // Invalid buffer.
     }

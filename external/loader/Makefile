@@ -31,7 +31,7 @@ INCLUDES	:=	include
 #---------------------------------------------------------------------------------
 ARCH	:=	-march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft
 
-ERROR   := -Werror
+ERROR   := -Werror -Wextra
 CFLAGS	:= -flto -Wall -Os -mword-relocations $(ERROR) \
 			-fomit-frame-pointer -ffunction-sections -fdata-sections -fshort-wchar \
 			$(ARCH)

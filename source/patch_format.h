@@ -92,7 +92,7 @@ struct system_patch
     char magic[4];   // "AIDA" for shits and giggles and because we like .hack.
     uint8_t version; // Version of the patch itself.
 
-	// NOTE - This metadata stuff is temporary, I eventually plan to move it down
+    // NOTE - This metadata stuff is temporary, I eventually plan to move it down
     // to the same 'variable' width section as tids.
     char name[64];   // User-readable name for patch in menu.
     char desc[256];  // User-readable description for patch in menu.

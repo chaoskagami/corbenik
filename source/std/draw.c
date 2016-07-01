@@ -29,6 +29,9 @@ static unsigned int text_top_height = 10;
 static unsigned int text_bottom_width = 20;
 static unsigned int text_bottom_height = 10;
 
+static int dim_factor_top = 0;
+static int dim_factor_bottom = 0;
+
 uint8_t *top_bg;
 uint8_t *bottom_bg;
 
@@ -153,6 +156,19 @@ void load_bg_top(char* fname_top) {
     fread(top_bg, 1, TOP_SIZE, f);
 
     fclose(f);
+
+    // TODO - Needs finetuning. Median color intensity isn't exactly accurate.
+    int max = 0;
+    for(int i=0; i < TOP_SIZE; i++) {
+        if (max < top_bg[i])
+            max = top_bg[i];
+    }
+
+    // See load_bg_bottom for an explanation on the magic value.
+    dim_factor_top = (max - 178);
+
+    if (dim_factor_top < 0)
+        dim_factor_top = 0;
 }
 
 void load_bg_bottom(char* fname_bottom) {
@@ -162,6 +178,24 @@ void load_bg_bottom(char* fname_bottom) {
 
     fread(bottom_bg, 1, BOTTOM_SIZE, f);
     fclose(f);
+
+    // TODO - Needs finetuning. Median color intensity isn't exactly accurate.
+    //        It's good enough for right now, though.
+    int max = 0;
+    for(int i=0; i < BOTTOM_SIZE; i++) {
+        if (max < bottom_bg[i])
+            max = bottom_bg[i];
+    }
+
+    // Why 178? Quick explanation:
+    //   A pixel color channel is 255 at absolute white here.
+    //   The minimum transparency with pure black overlay (I find) is 70% to be readable.
+    //   70% of 255 is approximately 178, and 255 - 178 is 77. That's therefore the maximum we want to subtract.
+    //   Thus this is the value for 70% transparency.
+    dim_factor_bottom = (max - 178);
+
+    if (dim_factor_bottom < 0)
+        dim_factor_bottom = 0;
 }
 
 void set_font(const char* filename) {
@@ -266,14 +300,17 @@ draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, co
     _UNUSED int width = 0;
     int height = 0;
     uint8_t* buffer_bg;
+    int dim_factor;
     if (screen == framebuffers->top_left || screen == framebuffers->top_right) {
         width = TOP_WIDTH;
         height = TOP_HEIGHT;
         buffer_bg = top_bg;
+        dim_factor = dim_factor_top;
     } else if (screen == framebuffers->bottom) {
         width = BOTTOM_WIDTH;
         height = BOTTOM_HEIGHT;
         buffer_bg = bottom_bg;
+        dim_factor = dim_factor_bottom;
     } else {
         return; // Invalid buffer.
     }
@@ -286,38 +323,50 @@ draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, co
 
     unsigned int c_font_w = (font_w / 8) + (font_w % 8 ? 1 : 0);
 
-	for (unsigned int yy = 0; yy < font_h; yy++) {
-		int xDisplacement = (x * SCREEN_DEPTH * height);
-		int yDisplacement = ((height - (y + yy) - 1) * SCREEN_DEPTH);
-		unsigned int pos = xDisplacement + yDisplacement;
+    for (unsigned int yy = 0; yy < font_h; yy++) {
+        int xDisplacement = (x * SCREEN_DEPTH * height);
+        int yDisplacement = ((height - (y + yy) - 1) * SCREEN_DEPTH);
+        unsigned int pos = xDisplacement + yDisplacement;
         unsigned char char_dat = ((char*)FCRAM_FONT_LOC)[(character - ' ') * (c_font_w * font_h) + yy];
         for(unsigned int i=0; i < font_w + font_kern; i++) {
             if (color_bg == 0) {
-                screen[pos]     = buffer_bg[pos];
-                screen[pos + 1] = buffer_bg[pos + 1];
-                screen[pos + 2] = buffer_bg[pos + 2];
+                screen[pos]     = 0;
+                screen[pos + 1] = 0;
+                screen[pos + 2] = 0;
+                if (buffer_bg[pos] >= dim_factor)
+                    screen[pos]     = buffer_bg[pos] - dim_factor;
+                if (buffer_bg[pos + 1] >= dim_factor)
+                    screen[pos + 1]     = buffer_bg[pos + 1] - dim_factor;
+                if (buffer_bg[pos + 2] >= dim_factor)
+                    screen[pos + 2] = buffer_bg[pos + 2] - dim_factor;
             } else {
                 screen[pos]     = color_bg >> 16;
                 screen[pos + 1] = color_bg >> 8;
                 screen[pos + 2] = color_bg;
             }
 
-			if (char_dat & 0x80) {
+            if (char_dat & 0x80) {
                 if (color_fg == 0) {
-                    screen[pos]     = buffer_bg[pos];
-                    screen[pos + 1] = buffer_bg[pos + 1];
-                    screen[pos + 2] = buffer_bg[pos + 2];
+                    screen[pos]     = 0;
+                    screen[pos + 1] = 0;
+                    screen[pos + 2] = 0;
+                    if (buffer_bg[pos] >= dim_factor)
+                        screen[pos]     = buffer_bg[pos] - dim_factor;
+                    if (buffer_bg[pos + 1] >= dim_factor)
+                        screen[pos + 1]     = buffer_bg[pos + 1] - dim_factor;
+                    if (buffer_bg[pos + 2] >= dim_factor)
+                        screen[pos + 2] = buffer_bg[pos + 2] - dim_factor;
                 } else {
                     screen[pos]     = color_fg >> 16;
                     screen[pos + 1] = color_fg >> 8;
                     screen[pos + 2] = color_fg;
                 }
-			}
+            }
 
             char_dat <<= 1;
-			pos += SCREEN_DEPTH * height;
+            pos += SCREEN_DEPTH * height;
         }
-	}
+    }
 }
 
 unsigned char color_top = 0xf0;
@@ -370,7 +419,7 @@ putc(void *buf, const int c)
             cursor_x[0] = 0;
             cursor_y[0] = 0;
 
-/*			uint32_t col = SCREEN_TOP_HEIGHT * SCREEN_DEPTH;
+/*            uint32_t col = SCREEN_TOP_HEIGHT * SCREEN_DEPTH;
             uint32_t one_c = 8 * SCREEN_DEPTH;
             for (unsigned int x = 0; x < width * 8; x++) {
                 memmove(&screen[x * col + one_c], &screen[x * col + one_c], col - one_c);

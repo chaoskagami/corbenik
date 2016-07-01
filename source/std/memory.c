@@ -37,7 +37,7 @@ memcpy(void *dest, const void *src, size_t size)
     uint8_t *destc = (uint8_t *)dest;
     const uint8_t *srcc = (const uint8_t *)src;
 
-	for(size_t i=0; i < size; i++) {
+    for(size_t i=0; i < size; i++) {
         destc[i] = srcc[i];
     }
 }
@@ -55,7 +55,7 @@ memmove(void *dest, const void *src, size_t size)
     const uint8_t *srcc = (const uint8_t *)src;
 
     // Finish by copying the leftovers
-	for(size_t i=size; i > 0; i--) {
+    for(size_t i=size; i > 0; i--) {
         destc[i-1] = srcc[i-1];
     }
 }
@@ -66,7 +66,7 @@ memset(void *dest, const int filler, size_t size)
     char *destc = (char *)dest;
 
     // Finish
-	for(size_t i = 0; i < size; i++) {
+    for(size_t i = 0; i < size; i++) {
         destc[i] = filler;
     }
 }

@@ -6,6 +6,7 @@
 #include "memory.h"
 #include "logger.h"
 #include "../../../source/patch_format.h"
+#include "../../../source/std/unused.h"
 #include "interp.h"
 
 #ifndef PATH_MAX
@@ -272,7 +273,7 @@ patchCfgGetRegion(u8 *code, u32 size, u8 regionId, u32 CFGUHandleOffset)
 }
 
 static void
-adjust_cpu_settings(u64 progId, u8 *code, u32 size)
+adjust_cpu_settings(_UNUSED u64 progId, u8 *code, u32 size)
 {
     if (!failed_load_config) {
         u32 cpuSetting = 0;
@@ -324,7 +325,7 @@ language_emu(u64 progId, u8 *code, u32 size)
 }
 
 void
-overlay_patch(u64 progId, u8 *code, u32 size)
+overlay_patch(_UNUSED u64 progId, _UNUSED u8 *code, _UNUSED u32 size)
 {
     // TODO - Implement. Needs some thought. This should allow usage of files off SD rather than RomFS.
 
@@ -470,7 +471,7 @@ code_handler(u64 progId, prog_addrs_t *shared)
 
 // This is only for the .code segment.
 void
-patch_exe(u64 progId, u16 progver, u8 *text, u32 text_size, u32 orig_text, u8 *data, u32 data_size, u32 orig_data, u8 *ro, u32 ro_size, u32 orig_ro)
+patch_exe(u64 progId, u16 progver, u8 *text, _UNUSED u32 text_size, u32 orig_text, u8 *data, _UNUSED u32 data_size, u32 orig_data, u8 *ro, _UNUSED u32 ro_size, u32 orig_ro)
 {
     if (progId == 0x0004013000008002LL)
         adjust_cpu_settings(progId, text, orig_text);
@@ -482,28 +483,28 @@ patch_exe(u64 progId, u16 progver, u8 *text, u32 text_size, u32 orig_text, u8 *d
 
 // Gets how many bytes .text must be extended by for patches to fit.
 u32
-get_text_extend(u64 progId, u16 progver, u32 size_orig)
+get_text_extend(_UNUSED u64 progId, _UNUSED u16 progver, _UNUSED u32 size_orig)
 {
     return 0; // Stub - nothing needs this yet
 }
 
 // Gets how many bytes .ro must be extended.
 u32
-get_ro_extend(u64 progId, u16 progver, u32 size_orig)
+get_ro_extend(_UNUSED u64 progId, _UNUSED u16 progver, _UNUSED u32 size_orig)
 {
     return 0; // Stub - nothing needs this yet
 }
 
 // Again, same, but for .data.
 u32
-get_data_extend(u64 progId, u16 progver, u32 size_orig)
+get_data_extend(_UNUSED u64 progId, _UNUSED u16 progver, _UNUSED u32 size_orig)
 {
     return 0; // Stub - nothing needs this yet
 }
 
 // Get CPU speed for progId.
 u8
-get_cpumode(u64 progId)
+get_cpumode(_UNUSED u64 progId)
 {
     return 0xff; // Skip.
 }

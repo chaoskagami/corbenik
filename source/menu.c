@@ -105,7 +105,7 @@ header(char *append)
 {
     set_cursor(TOP_SCREEN, 0, 0);
     fill_line(stdout, 0, 0x2);
-    fprintf(stdout, "\x1b[30;42m .Corbenik // %s\x1b[0m\n\n", append);
+    fprintf(stdout, "\x1b[30;42m ." FW_NAME " // %s\x1b[0m\n\n", append);
 }
 
 static int current_menu_index_patches = 0;
@@ -225,7 +225,7 @@ static struct options_s info_d[] = {
     { 0, "  Native FIRM: ", "The version of NATIVE_FIRM in use.", not_option, 0, 0},
     { 0, "  AGB FIRM:    ", "The version of AGB_FIRM in use. This is used to run GBA games.", not_option, 0, 0},
     { 0, "  TWL FIRM:    ", "The version of TWL_FIRM in use. This is used to run DS games and DSiWare.", not_option, 0, 0},
-    { 0, "  Corbenik:    " VERSION " (" REL ")", "Corbenik's version.", not_option, 0, 0},
+    { 0, "  " FW_NAME ":    " VERSION " (" REL ")", FW_NAME "'s version.", not_option, 0, 0},
     { -1, "", "", not_option, 0, 0 }
 };
 static int is_setup_info = 0;
@@ -254,7 +254,7 @@ menu_info()
 #define ln(s) { 0, s, "", not_option, 0, 0 }
 
 static struct options_s help_d[] = {
-    ln("Corbenik is another 3DS CFW for power users."),
+    ln(FW_NAME " is another 3DS CFW for power users."),
     ln("  It seeks to address some faults in other"),
     ln("  CFWs and is generally just another choice"),
     ln("  for users - but primarily is intended for"),
@@ -309,7 +309,7 @@ void chainload_menu();
 #endif
 
 static struct options_s main_s[] = {
-    { 0, "Options",            "Internal options for the CFW. These are part of Corbenik itself.", call_fun, (uint32_t)menu_options, 0 },
+    { 0, "Options",            "Internal options for the CFW. These are part of " FW_NAME " itself.", call_fun, (uint32_t)menu_options, 0 },
     { 0, "Patches",            "External bytecode patches found in `" PATH_PATCHES "`. You can choose which to enable.", call_fun, (uint32_t)menu_patches, 0 },
     { 0, "Info",               "Shows the current FIRM versions (and loads them, if needed)", call_fun, (uint32_t)menu_info,    0 },
     { 0, "Help/Readme",        "Displays info. Why are you opening help on help? That's kind of silly.", call_fun, (uint32_t)menu_help,    0 },

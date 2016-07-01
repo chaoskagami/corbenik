@@ -30,7 +30,7 @@ REL ?= master
 CHAINLOADER ?= 1
 
 CROSS_ASFLAGS := -mlittle-endian -mcpu=arm946e-s -march=armv5te
-CROSS_CFLAGS  := -MMD -MP -Wall -Wextra -Werror -fomit-frame-pointer -Os $(ASFLAGS) -fshort-wchar -fno-builtin -std=gnu11 -DVERSION=\"$(REVISION)\" -DREL=\"$(REL)\" -DCHAINLOADER=$(CHAINLOADER) -DPATH_CFW=\"/$(fw_folder)\"
+CROSS_CFLAGS  := -MMD -MP -Wall -Wextra -Werror -fomit-frame-pointer -Os $(ASFLAGS) -fshort-wchar -fno-builtin -std=gnu11 -DVERSION=\"$(REVISION)\" -DREL=\"$(REL)\" -DCHAINLOADER=$(CHAINLOADER) -DPATH_CFW=\"/$(fw_folder)\" -DFW_NAME=\"$(fw_name)\"
 CROSS_FLAGS   := dir_out=$(abspath $(dir_out)) --no-print-directory
 CROSS_LDFLAGS := -nostdlib -Wl,-z,defs -lgcc -Wl,-Map,$(dir_build)/link.map
 

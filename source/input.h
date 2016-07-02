@@ -20,4 +20,6 @@
 
 #define HID_PAD ((*(volatile uint32_t *)0x10146000) ^ BUTTON_ANY)
 
+uint32_t wait_key(_UNUSED int sleep);
+
 #endif

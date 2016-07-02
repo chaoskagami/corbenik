@@ -50,15 +50,15 @@
 #define OP_NEXT 0xFF
 
 #ifdef LOADER
-#define log(a) logstr(a)
-#define abort(a)                                                                                                                                               \
-    {                                                                                                                                                          \
-        logstr(a);                                                                                                                                             \
-        svcBreak(USERBREAK_ASSERT);                                                                                                                            \
-    }
+  #define log(a) logstr(a)
+  #define abort(a)                                                                                                                                               \
+      {                                                                                                                                                          \
+          logstr(a);                                                                                                                                             \
+          svcBreak(USERBREAK_ASSERT);                                                                                                                            \
+      }
 #else
-#define log(a) fprintf(stderr, a)
-int wait();
+  #define log(a) fprintf(stderr, a)
+  int wait();
 #endif
 
 struct mode
@@ -459,49 +459,49 @@ exec_bytecode(uint8_t *bytecode, uint32_t len, uint8_t* stack, uint32_t stack_si
                 if (debug)
                     log("abort\n");
 
-                abort("abort triggered, halting VM!\n")
+                abort("abort triggered, halting VM!\n");
                 break;
             case OP_ABORTEQ:
                 code++;
                 if (debug)
                     log("aborteq\n");
                 if (eq)
-                    abort("eq flag not set, halting VM!\n")
+                    abort("eq flag not set, halting VM!\n");
                 break;
             case OP_ABORTNE:
                 code++;
                 if (debug)
                     log("abortlt\n");
                 if (!eq)
-                    abort("eq flag not set, halting VM!\n")
+                    abort("eq flag not set, halting VM!\n");
                 break;
             case OP_ABORTLT:
                 code++;
                 if (debug)
                     log("abortlt\n");
                 if (lt)
-                    abort("lt flag set, halting VM!\n")
+                    abort("lt flag set, halting VM!\n");
                 break;
             case OP_ABORTGT:
                 code++;
                 if (debug)
                     log("abortgt\n");
                 if (gt)
-                    abort("gt flag set, halting VM!\n")
+                    abort("gt flag set, halting VM!\n");
                 break;
             case OP_ABORTF:
                 code++;
                 if (debug)
                     log("abortf\n");
                 if (found)
-                    abort("f flag set, halting VM!\n")
+                    abort("f flag set, halting VM!\n");
                 break;
             case OP_ABORTNF:
                 code++;
                 if (debug)
                     log("abortnf\n");
                 if (!found)
-                    abort("f flag is not set, halting VM!\n")
+                    abort("f flag is not set, halting VM!\n");
                 break;
             case OP_NEXT:
                 if (debug) {

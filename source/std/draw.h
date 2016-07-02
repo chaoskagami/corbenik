@@ -5,6 +5,7 @@
    It isn't perfect, but it does work. */
 
 #include <stdint.h>
+#include <stdarg.h>
 
 #define TOP_WIDTH 400
 #define TOP_HEIGHT 240
@@ -80,6 +81,8 @@ void clear_disp(uint8_t *screen);
 //  %p - unsigned char, changes color of text (will be replaced with ANSI codes
 //  eventually)
 void fprintf(void *channel, const char *format, ...);
+
+void vfprintf(void *channel, const char *format, va_list ap);
 
 #define BLACK 0
 #define BLUE 1

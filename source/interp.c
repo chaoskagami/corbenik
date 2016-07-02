@@ -1,11 +1,15 @@
 #include <stdint.h>
 #include <stddef.h>
-#ifndef LOADER
 #include "std/unused.h"
-#include "std/memory.h"
-#include "firm/firm.h"
-#include "config.h"
-#include "common.h"
+
+#ifndef LOADER
+  #include "std/memory.h"
+  #include "firm/firm.h"
+  #include "config.h"
+  #include "common.h"
+  #include "firm/fcram.h"
+#else
+  #include <string.h>
 #endif
 
 #define OP_NOP 0x00
@@ -72,8 +76,15 @@ static const char hexDigits[] = "0123456789ABCDEF";
 int is_n3ds = 1; // TODO - We don't really need to care, but it should still work from loader
 #endif
 
+#define STACK_SIZE 4096
+#ifdef LOADER
+  static uint8_t stack_glob[STACK_SIZE];
+#else
+  static uint8_t *stack_glob = NULL;
+#endif
+
 int
-exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
+exec_bytecode(uint8_t *bytecode, uint32_t len, uint8_t* stack, uint32_t stack_size, uint16_t ver, int debug)
 {
     if (!init_bytecode) {
 #ifndef LOADER
@@ -141,6 +152,10 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
 
         init_bytecode = 1;
     }
+
+    memset(stack, 0, stack_size); // Clear stack.
+
+    _UNUSED size_t top = stack_size - 1;
 
 #ifdef LOADER
     size_t set_mode = 18;
@@ -494,6 +509,9 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                 }
                 found = gt = lt = eq = 0;
 
+                memset(stack, 0, stack_size); // Clear stack.
+                top = stack_size - 1;
+
                 bytecode = code + 1;
 #ifndef LOADER
                 set_mode = 3;
@@ -697,5 +715,11 @@ execb(char *filename, int build_cache)
         debug = 1;
     }
 
-    return exec_bytecode(patch_mem, ver, patch_len, debug);
+#ifndef LOADER
+    if (stack_glob == NULL) {
+        stack_glob = static_allocate(STACK_SIZE);
+    }
+#endif
+
+    return exec_bytecode(patch_mem, patch_len, stack_glob, STACK_SIZE, ver, debug);
 }

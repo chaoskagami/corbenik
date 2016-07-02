@@ -1,4 +1,5 @@
 #include <3ds.h>
+#include <string.h>
 #include "patcher.h"
 #include "fsldr.h"
 #include "internal.h"
@@ -9,7 +10,7 @@
 #endif
 #include "../../../source/config.h"
 #include "../../../source/patch_format.h"
-
+/*
 int
 memcmp(const void *buf1, const void *buf2, u32 size)
 {
@@ -24,6 +25,7 @@ memcmp(const void *buf1, const void *buf2, u32 size)
 
     return 0;
 }
+*/
 
 // Quick Search algorithm, adapted from
 // http://igm.univ-mlv.fr/~lecroq/string/node19.html#SECTION00190

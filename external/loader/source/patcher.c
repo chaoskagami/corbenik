@@ -1,4 +1,5 @@
 #include <3ds.h>
+#include <string.h>
 #include "patcher.h"
 #include "exheader.h"
 #include "fsldr.h"

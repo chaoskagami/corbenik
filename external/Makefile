@@ -21,24 +21,24 @@ clean: clean_loader clean_bits clean_screeninit
 
 .PHONY: loader
 loader:
-	make -C loader
+	make -C loader dir_out=$(dir_out) fw_folder=$(fw_folder) root=$(root)
 
 .PHONY: bits
 bits:
-	make -C bits
+	make -C bits dir_out=$(dir_out) fw_folder=$(fw_folder) root=$(root)
 
 .PHONY: screeninit
 screeninit:
-	make -C screeninit
+	make -C screeninit dir_out=$(dir_out) fw_folder=$(fw_folder) root=$(root)
 
 .PHONY: clean_loader
 clean_loader:
-	make -C loader clean
+	make -C loader dir_out=$(dir_out) fw_folder=$(fw_folder) root=$(root) clean
 
 .PHONY: clean_bits
 clean_bits:
-	make -C bits clean
+	make -C bits dir_out=$(dir_out) fw_folder=$(fw_folder) root=$(root) clean
 
 .PHONY: clean_screeninit
 screeninit_clean:
-	make -C screeninit clean
+	make -C screeninit dir_out=$(dir_out) fw_folder=$(fw_folder) root=$(root) clean

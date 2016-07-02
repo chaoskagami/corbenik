@@ -18,6 +18,22 @@ fw_name ?= Corbenik
 # If unset, the primary folder is /corbenik.
 fw_folder ?= corbenik
 
+# Other valid options:
+#  shadowhand
+#  cruel
+root ?= clusterfuck
+
+ifeq "$(root)" "clusterfuck"
+  PATHARGS := -DPATH_ROOT=\"\"
+  PATHARGS += -DPATH_DATA=\"/$(fw_folder)\"
+else ifeq "$(root)" "cruel"
+  PATHARGS := -DPATH_ROOT=\"/3ds/apps\"
+  PATHARGS += -DPATH_DATA=\"/3ds/appdata/$(fw_folder)\"
+else ifeq "$(root)" "shadowhand"
+  PATHARGS := -DPATH_ROOT=\"/homebrew/3ds\"
+  PATHARGS += -DPATH_DATA=\"/homebrew/3ds/$(fw_folder)\"
+endif
+
 dir_source := source
 dir_data   := data
 dir_build  := build
@@ -30,7 +46,7 @@ REL ?= master
 CHAINLOADER ?= 1
 
 CROSS_ASFLAGS := -mlittle-endian -mcpu=arm946e-s -march=armv5te
-CROSS_CFLAGS  := -MMD -MP -Wall -Wextra -Werror -fomit-frame-pointer -Os $(ASFLAGS) -fshort-wchar -fno-builtin -std=gnu11 -DVERSION=\"$(REVISION)\" -DREL=\"$(REL)\" -DCHAINLOADER=$(CHAINLOADER) -DPATH_CFW=\"/$(fw_folder)\" -DFW_NAME=\"$(fw_name)\"
+CROSS_CFLAGS  := -MMD -MP -Wall -Wextra -Werror -fomit-frame-pointer -Os $(ASFLAGS) -fshort-wchar -fno-builtin -std=gnu11 -DVERSION=\"$(REVISION)\" -DREL=\"$(REL)\" -DCHAINLOADER=$(CHAINLOADER) -DPATH_CFW=\"/$(fw_folder)\" -DFW_NAME=\"$(fw_name)\" $(PATHARGS)
 CROSS_FLAGS   := dir_out=$(abspath $(dir_out)) --no-print-directory
 CROSS_LDFLAGS := -nostdlib -Wl,-z,defs -lgcc -Wl,-Map,$(dir_build)/link.map
 
@@ -55,7 +71,7 @@ release:
 
 .PHONY: hosttools
 hosttools:
-	make -C host/bdfe dir_out=$(dir_out) fw_folder=$(fw_folder)
+	make -C host/bdfe dir_out=$(dir_out) fw_folder=$(fw_folder) root=$(root)
 
 .PHONY: font
 font: hosttools
@@ -71,15 +87,15 @@ full: all contrib $(dir_out)/$(fw_folder)/locale
 
 .PHONY: contrib
 contrib:
-	make -C contrib dir_out=$(dir_out) fw_name=$(fw_name) fw_folder=$(fw_folder)
+	make -C contrib dir_out=$(dir_out) fw_name=$(fw_name) fw_folder=$(fw_folder) root=$(root)
 
 .PHONY: external
 external:
-	make -C external dir_out=$(dir_out) fw_name=$(fw_name) fw_folder=$(fw_folder) CHAINLOADER=$(CHAINLOADER)
+	make -C external dir_out=$(dir_out) fw_name=$(fw_name) fw_folder=$(fw_folder) CHAINLOADER=$(CHAINLOADER) root=$(root)
 
 .PHONY: patch
 patch:
-	make -C patch dir_out=$(dir_out) fw_name=$(fw_name) fw_folder=$(fw_folder)
+	make -C patch dir_out=$(dir_out) fw_name=$(fw_name) fw_folder=$(fw_folder) root=$(root)
 
 .PHONY: a9lh
 a9lh: $(dir_out)/arm9loaderhax.bin
@@ -96,9 +112,9 @@ $(dir_out)/$(fw_folder)/locale: all
 .PHONY: clean
 clean:
 	rm -f host/{font-emit,font.h,font_prop.h,termfont.bin}
-	make -C external dir_out=$(dir_out) fw_folder=$(fw_folder) clean
-	make -C patch dir_out=$(dir_out) fw_folder=$(fw_folder) clean
-	make -C host/bdfe dir_out=$(dir_out) fw_folder=$(fw_folder) clean
+	make -C external dir_out=$(dir_out) fw_folder=$(fw_folder) root=$(root) clean
+	make -C patch dir_out=$(dir_out) fw_folder=$(fw_folder) root=$(root) clean
+	make -C host/bdfe dir_out=$(dir_out) fw_folder=$(fw_folder) root=$(root) clean
 	rm -rf $(dir_out) $(dir_build)
 
 .PHONY: $(dir_out)/arm9loaderhax.bin

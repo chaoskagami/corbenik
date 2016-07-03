@@ -91,6 +91,9 @@
 #define PATH_ALT_SLOT0X11KEY96 "/slot0x11key96.bin" // Hey, your perrogative, buddy. I like cleaned up
                                                     // paths.
 
+#define PATH_BOOTLOG PATH_DATA "/boot.log"
+#define PATH_LOADERLOG PATH_DATA "/boot.log"
+
 #define PATCH_FLAG_REQUIRE (1 << 0) // Force enable patch unless 'Unsafe Options' is checked.
 #define PATCH_FLAG_DEVMODE (1 << 1) // Require 'Developer Options' to be checked.
 #define PATCH_FLAG_NOABORT (1 << 2) // Don't abort on error.

@@ -245,7 +245,7 @@ void dump_log(unsigned int force) {
     if (log_size == 0)
         return;
 
-    FILE *f = fopen(PATH_CFW "/boot.log", "w");
+    FILE *f = fopen(PATH_BOOTLOG, "w");
     fseek(f, 0, SEEK_END);
 
     fwrite(log_buffer, 1, log_size, f);

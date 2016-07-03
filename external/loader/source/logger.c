@@ -27,7 +27,7 @@ openLogger()
     if (logger_is_initd)
         return;
 
-    r = fileOpen(&log_file_hdl, ARCHIVE_SDMC, "/corbenik/loader.log", FS_OPEN_WRITE | FS_OPEN_READ | FS_OPEN_CREATE);
+    r = fileOpen(&log_file_hdl, ARCHIVE_SDMC, PATH_LOADERLOG, FS_OPEN_WRITE | FS_OPEN_READ | FS_OPEN_CREATE);
 
     if (R_FAILED(r)) {
         logger_is_initd = -1;

@@ -168,4 +168,9 @@ $(dir_build)/patch/%.o: $(dir_source)/patch/%.s
 	@mkdir -p "$(@D)"
 	$(CROSS_AS) $(CROSS_ASFLAGS) -c $(OUTPUT_OPTION) $<
 
+$(dir_build)/misc/%.o: $(dir_source)/misc/%.c
+	@mkdir -p "$(@D)"
+	$(CROSS_CC) $(CROSS_CFLAGS) -c -Wno-unused-function $(OUTPUT_OPTION) $<
+
+
 include $(call rwildcard, $(dir_build), *.d)

@@ -4,6 +4,7 @@
 #include <stddef.h>
 
 #include "../common.h"
+#include "../misc/sha256.h"
 
 firm_h *firm_loc = (firm_h *)FCRAM_FIRM_LOC;
 uint32_t firm_size = FCRAM_SPACING;
@@ -298,6 +299,37 @@ void __attribute__((naked)) arm11_preboot_halt()
 
 extern void wait();
 
+void* find_section_key() {
+    // The key will be dword-aligned (I think? Verify this. May need new NFIRM to check assumption. Go, Nintendo!)
+    uint8_t* key_loc = (uint8_t*)firm_loc + firm_loc->section[2].offset - 16;
+    uint32_t search_size = firm_loc->section[2].size - 16;
+
+    key_loc = (uint8_t*)((uint32_t)key_loc & 0xFFFFFFF8); // Align to 4bytes.
+
+    // The hash of the key. Can't give the key itself out, obviously.
+    uint32_t sha256boot[32] = {0xb9, 0x4d, 0xb1, 0xb1, 0xc3, 0xe0, 0x11, 0x08,
+                               0x9c, 0x19, 0x46, 0x06, 0x4a, 0xbc, 0x40, 0x2a,
+                               0x7c, 0x66, 0xf4, 0x4a, 0x74, 0x6f, 0x71, 0x50,
+                               0x32, 0xfd, 0xff, 0x03, 0x74, 0xd7, 0x45, 0x2c};
+    uint8_t sha256check[32] = {0};
+
+    uint64_t hash_dat = 0;
+
+    for(; search_size > 0; search_size -= 4) {
+        // Is candidate?
+        if (key_loc[search_size] == 0xDD) {
+            // Yes. Check hash.
+            Sha256Data(&key_loc[search_size], 16, sha256check);
+            if(memcmp(sha256boot, sha256check, 32)) {
+                fprintf(stderr, "Key at %x\n", (uint32_t)(&key_loc[search_size]) - (uint32_t)key_loc);
+                return &key_loc[search_size];
+            }
+        }
+    }
+
+    return NULL;
+}
+
 void
 boot_firm()
 {
@@ -307,12 +339,12 @@ boot_firm()
     // depending on which firmware you're booting from.
     // TODO: Don't use the hardcoded offset.
     if (update_96_keys && fsig->console == console_n3ds && fsig->version > 0x0F) {
-        void *keydata = NULL;
-        if (fsig->version == 0x1B || fsig->version == 0x1F) {
-            keydata = (void *)((uintptr_t)firm_loc + firm_loc->section[2].offset + 0x89814);
-        } else if (fsig->version == 0x21) {
-            keydata = (void *)((uintptr_t)firm_loc + firm_loc->section[2].offset + 0x89A14);
+        void *keydata = find_section_key();
+        if (!keydata) {
+            abort("Couldn't find key!\n");
         }
+
+        wait();
 
         aes_use_keyslot(0x11);
         uint8_t keyx[AES_BLOCK_SIZE];

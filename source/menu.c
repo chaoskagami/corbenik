@@ -75,55 +75,53 @@ int
 list_patches_build_back(char *fpath, int desc_is_path)
 {
     FILINFO fno;
+    DIR pdir;
+    char *fname = &fpath[strnlen(fpath, 255)];
+    if (f_opendir(&pdir, fpath) != FR_OK)
+        return 1;
 
-    // this code handles directory content deletion
-    if (f_stat(fpath, &fno) != FR_OK)
-        return 1; // fpath does not exist
+    fname[0] = '/';
+    fname++;
 
-    if (fno.fattrib & AM_DIR) { // process folder contents
-        DIR pdir;
-        char *fname = fpath + strnlen(fpath, 255);
-        if (f_opendir(&pdir, fpath) != FR_OK)
-            return 1;
+    while (f_readdir(&pdir, &fno) == FR_OK) {
+        strncpy(fname, fno.fname, strlen(fno.fname));
 
-        fname[0] = '/';
-        fname++;
+        if (fno.fname[0] == 0)
+            break;
 
-        while (f_readdir(&pdir, &fno) == FR_OK) {
-            if ((strncmp(fno.fname, ".", 2) == 0) || (strncmp(fno.fname, "..", 3) == 0))
-                continue; // filter out virtual entries
-            if (fname[0] == 0)
-                strncpy(fname, fno.fname, fpath + 255 - fname);
-            if (fno.fname[0] == 0)
-                break;
-            else // return value won't matter
-                list_patches_build_back(fpath, desc_is_path);
+        FILINFO f2;
+        if (f_stat(fpath, &f2) != FR_OK)
+            break;
+
+        if (f2.fattrib & AM_DIR) {
+            // return value won't matter
+            list_patches_build_back(fpath, desc_is_path);
+        } else {
+            struct system_patch p;
+            read_file(&p, fpath, sizeof(struct system_patch));
+
+            if (memcmp(p.magic, "AIDA", 4))
+                return 0;
+
+            strncpy(patches[current_menu_index_patches].name, p.name, 64);
+            if (desc_is_path)
+                strncpy(patches[current_menu_index_patches].desc, fpath, 255);
+            else
+                strncpy(patches[current_menu_index_patches].desc, p.desc, 255);
+            patches[current_menu_index_patches].index = p.uuid;
+            patches[current_menu_index_patches].allowed = boolean_val;
+            patches[current_menu_index_patches].a = 0;
+            patches[current_menu_index_patches].b = 0;
+            if (desc_is_path)
+                enable_list[p.uuid] = 0;
+
+            current_menu_index_patches++;
         }
-
-        f_closedir(&pdir);
-        --fname;
-        fname[0] = 0;
-    } else {
-        struct system_patch p;
-        read_file(&p, fpath, sizeof(struct system_patch));
-
-        if (memcmp(p.magic, "AIDA", 4))
-            return 0;
-
-        strncpy(patches[current_menu_index_patches].name, p.name, 64);
-        if (desc_is_path)
-            strncpy(patches[current_menu_index_patches].desc, fpath, 255);
-        else
-            strncpy(patches[current_menu_index_patches].desc, p.desc, 255);
-        patches[current_menu_index_patches].index = p.uuid;
-        patches[current_menu_index_patches].allowed = boolean_val;
-        patches[current_menu_index_patches].a = 0;
-        patches[current_menu_index_patches].b = 0;
-        if (desc_is_path)
-            enable_list[p.uuid] = 0;
-
-        current_menu_index_patches++;
     }
+
+    f_closedir(&pdir);
+    --fname;
+    fname[0] = 0;
 
     return 0;
 }

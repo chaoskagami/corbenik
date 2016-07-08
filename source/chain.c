@@ -76,50 +76,47 @@ int
 list_chain_build_back(char *fpath)
 {
     FILINFO fno;
+    DIR pdir;
+    char *fname = &fpath[strnlen(fpath, 255)];
+    if (f_opendir(&pdir, fpath) != FR_OK)
+        return 1;
 
-    // this code handles directory content deletion
-    if (f_stat(fpath, &fno) != FR_OK)
-        return 1; // fpath does not exist
+    fname[0] = '/';
+    fname++;
 
-    if (fno.fattrib & AM_DIR) { // process folder contents
-        DIR pdir;
-        char *fname = fpath + strnlen(fpath, 255);
-        if (f_opendir(&pdir, fpath) != FR_OK)
-            return 1;
+    while (f_readdir(&pdir, &fno) == FR_OK) {
+        strncpy(fname, fno.fname, strlen(fno.fname));
 
-        fname[0] = '/';
-        fname++;
+        if (fno.fname[0] == 0)
+            break;
 
-        while (f_readdir(&pdir, &fno) == FR_OK) {
-            if ((strncmp(fno.fname, ".", 2) == 0) || (strncmp(fno.fname, "..", 3) == 0))
-                continue; // filter out virtual entries
-            if (fname[0] == 0)
-                strncpy(fname, fno.fname, fpath + 255 - fname);
-            if (fno.fname[0] == 0)
-                break;
-            else // return value won't matter
-                list_chain_build_back(fpath);
+        FILINFO f2;
+        if (f_stat(fpath, &f2) != FR_OK)
+            break;
+
+        if (f2.fattrib & AM_DIR) {
+            // return value won't matter
+            list_chain_build_back(fpath);
+        } else {
+            char* basename = &fpath[strlen(fpath) - 1];
+            while(basename[0] != '/') basename--;
+            basename++;
+
+            strncpy(chains[current_chain_index].name, basename, 64);
+            strncpy(chains[current_chain_index].desc, fpath, 255);
+
+            chains[current_chain_index].index = 0;
+            chains[current_chain_index].allowed = call_fun;
+            chains[current_chain_index].a = (uint32_t) chainload_file;
+            chains[current_chain_index].b = (uint32_t) chains[current_chain_index].desc;
+
+            current_chain_index++;
         }
-
-        f_closedir(&pdir);
-
-        --fname;
-        fname[0] = 0;
-    } else {
-        char* basename = &fpath[strlen(fpath) - 1];
-        while(basename[0] != '/') basename--;
-        basename++;
-
-        strncpy(chains[current_chain_index].name, basename, 64);
-        strncpy(chains[current_chain_index].desc, fpath, 255);
-
-        chains[current_chain_index].index = 0;
-        chains[current_chain_index].allowed = call_fun;
-        chains[current_chain_index].a = (uint32_t) chainload_file;
-        chains[current_chain_index].b = (uint32_t) chains[current_chain_index].desc;
-
-        current_chain_index++;
     }
+
+    f_closedir(&pdir);
+    --fname;
+    fname[0] = 0;
 
     return 0;
 }

@@ -9,29 +9,12 @@
 #include "../std/abort.h"
 #include "../firm/firm.h"
 #include "../firm/fcram.h"
-#include "../fatfs/sdmmc.h"
+#include <ctr9/io.h>
 #include "../firm/headers.h"
 #include "../patch_format.h"
 #include "../config.h"
 
 uint8_t *emunand_temp = (uint8_t *)FCRAM_JUNK_LOC;
-
-void
-verify_loop_emunand(char *filename)
-{
-    // FIXME - This won't work unless the NAND file is completely contiguous on disk, sadly.
-    // Technically speaking if I were to defrag my SD this would work, I suspect.
-    // For now, this will remain as dead code.
-
-    uint32_t offset = get_file_sector(filename); // Get the sector of the file
-
-    // Check for RedNAND image on SD
-    if (!sdmmc_sdcard_readsectors(offset, 1, emunand_temp) && *(uint32_t *)(emunand_temp + 0x100) == NCSD_MAGIC) {
-        fprintf(stderr, "emunand: found NCSD magic\n");
-    } else {
-        abort("emunand: selected NAND image is not valid.\n");
-    }
-}
 
 void
 verify_emunand(uint32_t index, uint32_t *off, uint32_t *head)

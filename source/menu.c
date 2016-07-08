@@ -74,7 +74,7 @@ static int current_menu_index_patches = 0;
 int
 list_patches_build_back(char *fpath, int desc_is_path)
 {
-    FILINFO fno = {.lfname = NULL };
+    FILINFO fno;
 
     // this code handles directory content deletion
     if (f_stat(fpath, &fno) != FR_OK)
@@ -86,9 +86,8 @@ list_patches_build_back(char *fpath, int desc_is_path)
         if (f_opendir(&pdir, fpath) != FR_OK)
             return 1;
 
-        *(fname++) = '/';
-        fno.lfname = fname;
-        fno.lfsize = fpath + 255 - fname;
+        fname[0] = '/';
+        fname++;
 
         while (f_readdir(&pdir, &fno) == FR_OK) {
             if ((strncmp(fno.fname, ".", 2) == 0) || (strncmp(fno.fname, "..", 3) == 0))
@@ -102,7 +101,8 @@ list_patches_build_back(char *fpath, int desc_is_path)
         }
 
         f_closedir(&pdir);
-        *(--fname) = '\0';
+        --fname;
+        fname[0] = 0;
     } else {
         struct system_patch p;
         read_file(&p, fpath, sizeof(struct system_patch));

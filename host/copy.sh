@@ -9,7 +9,7 @@ dev=/dev/sdb
 mnt=/mnt/ext1
 
 mount -t vfat ${dev}1 $mnt || exit 0
-rm -rf $mnt/{corbenik,skeith}
+rm -rf $mnt/corbenik
 cp -r out/* $mnt/ || exit 0
 cp -r input/* $mnt/ || exit 0
 cp out/arm9loaderhax.bin $mnt/corbenik/chain/Corbenik || exit 0

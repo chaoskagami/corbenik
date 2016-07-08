@@ -75,7 +75,7 @@ void chainload_file(char* chain_file_data) {
 int
 list_chain_build_back(char *fpath)
 {
-    FILINFO fno = {.lfname = NULL };
+    FILINFO fno;
 
     // this code handles directory content deletion
     if (f_stat(fpath, &fno) != FR_OK)
@@ -87,9 +87,8 @@ list_chain_build_back(char *fpath)
         if (f_opendir(&pdir, fpath) != FR_OK)
             return 1;
 
-        *(fname++) = '/';
-        fno.lfname = fname;
-        fno.lfsize = fpath + 255 - fname;
+        fname[0] = '/';
+        fname++;
 
         while (f_readdir(&pdir, &fno) == FR_OK) {
             if ((strncmp(fno.fname, ".", 2) == 0) || (strncmp(fno.fname, "..", 3) == 0))
@@ -103,7 +102,9 @@ list_chain_build_back(char *fpath)
         }
 
         f_closedir(&pdir);
-        *(--fname) = '\0';
+
+        --fname;
+        fname[0] = 0;
     } else {
         char* basename = &fpath[strlen(fpath) - 1];
         while(basename[0] != '/') basename--;

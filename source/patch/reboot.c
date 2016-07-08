@@ -5,7 +5,7 @@
 #include "../std/abort.h"
 #include "../firm/firm.h"
 #include "../firm/fcram.h"
-#include "../fatfs/sdmmc.h"
+#include <ctr9/io.h>
 #include "../firm/headers.h"
 #include "../patch_format.h"
 

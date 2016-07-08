@@ -4,12 +4,13 @@
 #include <assert.h>
 #include <stdarg.h>
 #include "memory.h"
-#include "../fatfs/ff.h"
+#include <ctr9/io.h>
 #include "../firm/fcram.h"
 #include "fs.h"
 #include "unused.h"
 #include "../config.h"
 #include "../patch_format.h"
+#include "abort.h"
 
 static unsigned int top_cursor_x = 0, top_cursor_y = 0;
 static unsigned int bottom_cursor_x = 0, bottom_cursor_y = 0;
@@ -207,7 +208,7 @@ void set_font(const char* filename) {
 
     FILE* f = fopen(filename, "r");
 
-    if (!f) return;
+    if (!f) abort("Failed to load font file!\n");
 
     unsigned int new_w, new_h;
 
@@ -215,8 +216,7 @@ void set_font(const char* filename) {
     fread(&new_h, 1, 4, f);
 
     if (new_w == 0 || new_h == 0) {
-        fprintf(stderr, "Invalid font file: w/h is 0 - not loaded\n");
-        return;
+        abort("Invalid font file: w/h is 0 - not loaded\n");
     }
 
     unsigned int c_font_w = (new_w / 8) + (new_w % 8 ? 1 : 0);

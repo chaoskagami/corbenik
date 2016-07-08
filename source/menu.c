@@ -3,6 +3,8 @@
 #include "firm/headers.h"
 #include "std/unused.h"
 
+#include <ctr9/ctr_system.h>
+
 #define MAX_PATCHES ((FCRAM_SPACING / 2) / sizeof(struct options_s))
 struct options_s *patches = (struct options_s *)FCRAM_MENU_LOC;
 uint8_t *enable_list = (uint8_t *)FCRAM_PATCHLIST_LOC;
@@ -242,9 +244,8 @@ reset()
 
     // Reboot.
     fprintf(BOTTOM_SCREEN, "Rebooting system...\n");
-    i2cWriteRegister(I2C_DEV_MCU, 0x20, 1 << 2);
-    while (1)
-        ;
+
+    ctr_system_reset();
 }
 
 void
@@ -254,11 +255,10 @@ poweroff()
 
     fumount(); // Unmount SD.
 
-    // Reboot.
+    // Power off
     fprintf(BOTTOM_SCREEN, "Powering off system...\n");
-    i2cWriteRegister(I2C_DEV_MCU, 0x20, 1 << 0);
-    while (1)
-        ;
+
+    ctr_system_poweroff();
 }
 
 #if defined(CHAINLOADER) && CHAINLOADER == 1

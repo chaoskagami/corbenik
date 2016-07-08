@@ -17,6 +17,4 @@
 #include "input.h"
 #include "patcher.h"
 
-#include "i2c.h"
-
 #endif

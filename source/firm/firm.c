@@ -313,8 +313,6 @@ void* find_section_key() {
                                0x32, 0xfd, 0xff, 0x03, 0x74, 0xd7, 0x45, 0x2c};
     uint8_t sha256check[32] = {0};
 
-    uint64_t hash_dat = 0;
-
     for(; search_size > 0; search_size -= 4) {
         // Is candidate?
         if (key_loc[search_size] == 0xDD) {

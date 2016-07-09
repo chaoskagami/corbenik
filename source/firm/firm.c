@@ -3,6 +3,9 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include <ctr9/io.h>
+#include <ctr9/aes.h>
+
 #include "../common.h"
 #include "../misc/sha256.h"
 
@@ -25,6 +28,47 @@ static int update_96_keys = 0;
 
 static volatile uint32_t *const a11_entry = (volatile uint32_t *)0x1FFFFFF8;
 
+typedef enum {
+    NCCHTYPE_EXHEADER = 1,
+    NCCHTYPE_EXEFS = 2,
+    NCCHTYPE_ROMFS = 3,
+} ctr_ncchtypes;
+
+void
+ncch_getctr(const ncch_h *ncch, uint8_t *ctr, uint8_t type)
+{
+    uint32_t version = ncch->version;
+    const uint8_t *partitionID = ncch->partitionID;
+    int i;
+
+    for (i = 0; i < 16; i++)
+        ctr[i] = 0x00;
+
+    if (version == 2 || version == 0) {
+        for (i = 0; i < 8; i++)
+            ctr[i] = partitionID[7 - i]; // Convert to big endian & normal input
+        ctr[8] = type;
+    } else if (version == 1) {
+        int x = 0;
+        if (type == NCCHTYPE_EXHEADER)
+            x = MEDIA_UNITS;
+        else if (type == NCCHTYPE_EXEFS)
+            x = ncch->exeFSOffset * MEDIA_UNITS;
+        else if (type == NCCHTYPE_ROMFS)
+            x = ncch->exeFSOffset * MEDIA_UNITS;
+        for (i = 0; i < 8; i++)
+            ctr[i] = partitionID[i];
+        for (i = 0; i < 4; i++)
+            ctr[i + 12] = (x >> ((3 - i) * 8)) & 0xFF;
+    }
+}
+
+void
+aes(void *dst, const void *src, uint32_t blockCount, void *iv, uint32_t mode, uint32_t ivMode)
+{
+    set_ctr(iv);
+}
+
 void
 slot0x11key96_init()
 {
@@ -33,7 +77,7 @@ slot0x11key96_init()
     uint8_t key[AES_BLOCK_SIZE];
     if (read_file(key, PATH_SLOT0X11KEY96, AES_BLOCK_SIZE) != 0 || read_file(key, PATH_ALT_SLOT0X11KEY96, AES_BLOCK_SIZE) != 0) {
         // Read key successfully.
-        aes_setkey(0x11, key, AES_KEYNORMAL, AES_INPUT_BE | AES_INPUT_NORMAL);
+        setup_aeskey(0x11, key);
 
         // Tell boot_firm it needs to regenerate the keys.
         update_96_keys = 1;
@@ -54,7 +98,7 @@ decrypt_cetk_key(void *key, const void *cetk)
     if (sigtype != SIG_TYPE_RSA2048_SHA256)
         return 1;
 
-    ticket_h *ticket = (ticket_h *)(cetk + sizeof(sigtype) + 0x13C);
+    ticket_h *ticket = (ticket_h *)((uint8_t*)cetk + sizeof(sigtype) + 0x13C);
 
     if (ticket->ticketCommonKeyYIndex != 1)
         return 1;
@@ -76,11 +120,11 @@ decrypt_cetk_key(void *key, const void *cetk)
         if (i < p9_base)
             return 1;
 
-        aes_setkey(0x3D, common_key_y, AES_KEYY, AES_INPUT_BE | AES_INPUT_NORMAL);
+        setup_aeskeyY(0x3D, common_key_y);
         common_key_y_init = 1;
     }
 
-    aes_use_keyslot(0x3D);
+    use_aeskey(0x3D);
     memcpy(iv, ticket->titleID, sizeof(ticket->titleID));
 
     memcpy(key, ticket->titleKey, sizeof(ticket->titleKey));
@@ -99,8 +143,8 @@ decrypt_firm_title(firm_h *dest, ncch_h *ncch, uint32_t *size, void *key)
     uint8_t exefs_iv[16] = { 0 };
 
     fprintf(BOTTOM_SCREEN, "n");
-    aes_setkey(0x16, key, AES_KEYNORMAL, AES_INPUT_BE | AES_INPUT_NORMAL);
-    aes_use_keyslot(0x16);
+    setup_aeskey(0x16, key);
+    use_aeskey(0x16);
     aes(ncch, ncch, *size / AES_BLOCK_SIZE, firm_iv, AES_CBC_DECRYPT_MODE, AES_INPUT_BE | AES_INPUT_NORMAL);
 
     if (ncch->magic != NCCH_MAGIC)
@@ -110,12 +154,12 @@ decrypt_firm_title(firm_h *dest, ncch_h *ncch, uint32_t *size, void *key)
     ncch_getctr(ncch, exefs_iv, NCCHTYPE_EXEFS);
 
     // Get the exefs offset and size from the NCCH
-    exefs_h *exefs = (exefs_h *)((void *)ncch + ncch->exeFSOffset * MEDIA_UNITS);
+    exefs_h *exefs = (exefs_h *)((uint8_t *)ncch + ncch->exeFSOffset * MEDIA_UNITS);
     uint32_t exefs_size = ncch->exeFSSize * MEDIA_UNITS;
 
     fprintf(BOTTOM_SCREEN, "e");
-    aes_setkey(0x2C, exefs_key, AES_KEYY, AES_INPUT_BE | AES_INPUT_NORMAL);
-    aes_use_keyslot(0x2C);
+    setup_aeskeyY(0x2C, exefs_key);
+    use_aeskey(0x2C);
     aes(exefs, exefs, exefs_size / AES_BLOCK_SIZE, exefs_iv, AES_CTR_MODE, AES_INPUT_BE | AES_INPUT_NORMAL);
 
     // Get the decrypted FIRM
@@ -145,18 +189,18 @@ decrypt_arm9bin(arm9bin_h *header, uint64_t firm_title, uint8_t version)
         slot0x11key96_init();
         slot = 0x16;
 
-        aes_use_keyslot(0x11);
+        use_aeskey(0x11);
         aes(decrypted_keyx, header->slot0x16keyX, 1, NULL, AES_ECB_DECRYPT_MODE, 0);
-        aes_setkey(slot, decrypted_keyx, AES_KEYX, AES_INPUT_BE | AES_INPUT_NORMAL);
+        setup_aeskeyX(slot, decrypted_keyx);
     }
 
-    aes_setkey(slot, header->keyy, AES_KEYY, AES_INPUT_BE | AES_INPUT_NORMAL);
-    aes_setiv(header->ctr, AES_INPUT_BE | AES_INPUT_NORMAL);
+    setup_aeskeyY(slot, header->keyy);
+    set_ctr(header->ctr);
 
     void *arm9bin = (uint8_t *)header + 0x800;
     int size = atoi(header->size);
 
-    aes_use_keyslot(slot);
+    use_aeskey(slot);
     aes(arm9bin, arm9bin, size / AES_BLOCK_SIZE, header->ctr, AES_CTR_MODE, AES_INPUT_BE | AES_INPUT_NORMAL);
 
     if (firm_title == NATIVE_FIRM_TITLEID)
@@ -337,18 +381,18 @@ boot_firm()
     // depending on which firmware you're booting from.
     // TODO: Don't use the hardcoded offset.
     if (update_96_keys && fsig->console == console_n3ds && fsig->version > 0x0F) {
-        void *keydata = find_section_key();
+        uint8_t *keydata = find_section_key();
         if (!keydata) {
             abort("Couldn't find key!\n");
         }
 
         wait();
 
-        aes_use_keyslot(0x11);
+        use_aeskey(0x11);
         uint8_t keyx[AES_BLOCK_SIZE];
         for (int slot = 0x19; slot < 0x20; slot++) {
             aes(keyx, keydata, 1, NULL, AES_ECB_DECRYPT_MODE, 0);
-            aes_setkey(slot, keyx, AES_KEYX, AES_INPUT_BE | AES_INPUT_NORMAL);
+            setup_aeskeyX(slot, keyx);
             *(uint8_t *)(keydata + 0xF) += 1;
         }
 
@@ -356,7 +400,7 @@ boot_firm()
     }
 
     for (firm_section_h *section = firm_loc->section; section < firm_loc->section + 4 && section->address != 0; section++) {
-        memcpy((void *)section->address, (void *)firm_loc + section->offset, section->size);
+        memcpy((void *)section->address, (void *)((uint8_t*)firm_loc + section->offset), section->size);
     }
     fprintf(BOTTOM_SCREEN, "Copied FIRM\n");
 
@@ -387,17 +431,17 @@ find_proc9(firm_h *firm, firm_section_h *process9, exefs_h **p9exefs)
             break;
 
         if (section->type == FIRM_TYPE_ARM9) {
-            void *arm9section = (void *)firm + section->offset;
+            uint8_t *arm9section = (uint8_t *)firm + section->offset;
             while (arm9section < arm9section + section->size) {
                 if (!memcmp(arm9section, "Process9", 8)) { // Process9
-                    ncch_h *ncch = (ncch_h *)(arm9section - sizeof(ncch_h));
+                    ncch_h *ncch = (ncch_h *)((uint8_t*)arm9section - sizeof(ncch_h));
                     if (ncch->magic == NCCH_MAGIC) {
                         // Found Process9
                         ncch_ex_h *p9exheader = (ncch_ex_h *)(ncch + 1);
                         *p9exefs = (exefs_h *)(p9exheader + 1);
                         process9->address = p9exheader->sci.textCodeSet.address;
                         process9->size = (*p9exefs)->fileHeaders[0].size;
-                        process9->offset = (void *)((*p9exefs) + 1) - (void *)firm;
+                        process9->offset = ((uint32_t)((*p9exefs) + 1) - (uint32_t)firm);
                         fprintf(BOTTOM_SCREEN, "p");
                         return 0;
                     }

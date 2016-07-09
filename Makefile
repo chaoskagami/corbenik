@@ -59,7 +59,7 @@ all: hosttools font ctr9io a9lh patch external
 
 .PHONY: ctr9io
 ctr9io:
-	./host/compile_ctr9_io.sh
+	cd external/libctr9_io && autoreconf -fi && CFLAGS= LDFLAGS= ASFLAGS= ./configure --host arm-none-eabi --prefix=$(shell pwd)/external/libctr9_io/out && make && make install
 
 .PHONY: release
 release:

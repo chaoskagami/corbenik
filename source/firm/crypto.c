@@ -374,3 +374,5 @@ rsa_verify(const void *data, uint32_t size, const void *sig, uint32_t mode)
 
     return memcmp(dataHash, decSig + (sigSize - SHA_256_HASH_SIZE), SHA_256_HASH_SIZE) == 0;
 }
+
+

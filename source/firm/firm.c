@@ -5,7 +5,6 @@
 
 #include "../common.h"
 #include "../misc/sha256.h"
-#include "../fatfs/sdmmc.h"
 
 firm_h *firm_loc = (firm_h *)FCRAM_FIRM_LOC;
 uint32_t firm_size = FCRAM_SPACING;

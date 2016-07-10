@@ -40,6 +40,7 @@ void slot0x11key96_init();
 
 void extract_firm1();
 void extract_slot0x05keyY();
+void extract_slot0x3DkeyY();
 
 int load_firms();
 void boot_firm();

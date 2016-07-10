@@ -42,8 +42,8 @@ main(int argc, char** argv)
 
     load_config(); // Load configuration.
 
-    extract_firm1();
     extract_slot0x05keyY();
+    extract_slot0x3DkeyY();
 
     if (CFG_BOOTENV == 7) {
         fprintf(stderr, "Rebooted from AGB, disabling EmuNAND.\n");

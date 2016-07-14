@@ -92,7 +92,7 @@
                                                     // paths.
 
 #define PATH_BOOTLOG PATH_DATA "/boot.log"
-#define PATH_LOADERLOG PATH_DATA "/boot.log"
+#define PATH_LOADERLOG PATH_DATA "/loader.log"
 
 #define PATCH_FLAG_REQUIRE (1 << 0) // Force enable patch unless 'Unsafe Options' is checked.
 #define PATCH_FLAG_DEVMODE (1 << 1) // Require 'Developer Options' to be checked.

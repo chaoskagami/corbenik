@@ -44,9 +44,6 @@ main(int argc, char** argv)
 
     config.options[OPTION_SAVE_LOGS] = 1;
 
-    extract_slot0x05keyY();
-    extract_slot0x3DkeyY();
-
     if (CFG_BOOTENV == 7) {
         fprintf(stderr, "Rebooted from AGB, disabling EmuNAND.\n");
         config.options[OPTION_EMUNAND] = 0;

@@ -5,9 +5,12 @@
 
 #include <ctr9/io.h>
 #include <ctr9/aes.h>
+#include <ctr9/sha.h>
 
 #include "../common.h"
 #include <ctr9/io.h>
+
+#include "decryptor.h"
 
 firm_h *firm_loc = (firm_h *)FCRAM_FIRM_LOC;
 uint32_t firm_size = FCRAM_SPACING;
@@ -30,41 +33,6 @@ firm_h* firm1 = NULL;
 static int update_96_keys = 0;
 
 static volatile uint32_t *const a11_entry = (volatile uint32_t *)0x1FFFFFF8;
-
-typedef enum {
-    NCCHTYPE_EXHEADER = 1,
-    NCCHTYPE_EXEFS = 2,
-    NCCHTYPE_ROMFS = 3,
-} ctr_ncchtypes;
-
-void
-ncch_getctr(const ncch_h *ncch, uint8_t *ctr, uint8_t type)
-{
-    uint32_t version = ncch->version;
-    const uint8_t *partitionID = ncch->partitionID;
-    int i;
-
-    for (i = 0; i < 16; i++)
-        ctr[i] = 0x00;
-
-    if (version == 2 || version == 0) {
-        for (i = 0; i < 8; i++)
-            ctr[i] = partitionID[7 - i]; // Convert to big endian & normal input
-        ctr[8] = type;
-    } else if (version == 1) {
-        int x = 0;
-        if (type == NCCHTYPE_EXHEADER)
-            x = MEDIA_UNITS;
-        else if (type == NCCHTYPE_EXEFS)
-            x = ncch->exeFSOffset * MEDIA_UNITS;
-        else if (type == NCCHTYPE_ROMFS)
-            x = ncch->exeFSOffset * MEDIA_UNITS;
-        for (i = 0; i < 8; i++)
-            ctr[i] = partitionID[i];
-        for (i = 0; i < 4; i++)
-            ctr[i + 12] = (x >> ((3 - i) * 8)) & 0xFF;
-    }
-}
 
 // Fwd decl
 int decrypt_arm9bin(arm9bin_h *header, uint64_t firm_title, uint8_t version);
@@ -92,13 +60,13 @@ void dump_firm(firm_h** buffer, uint8_t index) {
     fprintf(stderr, "  Read FIRM%u off NAND.\n", index);
 
     sdmmc_get_cid(1, (uint32_t*)cid);
-    sha(sha_t, cid, 0x10, SHA_256_MODE);
+    sha256sum(sha_t, cid, 0x10);
     memcpy(ctr, sha_t, 0x10);
-    aes_advctr(ctr, firm_offset / AES_BLOCK_SIZE, AES_INPUT_BE | AES_INPUT_NORMAL);
+    add_ctr(ctr, firm_offset / AES_BLOCK_SIZE);
 
-    aes_use_keyslot(0x06);
-    aes_setiv(ctr, AES_INPUT_BE|AES_INPUT_NORMAL);
-    aes((uint8_t*)firm, (uint8_t*)firm, firm_size / AES_BLOCK_SIZE, ctr, AES_CTR_MODE, AES_INPUT_BE | AES_INPUT_NORMAL);
+    use_aeskey(0x06);
+    set_ctr(ctr);
+    aes(firm, firm, firm_size / AES_BLOCK_SIZE, ctr, AES_CTR_MODE);
 
     fprintf(stderr, "  AES decrypted FIRM%u.\n", index);
 
@@ -142,7 +110,7 @@ uint8_t* key_search(uint8_t* mem, uint32_t size, uint8_t* sha256, uint8_t byte) 
         // Is candidate?
         if (mem[j] == byte) {
             // Yes. Check hash.
-            sha(hash, &mem[j], 0x10, SHA_256_MODE);
+            sha256sum(hash, &mem[j], 0x10);
 
             if(!memcmp(sha256, hash, 0x20)) {
                 return &mem[j];
@@ -174,7 +142,7 @@ void extract_slot0x05keyY() {
 
     memcpy(mem, key_data, 16);
 
-    aes_setkey(0x05, mem, AES_KEYY, AES_INPUT_BE | AES_INPUT_NORMAL);
+    setup_aeskeyY(0x05, mem);
 }
 
 void extract_slot0x3DkeyY() {
@@ -198,7 +166,7 @@ void extract_slot0x3DkeyY() {
 
     memcpy(mem, key_data, 16);
 
-    aes_setkey(0x3D, mem, AES_KEYY, AES_INPUT_BE | AES_INPUT_NORMAL);
+    setup_aeskeyY(0x3D, mem);
 }
 
 void* find_section_key() {
@@ -223,32 +191,32 @@ void* find_section_key() {
 int
 decrypt_cetk_key(void *key, const void *cetk)
 {
-    static int got_cetk = 0;
-    uint8_t iv[AES_BLOCK_SIZE] = { 0 };
-    uint32_t sigtype = __builtin_bswap32(*(uint32_t *)cetk);
+	static int got_cetk = 0;
+	uint8_t iv[AES_BLOCK_SIZE] = { 0 };
+	uint32_t sigtype = __builtin_bswap32(*(uint32_t *)cetk);
 
-    if (sigtype != SIG_TYPE_RSA2048_SHA256)
-        return 1;
+	if (sigtype != SIG_TYPE_RSA2048_SHA256)
+		return 1;
 
-    ticket_h *ticket = (ticket_h *)((uint8_t*)cetk + sizeof(sigtype) + 0x13C);
+	ticket_h *ticket = (ticket_h *)(cetk + sizeof(sigtype) + 0x13C);
+	if (ticket->ticketCommonKeyYIndex != 1)
+		return 1;
 
-    if (ticket->ticketCommonKeyYIndex != 1)
-        return 1;
+	if (got_cetk == 0) {
+		extract_slot0x3DkeyY();
+		got_cetk = 1;
+	}
 
-    if (got_cetk == 0) {
-        extract_slot0x3DkeyY();
-        got_cetk = 1;
-    }
+	use_aeskey(0x3D);
 
-    use_aeskey(0x3D);
-    memcpy(iv, ticket->titleID, sizeof(ticket->titleID));
+	memcpy(iv, ticket->titleID, sizeof(ticket->titleID));
+	memcpy(key, ticket->titleKey, sizeof(ticket->titleKey));
 
-    memcpy(key, ticket->titleKey, sizeof(ticket->titleKey));
-    aes(key, key, 1, iv, AES_CBC_DECRYPT_MODE, AES_INPUT_BE | AES_INPUT_NORMAL);
+	aes(key, key, 1, iv, AES_CBC_DECRYPT_MODE);
 
-    fprintf(stderr, "  Extracted titlekey from cetk.\n");
+	fprintf(stderr, " Extracted titlekey from cetk.\n");
 
-    return 0;
+	return 0;
 }
 
 int
@@ -259,9 +227,9 @@ decrypt_firm_title(firm_h *dest, ncch_h *ncch, uint32_t *size, void *key)
     uint8_t exefs_iv[16] = { 0 };
 
     fprintf(stderr, "  Decrypting FIRM container\n");
-    aes_setkey(0x16, key, AES_KEYNORMAL, AES_INPUT_BE | AES_INPUT_NORMAL);
-    aes_use_keyslot(0x16);
-    aes(ncch, ncch, *size / AES_BLOCK_SIZE, firm_iv, AES_CBC_DECRYPT_MODE, AES_INPUT_BE | AES_INPUT_NORMAL);
+    setup_aeskey(0x16, key);
+    use_aeskey(0x16);
+    aes(ncch, ncch, *size / AES_BLOCK_SIZE, firm_iv, AES_CBC_DECRYPT_MODE);
 
     if (ncch->magic != NCCH_MAGIC)
         return 1;
@@ -274,9 +242,9 @@ decrypt_firm_title(firm_h *dest, ncch_h *ncch, uint32_t *size, void *key)
     uint32_t exefs_size = ncch->exeFSSize * MEDIA_UNITS;
 
     fprintf(stderr, "  Decrypting ExeFs for FIRM\n");
-    aes_setkey(0x2C, exefs_key, AES_KEYY, AES_INPUT_BE | AES_INPUT_NORMAL);
-    aes_use_keyslot(0x2C);
-    aes(exefs, exefs, exefs_size / AES_BLOCK_SIZE, exefs_iv, AES_CTR_MODE, AES_INPUT_BE | AES_INPUT_NORMAL);
+    setup_aeskeyY(0x2C, exefs_key);
+    use_aeskey(0x2C);
+    aes(exefs, exefs, exefs_size / AES_BLOCK_SIZE, exefs_iv, AES_CTR_MODE);
 
     // Get the decrypted FIRM
     // We assume the firm.bin is always the first file
@@ -304,7 +272,7 @@ decrypt_arm9bin(arm9bin_h *header, uint64_t firm_title, uint8_t version)
         slot = 0x16;
 
         use_aeskey(0x11);
-        aes(decrypted_keyx, header->slot0x16keyX, 1, NULL, AES_ECB_DECRYPT_MODE, 0);
+        aes(decrypted_keyx, header->slot0x16keyX, 1, NULL, AES_ECB_DECRYPT_MODE);
         setup_aeskeyX(slot, decrypted_keyx);
     }
 
@@ -315,7 +283,7 @@ decrypt_arm9bin(arm9bin_h *header, uint64_t firm_title, uint8_t version)
     int size = atoi(header->size);
 
     use_aeskey(slot);
-    aes(arm9bin, arm9bin, size / AES_BLOCK_SIZE, header->ctr, AES_CTR_MODE, AES_INPUT_BE | AES_INPUT_NORMAL);
+    aes(arm9bin, arm9bin, size / AES_BLOCK_SIZE, header->ctr, AES_CTR_MODE);
 
     if (firm_title == NATIVE_FIRM_TITLEID)
         return *(uint32_t *)arm9bin != ARM9BIN_MAGIC;
@@ -477,7 +445,7 @@ boot_firm()
         use_aeskey(0x11);
         uint8_t keyx[AES_BLOCK_SIZE];
         for (int slot = 0x19; slot < 0x20; slot++) {
-            aes(keyx, keydata, 1, NULL, AES_ECB_DECRYPT_MODE, 0);
+            aes(keyx, keydata, 1, NULL, AES_ECB_DECRYPT_MODE);
             setup_aeskeyX(slot, keyx);
             *(uint8_t *)(keydata + 0xF) += 1;
         }

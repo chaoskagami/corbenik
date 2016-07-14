@@ -80,7 +80,7 @@ void clear_disp(uint8_t *screen);
 // Formats are also supported (but are subject to replacement)
 //  %p - unsigned char, changes color of text (will be replaced with ANSI codes
 //  eventually)
-void fprintf(void *channel, const char *format, ...);
+void fprintf(void *channel, const char *format, ...) __attribute__ ((format (printf, 2, 3)));
 
 void vfprintf(void *channel, const char *format, va_list ap);
 

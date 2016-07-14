@@ -6,10 +6,10 @@
 #include "memory.h"
 #include "../config.h"
 
-// ctr_nand_interface nand_io;
 // ctr_nand_crypto_interface ctr_io;
 // ctr_nand_crypto_interface twl_io;
-static ctr_sd_interface sd_io;
+static ctr_sd_interface   sd_io;
+static ctr_nand_interface nand_io;
 static FATFS fs;
 static int set_up_fs = 0;
 
@@ -65,7 +65,7 @@ rrmdir(char *name)
 int
 fmount(void)
 {
-    if(!set_up_fs && ctr_fatfs_initialize(NULL, NULL, NULL, &sd_io))
+    if(!set_up_fs && ctr_fatfs_initialize(&nand_io, NULL, NULL, &sd_io))
         return 1;
 
     set_up_fs = 1;

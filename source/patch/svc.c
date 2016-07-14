@@ -33,8 +33,8 @@ PATCH(services)
         FILE *data = fopen(PATH_BACKDOOR, "r");
         uint32_t size = fsize(data);
 
-        fprintf(stderr, "Svc: backdoor is %d bytes\n", size);
-        fprintf(stderr, "Svc: Read code to %x\n", (uint32_t)svc_tab_open);
+        fprintf(stderr, "Svc: backdoor is %lu bytes\n", size);
+        fprintf(stderr, "Svc: Read code to %lx\n", (uint32_t)svc_tab_open);
 
         fread(svc_tab_open, 1, size, data);
 

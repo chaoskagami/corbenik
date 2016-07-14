@@ -42,6 +42,8 @@ main(int argc, char** argv)
 
     load_config(); // Load configuration.
 
+    config.options[OPTION_SAVE_LOGS] = 1;
+
     if (CFG_BOOTENV == 7) {
         fprintf(stderr, "Rebooted from AGB, disabling EmuNAND.\n");
         config.options[OPTION_EMUNAND] = 0;

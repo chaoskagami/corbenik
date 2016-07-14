@@ -42,6 +42,8 @@ main(int argc, char** argv)
 
     load_config(); // Load configuration.
 
+    config.options[OPTION_SAVE_LOGS] = 1;
+
     extract_slot0x05keyY();
     extract_slot0x3DkeyY();
 

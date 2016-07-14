@@ -49,7 +49,7 @@ verify_emunand(uint32_t index, uint32_t *off, uint32_t *head)
         *off = offset + 1;
         *head = offset + 1;
 
-        fprintf(stderr, "emunand: found NCSD magic for %u\n", index);
+        fprintf(stderr, "emunand: found NCSD magic for %lu\n", index);
         fprintf(stderr, "emunand: layout is normal\n");
     }
     // Check for GW EmuNAND on SD
@@ -57,7 +57,7 @@ verify_emunand(uint32_t index, uint32_t *off, uint32_t *head)
         *off = offset;
         *head = offset + nandSize;
 
-        fprintf(stderr, "emunand: found NCSD magic for %u\n", index);
+        fprintf(stderr, "emunand: found NCSD magic for %lu\n", index);
         fprintf(stderr, "emunand: layout is gateway\n");
     } else {
         abort("emunand: selected NAND image is not valid.\n");
@@ -73,8 +73,8 @@ getEmuCode(uint8_t *pos, uint32_t size)
     uint8_t *ret = memfind(pos + 0x13500, size - 0x13500, pattern, 6) + 0x455;
 
     if (ret) {
-        fprintf(stderr, "emunand: free space @ %x\n", ret);
-        fprintf(stderr, "emunand: size is %u bytes\n", (uint8_t *)ret - pos);
+        fprintf(stderr, "emunand: free space @ %lx\n", (uint32_t)ret);
+        fprintf(stderr, "emunand: size is %lu bytes\n", (uint32_t) (ret - pos));
     }
 
     return ret;
@@ -89,7 +89,7 @@ getSDMMC(uint8_t *pos, uint32_t size)
 
     uint32_t ret = *(uint32_t *)(off + 9) + *(uint32_t *)(off + 0xD);
 
-    fprintf(stderr, "emunand: SDMMC code @ %x\n", ret);
+    fprintf(stderr, "emunand: SDMMC code @ %lx\n", ret);
 
     return ret;
 }
@@ -116,8 +116,8 @@ patchNANDRW(uint8_t *pos, uint32_t size, uint32_t branchOffset)
     writeOffset[1] = nandRedir[1];
     ((uint32_t *)writeOffset)[1] = branchOffset;
 
-    fprintf(stderr, "emunand: write @ %x\n", writeOffset);
-    fprintf(stderr, "emunand: read @ %x\n", readOffset);
+    fprintf(stderr, "emunand: write @ %lx\n", (uint32_t)writeOffset);
+    fprintf(stderr, "emunand: read @ %lx\n", (uint32_t)readOffset);
 }
 
 static void
@@ -134,7 +134,7 @@ patchMPU(uint8_t *pos, uint32_t size)
     off[6] = mpuPatch[1];
     off[9] = mpuPatch[2];
 
-    fprintf(stderr, "emunand: mpu @ %x\n", off);
+    fprintf(stderr, "emunand: mpu @ %lx\n", (uint32_t)off);
 }
 
 void
@@ -174,8 +174,8 @@ patch_emunand(uint32_t index)
 
     verify_emunand(index, pos_offset, pos_head);
 
-    fprintf(stderr, "emunand: nand is on sector %u\n", *pos_offset);
-    fprintf(stderr, "emunand: head is on sector %u\n", *pos_head);
+    fprintf(stderr, "emunand: nand is on sector %lu\n", *pos_offset);
+    fprintf(stderr, "emunand: head is on sector %lu\n", *pos_head);
 
     // Add emuNAND hooks
     patchNANDRW(process9Offset, process9Size, branchOffset);

@@ -4,7 +4,6 @@
 #include <stddef.h>
 
 #include "../common.h"
-#include "../misc/sha256.h"
 #include "../fatfs/sdmmc.h"
 
 firm_h *firm_loc = (firm_h *)FCRAM_FIRM_LOC;
@@ -29,6 +28,59 @@ static int update_96_keys = 0;
 
 static volatile uint32_t *const a11_entry = (volatile uint32_t *)0x1FFFFFF8;
 
+// Fwd decl
+int decrypt_arm9bin(arm9bin_h *header, uint64_t firm_title, uint8_t version);
+
+#define SECTOR_SIZE 0x200
+
+// 0x0B130000 = start of FIRM0 partition, 0x400000 = size of FIRM partition (4MB)
+void dump_firm(firm_h** buffer, uint8_t index) {
+    if (*buffer != NULL) return;
+
+    uint32_t firm_offset = 0x0B130000 + (index % 2) * 0x400000,
+             firm_size   = 0x00100000; // 1MB, because
+
+    buffer[0] = static_allocate(firm_size);
+
+    uint8_t ctr[0x10],
+            cid[0x10],
+            sha_t[0x20];
+
+    firm_h* firm = buffer[0];
+
+    if (sdmmc_nand_readsectors(firm_offset / SECTOR_SIZE, firm_size / SECTOR_SIZE, (uint8_t*)firm))
+        abort("Failed to read NAND!\n");
+
+    fprintf(stderr, "Read FIRM%u off NAND.\n", index);
+
+    sdmmc_get_cid(1, (uint32_t*)cid);
+    sha(sha_t, cid, 0x10, SHA_256_MODE);
+    memcpy(ctr, sha_t, 0x10);
+    aes_advctr(ctr, firm_offset / AES_BLOCK_SIZE, AES_INPUT_BE | AES_INPUT_NORMAL);
+
+    aes_use_keyslot(0x06);
+    aes_setiv(ctr, AES_INPUT_BE|AES_INPUT_NORMAL);
+    aes((uint8_t*)firm, (uint8_t*)firm, firm_size / AES_BLOCK_SIZE, ctr, AES_CTR_MODE, AES_INPUT_BE | AES_INPUT_NORMAL);
+
+    fprintf(stderr, "AES decrypted FIRM%u.\n", index);
+
+    if (memcmp((char*) & firm->magic, "FIRM", 4))
+        abort("Decryption failed on FIRM.\n");
+
+    fprintf(stderr, "Magic is intact on FIRM%u.\n", index);
+
+    uint8_t detver = 0;
+
+    if(index == 1)
+        detver = 0x10;
+
+    if(decrypt_arm9bin((arm9bin_h*)((uint8_t*)firm + firm->section[2].offset), NATIVE_FIRM_TITLEID, detver)) {
+        abort("\rFailed to decrypt FIRM%u arm9loader.\n", index);
+    }
+
+    fprintf(stderr, "\rDecrypted FIRM%u arm9loader.\n", index);
+}
+
 void
 slot0x11key96_init()
 {
@@ -42,92 +94,21 @@ slot0x11key96_init()
         // Tell boot_firm it needs to regenerate the keys.
         update_96_keys = 1;
     }
-    // If we can't read the key, we assume it's not needed, and the firmware is
-    // the right version.
-    // Otherwise, we make sure the error message for decrypting arm9bin mentions
-    // this.
-}
-
-// Fwd decl
-int decrypt_arm9bin(arm9bin_h *header, uint64_t firm_title, uint8_t version);
-
-// The following two functions are loosely based on code from @Wolfvak's KGB CFW.
-void extract_firms() {
-    // 0x0B130000 = start of FIRM0 partition, 0x400000 = size of FIRM partition (4MB)
-    uint32_t firm0_offset = 0x0B530000, // FIRM1 (AKA Safe Mode FIRM)
-             firm1_offset = 0x0B530000, // FIRM1 (AKA Safe Mode FIRM)
-             firm_size   = 0x00100000; // 1MB, because
-
-    firm0  = (firm_h*)static_allocate(firm_size);
-    firm1  = (firm_h*)static_allocate(firm_size);
-
-    uint8_t ctr[0x10] = {0},
-            cid[0x10] = {0},
-            sha[0x20] = {0};
-
-    if (sdmmc_nand_readsectors(firm0_offset / 0x200, firm_size / 0x200, (uint8_t*)firm0)) {
-        abort("Failed to read FIRM1 off NAND!\n");
-    }
-
-    if (sdmmc_nand_readsectors(firm1_offset / 0x200, firm_size / 0x200, (uint8_t*)firm1)) {
-        abort("Failed to read FIRM1 off NAND!\n");
-    }
-
-    // Common.
-    sdmmc_get_cid(1, (uint32_t*)cid);
-    Sha256Data(cid, 0x10, sha);
-    memcpy(ctr, sha, 0x10);
-
-    // FIRM0
-    aes_advctr(ctr, firm0_offset / AES_BLOCK_SIZE, AES_INPUT_BE | AES_INPUT_NORMAL);
-    aes_use_keyslot(0x06);
-    aes_setiv(ctr, AES_INPUT_BE | AES_INPUT_NORMAL);
-    aes((uint8_t*)firm0, (uint8_t*)firm0, firm_size / AES_BLOCK_SIZE, ctr, AES_CTR_MODE, AES_INPUT_BE | AES_INPUT_NORMAL);
-
-    // FIXME: First off, don't hardcode the section index. Second, the version.
-    if(decrypt_arm9bin((arm9bin_h*)((uint8_t*)firm0 + firm0->section[2].offset), firm0->section[2].size, 0x10)) {
-        abort("Failed to decrypt FIRM0 arm9loader.\n");
-    }
-
-    // We don't check magic on FIRM0 since it's like, you know, fucked up. Deliberately.
-
-    // Common.
-    sdmmc_get_cid(1, (uint32_t*)cid);
-    Sha256Data(cid, 0x10, sha);
-    memcpy(ctr, sha, 0x10);
-
-    // FIRM1
-    aes_advctr(ctr, firm1_offset / AES_BLOCK_SIZE, AES_INPUT_BE | AES_INPUT_NORMAL);
-    aes_use_keyslot(0x06);
-    aes_setiv(ctr, AES_INPUT_BE | AES_INPUT_NORMAL);
-    aes((uint8_t*)firm1, (uint8_t*)firm1, firm_size / AES_BLOCK_SIZE, ctr, AES_CTR_MODE, AES_INPUT_BE | AES_INPUT_NORMAL);
-
-    if (memcmp(& firm1->magic, "FIRM", 4)) {
-        abort("FIRM1 magic is missing!\n");
-    }
-
-    // FIXME: First off, don't hardcode the section index. Second, the version.
-    if(decrypt_arm9bin((arm9bin_h*)((uint8_t*)firm1 + firm1->section[2].offset), firm1->section[2].size, 0x10)) {
-        abort("Failed to decrypt FIRM1 arm9loader.\n");
-    }
-
-    fprintf(stderr, "\rExtracted FIRM off NAND.\n");
-    // FIXME - "\r": Workaround because decrypt_arm9bin wasn't intended to be used outside of normal FIRM decryption.
-    //               Causes output when we don't want that here.
 }
 
 uint8_t* key_search(uint8_t* mem, uint32_t size, uint8_t* sha256, uint8_t byte) {
     uint8_t hash[0x20] = {0};
 
-    // Search ARM9 for NAND key.
-    for(; size > 0; size -= 4) {
+    // Search ARM9 for key.
+    for(uint32_t j = 0; j < size; j ++) {
         // Is candidate?
-        if (mem[size] == byte) {
+        if (mem[j] == byte) {
             // Yes. Check hash.
-            Sha256Data(&mem[size], 16, hash);
+            sha(hash, &mem[j], 0x10, SHA_256_MODE);
 
-            if(memcmp(sha256, hash, 0x20))
-                return &mem[size];
+            if(!memcmp(sha256, hash, 0x20)) {
+                return &mem[j];
+            }
         }
     }
 
@@ -135,46 +116,75 @@ uint8_t* key_search(uint8_t* mem, uint32_t size, uint8_t* sha256, uint8_t byte) 
 }
 
 void extract_slot0x05keyY() {
-    if (firm0 == NULL || firm1 == NULL)
-        extract_firms();
+    if (firm1 == NULL)
+        dump_firm(&firm1, 1);
 
     uint8_t sha256[] = {0x98, 0x24, 0x27, 0x14, 0x22, 0xB0, 0x6B, 0xF2, 0x10, 0x96, 0x9C, 0x36, 0x42, 0x53, 0x7C, 0x86,
                         0x62, 0x22, 0x5C, 0xFD, 0x6F, 0xAE, 0x9B, 0x0A, 0x85, 0xA5, 0xCE, 0x21, 0xAA, 0xB6, 0xC8, 0x4D};
 
     uint8_t* key_loc     = (uint8_t*)firm1 + firm1->section[2].offset;
-    uint32_t search_size = firm1->section[2].size - 16;
+    uint32_t search_size = firm1->section[2].size;
 
-    uint8_t* key_data = key_search(key_loc, search_size, sha256, 0xDD);
+    uint8_t mem[16] __attribute__((aligned(4))) = {0};
+
+    uint8_t* key_data = key_search(key_loc, search_size, sha256, 0x4D);
 
     if (!key_data)
         abort("0x05 KeyY not found!\n");
 
-    fprintf(stderr, "0x05 KeyY at %x in FIRM1\n", (uint32_t)key_data - (uint32_t)key_loc);
+    fprintf(stderr, "0x05 KeyY at %lx in FIRM1\n", (uint32_t)key_data - (uint32_t)key_loc);
 
+    memcpy(mem, key_data, 16);
+
+    aes_setkey(0x05, mem, AES_KEYY, AES_INPUT_BE | AES_INPUT_NORMAL);
 }
 
 void extract_slot0x3DkeyY() {
-    if (firm0 == NULL || firm1 == NULL)
-        extract_firms();
+    if (firm0 == NULL)
+        dump_firm(&firm0, 0);
 
-    uint8_t sha256[] = {0x0a, 0x1c, 0x7b, 0x55, 0x86, 0x05, 0x89, 0xb0, 0xed, 0xd8, 0x87, 0x4b, 0x50, 0x55, 0xe3, 0x47,
-                        0x16, 0xa2, 0xcd, 0xe2, 0x5b, 0xad, 0x12, 0x48, 0xbb, 0xbb, 0xee, 0xd1, 0xb3, 0x40, 0xb1, 0xb8};
+    uint8_t sha256[] = {0x21, 0x12, 0xf4, 0x50, 0x78, 0x6d, 0xce, 0x64, 0x39, 0xfd, 0xb8, 0x71, 0x14, 0x74, 0x41, 0xf4,
+                        0x69, 0xb6, 0xc4, 0x70, 0xa4, 0xb1, 0x5f, 0x7d, 0xfd, 0xe8, 0xcc, 0xe4, 0xc4, 0x62, 0x82, 0x5b};
 
     uint8_t* key_loc     = (uint8_t*)firm0 + firm0->section[2].offset;
-    uint32_t search_size = firm0->section[2].size - 16;
+    uint32_t search_size = firm0->section[2].size;
 
-    uint8_t* key_data = key_search(key_loc, search_size, sha256, 0xD0);
+    uint8_t mem[16] __attribute__((aligned(4))) = {0};
+
+    uint8_t* key_data = key_search(key_loc, search_size, sha256, 0x0C);
 
     if (!key_data)
-        abort("0x3D KeyY not found!\n");
+        abort("0x3D KeyY #1 not found!\n");
 
-    fprintf(stderr, "0x3D KeyY at %x in FIRM0\n", (uint32_t)key_data - (uint32_t)key_loc);
+    fprintf(stderr, "0x3D KeyY #1 at %lx in FIRM0\n", (uint32_t)key_data - (uint32_t)key_loc);
+
+    memcpy(mem, key_data, 16);
+
+    aes_setkey(0x3D, mem, AES_KEYY, AES_INPUT_BE | AES_INPUT_NORMAL);
+}
+
+void* find_section_key() {
+    // The key will be dword-aligned (I think? Verify this. May need new NFIRM to check assumption. Go, Nintendo!)
+
+    // The hash of the key. Can't give the key itself out, obviously.
+    uint8_t sha256[] = {0xb9, 0x4d, 0xb1, 0xb1, 0xc3, 0xe0, 0x11, 0x08, 0x9c, 0x19, 0x46, 0x06, 0x4a, 0xbc, 0x40, 0x2a,
+                        0x7c, 0x66, 0xf4, 0x4a, 0x74, 0x6f, 0x71, 0x50, 0x32, 0xfd, 0xff, 0x03, 0x74, 0xd7, 0x45, 0x2c};
+    uint8_t* key_loc = (uint8_t*)firm_loc + firm_loc->section[2].offset;
+    uint32_t search_size = firm_loc->section[2].size;
+
+    uint8_t* key_data = key_search(key_loc, search_size, sha256, 0xDD);
+
+    if (!key_data)
+        abort("FIRM Section key not found!\n");
+
+    fprintf(stderr, "FIRM Section key at %lx in FIRM\n", (uint32_t)key_data - (uint32_t)key_loc);
+
+    return key_data;
 }
 
 int
 decrypt_cetk_key(void *key, const void *cetk)
 {
-    static int common_key_y_init = 0;
     uint8_t iv[AES_BLOCK_SIZE] = { 0 };
     uint32_t sigtype = __builtin_bswap32(*(uint32_t *)cetk);
 
@@ -185,27 +195,6 @@ decrypt_cetk_key(void *key, const void *cetk)
 
     if (ticket->ticketCommonKeyYIndex != 1)
         return 1;
-
-    if (!common_key_y_init) {
-        uint8_t common_key_y[AES_BLOCK_SIZE] = { 0 };
-        uint8_t *p9_base = (uint8_t *)0x08028000;
-        uint8_t *i;
-        for (i = p9_base + 0x70000 - AES_BLOCK_SIZE; i >= p9_base; i--) {
-            if (i[0] == 0xD0 && i[4] == 0x9C && i[8] == 0x32 && i[12] == 0x23) {
-                // At i, there's 7 keys with 4 bytes padding between them.
-                // We only need the 2nd.
-                memcpy(common_key_y, i + AES_BLOCK_SIZE + 4, sizeof(common_key_y));
-                fprintf(stderr, "y");
-                break;
-            }
-        }
-
-        if (i < p9_base)
-            return 1;
-
-        aes_setkey(0x3D, common_key_y, AES_KEYY, AES_INPUT_BE | AES_INPUT_NORMAL);
-        common_key_y_init = 1;
-    }
 
     aes_use_keyslot(0x3D);
     memcpy(iv, ticket->titleID, sizeof(ticket->titleID));
@@ -264,8 +253,6 @@ decrypt_arm9bin(arm9bin_h *header, uint64_t firm_title, uint8_t version)
 {
     uint8_t slot = 0x15;
 
-    fprintf(BOTTOM_SCREEN, "9");
-
     if (firm_title == NATIVE_FIRM_TITLEID && version > 0x0F) {
         uint8_t decrypted_keyx[AES_BLOCK_SIZE];
 
@@ -288,10 +275,11 @@ decrypt_arm9bin(arm9bin_h *header, uint64_t firm_title, uint8_t version)
 
     if (firm_title == NATIVE_FIRM_TITLEID)
         return *(uint32_t *)arm9bin != ARM9BIN_MAGIC;
+
     else if (firm_title == AGB_FIRM_TITLEID || firm_title == TWL_FIRM_TITLEID)
         return *(uint32_t *)arm9bin != LGY_ARM9BIN_MAGIC;
-    else
-        return 0;
+
+    return 1;
 }
 
 int
@@ -425,34 +413,6 @@ void __attribute__((naked)) arm11_preboot_halt()
 }
 
 extern void wait();
-
-void* find_section_key() {
-    // The key will be dword-aligned (I think? Verify this. May need new NFIRM to check assumption. Go, Nintendo!)
-    uint8_t* key_loc = (uint8_t*)firm_loc + firm_loc->section[2].offset - 16;
-    uint32_t search_size = firm_loc->section[2].size - 16;
-
-    key_loc = (uint8_t*)((uint32_t)key_loc & 0xFFFFFFF8); // Align to 4bytes.
-
-    // The hash of the key. Can't give the key itself out, obviously.
-    uint32_t sha256boot[32] = {0xb9, 0x4d, 0xb1, 0xb1, 0xc3, 0xe0, 0x11, 0x08,
-                               0x9c, 0x19, 0x46, 0x06, 0x4a, 0xbc, 0x40, 0x2a,
-                               0x7c, 0x66, 0xf4, 0x4a, 0x74, 0x6f, 0x71, 0x50,
-                               0x32, 0xfd, 0xff, 0x03, 0x74, 0xd7, 0x45, 0x2c};
-    uint8_t sha256check[32] = {0};
-
-    for(; search_size > 0; search_size -= 4) {
-        // Is candidate?
-        if (key_loc[search_size] == 0xDD) {
-            // Yes. Check hash.
-            Sha256Data(&key_loc[search_size], 16, sha256check);
-            if(memcmp(sha256boot, sha256check, 32)) {
-                fprintf(stderr, "Key at %x\n", (uint32_t)(&key_loc[search_size]) - (uint32_t)key_loc);
-                return &key_loc[search_size];
-            }
-        }
-    }
-    return NULL;
-}
 
 void
 boot_firm()

@@ -64,7 +64,7 @@
 struct mode
 {
     uint8_t *memory;
-    size_t size;
+    uint32_t size;
 };
 struct mode modes[21];
 int init_bytecode = 0;
@@ -155,18 +155,18 @@ exec_bytecode(uint8_t *bytecode, uint32_t len, uint8_t* stack, uint32_t stack_si
 
     memset(stack, 0, stack_size); // Clear stack.
 
-    _UNUSED size_t top = stack_size - 1;
+    _UNUSED uint32_t top = stack_size - 1;
 
 #ifdef LOADER
-    size_t set_mode = 18;
+    uint32_t set_mode = 18;
 #else
-    size_t set_mode = 3;
+    uint32_t set_mode = 3;
 #endif
     struct mode *current_mode = &modes[set_mode];
 
-    size_t offset = 0, new_offset = 0;
+    uint32_t offset = 0, new_offset = 0;
 
-    size_t i;
+    uint32_t i;
 
     int eq = 0, gt = 0, lt = 0, found = 0; // Flags.
 
@@ -185,7 +185,7 @@ exec_bytecode(uint8_t *bytecode, uint32_t len, uint8_t* stack, uint32_t stack_si
 #ifdef LOADER
                     log("rel\n");
 #else
-                    fprintf(stderr, "rel %u\n", *(code+1));
+                    fprintf(stderr, "rel %hhu\n", code[1]);
 #endif
                 }
                 code++;
@@ -198,7 +198,7 @@ exec_bytecode(uint8_t *bytecode, uint32_t len, uint8_t* stack, uint32_t stack_si
 #ifdef LOADER
                     log("find\n");
 #else
-                    fprintf(stderr, "find %u ...\n", code[1]);
+                    fprintf(stderr, "find %hhu ...\n", code[1]);
 #endif
                 }
                 found = 0;
@@ -215,7 +215,7 @@ exec_bytecode(uint8_t *bytecode, uint32_t len, uint8_t* stack, uint32_t stack_si
 #ifdef LOADER
                     log("back\n");
 #else
-                    fprintf(stderr, "back %u\n", *(code+1));
+                    fprintf(stderr, "back %hhu\n", code[1]);
 #endif
                 }
                 offset -= code[1];
@@ -226,7 +226,7 @@ exec_bytecode(uint8_t *bytecode, uint32_t len, uint8_t* stack, uint32_t stack_si
 #ifdef LOADER
                     log("fwd\n");
 #else
-                    fprintf(stderr, "fwd %u\n", *(code+1));
+                    fprintf(stderr, "fwd %u\n", code[1]);
 #endif
                 }
                 offset += code[1];
@@ -449,7 +449,7 @@ exec_bytecode(uint8_t *bytecode, uint32_t len, uint8_t* stack, uint32_t stack_si
 #ifdef LOADER
                     log("seek\n");
 #else
-                    fprintf(stderr, "seek %u\n", offset);
+                    fprintf(stderr, "seek %lu\n", offset);
 #endif
                 }
                 code += 4;
@@ -527,14 +527,21 @@ exec_bytecode(uint8_t *bytecode, uint32_t len, uint8_t* stack, uint32_t stack_si
 #ifndef LOADER
                 // Panic; not proper opcode.
                 fprintf(stderr, "Invalid opcode. State:\n"
-                                "  Relative:  %u\n"
-                                "    Actual:  %x:%u\n"
-                                "  Memory:    %x\n"
-                                "    Actual:  %x\n"
-                                "  Code Loc:  %x\n"
-                                "    Actual:  %x\n"
-                                "  Opcode:    %u\n",
-                        set_mode, current_mode->memory, current_mode->size, offset, current_mode->memory + offset, code - bytecode, code, *code);
+                                "  Relative:  %lu\n"
+                                "    Actual:  %lx:%lu\n"
+                                "  Memory:    %lx\n"
+                                "    Actual:  %lx\n"
+                                "  Code Loc:  %lx\n"
+                                "    Actual:  %lx\n"
+                                "  Opcode:    %hhu\n",
+                        (uint32_t)set_mode,
+                        (uint32_t)current_mode->memory,
+                        (uint32_t)current_mode->size,
+                        (uint32_t)offset,
+                        (uint32_t)(current_mode->memory + offset),
+                        (uint32_t)(code - bytecode),
+                        (uint32_t)code,
+                        *code);
 #endif
                 abort("Halting startup.\n");
                 break;
@@ -542,14 +549,17 @@ exec_bytecode(uint8_t *bytecode, uint32_t len, uint8_t* stack, uint32_t stack_si
 
         if (offset > current_mode->size) { // Went out of bounds. Error.
 #ifndef LOADER
-            fprintf(stderr, " -> %x", offset);
+            fprintf(stderr, " -> %lx", offset);
 #endif
             abort("seeked out of bounds\n");
         }
 
 #ifndef LOADER
         if (debug) {
-            fprintf(stderr, "l:%u g:%u e:%u f:%u m:%u o:0x%x\nc:0x%x m:0x%x n:%x\n", lt, gt, eq, found, set_mode, offset, code - bytecode, current_mode->memory + offset, code);
+            fprintf(stderr, "l:%d g:%d e:%d f:%d m:%lu o:0x%lx\nc:0x%lx m:0x%lx n:%lx\n",
+                lt, gt, eq, found,
+                set_mode,
+                (uint32_t)offset, (uint32_t)(code - bytecode), (uint32_t)(current_mode->memory + offset), (uint32_t)code);
             wait();
         }
 #endif
@@ -641,7 +651,7 @@ execb(char *filename, int build_cache)
         // File wasn't found. The user didn't enable anything.
         return 0;
     }
-    size_t len = fsize(f);
+    uint32_t len = fsize(f);
     fread((uint8_t *)FCRAM_PATCH_LOC, 1, len, f);
     fclose(f);
 

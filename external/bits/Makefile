@@ -1,6 +1,9 @@
 PATH := $(PATH):$(DEVKITARM)/bin
 
-all: backdoor.bin stub.bin emunand.bin reboot_hook.bin reboot_code.bin chain.bin
+SOURCES=$(wildcard *.s)
+OBJECTS=$(patsubst %.s, %.bin, $(SOURCES))
+
+all: $(OBJECTS)
 
 %.o: %.s
 	arm-none-eabi-as -o $@ $<

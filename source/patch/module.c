@@ -52,13 +52,13 @@ PATCH(modules)
                     }
                 }
 
-                fprintf(stderr, "module: Grow %d units\n", need_units);
+                fprintf(stderr, "module: Grow %lu units\n", need_units);
             }
 
             // Move the remaining modules closer
             else if (module->contentSize < sysmodule->contentSize) {
                 // NOTE - This doesn't change the sysmodule section size; it isn't needed to do so.
-                fprintf(stderr, "Module: Shrink %d units\n", sysmodule->contentSize - module->contentSize);
+                fprintf(stderr, "Module: Shrink %lu units\n", sysmodule->contentSize - module->contentSize);
                 int remaining_size =
                     sysmodule_section->size - (((uint32_t)sysmodule + sysmodule->contentSize * 0x200) - ((uint32_t)firm_loc + sysmodule_section->offset));
                 // Sysmodule section size - (End location of this sysmodule -
@@ -67,7 +67,7 @@ PATCH(modules)
                 // Move end of section to be adjacent
             }
 
-            fprintf(stderr, "Module: Injecting %llu\n", module->programID);
+            fprintf(stderr, "Module: Injecting module\n");
             // Copy the module into the firm
             memcpy(sysmodule, module, module->contentSize * 0x200);
         }

@@ -6,6 +6,7 @@
 #include "config.h"
 #include "screeninit.h"
 #include "std/abort.h"
+#include "interrupt.h"
 
 int is_n3ds = 0;
 int doing_autoboot = 0;
@@ -30,6 +31,8 @@ main(int argc, char** argv)
     clear_disp(BOTTOM_SCREEN);
 
     set_font(PATH_BITS "/termfont.bin");
+
+    install_interrupts(); // Get some free debug info.
 
     if (c) {
         // Failed to mount SD. Bomb out.

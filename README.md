@@ -165,6 +165,15 @@ If you think you've found a bug, please do the following first, to save me some 
  * Enable `Logging` and `Verbose` in `Options` then `Save Configuration` and retrieve the files `/corbenik/boot.log` and `/corbenik/loader.log` if they exist. I will want them. Do not report bugs without them, unless they are not created with the above enabled.
  * Please at least try to reproduce the bug from a clean installation.
 
+Contributions
+-------------------------
+
+If you have a feature or bugfix, PR or hit me on freenode/#Cakey. However, please note the following conditions:
+
+ * Do NOT base any code on Nintendo's SDK. Additionally, if you are under NDA, do not even bother to PR. I cannot accept tainted code. This is for my own legal safety (and sanity)
+ * Please attempt to obey coding standards. The .clang-format is a loose guide to this. I'll tell you if I need reformatting.
+ * Please ensure your changes are functional and don't break consoles, O3DS or N3DS. Do not assume anything about the environment.
+
 Credits
 -------------------------
 

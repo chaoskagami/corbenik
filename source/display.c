@@ -16,6 +16,13 @@ void show_help(char* help) {
     wait_key(1);
 }
 
+void accent_color(void* screen, int fg) {
+    char color[] = "\x1b[30m";
+    if (!fg) color[2] = '4';
+    color[3] = ("01234567")[config.options[OPTION_ACCENT_COLOR]];
+    fprintf(screen, "%s", color);
+}
+
 int
 show_menu(struct options_s *options, uint8_t *toggles)
 {
@@ -85,28 +92,35 @@ show_menu(struct options_s *options, uint8_t *toggles)
             set_cursor(TOP_SCREEN, 0, i-window_top+2);
 
             if (options[i].allowed == boolean_val || (is_n3ds && options[i].allowed == boolean_val_n3ds)) {
-                if (cursor_y == i)
-                    fprintf(TOP_SCREEN, "\x1b[32m>>\x1b[0m ");
-                else
+                if (cursor_y == i) {
+                    accent_color(TOP_SCREEN, 1);
+                    fprintf(TOP_SCREEN, ">>\x1b[0m ");
+                } else {
                     fprintf(TOP_SCREEN, "   ");
+                }
 
                 fprintf(TOP_SCREEN, "[%c]  %s", (toggles[options[i].index] ? '*' : ' '), options[i].name);
             } else if (options[i].allowed == call_fun || options[i].allowed == break_menu) {
-                if (cursor_y == i)
-                    fprintf(TOP_SCREEN, "\x1b[32m>>\x1b[0m ");
-                else
+                if (cursor_y == i) {
+                    accent_color(TOP_SCREEN, 1);
+                    fprintf(TOP_SCREEN, ">>\x1b[0m ");
+                } else {
                     fprintf(TOP_SCREEN, "   ");
+                }
 
                 fprintf(TOP_SCREEN, "%s", options[i].name);
             } else if (options[i].allowed == ranged_val) {
-                if (cursor_y == i)
-                    fprintf(TOP_SCREEN, "\x1b[32m>>\x1b[0m ");
-                else
+                if (cursor_y == i) {
+                    accent_color(TOP_SCREEN, 1);
+                    fprintf(TOP_SCREEN, ">>\x1b[0m ");
+                } else {
                     fprintf(TOP_SCREEN, "   ");
-
+                }
                 fprintf(TOP_SCREEN, "[%u]  %s  ", toggles[options[i].index], options[i].name);
             } else if (options[i].allowed == not_option) {
-                fprintf(TOP_SCREEN, "%s", options[i].name);
+                if (options[i].a == 1)
+                    accent_color(TOP_SCREEN, 1);
+                fprintf(TOP_SCREEN, "%s\x1b[0m", options[i].name);
             }
             ++i;
         }

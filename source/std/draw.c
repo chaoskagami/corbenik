@@ -356,9 +356,9 @@ draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, co
                         screen[pos + 2] = buffer_bg[pos + 2] - dim_factor;
                 }
             } else {
-                screen[pos]     = color_bg >> 16;
+                screen[pos]     = color_bg;
                 screen[pos + 1] = color_bg >> 8;
-                screen[pos + 2] = color_bg;
+                screen[pos + 2] = color_bg >> 16;
             }
 
             if (char_dat & 0x80) {
@@ -379,9 +379,9 @@ draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, co
                             screen[pos + 2] = buffer_bg[pos + 2] - dim_factor;
                     }
                 } else {
-                    screen[pos]     = color_fg >> 16;
+                    screen[pos]     = color_fg;
                     screen[pos + 1] = color_fg >> 8;
-                    screen[pos + 2] = color_fg;
+                    screen[pos + 2] = color_fg >> 16;
                 }
             }
 

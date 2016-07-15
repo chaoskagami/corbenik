@@ -46,15 +46,13 @@ main(int argc, char** argv)
 
     load_config(); // Load configuration.
 
-    config.options[OPTION_SAVE_LOGS] = 1;
-
     if (CFG_BOOTENV == 7) {
         fprintf(stderr, "Rebooted from AGB, disabling EmuNAND.\n");
         config.options[OPTION_EMUNAND] = 0;
     }
 
     // Autoboot. Non-standard code path.
-    if (config.options[OPTION_AUTOBOOT] && (ctr_hid_get_buttons() & CTR_HID_RT)) {
+    if (config.options[OPTION_AUTOBOOT] && !(ctr_hid_get_buttons() & CTR_HID_RT)) {
         if (config.options[OPTION_SILENCE])
             shut_up(); // This does exactly what it sounds like.
         doing_autoboot = 1;

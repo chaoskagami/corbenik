@@ -11,7 +11,7 @@ uint8_t *enable_list = (uint8_t *)FCRAM_PATCHLIST_LOC;
 
 static struct options_s options[] = {
     // Patches.
-    { 0, "\x1b[32;40mGeneral Options\x1b[0m", "", not_option, 0, 0 },
+    { 0, "General Options", "", not_option, 1, 0 },
 
     { OPTION_SVCS, "svcBackdoor Fixup", "Reinserts svcBackdoor on 11.0 NATIVE_FIRM. svcBackdoor allows executing arbitrary functions with ARM11 kernel permissions, and is required by some (poorly coded) applications.", boolean_val, 0, 0 },
 
@@ -25,10 +25,12 @@ static struct options_s options[] = {
     { OPTION_SILENCE, "  Silent mode", "Suppress all debug output during autoboot. You'll see the screen turn on and then off once.", boolean_val, 0, 0 },
     { OPTION_DIM_MODE, "Dim Background", "Experimental! Dims colors on lighter backgrounds to improve readability with text. You won't notice the change until scrolling or exiting the current menu due to the way rendering works.", boolean_val, 0, 0 },
 
+    { OPTION_ACCENT_COLOR, "Accent color", "Changes the accent color in menus.", ranged_val, 1, 7},
+
     // space
     { 0, "", "", not_option, 0, 0 },
     // Patches.
-    { 0, "\x1b[32;40mLoader Options\x1b[0m", "", not_option, 0, 0 },
+    { 0, "Loader Options", "", not_option, 1, 0 },
 
     { OPTION_LOADER, "Use Loader Replacement", "Replaces loader with one capable of extra features. You should enable this even if you don't plan to use loader-based patches to kill ASLR and the Ninjhax/OOThax checks.", boolean_val, 0, 0 },
     { OPTION_LOADER_CPU_L2, "  CPU - L2 cache", "Forces the system to use the L2 cache on all applications. If you have issues with crashes, try turning this off.", boolean_val_n3ds, 0, 0 },
@@ -45,7 +47,7 @@ static struct options_s options[] = {
     // space
     { 0, "", "", not_option, 0, 0 },
     // Patches.
-    { 0, "\x1b[32;40mDeveloper Options\x1b[0m", "", not_option, 0, 0 },
+    { 0, "Developer Options", "", not_option, 1, 0 },
 
     { OPTION_TRACE, "Step Through", "After each important step, [WAIT] will be shown and you'll need to press a key. Debug feature.", boolean_val, 0, 0 },
     { OPTION_OVERLY_VERBOSE, "Verbose", "Output more debug information than the average user needs.", boolean_val, 0, 0 },
@@ -61,12 +63,15 @@ static struct options_s options[] = {
 
 extern unsigned int font_w;
 
+void accent_color(void* screen, int fg);
+
 void
 header(char *append)
 {
     set_cursor(TOP_SCREEN, 0, 0);
-    fill_line(stdout, 0, 0x2);
-    fprintf(stdout, "\x1b[30;42m ." FW_NAME " // %s\x1b[0m\n\n", append);
+    fill_line(stdout, 0, config.options[OPTION_ACCENT_COLOR]);
+    accent_color(TOP_SCREEN, 0);
+    fprintf(stdout, "\x1b[30m ." FW_NAME " // %s\x1b[0m\n\n", append);
 }
 
 static int current_menu_index_patches = 0;
@@ -140,11 +145,11 @@ list_patches_build(char *name, int desc_is_fname)
     memset(enable_list, 0, FCRAM_SPACING / 2);
 
     if (!desc_is_fname) {
-        strncpy(patches[0].name, "\x1b[40;32mPatches\x1b[0m", 64);
+        strncpy(patches[0].name, "Patches", 64);
         strncpy(patches[0].desc, "", 255);
         patches[0].index = 0;
         patches[0].allowed = not_option;
-        patches[0].a = 0;
+        patches[0].a = 1;
         patches[0].b = 0;
 
         current_menu_index_patches += 1;

@@ -130,11 +130,11 @@ list_chain_build(char *name)
 {
     current_chain_index = 0;
 
-    strncpy(chains[0].name, "\x1b[40;32mChainloader Payloads\x1b[0m", 64);
+    strncpy(chains[0].name, "Chainloader Payloads", 64);
     strncpy(chains[0].desc, "", 255);
     chains[0].index = 0;
     chains[0].allowed = not_option;
-    chains[0].a = 0;
+    chains[0].a = 1;
     chains[0].b = 0;
 
     current_chain_index += 1;

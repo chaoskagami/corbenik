@@ -1,4 +1,5 @@
 #include <3ds.h>
+#include <string.h>
 #include "patcher.h"
 #include "exheader.h"
 #include "fsldr.h"
@@ -394,7 +395,7 @@ code_handler(u64 progId, prog_addrs_t *shared)
 
     u32 highTid = progId >> 0x20;
 
-    if ((highTid == 0x00040000 || highTid == 0x00040002) && !config.options[OPTION_LOADER_DUMPCODE_ALL])
+    if (!(highTid == 0x00040000 || highTid == 0x00040002) && !config.options[OPTION_LOADER_DUMPCODE_ALL])
         return;
 
     static char text_path[] = TEXT_PATH;

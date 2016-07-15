@@ -74,7 +74,13 @@ struct options_s
 #define OPTION_TRACE 7
 
 // Freed up options due to code changes.
-// 8, 9, 10
+// 9, 10
+
+// Dim background for readability.
+#define OPTION_DIM_MODE 8
+
+// Accent color in menus.
+#define OPTION_ACCENT_COLOR 9
 
 // Enable L2 cache.
 #define OPTION_LOADER_CPU_L2 11

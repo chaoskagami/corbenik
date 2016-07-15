@@ -1,3 +1,5 @@
+out := ../$(dir_out)/$(fw_folder)
+
 .PHONY: all
 all: build install
 
@@ -6,8 +8,8 @@ build: clean $(patsubst %.pco, %.vco, $(wildcard *.pco))
 
 .PHONY: install
 install: build
-	mkdir -p ../out/corbenik/contrib
-	cp *.vco README.md ../out/corbenik/contrib/
+	mkdir -p $(out)/contrib
+	cp *.vco README.md $(out)/contrib/
 
 %.vco: %.pco
 	../host/bytecode_asm.py $< $@

@@ -5,6 +5,7 @@
    It isn't perfect, but it does work. */
 
 #include <stdint.h>
+#include <stdarg.h>
 
 #define TOP_WIDTH 400
 #define TOP_HEIGHT 240
@@ -47,7 +48,6 @@ void clear_bg();
 void load_bg_top(char* fname_top);
 void load_bg_bottom(char* fname_bottom);
 
-void clear_screen(uint8_t *screen);
 void clear_screens();
 void draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, const uint32_t color_fg, const uint32_t color_bg);
 
@@ -80,7 +80,9 @@ void clear_disp(uint8_t *screen);
 // Formats are also supported (but are subject to replacement)
 //  %p - unsigned char, changes color of text (will be replaced with ANSI codes
 //  eventually)
-void fprintf(void *channel, const char *format, ...);
+void fprintf(void *channel, const char *format, ...) __attribute__ ((format (printf, 2, 3)));
+
+void vfprintf(void *channel, const char *format, va_list ap);
 
 #define BLACK 0
 #define BLUE 1

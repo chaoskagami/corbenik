@@ -1,12 +1,17 @@
 #include <stddef.h>
 #include "fs.h"
 #include "memory.h"
-#include "../fatfs/ff.h"
+#include <ctr9/io.h>
 #include "draw.h"
 #include "memory.h"
 #include "../config.h"
 
+// ctr_nand_crypto_interface ctr_io;
+// ctr_nand_crypto_interface twl_io;
+static ctr_sd_interface   sd_io;
+static ctr_nand_interface nand_io;
 static FATFS fs;
+static int set_up_fs = 0;
 
 FILE files[MAX_FILES_OPEN];
 
@@ -15,38 +20,36 @@ FILE files[MAX_FILES_OPEN];
 int
 rrmdir_back(char *fpath)
 {
-    FILINFO fno = {.lfname = NULL };
+    FILINFO fno;
+    DIR pdir;
+    char *fname = &fpath[strnlen(fpath, 255)];
+    if (f_opendir(&pdir, fpath) != FR_OK)
+        return 1;
 
-    // this code handles directory content deletion
-    if (f_stat(fpath, &fno) != FR_OK)
-        return 1; // fpath does not exist
+    fname[0] = '/';
+    fname++;
 
-    if (fno.fattrib & AM_DIR) { // process folder contents
-        DIR pdir;
-        char *fname = fpath + strnlen(fpath, 255);
-        if (f_opendir(&pdir, fpath) != FR_OK)
-            return 1;
+    while (f_readdir(&pdir, &fno) == FR_OK) {
+        strncpy(fname, fno.fname, strlen(fno.fname));
 
-        fname[0] = '/';
-        fname++;
-        fno.lfname = fname;
-        fno.lfsize = fpath + 255 - fname;
+        if (fno.fname[0] == 0)
+            break;
 
-        while (f_readdir(&pdir, &fno) == FR_OK) {
-            if ((strncmp(fno.fname, ".", 2) == 0) || (strncmp(fno.fname, "..", 3) == 0))
-                continue; // filter out virtual entries
-            if (fname[0] == 0)
-                strncpy(fname, fno.fname, fpath + 255 - fname);
-            if (fno.fname[0] == 0)
-                break;
-            else // return value won't matter
-                rrmdir_back(fpath);
+        FILINFO f2;
+        if (f_stat(fpath, &f2) != FR_OK)
+            break;
+
+        if (f2.fattrib & AM_DIR) {
+            // return value won't matter
+            rrmdir_back(fpath);
+        } else {
+            f_unlink(fpath);
         }
-
-        f_closedir(&pdir);
-        --fname;
-        fname[0] = 0;
     }
+
+    f_closedir(&pdir);
+    --fname;
+    fname[0] = 0;
 
     return f_unlink(fpath);
 }
@@ -62,7 +65,15 @@ rrmdir(char *name)
 int
 fmount(void)
 {
-    if (f_mount(&fs, "0:", 1))
+    if(!set_up_fs && ctr_fatfs_initialize(&nand_io, NULL, NULL, &sd_io))
+        return 1;
+
+    set_up_fs = 1;
+
+    if (f_mount(&fs, "SD:", 1))
+        return 1;
+
+    if (f_chdrive("SD:"))
         return 1;
 
     for (int i = 0; i < MAX_FILES_OPEN; i++)
@@ -78,7 +89,7 @@ fumount(void)
         if (files[i].is_open)
             fclose(&files[i]);
 
-    if (f_mount(NULL, "0:", 1))
+    if (f_mount(NULL, "SD:", 1))
         return 1;
 
     config.options[OPTION_SAVE_LOGS] = 0; // FS unmounted, can't log anymore
@@ -233,27 +244,4 @@ read_file(void *data, char *path, size_t size)
     fclose(temp);
 
     return read;
-}
-
-//    DWORD fptr;   /* File read/write pointer (Zeroed on file open) */
-//    DWORD fsize;  /* File size */
-//    DWORD sclust; /* File start cluster (0:no cluster chain, always 0 when fsize is 0) */
-//    DWORD clust;  /* Current cluster of fpter (not valid when fprt is 0) */
-//    DWORD dsect;  /* Sector number appearing in buf[] (0:invalid) */
-
-size_t
-get_file_sector(char *path)
-{
-    FILE *temp = fopen(path, "r");
-
-    if (!temp || !temp->is_open)
-        return 0;
-
-    UINT sector;
-
-    f_getsector(&temp->handle, &sector);
-
-    fclose(temp);
-
-    return sector;
 }

@@ -8,10 +8,15 @@ Not every feature has been implemented/tested yet, but at the moment it offers a
 
 Corbenik is licensed under the terms of the GPLv3. Please obey it. You should have received a copy either as part of the git repository, or as part of the tarball/zipfile you downloaded. If not, get a copy here: `http://www.gnu.org/licenses/gpl-3.0.txt`
 
-Upgrading
+Usage
 -------------------------
 
-Skip to `Installing` if you are installing this for the first time.
+If you are using a nightly build off of https://github.com/chaoskagami/corbenik - treat all paths starting in `/corbenik` as `/skeith` instead for these instructions.
+
+Skip to `Installing` if you are installing this for the first time, otherwise follow `Updating` and then `Installing`.
+
+Updating
+-------------------------
 
 When updating Corbenik, usually you should (at minimum) perform the following steps to SAFELY update:
 
@@ -84,14 +89,15 @@ Setup
 -------------------------
 
 Unless otherwise noted, menu controls are always shown at the top, but for reference:
- * A      -> enter/select/enable/increase
- * X      -> Decrease
- * B      -> back/exit/boot
- * Up     -> Up one
- * Down   -> Down one
- * Left   -> Up five
- * Right  -> Down five
- * Select -> Help
+ * A         -> Enter/Select/Enable/Increase
+ * X         -> Decrease
+ * B         -> Back/Exit/Boot
+ * Up        -> Up one
+ * Down      -> Down one
+ * Left      -> Up five
+ * Right     -> Down five
+ * Select    -> Help (on any selectable option)
+ * L+R+Start -> Screenshot (Menu ONLY.)
 
 For starters, you'll want to go into options and enable `Loader Replacement` to get loader to run patches as well. Even if you don't plan to run any loader patches, this will at very least kill ASLR and anti-OoThax/anti-Ninjhax features in the official Nintendo loader.
 
@@ -117,8 +123,7 @@ You'll also want these patches, which are done by loader and therefore require i
 If you're using the reboot hook, you might want these:
  * AGB Signature fix
  * AGB Bootscreen
-   * Will stop games with corrupted Nintendo logos from running. Disable for
-     ROMhacks if this occurs.
+   * Will stop games with corrupted Nintendo logos from running. Disable for ROM hacks if this occurs.
  * TWL Patches
 
 If you're on 11.0, you also want these:
@@ -132,15 +137,24 @@ If you region changed your console and replaced SecureInfo_A, you want:
  * SecureInfo_A Signature Fix
 
 Optional, but recommended patches are:
- * MSET Version
+ * Settings Version String
  * ErrDisp devmode
 
 And these YOU SHOULD NOT ENABLE unless you have specialized needs:
  * Developer UNITINFO (Pretends to be a developer console/Panda)
- * ARM11 XN Disable   (Grants +X maps by default)
- * Force TestMenu     (Boots into TestMenu rather than HOME - requires TestMenu to be installed.)
+ * ARM11 XN Disable   (Grants +X maps by default to kernel)
+ * Force TestMenu     (Boots into TestMenu rather than HOME - requires TestMenu to be installed)
 
 Before booting, you should select 'Save Configuration' from the menu.
+
+Customization
+-------------------------
+
+Extra patches may be supplied in the `/corbenik/contrib` folder. Copy any of these patches to `patch` if you wish to use them.
+
+You can copy some 90° rotated BGR8 pixel data sized to the screen (essentially, a menuhax splash) and it will be used as backgrounds for menus. Put them at:
+ * Top: `/corbenik/bits/top.bin`
+ * Bottom: `/corbenik/bits/bottom.bin`
 
 Reporting issues
 -------------------------
@@ -150,6 +164,15 @@ If you think you've found a bug, please do the following first, to save me some 
  * Check if a recently enabled patch is the cause of the issue. If so, you should include this in the report.
  * Enable `Logging` and `Verbose` in `Options` then `Save Configuration` and retrieve the files `/corbenik/boot.log` and `/corbenik/loader.log` if they exist. I will want them. Do not report bugs without them, unless they are not created with the above enabled.
  * Please at least try to reproduce the bug from a clean installation.
+
+Contributions
+-------------------------
+
+If you have a feature or bugfix, PR or hit me on freenode/#Cakey. However, please note the following conditions:
+
+ * Do NOT base any code on Nintendo's SDK. Additionally, if you are under NDA, do not even bother to PR. I cannot accept tainted code. This is for my own legal safety (and sanity)
+ * Please attempt to obey coding standards. The .clang-format is a loose guide to this. I'll tell you if I need reformatting.
+ * Please ensure your changes are functional and don't break consoles, O3DS or N3DS. Do not assume anything about the environment.
 
 Credits
 -------------------------
@@ -161,7 +184,7 @@ Credits
  * General inspiration from Cakes, FIRM decryption code, reboot assembly code, some code for text display. https://github.com/mid-kid/CakesForeveryWan
 
 @Wolfvak
- * Code segment dumping + loading
+ * Code segment dumping + loading, ideas, and a lot of miscellaneous code.
 
 @AuroraWright
  * RE work, patches, EmuNAND, and Reboot/Firmlaunch C code. https://github.com/AuroraWright/Luma3ds
@@ -196,11 +219,16 @@ Credits
 @TiniVi
  * RE work, screen deinit.
 
+@gemarcano
+ * For general help and libctr9_io (which is a submodule here.) Made life much easier.
+
 Temptress Cerise (GBATemp) 
  * A LOT of testing which was really helpful.
 
 Crystal the Glaceon (GBATemp)
  * A LOT of testing which was really helpful.
+
+Everyone on #Cakey for being generally cool people.
 
 CyberConnect2
  * Because the name originates from .hack, which you should go play.

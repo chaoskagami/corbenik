@@ -3,7 +3,7 @@
 
 #include "types.h"
 #include "memory.h"
-#include "../fatfs/ff.h"
+#include <ctr9/io.h>
 
 #define MAX_FILES_OPEN 64
 
@@ -42,7 +42,5 @@ size_t fread(void *buffer, size_t elementSize, size_t elementCnt, FILE *fp);
 
 size_t write_file(void *data, char *path, size_t size);
 size_t read_file(void *data, char *path, size_t size);
-
-size_t get_file_sector(char *path);
 
 #endif

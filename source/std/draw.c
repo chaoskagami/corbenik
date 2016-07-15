@@ -4,12 +4,13 @@
 #include <assert.h>
 #include <stdarg.h>
 #include "memory.h"
-#include "../fatfs/ff.h"
+#include <ctr9/io.h>
 #include "../firm/fcram.h"
 #include "fs.h"
 #include "unused.h"
 #include "../config.h"
 #include "../patch_format.h"
+#include "abort.h"
 
 static unsigned int top_cursor_x = 0, top_cursor_y = 0;
 static unsigned int bottom_cursor_x = 0, bottom_cursor_y = 0;
@@ -38,6 +39,8 @@ uint8_t *bottom_bg;
 unsigned char color_top = 0xf0;
 unsigned char color_bottom = 0xf0;
 int kill_output = 0;
+
+#define TRANSP_THRESH 178
 
 void std_init() {
     top_bg     = static_allocate(TOP_SIZE);
@@ -170,8 +173,8 @@ void load_bg_top(char* fname_top) {
 
     // See load_bg_bottom for an explanation on the magic value.
     dim_factor_top = 0;
-    if (max > 178)
-        dim_factor_top = max - 178;
+    if (max > TRANSP_THRESH)
+        dim_factor_top = max - TRANSP_THRESH;
 }
 
 void load_bg_bottom(char* fname_bottom) {
@@ -196,8 +199,8 @@ void load_bg_bottom(char* fname_bottom) {
     //   70% of 255 is approximately 178, and 255 - 178 is 77. That's therefore the maximum we want to subtract.
     //   Thus this is the value for 70% transparency.
     dim_factor_bottom = 0;
-    if (max > 178)
-        dim_factor_bottom = max - 178;
+    if (max > TRANSP_THRESH)
+        dim_factor_bottom = max - TRANSP_THRESH;
 }
 
 void set_font(const char* filename) {
@@ -205,7 +208,7 @@ void set_font(const char* filename) {
 
     FILE* f = fopen(filename, "r");
 
-    if (!f) return;
+    if (!f) abort("Failed to load font file!\n");
 
     unsigned int new_w, new_h;
 
@@ -213,8 +216,7 @@ void set_font(const char* filename) {
     fread(&new_h, 1, 4, f);
 
     if (new_w == 0 || new_h == 0) {
-        fprintf(stderr, "Invalid font file: w/h is 0 - not loaded\n");
-        return;
+        abort("Invalid font file: w/h is 0 - not loaded\n");
     }
 
     unsigned int c_font_w = (new_w / 8) + (new_w % 8 ? 1 : 0);
@@ -243,7 +245,7 @@ void dump_log(unsigned int force) {
     if (log_size == 0)
         return;
 
-    FILE *f = fopen(PATH_CFW "/boot.log", "w");
+    FILE *f = fopen(PATH_BOOTLOG, "w");
     fseek(f, 0, SEEK_END);
 
     fwrite(log_buffer, 1, log_size, f);
@@ -261,17 +263,30 @@ clear_disp(uint8_t *screen)
         screen = framebuffers->bottom;
 
     if (screen == framebuffers->top_left || screen == framebuffers->top_right) {
-        memcpy(screen, top_bg, TOP_SIZE);
+        if (kill_output || !config.options[OPTION_DIM_MODE]) {
+            memcpy(screen, top_bg, TOP_SIZE);
+        } else {
+            for(int i=0; i < TOP_SIZE; i++) {
+                screen[i] = 0;
+                if (top_bg[i] > dim_factor_top)
+                    screen[i] = top_bg[i] - dim_factor_top;
+            }
+        }
+        top_cursor_x = 0;
+        top_cursor_y = 0;
     } else if (screen == framebuffers->bottom) {
-        memcpy(screen, bottom_bg, BOTTOM_SIZE);
+        if (kill_output || !config.options[OPTION_DIM_MODE]) {
+            memcpy(screen, bottom_bg, BOTTOM_SIZE);
+        } else {
+            for(int i=0; i < BOTTOM_SIZE; i++) {
+                screen[i] = 0;
+                if (bottom_bg[i] >= dim_factor_bottom)
+                    screen[i] = bottom_bg[i] - dim_factor_bottom;
+            }
+        }
+        bottom_cursor_x = 0;
+        bottom_cursor_y = 0;
     }
-}
-
-void
-clear_screen(uint8_t *screen)
-{
-    // TODO - remove. This is a stub now.
-    clear_disp(screen);
 }
 
 void
@@ -284,13 +299,6 @@ set_cursor(void *channel, unsigned int x, unsigned int y)
         bottom_cursor_x = x;
         bottom_cursor_y = y;
     }
-}
-
-void
-clear_screens()
-{
-    clear_screen(framebuffers->top_left);
-    clear_screen(framebuffers->bottom);
 }
 
 void
@@ -332,23 +340,11 @@ draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, co
         unsigned char char_dat = ((char*)FCRAM_FONT_LOC)[(character - ' ') * (c_font_w * font_h) + yy];
         for(unsigned int i=0; i < font_w + font_kern; i++) {
             if (color_bg == 0) {
-                screen[pos]     = 0;
-                screen[pos + 1] = 0;
-                screen[pos + 2] = 0;
-                if (buffer_bg[pos] >= dim_factor)
-                    screen[pos]     = buffer_bg[pos] - dim_factor;
-                if (buffer_bg[pos + 1] >= dim_factor)
-                    screen[pos + 1]     = buffer_bg[pos + 1] - dim_factor;
-                if (buffer_bg[pos + 2] >= dim_factor)
-                    screen[pos + 2] = buffer_bg[pos + 2] - dim_factor;
-            } else {
-                screen[pos]     = color_bg >> 16;
-                screen[pos + 1] = color_bg >> 8;
-                screen[pos + 2] = color_bg;
-            }
-
-            if (char_dat & 0x80) {
-                if (color_fg == 0) {
+                if (!config.options[OPTION_DIM_MODE]) {
+                    screen[pos]     = buffer_bg[pos];
+                    screen[pos + 1] = buffer_bg[pos + 1];
+                    screen[pos + 2] = buffer_bg[pos + 2];
+                } else {
                     screen[pos]     = 0;
                     screen[pos + 1] = 0;
                     screen[pos + 2] = 0;
@@ -358,10 +354,34 @@ draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, co
                         screen[pos + 1]     = buffer_bg[pos + 1] - dim_factor;
                     if (buffer_bg[pos + 2] >= dim_factor)
                         screen[pos + 2] = buffer_bg[pos + 2] - dim_factor;
+                }
+            } else {
+                screen[pos]     = color_bg;
+                screen[pos + 1] = color_bg >> 8;
+                screen[pos + 2] = color_bg >> 16;
+            }
+
+            if (char_dat & 0x80) {
+                if (color_fg == 0) {
+                    if (!config.options[OPTION_DIM_MODE]) {
+                        screen[pos]     = buffer_bg[pos];
+                        screen[pos + 1] = buffer_bg[pos + 1];
+                        screen[pos + 2] = buffer_bg[pos + 2];
+                    } else {
+                        screen[pos]     = 0;
+                        screen[pos + 1] = 0;
+                        screen[pos + 2] = 0;
+                        if (buffer_bg[pos] >= dim_factor)
+                            screen[pos]     = buffer_bg[pos] - dim_factor;
+                        if (buffer_bg[pos + 1] >= dim_factor)
+                            screen[pos + 1]     = buffer_bg[pos + 1] - dim_factor;
+                        if (buffer_bg[pos + 2] >= dim_factor)
+                            screen[pos + 2] = buffer_bg[pos + 2] - dim_factor;
+                    }
                 } else {
-                    screen[pos]     = color_fg >> 16;
+                    screen[pos]     = color_fg;
                     screen[pos + 1] = color_fg >> 8;
-                    screen[pos + 2] = color_fg;
+                    screen[pos + 2] = color_fg >> 16;
                 }
             }
 
@@ -375,6 +395,8 @@ void
 shut_up()
 {
     kill_output = !kill_output;
+    clear_disp(TOP_SCREEN);
+    clear_disp(BOTTOM_SCREEN);
 }
 
 void

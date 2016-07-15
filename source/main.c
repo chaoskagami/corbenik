@@ -1,15 +1,17 @@
+#include <ctr9/ctr_hid.h>
+
 #include "common.h"
 #include "firm/firm.h"
 #include "input.h"
 #include "config.h"
 #include "screeninit.h"
 #include "std/abort.h"
-
-int menu_handler();
+#include "interrupt.h"
 
 int is_n3ds = 0;
-
 int doing_autoboot = 0;
+
+int menu_handler();
 void shut_up();
 
 int
@@ -24,10 +26,13 @@ main(int argc, char** argv)
     screen_init();
     clear_bg();
     load_bg_top(PATH_BITS "/top.bin");
-    load_bg_bottom(PATH_BITS "/bottom.bin"); // This is basically a menuhax splash (90deg rotated RGB8 pixel data)
-    clear_screens();
+    load_bg_bottom(PATH_BITS "/bottom.bin"); // This is basically a menuhax splash (90deg rotated BGR8 pixel data)
+    clear_disp(TOP_SCREEN);
+    clear_disp(BOTTOM_SCREEN);
 
     set_font(PATH_BITS "/termfont.bin");
+
+    install_interrupts(); // Get some free debug info.
 
     if (c) {
         // Failed to mount SD. Bomb out.
@@ -47,7 +52,7 @@ main(int argc, char** argv)
     }
 
     // Autoboot. Non-standard code path.
-    if (config.options[OPTION_AUTOBOOT] && !(HID_PAD & BUTTON_R)) {
+    if (config.options[OPTION_AUTOBOOT] && !(ctr_hid_get_buttons() & CTR_HID_RT)) {
         if (config.options[OPTION_SILENCE])
             shut_up(); // This does exactly what it sounds like.
         doing_autoboot = 1;

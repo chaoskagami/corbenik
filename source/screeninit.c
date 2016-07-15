@@ -1,5 +1,6 @@
+#include <ctr9/io.h>
+#include <ctr9/ctr_screen.h>
 #include "std/fs.h"
-#include "i2c.h"
 #include "patch_format.h"
 
 #define PDN_GPU_CNT (*(volatile uint8_t *)0x10141200)
@@ -20,10 +21,9 @@ screen_init()
         screenInitAddress[2] = 0x5F;
         *a11_entry = (uint32_t)screenInitAddress;
 
-        while (*a11_entry)
-            ;
+        while (*a11_entry);
 
         // Turn on backlight
-        i2cWriteRegister(I2C_DEV_MCU, 0x22, 0x2A);
+        ctr_screen_enable_backlight(CTR_SCREEN_BOTH);
     }
 }

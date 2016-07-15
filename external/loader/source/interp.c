@@ -3,6 +3,7 @@
 // so it's temporarliy #if'd 0.
 #include <3ds.h>
 #include "patcher.h"
+#include "exheader.h"
 #include "fsldr.h"
 #include "internal.h"
 #include "memory.h"

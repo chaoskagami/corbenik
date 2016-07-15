@@ -12,6 +12,7 @@ regenerate_config()
     memset(&config, 0, sizeof(config));
     memcpy(&(config.magic), CONFIG_MAGIC, 4);
     config.config_ver = config_version;
+    config.options[OPTION_ACCENT_COLOR] = 0x2;
 
     if (!(conf_handle = fopen(PATH_CONFIG, "w")))
         abort("Failed to open config for write?\n");

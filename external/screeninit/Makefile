@@ -11,7 +11,7 @@ AS := arm-none-eabi-as
 LD := arm-none-eabi-ld
 OC := arm-none-eabi-objcopy
 
-name := $(shell basename $(CURDIR))
+name_si := screeninit
 
 dir_source := source
 dir_build := build
@@ -25,16 +25,16 @@ objects = $(patsubst $(dir_source)/%.s, $(dir_build)/%.o, \
           $(call rwildcard, $(dir_source), *.s *.c)))
 
 .PHONY: all
-all: $(dir_build)/$(name).bin
+all: $(dir_build)/$(name_si).bin
 
 .PHONY: clean
 clean:
 	@rm -rf $(dir_build)
 
-$(dir_build)/$(name).bin: $(dir_build)/$(name).elf
+$(dir_build)/$(name_si).bin: $(dir_build)/$(name_si).elf
 	$(OC) -S -O binary $< $@
 
-$(dir_build)/$(name).elf: $(objects)
+$(dir_build)/$(name_si).elf: $(objects)
 	$(LINK.o) -T linker.ld $(OUTPUT_OPTION) $^
 
 $(dir_build)/%.o: $(dir_source)/%.c

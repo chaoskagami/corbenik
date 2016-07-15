@@ -3,13 +3,15 @@
 #include "firm/headers.h"
 #include "std/unused.h"
 
+#include <ctr9/ctr_system.h>
+
 #define MAX_PATCHES ((FCRAM_SPACING / 2) / sizeof(struct options_s))
 struct options_s *patches = (struct options_s *)FCRAM_MENU_LOC;
 uint8_t *enable_list = (uint8_t *)FCRAM_PATCHLIST_LOC;
 
 static struct options_s options[] = {
     // Patches.
-    { 0, "\x1b[32;40mGeneral Options\x1b[0m", "", not_option, 0, 0 },
+    { 0, "General Options", "", not_option, 1, 0 },
 
     { OPTION_SVCS, "svcBackdoor Fixup", "Reinserts svcBackdoor on 11.0 NATIVE_FIRM. svcBackdoor allows executing arbitrary functions with ARM11 kernel permissions, and is required by some (poorly coded) applications.", boolean_val, 0, 0 },
 
@@ -21,11 +23,14 @@ static struct options_s options[] = {
 
     { OPTION_AUTOBOOT, "Autoboot", "Boot the system automatically, unless the R key is held while booting.", boolean_val, 0, 0 },
     { OPTION_SILENCE, "  Silent mode", "Suppress all debug output during autoboot. You'll see the screen turn on and then off once.", boolean_val, 0, 0 },
+    { OPTION_DIM_MODE, "Dim Background", "Experimental! Dims colors on lighter backgrounds to improve readability with text. You won't notice the change until scrolling or exiting the current menu due to the way rendering works.", boolean_val, 0, 0 },
+
+    { OPTION_ACCENT_COLOR, "Accent color", "Changes the accent color in menus.", ranged_val, 1, 7},
 
     // space
     { 0, "", "", not_option, 0, 0 },
     // Patches.
-    { 0, "\x1b[32;40mLoader Options\x1b[0m", "", not_option, 0, 0 },
+    { 0, "Loader Options", "", not_option, 1, 0 },
 
     { OPTION_LOADER, "Use Loader Replacement", "Replaces loader with one capable of extra features. You should enable this even if you don't plan to use loader-based patches to kill ASLR and the Ninjhax/OOThax checks.", boolean_val, 0, 0 },
     { OPTION_LOADER_CPU_L2, "  CPU - L2 cache", "Forces the system to use the L2 cache on all applications. If you have issues with crashes, try turning this off.", boolean_val_n3ds, 0, 0 },
@@ -42,7 +47,7 @@ static struct options_s options[] = {
     // space
     { 0, "", "", not_option, 0, 0 },
     // Patches.
-    { 0, "\x1b[32;40mDeveloper Options\x1b[0m", "", not_option, 0, 0 },
+    { 0, "Developer Options", "", not_option, 1, 0 },
 
     { OPTION_TRACE, "Step Through", "After each important step, [WAIT] will be shown and you'll need to press a key. Debug feature.", boolean_val, 0, 0 },
     { OPTION_OVERLY_VERBOSE, "Verbose", "Output more debug information than the average user needs.", boolean_val, 0, 0 },
@@ -56,55 +61,17 @@ static struct options_s options[] = {
     { -1, "", "", 0, -1, -1 }, // cursor_min and cursor_max are stored in the last two.
 };
 
-extern void waitcycles(uint32_t cycles);
-
-uint32_t
-wait_key(_UNUSED int sleep)
-{
-    // If your dpad has issues, please add this to the makefile.
-    if (sleep) {
-        #define ARM9_APPROX_DELAY_MAX 134058675 / 95
-        waitcycles(ARM9_APPROX_DELAY_MAX); // Approximately what a human can input - fine tuning needed (sorry, TASers!)
-    }
-
-    uint32_t ret = 0, get = 0;
-    while (ret == 0) {
-        get = HID_PAD;
-
-        if ((get & (BUTTON_L | BUTTON_R | BUTTON_STA)) == (BUTTON_L | BUTTON_R | BUTTON_STA)) {
-            screenshot();
-            waitcycles(ARM9_APPROX_DELAY_MAX); // Approximately what a human can input - fine tuning needed (sorry, TASers!)
-        } else if (get & BUTTON_UP)
-            ret = BUTTON_UP;
-        else if (get & BUTTON_DOWN)
-            ret = BUTTON_DOWN;
-        else if (get & BUTTON_RIGHT)
-            ret = BUTTON_RIGHT;
-        else if (get & BUTTON_LEFT)
-            ret = BUTTON_LEFT;
-        else if (get & BUTTON_A)
-            ret = BUTTON_A;
-        else if (get & BUTTON_B)
-            ret = BUTTON_B;
-        else if (get & BUTTON_X)
-            ret = BUTTON_X;
-        else if (get & BUTTON_SEL)
-            ret = BUTTON_SEL;
-
-    }
-    while (HID_PAD & ret);
-
-    return ret;
-}
-
 extern unsigned int font_w;
+
+void accent_color(void* screen, int fg);
 
 void
 header(char *append)
 {
     set_cursor(TOP_SCREEN, 0, 0);
-    fill_line(stdout, 0, 0x2);
-    fprintf(stdout, "\x1b[30;42m .Corbenik // %s\x1b[0m\n\n", append);
+    fill_line(stdout, 0, config.options[OPTION_ACCENT_COLOR]);
+    accent_color(TOP_SCREEN, 0);
+    fprintf(stdout, "\x1b[30m ." FW_NAME " // %s\x1b[0m\n\n", append);
 }
 
 static int current_menu_index_patches = 0;
@@ -114,56 +81,54 @@ static int current_menu_index_patches = 0;
 int
 list_patches_build_back(char *fpath, int desc_is_path)
 {
-    FILINFO fno = {.lfname = NULL };
+    FILINFO fno;
+    DIR pdir;
+    char *fname = &fpath[strnlen(fpath, 255)];
+    if (f_opendir(&pdir, fpath) != FR_OK)
+        return 1;
 
-    // this code handles directory content deletion
-    if (f_stat(fpath, &fno) != FR_OK)
-        return 1; // fpath does not exist
+    fname[0] = '/';
+    fname++;
 
-    if (fno.fattrib & AM_DIR) { // process folder contents
-        DIR pdir;
-        char *fname = fpath + strnlen(fpath, 255);
-        if (f_opendir(&pdir, fpath) != FR_OK)
-            return 1;
+    while (f_readdir(&pdir, &fno) == FR_OK) {
+        strncpy(fname, fno.fname, strlen(fno.fname));
 
-        *(fname++) = '/';
-        fno.lfname = fname;
-        fno.lfsize = fpath + 255 - fname;
+        if (fno.fname[0] == 0)
+            break;
 
-        while (f_readdir(&pdir, &fno) == FR_OK) {
-            if ((strncmp(fno.fname, ".", 2) == 0) || (strncmp(fno.fname, "..", 3) == 0))
-                continue; // filter out virtual entries
-            if (fname[0] == 0)
-                strncpy(fname, fno.fname, fpath + 255 - fname);
-            if (fno.fname[0] == 0)
-                break;
-            else // return value won't matter
-                list_patches_build_back(fpath, desc_is_path);
+        FILINFO f2;
+        if (f_stat(fpath, &f2) != FR_OK)
+            break;
+
+        if (f2.fattrib & AM_DIR) {
+            // return value won't matter
+            list_patches_build_back(fpath, desc_is_path);
+        } else {
+            struct system_patch p;
+            read_file(&p, fpath, sizeof(struct system_patch));
+
+            if (memcmp(p.magic, "AIDA", 4))
+                return 0;
+
+            strncpy(patches[current_menu_index_patches].name, p.name, 64);
+            if (desc_is_path)
+                strncpy(patches[current_menu_index_patches].desc, fpath, 255);
+            else
+                strncpy(patches[current_menu_index_patches].desc, p.desc, 255);
+            patches[current_menu_index_patches].index = p.uuid;
+            patches[current_menu_index_patches].allowed = boolean_val;
+            patches[current_menu_index_patches].a = 0;
+            patches[current_menu_index_patches].b = 0;
+            if (desc_is_path)
+                enable_list[p.uuid] = 0;
+
+            current_menu_index_patches++;
         }
-
-        f_closedir(&pdir);
-        *(--fname) = '\0';
-    } else {
-        struct system_patch p;
-        read_file(&p, fpath, sizeof(struct system_patch));
-
-        if (memcmp(p.magic, "AIDA", 4))
-            return 0;
-
-        strncpy(patches[current_menu_index_patches].name, p.name, 64);
-        if (desc_is_path)
-            strncpy(patches[current_menu_index_patches].desc, fpath, 255);
-        else
-            strncpy(patches[current_menu_index_patches].desc, p.desc, 255);
-        patches[current_menu_index_patches].index = p.uuid;
-        patches[current_menu_index_patches].allowed = boolean_val;
-        patches[current_menu_index_patches].a = 0;
-        patches[current_menu_index_patches].b = 0;
-        if (desc_is_path)
-            enable_list[p.uuid] = 0;
-
-        current_menu_index_patches++;
     }
+
+    f_closedir(&pdir);
+    --fname;
+    fname[0] = 0;
 
     return 0;
 }
@@ -180,11 +145,11 @@ list_patches_build(char *name, int desc_is_fname)
     memset(enable_list, 0, FCRAM_SPACING / 2);
 
     if (!desc_is_fname) {
-        strncpy(patches[0].name, "\x1b[40;32mPatches\x1b[0m", 64);
+        strncpy(patches[0].name, "Patches", 64);
         strncpy(patches[0].desc, "", 255);
         patches[0].index = 0;
         patches[0].allowed = not_option;
-        patches[0].a = 0;
+        patches[0].a = 1;
         patches[0].b = 0;
 
         current_menu_index_patches += 1;
@@ -224,7 +189,7 @@ static struct options_s info_d[] = {
     { 0, "  Native FIRM: ", "The version of NATIVE_FIRM in use.", not_option, 0, 0},
     { 0, "  AGB FIRM:    ", "The version of AGB_FIRM in use. This is used to run GBA games.", not_option, 0, 0},
     { 0, "  TWL FIRM:    ", "The version of TWL_FIRM in use. This is used to run DS games and DSiWare.", not_option, 0, 0},
-    { 0, "  Corbenik:    " VERSION " (" REL ")", "Corbenik's version.", not_option, 0, 0},
+    { 0, "  " FW_NAME ":    " VERSION " (" REL ")", FW_NAME "'s version.", not_option, 0, 0},
     { -1, "", "", not_option, 0, 0 }
 };
 static int is_setup_info = 0;
@@ -251,19 +216,33 @@ menu_info()
 }
 
 #define ln(s) { 0, s, "", not_option, 0, 0 }
+#define lnh(s) { 0, s, "", not_option, 1, 0 }
 
 static struct options_s help_d[] = {
-    ln("Corbenik is another 3DS CFW for power users."),
+    lnh("About"),
+    ln("  This is another 3DS CFW for power users."),
     ln("  It seeks to address some faults in other"),
     ln("  CFWs and is generally just another choice"),
     ln("  for users - but primarily is intended for"),
-    ln("  developers and is not for the faint of heart."),
+    ln("  developers. It is not for the faint of heart."),
     ln(""),
-    ln("Credits to people who've helped me put this"),
-    ln("  together by code, documentation, or help:"),
+    lnh("Usage"),
+    ln("  A         -> Select/Toggle/Increment"),
+    ln("  B         -> Back/Boot"),
+    ln("  X         -> Decrement"),
+    ln("  Select    -> Help/Information"),
+    ln("  Down      -> Down"),
+    ln("  Right     -> Down five"),
+    ln("  Up        -> Up"),
+    ln("  Left      -> Up five"),
+    ln("  L+R+Start -> Menu Screenshot"),
+    ln(""),
+    lnh("Credits"),
     ln("  @mid-kid, @Wolfvak, @Reisyukaku, @AuroraWright"),
     ln("  @d0k3, @TuxSH, @Steveice10, @delebile,"),
-    ln("  @Normmatt, @b1l1s, @dark-samus, @TiniVi, etc"),
+    ln("  @Normmatt, @b1l1s, @dark-samus, @TiniVi,"),
+    ln("  @gemarcano, and anyone else I may have"),
+    ln("  forgotten (yell at me, please!)"),
     ln(""),
     ln("  <https://github.com/chaoskagami/corbenik>"),
     { -1, "", "", not_option, 0, 0 }
@@ -284,9 +263,8 @@ reset()
 
     // Reboot.
     fprintf(BOTTOM_SCREEN, "Rebooting system...\n");
-    i2cWriteRegister(I2C_DEV_MCU, 0x20, 1 << 2);
-    while (1)
-        ;
+
+    ctr_system_reset();
 }
 
 void
@@ -296,11 +274,10 @@ poweroff()
 
     fumount(); // Unmount SD.
 
-    // Reboot.
+    // Power off
     fprintf(BOTTOM_SCREEN, "Powering off system...\n");
-    i2cWriteRegister(I2C_DEV_MCU, 0x20, 1 << 0);
-    while (1)
-        ;
+
+    ctr_system_poweroff();
 }
 
 #if defined(CHAINLOADER) && CHAINLOADER == 1
@@ -308,17 +285,17 @@ void chainload_menu();
 #endif
 
 static struct options_s main_s[] = {
-    { 0, "Options",            "Internal options for the CFW. These are part of Corbenik itself.", call_fun, (uint32_t)menu_options, 0 },
-    { 0, "Patches",            "External bytecode patches found in `" PATH_PATCHES "`. You can choose which to enable.", call_fun, (uint32_t)menu_patches, 0 },
+    { 0, "Options",            "Internal options for the CFW.\nThese are part of " FW_NAME " itself.", call_fun, (uint32_t)menu_options, 0 },
+    { 0, "Patches",            "External bytecode patches found in `" PATH_PATCHES "`.\nYou can choose which to enable.", call_fun, (uint32_t)menu_patches, 0 },
     { 0, "Info",               "Shows the current FIRM versions (and loads them, if needed)", call_fun, (uint32_t)menu_info,    0 },
-    { 0, "Help/Readme",        "Displays info. Why are you opening help on help? That's kind of silly.", call_fun, (uint32_t)menu_help,    0 },
+    { 0, "Readme",             "Mini-readme.\nWhy are you opening help on this, though?\nThat's kind of silly.", call_fun, (uint32_t)menu_help,    0 },
     { 0, "Reboot",             "Reboots the console.", call_fun, (uint32_t)reset,        0 },
     { 0, "Power off",          "Powers off the console.", call_fun, (uint32_t)poweroff,     0 },
-    { 0, "Save Configuration", "Save the configuration. You must do this prior to booting, otherwise nothing is done.", call_fun, (uint32_t)save_config,  0 },
+    { 0, "Save Configuration", "Save the configuration.\nYou must do this prior to booting,\notherwise the cache will not be (re)generated..", call_fun, (uint32_t)save_config,  0 },
 #if defined(CHAINLOADER) && CHAINLOADER == 1
     { 0, "Chainload",          "Boot another ARM9 payload file.", call_fun, (uint32_t)chainload_menu, 0 },
 #endif
-    { 0, "Boot Firmware",      "Generates caches, patches the firmware, and boots it.", break_menu, 0, 0 },
+    { 0, "Boot Firmware",      "Generates caches, patches the firmware, and boots it.\nMake sure to 'Save Configuration' first if any options changed.", break_menu, 0, 0 },
 
     // Sentinel.
     { -1, "", "", 0, -1, -1 }, // cursor_min and cursor_max are stored in the last two.

@@ -46,8 +46,9 @@ void
 memmove(void *dest, const void *src, size_t size)
 {
     // memcpy does the job of moving backwards just fine
-    if (dest < src || src + size <= dest) {
-        return memcpy(dest, src, size);
+    if (dest < src || (uint8_t*)src + size <= (uint8_t*)dest) {
+        memcpy(dest, src, size);
+        return;
     }
 
     // Moving forward is just a reverse memcpy

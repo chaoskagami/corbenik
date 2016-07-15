@@ -1,11 +1,15 @@
 #include <stdint.h>
 #include <stddef.h>
-#ifndef LOADER
 #include "std/unused.h"
-#include "std/memory.h"
-#include "firm/firm.h"
-#include "config.h"
-#include "common.h"
+
+#ifndef LOADER
+  #include "std/memory.h"
+  #include "firm/firm.h"
+  #include "config.h"
+  #include "common.h"
+  #include "firm/fcram.h"
+#else
+  #include <string.h>
 #endif
 
 #define OP_NOP 0x00
@@ -46,21 +50,21 @@
 #define OP_NEXT 0xFF
 
 #ifdef LOADER
-#define log(a) logstr(a)
-#define abort(a)                                                                                                                                               \
-    {                                                                                                                                                          \
-        logstr(a);                                                                                                                                             \
-        svcBreak(USERBREAK_ASSERT);                                                                                                                            \
-    }
+  #define log(a) logstr(a)
+  #define abort(a)                                                                                                                                               \
+      {                                                                                                                                                          \
+          logstr(a);                                                                                                                                             \
+          svcBreak(USERBREAK_ASSERT);                                                                                                                            \
+      }
 #else
-#define log(a) fprintf(stderr, a)
-int wait();
+  #define log(a) fprintf(stderr, a)
+  int wait();
 #endif
 
 struct mode
 {
     uint8_t *memory;
-    size_t size;
+    uint32_t size;
 };
 struct mode modes[21];
 int init_bytecode = 0;
@@ -72,8 +76,15 @@ static const char hexDigits[] = "0123456789ABCDEF";
 int is_n3ds = 1; // TODO - We don't really need to care, but it should still work from loader
 #endif
 
+#define STACK_SIZE 4096
+#ifdef LOADER
+  static uint8_t stack_glob[STACK_SIZE];
+#else
+  static uint8_t *stack_glob = NULL;
+#endif
+
 int
-exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
+exec_bytecode(uint8_t *bytecode, uint32_t len, uint8_t* stack, uint32_t stack_size, uint16_t ver, int debug)
 {
     if (!init_bytecode) {
 #ifndef LOADER
@@ -142,16 +153,20 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
         init_bytecode = 1;
     }
 
+    memset(stack, 0, stack_size); // Clear stack.
+
+    _UNUSED uint32_t top = stack_size - 1;
+
 #ifdef LOADER
-    size_t set_mode = 18;
+    uint32_t set_mode = 18;
 #else
-    size_t set_mode = 3;
+    uint32_t set_mode = 3;
 #endif
     struct mode *current_mode = &modes[set_mode];
 
-    size_t offset = 0, new_offset = 0;
+    uint32_t offset = 0, new_offset = 0;
 
-    size_t i;
+    uint32_t i;
 
     int eq = 0, gt = 0, lt = 0, found = 0; // Flags.
 
@@ -170,7 +185,7 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
 #ifdef LOADER
                     log("rel\n");
 #else
-                    fprintf(stderr, "rel %u\n", *(code+1));
+                    fprintf(stderr, "rel %hhu\n", code[1]);
 #endif
                 }
                 code++;
@@ -183,7 +198,7 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
 #ifdef LOADER
                     log("find\n");
 #else
-                    fprintf(stderr, "find %u ...\n", code[1]);
+                    fprintf(stderr, "find %hhu ...\n", code[1]);
 #endif
                 }
                 found = 0;
@@ -200,7 +215,7 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
 #ifdef LOADER
                     log("back\n");
 #else
-                    fprintf(stderr, "back %u\n", *(code+1));
+                    fprintf(stderr, "back %hhu\n", code[1]);
 #endif
                 }
                 offset -= code[1];
@@ -211,7 +226,7 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
 #ifdef LOADER
                     log("fwd\n");
 #else
-                    fprintf(stderr, "fwd %u\n", *(code+1));
+                    fprintf(stderr, "fwd %u\n", code[1]);
 #endif
                 }
                 offset += code[1];
@@ -434,7 +449,7 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
 #ifdef LOADER
                     log("seek\n");
 #else
-                    fprintf(stderr, "seek %u\n", offset);
+                    fprintf(stderr, "seek %lu\n", offset);
 #endif
                 }
                 code += 4;
@@ -444,55 +459,58 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
                 if (debug)
                     log("abort\n");
 
-                abort("abort triggered, halting VM!\n")
+                abort("abort triggered, halting VM!\n");
                 break;
             case OP_ABORTEQ:
                 code++;
                 if (debug)
                     log("aborteq\n");
                 if (eq)
-                    abort("eq flag not set, halting VM!\n")
+                    abort("eq flag not set, halting VM!\n");
                 break;
             case OP_ABORTNE:
                 code++;
                 if (debug)
                     log("abortlt\n");
                 if (!eq)
-                    abort("eq flag not set, halting VM!\n")
+                    abort("eq flag not set, halting VM!\n");
                 break;
             case OP_ABORTLT:
                 code++;
                 if (debug)
                     log("abortlt\n");
                 if (lt)
-                    abort("lt flag set, halting VM!\n")
+                    abort("lt flag set, halting VM!\n");
                 break;
             case OP_ABORTGT:
                 code++;
                 if (debug)
                     log("abortgt\n");
                 if (gt)
-                    abort("gt flag set, halting VM!\n")
+                    abort("gt flag set, halting VM!\n");
                 break;
             case OP_ABORTF:
                 code++;
                 if (debug)
                     log("abortf\n");
                 if (found)
-                    abort("f flag set, halting VM!\n")
+                    abort("f flag set, halting VM!\n");
                 break;
             case OP_ABORTNF:
                 code++;
                 if (debug)
                     log("abortnf\n");
                 if (!found)
-                    abort("f flag is not set, halting VM!\n")
+                    abort("f flag is not set, halting VM!\n");
                 break;
             case OP_NEXT:
                 if (debug) {
                     log("next\n");
                 }
                 found = gt = lt = eq = 0;
+
+                memset(stack, 0, stack_size); // Clear stack.
+                top = stack_size - 1;
 
                 bytecode = code + 1;
 #ifndef LOADER
@@ -509,14 +527,21 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
 #ifndef LOADER
                 // Panic; not proper opcode.
                 fprintf(stderr, "Invalid opcode. State:\n"
-                                "  Relative:  %u\n"
-                                "    Actual:  %x:%u\n"
-                                "  Memory:    %x\n"
-                                "    Actual:  %x\n"
-                                "  Code Loc:  %x\n"
-                                "    Actual:  %x\n"
-                                "  Opcode:    %u\n",
-                        set_mode, current_mode->memory, current_mode->size, offset, current_mode->memory + offset, code - bytecode, code, *code);
+                                "  Relative:  %lu\n"
+                                "    Actual:  %lx:%lu\n"
+                                "  Memory:    %lx\n"
+                                "    Actual:  %lx\n"
+                                "  Code Loc:  %lx\n"
+                                "    Actual:  %lx\n"
+                                "  Opcode:    %hhu\n",
+                        (uint32_t)set_mode,
+                        (uint32_t)current_mode->memory,
+                        (uint32_t)current_mode->size,
+                        (uint32_t)offset,
+                        (uint32_t)(current_mode->memory + offset),
+                        (uint32_t)(code - bytecode),
+                        (uint32_t)code,
+                        *code);
 #endif
                 abort("Halting startup.\n");
                 break;
@@ -524,14 +549,17 @@ exec_bytecode(uint8_t *bytecode, uint16_t ver, uint32_t len, int debug)
 
         if (offset > current_mode->size) { // Went out of bounds. Error.
 #ifndef LOADER
-            fprintf(stderr, " -> %x", offset);
+            fprintf(stderr, " -> %lx", offset);
 #endif
             abort("seeked out of bounds\n");
         }
 
 #ifndef LOADER
         if (debug) {
-            fprintf(stderr, "l:%u g:%u e:%u f:%u m:%u o:0x%x\nc:0x%x m:0x%x n:%x\n", lt, gt, eq, found, set_mode, offset, code - bytecode, current_mode->memory + offset, code);
+            fprintf(stderr, "l:%d g:%d e:%d f:%d m:%lu o:0x%lx\nc:0x%lx m:0x%lx n:%lx\n",
+                lt, gt, eq, found,
+                set_mode,
+                (uint32_t)offset, (uint32_t)(code - bytecode), (uint32_t)(current_mode->memory + offset), (uint32_t)code);
             wait();
         }
 #endif
@@ -623,7 +651,7 @@ execb(char *filename, int build_cache)
         // File wasn't found. The user didn't enable anything.
         return 0;
     }
-    size_t len = fsize(f);
+    uint32_t len = fsize(f);
     fread((uint8_t *)FCRAM_PATCH_LOC, 1, len, f);
     fclose(f);
 
@@ -697,5 +725,11 @@ execb(char *filename, int build_cache)
         debug = 1;
     }
 
-    return exec_bytecode(patch_mem, ver, patch_len, debug);
+#ifndef LOADER
+    if (stack_glob == NULL) {
+        stack_glob = static_allocate(STACK_SIZE);
+    }
+#endif
+
+    return exec_bytecode(patch_mem, patch_len, stack_glob, STACK_SIZE, ver, debug);
 }

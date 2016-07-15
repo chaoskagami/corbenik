@@ -10,8 +10,19 @@ endif
 
 TOPDIR ?= $(CURDIR)
 MAKEROM ?= makerom
-PYTHON ?= python3
+PYTHON ?= python2
 include $(DEVKITARM)/3ds_rules
+
+ifeq "$(root)" "clusterfuck"
+  PATHARGS := -DPATH_ROOT=\"\"
+  PATHARGS += -DPATH_DATA=\"/$(fw_folder)\"
+else ifeq "$(root)" "cruel"
+  PATHARGS := -DPATH_ROOT=\"/3ds/apps\"
+  PATHARGS += -DPATH_DATA=\"/3ds/appdata/$(fw_folder)\"
+else ifeq "$(root)" "shadowhand"
+  PATHARGS := -DPATH_ROOT=\"/homebrew/3ds\"
+  PATHARGS += -DPATH_DATA=\"/homebrew/3ds/$(fw_folder)\"
+endif
 
 #---------------------------------------------------------------------------------
 # TARGET is the name of the output
@@ -36,7 +47,7 @@ CFLAGS	:= -flto -Wall -Os -mword-relocations $(ERROR) \
 			-fomit-frame-pointer -ffunction-sections -fdata-sections -fshort-wchar \
 			$(ARCH)
 
-CFLAGS	+=	$(INCLUDE) -DARM11 -D_3DS -DLOADER=1
+CFLAGS	+=	$(INCLUDE) -DARM11 -D_3DS -DLOADER=1 -DPATH_CFW=\"/$(fw_folder)\" $(PATHARGS)
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu99
 

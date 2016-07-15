@@ -201,11 +201,16 @@ show_menu(struct options_s *options, uint8_t *toggles)
         else if (cursor_y > cursor_max - 1)
             cursor_y = cursor_min;
 
+        if (less_mode) {
+            window_top = cursor_y;
+            window_bottom = window_top + window_size;
+            clear_disp(TOP_SCREEN);
+        }
+
         if (cursor_y < window_top + cursor_min) {
             window_top = cursor_y - cursor_min;
             window_bottom = window_top + window_size;
             clear_disp(TOP_SCREEN);
-
         } else if (cursor_y > window_bottom - cursor_min) {
             window_bottom = cursor_y + cursor_min;
             window_top = window_bottom - window_size;

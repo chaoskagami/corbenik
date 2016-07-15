@@ -184,7 +184,7 @@ Credits
  * General inspiration from Cakes, FIRM decryption code, reboot assembly code, some code for text display. https://github.com/mid-kid/CakesForeveryWan
 
 @Wolfvak
- * Code segment dumping + loading
+ * Code segment dumping + loading, ideas, and a lot of miscellaneous code.
 
 @AuroraWright
  * RE work, patches, EmuNAND, and Reboot/Firmlaunch C code. https://github.com/AuroraWright/Luma3ds
@@ -218,6 +218,9 @@ Credits
 
 @TiniVi
  * RE work, screen deinit.
+
+@gemarcano
+ * For general help and libctr9_io (which is a submodule here.) Made life much easier.
 
 Temptress Cerise (GBATemp) 
  * A LOT of testing which was really helpful.

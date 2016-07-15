@@ -216,19 +216,33 @@ menu_info()
 }
 
 #define ln(s) { 0, s, "", not_option, 0, 0 }
+#define lnh(s) { 0, s, "", not_option, 1, 0 }
 
 static struct options_s help_d[] = {
-    ln(FW_NAME " is another 3DS CFW for power users."),
+    lnh("About"),
+    ln("  This is another 3DS CFW for power users."),
     ln("  It seeks to address some faults in other"),
     ln("  CFWs and is generally just another choice"),
     ln("  for users - but primarily is intended for"),
-    ln("  developers and is not for the faint of heart."),
+    ln("  developers. It is not for the faint of heart."),
     ln(""),
-    ln("Credits to people who've helped me put this"),
-    ln("  together by code, documentation, or help:"),
+    lnh("Usage"),
+    ln("  A         -> Select/Toggle/Increment"),
+    ln("  B         -> Back/Boot"),
+    ln("  X         -> Decrement"),
+    ln("  Select    -> Help/Information"),
+    ln("  Down      -> Down"),
+    ln("  Right     -> Down five"),
+    ln("  Up        -> Up"),
+    ln("  Left      -> Up five"),
+    ln("  L+R+Start -> Menu Screenshot"),
+    ln(""),
+    lnh("Credits"),
     ln("  @mid-kid, @Wolfvak, @Reisyukaku, @AuroraWright"),
     ln("  @d0k3, @TuxSH, @Steveice10, @delebile,"),
-    ln("  @Normmatt, @b1l1s, @dark-samus, @TiniVi, etc"),
+    ln("  @Normmatt, @b1l1s, @dark-samus, @TiniVi,"),
+    ln("  @gemarcano, and anyone else I may have"),
+    ln("  forgotten (yell at me, please!)"),
     ln(""),
     ln("  <https://github.com/chaoskagami/corbenik>"),
     { -1, "", "", not_option, 0, 0 }
@@ -271,17 +285,17 @@ void chainload_menu();
 #endif
 
 static struct options_s main_s[] = {
-    { 0, "Options",            "Internal options for the CFW. These are part of " FW_NAME " itself.", call_fun, (uint32_t)menu_options, 0 },
-    { 0, "Patches",            "External bytecode patches found in `" PATH_PATCHES "`. You can choose which to enable.", call_fun, (uint32_t)menu_patches, 0 },
+    { 0, "Options",            "Internal options for the CFW.\nThese are part of " FW_NAME " itself.", call_fun, (uint32_t)menu_options, 0 },
+    { 0, "Patches",            "External bytecode patches found in `" PATH_PATCHES "`.\nYou can choose which to enable.", call_fun, (uint32_t)menu_patches, 0 },
     { 0, "Info",               "Shows the current FIRM versions (and loads them, if needed)", call_fun, (uint32_t)menu_info,    0 },
-    { 0, "Help/Readme",        "Displays info. Why are you opening help on help? That's kind of silly.", call_fun, (uint32_t)menu_help,    0 },
+    { 0, "Readme",             "Mini-readme.\nWhy are you opening help on this, though?\nThat's kind of silly.", call_fun, (uint32_t)menu_help,    0 },
     { 0, "Reboot",             "Reboots the console.", call_fun, (uint32_t)reset,        0 },
     { 0, "Power off",          "Powers off the console.", call_fun, (uint32_t)poweroff,     0 },
-    { 0, "Save Configuration", "Save the configuration. You must do this prior to booting, otherwise nothing is done.", call_fun, (uint32_t)save_config,  0 },
+    { 0, "Save Configuration", "Save the configuration.\nYou must do this prior to booting,\notherwise the cache will not be (re)generated..", call_fun, (uint32_t)save_config,  0 },
 #if defined(CHAINLOADER) && CHAINLOADER == 1
     { 0, "Chainload",          "Boot another ARM9 payload file.", call_fun, (uint32_t)chainload_menu, 0 },
 #endif
-    { 0, "Boot Firmware",      "Generates caches, patches the firmware, and boots it.", break_menu, 0, 0 },
+    { 0, "Boot Firmware",      "Generates caches, patches the firmware, and boots it.\nMake sure to 'Save Configuration' first if any options changed.", break_menu, 0, 0 },
 
     // Sentinel.
     { -1, "", "", 0, -1, -1 }, // cursor_min and cursor_max are stored in the last two.

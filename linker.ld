@@ -1,37 +1,31 @@
+OUTPUT_ARCH(arm)
 ENTRY(_start)
 SECTIONS
 {
     . = 0x23F00000;
 
-    START_SECTION = .;
-      .text.start : {
-          *(.text.start)
-      }
-    START_SECTION_END = .;
+    .text.start : {
+        *(.text.start)
+    }
 
-    TEXT_SECTION = .;
-      .text : {
-          *(.text)
-      }
-    TEXT_SECTION_END = .;
+    .text : {
+        *(.text)
+    }
 
-    DATA_SECTION = .;
-      .data : {
-          *(.data)
-      }
-    DATA_SECTION_END = .;
+    .data : {
+        *(.data)
+    }
 
-    BSS_SECTION = .;
-      .bss : {
-          *(.bss COMMON)
-      }
-    BSS_SECTION_END = .;
+    .bss : {
+        __bss_start = .;
+        *(.bss COMMON)
+    }
+    __bss_end = .;
 
-    RODATA_SECTION = .;
-      .rodata : {
-          *(.rodata)
-      }
-    RODATA_SECTION_END = .;
+    .rodata : {
+        *(.rodata)
+    }
 
     . = ALIGN(4);
+    __end__ = 0x20400000;
 }

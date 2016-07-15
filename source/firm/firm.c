@@ -122,14 +122,14 @@ uint8_t* key_search(uint8_t* mem, uint32_t size, uint8_t* sha256, uint8_t byte) 
 }
 
 void extract_slot0x05keyY() {
-    if (firm1 == NULL)
-        dump_firm(&firm1, 1);
+    if (firm0 == NULL)
+        dump_firm(&firm0, 0);
 
     uint8_t sha256[] = {0x98, 0x24, 0x27, 0x14, 0x22, 0xB0, 0x6B, 0xF2, 0x10, 0x96, 0x9C, 0x36, 0x42, 0x53, 0x7C, 0x86,
                         0x62, 0x22, 0x5C, 0xFD, 0x6F, 0xAE, 0x9B, 0x0A, 0x85, 0xA5, 0xCE, 0x21, 0xAA, 0xB6, 0xC8, 0x4D};
 
-    uint8_t* key_loc     = (uint8_t*)firm1 + firm1->section[2].offset;
-    uint32_t search_size = firm1->section[2].size;
+    uint8_t* key_loc     = (uint8_t*)firm0 + firm0->section[2].offset;
+    uint32_t search_size = firm0->section[2].size;
 
     uint8_t mem[16] __attribute__((aligned(4))) = {0};
 

@@ -5,41 +5,37 @@
 
 extern void waitcycles(uint32_t cycles);
 
+#define ARM9_APPROX_DELAY_MAX 134058675 / 95
+
 uint32_t
 wait_key(_UNUSED int sleep)
 {
-    // If your dpad has issues, please add this to the makefile.
-    if (sleep) {
-        #define ARM9_APPROX_DELAY_MAX 134058675 / 95
-        waitcycles(ARM9_APPROX_DELAY_MAX); // Approximately what a human can input - fine tuning needed (sorry, TASers!)
-    }
-
     uint32_t ret = 0, get = 0;
     while (ret == 0) {
-        get = HID_PAD;
+        get = ctr_hid_get_buttons();
 
-        if ((get & (BUTTON_L | BUTTON_R | BUTTON_STA)) == (BUTTON_L | BUTTON_R | BUTTON_STA)) {
+        if ((get & (CTR_HID_LT | CTR_HID_RT | CTR_HID_START)) == (CTR_HID_LT | CTR_HID_RT | CTR_HID_START)) {
             screenshot();
             waitcycles(ARM9_APPROX_DELAY_MAX); // Approximately what a human can input - fine tuning needed (sorry, TASers!)
-        } else if (get & BUTTON_UP)
-            ret = BUTTON_UP;
-        else if (get & BUTTON_DOWN)
-            ret = BUTTON_DOWN;
-        else if (get & BUTTON_RIGHT)
-            ret = BUTTON_RIGHT;
-        else if (get & BUTTON_LEFT)
-            ret = BUTTON_LEFT;
-        else if (get & BUTTON_A)
-            ret = BUTTON_A;
-        else if (get & BUTTON_B)
-            ret = BUTTON_B;
-        else if (get & BUTTON_X)
-            ret = BUTTON_X;
-        else if (get & BUTTON_SEL)
-            ret = BUTTON_SEL;
+        } else if (get & CTR_HID_UP)
+            ret = CTR_HID_UP;
+        else if (get & CTR_HID_DOWN)
+            ret = CTR_HID_DOWN;
+        else if (get & CTR_HID_RIGHT)
+            ret = CTR_HID_RIGHT;
+        else if (get & CTR_HID_LEFT)
+            ret = CTR_HID_LEFT;
+        else if (get & CTR_HID_A)
+            ret = CTR_HID_A;
+        else if (get & CTR_HID_B)
+            ret = CTR_HID_B;
+        else if (get & CTR_HID_X)
+            ret = CTR_HID_X;
+        else if (get & CTR_HID_SELECT)
+            ret = CTR_HID_SELECT;
 
     }
-    while (HID_PAD & ret);
+    while (ctr_hid_get_buttons());
 
     return ret;
 }

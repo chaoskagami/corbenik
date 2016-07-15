@@ -114,35 +114,35 @@ show_menu(struct options_s *options, uint8_t *toggles)
         uint32_t key = wait_key(1);
 
         switch (key) {
-            case BUTTON_UP:
+            case CTR_HID_UP:
                 if (cursor_min == cursor_max)
                     break;
                 cursor_y -= 1;
                 while ((options[cursor_y].allowed == not_option || (options[cursor_y].allowed == boolean_val_n3ds && !is_n3ds)) && cursor_y >= cursor_min && !less_mode)
                     cursor_y--;
                 break;
-            case BUTTON_DOWN:
+            case CTR_HID_DOWN:
                 if (cursor_min == cursor_max)
                     break;
                 cursor_y += 1;
                 while ((options[cursor_y].allowed == not_option || (options[cursor_y].allowed == boolean_val_n3ds && !is_n3ds)) && cursor_y < cursor_max && !less_mode)
                     cursor_y++;
                 break;
-            case BUTTON_LEFT:
+            case CTR_HID_LEFT:
                 if (cursor_min == cursor_max)
                     break;
                 cursor_y -= 5;
                 while ((options[cursor_y].allowed == not_option || (options[cursor_y].allowed == boolean_val_n3ds && !is_n3ds)) && cursor_y >= cursor_min && !less_mode)
                     cursor_y--;
                 break;
-            case BUTTON_RIGHT:
+            case CTR_HID_RIGHT:
                 if (cursor_min == cursor_max)
                     break;
                 cursor_y += 5;
                 while ((options[cursor_y].allowed == not_option || (options[cursor_y].allowed == boolean_val_n3ds && !is_n3ds)) && cursor_y < cursor_max && !less_mode)
                     cursor_y++;
                 break;
-            case BUTTON_A:
+            case CTR_HID_A:
                 if (less_mode)
                     break;
 
@@ -161,7 +161,7 @@ show_menu(struct options_s *options, uint8_t *toggles)
                     cursor_y = cursor_min;
                 }
                 break;
-            case BUTTON_X:
+            case CTR_HID_X:
                 if (options[cursor_y].allowed == ranged_val) {
                     if (toggles[options[cursor_y].index] == options[cursor_y].a)
                         toggles[options[cursor_y].index] = options[cursor_y].b;
@@ -169,12 +169,12 @@ show_menu(struct options_s *options, uint8_t *toggles)
                         toggles[options[cursor_y].index]--;
                 }
                 break;
-            case BUTTON_B:
+            case CTR_HID_B:
                 exit = 1;
                 clear_disp(TOP_SCREEN);
                 cursor_y = cursor_min;
                 break;
-            case BUTTON_SEL:
+            case CTR_HID_SELECT:
                 if (options[cursor_y].desc[0] != 0) {
                     show_help(options[cursor_y].desc);
                     clear_disp(TOP_SCREEN);

@@ -1,3 +1,5 @@
+#include <ctr9/ctr_hid.h>
+
 #include "common.h"
 #include "firm/firm.h"
 #include "input.h"
@@ -5,11 +7,10 @@
 #include "screeninit.h"
 #include "std/abort.h"
 
-int menu_handler();
-
 int is_n3ds = 0;
-
 int doing_autoboot = 0;
+
+int menu_handler();
 void shut_up();
 
 int
@@ -50,7 +51,7 @@ main(int argc, char** argv)
     }
 
     // Autoboot. Non-standard code path.
-    if (config.options[OPTION_AUTOBOOT] && !(HID_PAD & BUTTON_R)) {
+    if (config.options[OPTION_AUTOBOOT] && (ctr_hid_get_buttons() & CTR_HID_RT)) {
         if (config.options[OPTION_SILENCE])
             shut_up(); // This does exactly what it sounds like.
         doing_autoboot = 1;

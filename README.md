@@ -11,7 +11,7 @@ Corbenik is licensed under the terms of the GPLv3. Please obey it. You should ha
 Usage
 -------------------------
 
-If you are using a nightly build off of https://github.com/chaoskagami/corbenik - treat all paths starting in `/corbenik` as `/skeith` instead for these instructions.
+If you are using a nightly build off of https://github.com/chaoskagami/skeith - treat all paths starting in `/corbenik` as `/skeith` instead for these instructions.
 
 Skip to `Installing` if you are installing this for the first time, otherwise follow `Updating` and then `Installing`.
 

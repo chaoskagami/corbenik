@@ -220,7 +220,7 @@ Credits
  * RE work, screen deinit.
 
 @gemarcano
- * For general help and libctr9_io (which is a submodule here.) Made life much easier.
+ * For general help and libctr9 (which is a submodule here.) Made life much easier.
 
 Temptress Cerise (GBATemp) 
  * A LOT of testing which was really helpful.

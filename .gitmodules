@@ -4,6 +4,6 @@
 [submodule "host/bdfe"]
 	path = host/bdfe
 	url = https://github.com/chaoskagami/bdfe
-[submodule "external/libctr9_io"]
-	path = external/libctr9_io
-	url = https://github.com/gemarcano/libctr9_io
+[submodule "external/libctr9"]
+	path = external/libctr9
+	url = https://github.com/gemarcano/libctr9

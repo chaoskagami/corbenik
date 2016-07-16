@@ -46,9 +46,9 @@ REL ?= master
 CHAINLOADER ?= 1
 
 CROSS_ASFLAGS := -mlittle-endian -mcpu=arm946e-s -march=armv5te
-CROSS_CFLAGS  := -MMD -MP -Wall -Wextra -Werror -fomit-frame-pointer -I$(shell pwd)/external/libctr9_io/out/include -Os $(ASFLAGS) -fshort-wchar -fno-builtin -std=gnu11 -DVERSION=\"$(REVISION)\" -DREL=\"$(REL)\" -DCHAINLOADER=$(CHAINLOADER) -DPATH_CFW=\"/$(fw_folder)\" -DFW_NAME=\"$(fw_name)\" $(PATHARGS)
+CROSS_CFLAGS  := -MMD -MP -Wall -Wextra -Werror -fomit-frame-pointer -I$(shell pwd)/external/libctr9/out/include -Os $(ASFLAGS) -fshort-wchar -fno-builtin -std=gnu11 -DVERSION=\"$(REVISION)\" -DREL=\"$(REL)\" -DCHAINLOADER=$(CHAINLOADER) -DPATH_CFW=\"/$(fw_folder)\" -DFW_NAME=\"$(fw_name)\" $(PATHARGS)
 CROSS_FLAGS   := dir_out=$(abspath $(dir_out)) --no-print-directory
-CROSS_LDFLAGS := -nostdlib -Wl,-z,defs -lgcc -Wl,-Map,$(dir_build)/link.map -L$(shell pwd)/external/libctr9_io/out/lib -lctr9
+CROSS_LDFLAGS := -nostdlib -Wl,-z,defs -lgcc -Wl,-Map,$(dir_build)/link.map -L$(shell pwd)/external/libctr9/out/lib -lctr9
 
 objects_cfw = $(patsubst $(dir_source)/%.s, $(dir_build)/%.o, \
 			  $(patsubst $(dir_source)/%.c, $(dir_build)/%.o, \
@@ -59,7 +59,7 @@ all: hosttools font ctr9io a9lh patch external
 
 .PHONY: ctr9io
 ctr9io:
-	cd external/libctr9_io && autoreconf -fi && CFLAGS= LDFLAGS= ASFLAGS= ./configure --host arm-none-eabi --prefix=$(shell pwd)/external/libctr9_io/out && make && make install
+	cd external/libctr9 && autoreconf -fi && CFLAGS= LDFLAGS= ASFLAGS= ./configure --host arm-none-eabi --prefix=$(shell pwd)/external/libctr9/out && make && make install
 
 .PHONY: release
 release:
@@ -116,7 +116,7 @@ $(dir_out)/$(fw_folder)/locale: all
 .PHONY: clean
 clean:
 	rm -f host/{font-emit,font.h,font_prop.h,termfont.bin}
-	cd external/libctr9_io && git clean -fxd
+	cd external/libctr9 && git clean -fxd
 	make -C external dir_out=$(dir_out) fw_folder=$(fw_folder) root=$(root) clean
 	make -C patch dir_out=$(dir_out) fw_folder=$(fw_folder) root=$(root) clean
 	make -C host/bdfe dir_out=$(dir_out) fw_folder=$(fw_folder) root=$(root) clean

@@ -23,7 +23,7 @@ main(int argc, char** argv)
     std_init();
 
     int c = fmount();
-    screen_init();
+    screen_mode(0);
     clear_bg();
     load_bg_top(PATH_BITS "/top.bin");
     load_bg_bottom(PATH_BITS "/bottom.bin"); // This is basically a menuhax splash (90deg rotated BGR8 pixel data)

@@ -1,6 +1,7 @@
 #if defined(CHAINLOADER) && CHAINLOADER == 1
 
 #include "common.h"
+#include "screeninit.h"
 #include "firm/firm.h"
 #include "firm/headers.h"
 
@@ -66,6 +67,8 @@ void chainload_file(char* chain_file_data) {
     argv_off[0] = (uint32_t)off;
 
     fprintf(stderr, "Chaining to copy payload...\n");
+
+    screen_mode(1); // TODO - Because RGBA8 screeninit is non-standard...ugh
 
     ((void(*)(void*, uint32_t))0x24F00000)(chain_data, size + 256 + 8); // Size of payload + argv.
 }

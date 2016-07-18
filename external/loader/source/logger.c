@@ -8,8 +8,8 @@
 #define PATH_MAX 255
 #define _MAX_LFN 255
 #endif
-#include "../../../source/config.h"
-#include "../../../source/patch_format.h"
+#include <option.h>
+#include <patch_format.h>
 
 Handle log_file_hdl;
 int logger_is_initd = 0;

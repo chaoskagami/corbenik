@@ -1,6 +1,8 @@
 #ifndef __PATCH_FORMAT_H
 #define __PATCH_FORMAT_H
 
+#include <corbconf.h>
+
 // The following are titleids which are handled specially for one reason or
 // another.
 // We use titleIDs to be generic; it ensures that patches can share the same
@@ -22,77 +24,60 @@
 #define PATCH_DISABLED (1 << 2)   // Do not allow changing this patch's status. With PATCH_MANDATORY,
                                   // this prevents disabling it.
 
-#ifndef PATH_ROOT
-#define PATH_ROOT "" // Root "storage" directory. Nothing by default (e.g. root clutter mode)
-#endif
+#define PATH_MODULES         LIBDIR "/module"        // Sysmodule location
+#define PATH_PATCHES         SBINDIR                 // Patch binary folder.
 
-// You can redefine this in the Makefile, if you'd like.
-// Recommended names for being silly:
-//   Windows
-//   system
+#define PATH_BITS            LIBEXECDIR              // Path to misc bits we need (emunand code, reboot code, etc)
 
-//#ifndef PATH_CFW
-//#define PATH_CFW "/corbenik" // CFW root directory.
-//#endif
+#define PATH_EMUNAND_CODE    PATH_BITS "/emunand.bin"       // Emunand hook.
+#define PATH_SCREENINIT_CODE PATH_BITS "/screeninit.bin"    // Screeninit code (ARM11)
+#define PATH_BACKDOOR        PATH_BITS "/backdoor.bin"      // svcBackdoor
+#define PATH_REBOOT_HOOK     PATH_BITS "/reboot_hook.bin"   // Reboot hook
+#define PATH_REBOOT_CODE     PATH_BITS "/reboot_code.bin"   // Reboot entry code
 
-//#ifndef PATH_DATA
-//#define PATH_DATA PATH_ROOT PATH_CFW // Data "storage" directory. Nothing by default (e.g. root clutter mode)
-//#endif
+#define PATH_CHAINS          PREFIX "/boot"
 
-#define PATH_MODULES PATH_ROOT PATH_CFW "/module"     // Sysmodule location
-#define PATH_PATCHES PATH_ROOT PATH_CFW "/patch"      // Patch binary folder.
+#define PATH_TEMP            LOCALSTATEDIR               // Files that are transient and used to speed operation
+#define PATH_LOADER_CACHE    PATH_TEMP "/loader" // Cached patch bytecode for loader.
 
-#define PATH_BITS PATH_ROOT PATH_CFW "/bits" // Path to misc bits we need (emunand code, reboot code, etc)
+#define PATH_LOCEMU          LOCALEDIR "/emu"    // Locale emulation config
+#define PATH_FIRMWARES       LIBDIR   "/firmware" // Firmware folder.
 
-#define PATH_EMUNAND_CODE PATH_BITS "/emunand.bin"       // Emunand hook.
-#define PATH_SCREENINIT_CODE PATH_BITS "/screeninit.bin" // Screeninit code (ARM11)
-#define PATH_BACKDOOR PATH_BITS "/backdoor.bin"   // svcBackdoor
-#define PATH_REBOOT_HOOK PATH_BITS "/reboot_hook.bin"   // Reboot hook
-#define PATH_REBOOT_CODE PATH_BITS "/reboot_code.bin"   // Reboot entry code
+#define PATH_CONFIG_DIR      SYSCONFDIR                   // Config file directory.
+#define PATH_CONFIG          PATH_CONFIG_DIR "/main.conf" // Config file.
+#define PATH_CPU_CFG         PATH_CONFIG_DIR "/cpu.conf"  // CPU settings config
 
-#define PATH_CHAINS PATH_DATA "/chain"
+#define PATH_NATIVE_P        PATH_TEMP "/p_native"
+#define PATH_AGB_P           PATH_TEMP "/p_agb"
+#define PATH_TWL_P           PATH_TEMP "/p_twl"
 
-#define PATH_TEMP PATH_DATA "/cache"           // Files that are transient and used to speed operation
-#define PATH_LOADER_CACHE PATH_TEMP "/loader" // Cached patch bytecode for loader.
+#define PATH_KEYS            SHAREDIR "/keys" // Keyfiles will be loaded from this dir, and
+                                              // additionally the root if not found.
 
-#define PATH_LOCEMU PATH_DATA "/locale"    // Locale emulation config
-#define PATH_FIRMWARES PATH_DATA "/firmware" // Firmware folder.
+#define PATH_EXEFS           LIBDIR "/exe"         // ExeFS overrides/dumps, named by titleid
+#define PATH_EXEFS_TEXT      PATH_EXEFS "/text"    // Text segment overrides/dumps, named by titleid
+#define PATH_EXEFS_RO        PATH_EXEFS "/ro"      // RO segment overrides/dumps, named by titleid
+#define PATH_EXEFS_DATA      PATH_EXEFS "/data"    // Data segment overrides/dumps, named by titleid
 
-#define PATH_CONFIG_DIR PATH_DATA "/config"       // Config file directory.
-#define PATH_CONFIG PATH_CONFIG_DIR "/main.conf" // Config file.
-#define PATH_CPU_CFG PATH_CONFIG_DIR "/cpu.conf" // CPU settings config
+#define PATH_NATIVE_F        PATH_FIRMWARES "/native"
+#define PATH_AGB_F           PATH_FIRMWARES "/agb"
+#define PATH_TWL_F           PATH_FIRMWARES "/twl"
 
-#define PATH_NATIVE_P PATH_TEMP "/p_native"
-#define PATH_AGB_P PATH_TEMP "/p_agb"
-#define PATH_TWL_P PATH_TEMP "/p_twl"
+#define PATH_NATIVE_CETK     PATH_KEYS "/native.cetk"
+#define PATH_TWL_CETK        PATH_KEYS "/twl.cetk"
+#define PATH_AGB_CETK        PATH_KEYS "/agb.cetk"
 
-#define PATH_KEYS PATH_DATA "/keys" // Keyfiles will be loaded from this dir, and
-                                   // additionally the root if not found.
+#define PATH_NATIVE_FIRMKEY  PATH_KEYS "/native.key"
+#define PATH_TWL_FIRMKEY     PATH_KEYS "/twl.key"
+#define PATH_AGB_FIRMKEY     PATH_KEYS "/agb.key"
 
-#define PATH_EXEFS PATH_DATA "/exe"         // ExeFS overrides/dumps, named by titleid
-#define PATH_EXEFS_TEXT PATH_EXEFS "/text" // Text segment overrides/dumps, named by titleid
-#define PATH_EXEFS_RO PATH_EXEFS "/ro"     // RO segment overrides/dumps, named by titleid
-#define PATH_EXEFS_DATA PATH_EXEFS "/data" // Data segment overrides/dumps, named by titleid
-
-#define PATH_NATIVE_F PATH_FIRMWARES "/native"
-#define PATH_AGB_F PATH_FIRMWARES "/agb"
-#define PATH_TWL_F PATH_FIRMWARES "/twl"
-
-#define PATH_NATIVE_CETK PATH_KEYS "/native.cetk"
-#define PATH_TWL_CETK PATH_KEYS "/twl.cetk"
-#define PATH_AGB_CETK PATH_KEYS "/agb.cetk"
-
-#define PATH_NATIVE_FIRMKEY PATH_KEYS "/native.key"
-#define PATH_TWL_FIRMKEY PATH_KEYS "/twl.key"
-#define PATH_AGB_FIRMKEY PATH_KEYS "/agb.key"
-
-#define PATH_SLOT0X11KEY96 PATH_KEYS "/11.key"
+#define PATH_SLOT0X11KEY96   PATH_KEYS "/11Key96.key"
 
 #define PATH_ALT_SLOT0X11KEY96 "/slot0x11key96.bin" // Hey, your perrogative, buddy. I like cleaned up
                                                     // paths.
 
-#define PATH_BOOTLOG PATH_DATA "/boot.log"
-#define PATH_LOADERLOG PATH_DATA "/loader.log"
+#define PATH_BOOTLOG         LOCALSTATEDIR "/boot.log"
+#define PATH_LOADERLOG       LOCALSTATEDIR "/loader.log"
 
 #define PATCH_FLAG_REQUIRE (1 << 0) // Force enable patch unless 'Unsafe Options' is checked.
 #define PATCH_FLAG_DEVMODE (1 << 1) // Require 'Developer Options' to be checked.

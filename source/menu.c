@@ -276,7 +276,7 @@ poweroff()
     ctr_system_poweroff();
 }
 
-#if defined(CHAINLOADER) && CHAINLOADER == 1
+#ifdef CHAINLOADER
 void chainload_menu();
 #endif
 
@@ -288,7 +288,7 @@ static struct options_s main_s[] = {
     { 0, "Reboot",             "Reboots the console.", call_fun, (uint32_t)reset,        0 },
     { 0, "Power off",          "Powers off the console.", call_fun, (uint32_t)poweroff,     0 },
     { 0, "Save Configuration", "Save the configuration.\nYou must do this prior to booting,\notherwise the cache will not be (re)generated..", call_fun, (uint32_t)save_config,  0 },
-#if defined(CHAINLOADER) && CHAINLOADER == 1
+#ifdef CHAINLOADER
     { 0, "Chainload",          "Boot another ARM9 payload file.", call_fun, (uint32_t)chainload_menu, 0 },
 #endif
     { 0, "Boot Firmware",      "Generates caches, patches the firmware, and boots it.\nMake sure to 'Save Configuration' first if any options changed.", break_menu, 0, 0 },

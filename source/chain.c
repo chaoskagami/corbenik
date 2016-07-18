@@ -1,4 +1,5 @@
-#if defined(CHAINLOADER) && CHAINLOADER == 1
+#include <corbconf.h>
+#ifdef CHAINLOADER
 
 #include <common.h>
 #include <screeninit.h>

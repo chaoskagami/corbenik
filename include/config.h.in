@@ -1,0 +1,22 @@
+/* use chainloader code */
+#define CHAINLOADER %CHAINLOADER%
+
+/* CFW data dirs */
+#define PREFIX        "%PREFIX%"
+
+#define LOCALSTATEDIR "%LOCALSTATEDIR%"
+#define BINDIR        "%BINDIR%"
+#define SBINDIR       "%SBINDIR%"
+#define LIBDIR        "%LIBDIR%"
+#define LIBEXECDIR    "%LIBEXECDIR%"
+#define SHAREDIR      "%DATAROOTDIR%"
+#define SYSCONFDIR    "%SYSCONFDIR%"
+
+#define LOCALEDIR SHAREDIR "/locale"
+
+/* Name of package */
+#define PACKAGE "%PACKAGE%"
+
+/* Define to the version of this package. */
+#define PACKAGE_VERSION "%VERSION%"
+

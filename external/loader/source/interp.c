@@ -13,8 +13,8 @@
 #define PATH_MAX 255
 #define _MAX_LFN 255
 #endif
-#include "../../../source/config.h"
-#include "../../../source/patch_format.h"
+#include <option.h>
+#include <patch_format.h>
 
 // Patches must consist of fewer bytes than this.
 // 16K is reasonable, IMO, and doesn't cause issues.

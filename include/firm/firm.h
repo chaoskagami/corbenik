@@ -1,4 +1,5 @@
 #ifndef __FIRM_H
+#define __FIRM_H
 
 #include <stdint.h>
 

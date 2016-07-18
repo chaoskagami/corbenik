@@ -8,24 +8,8 @@
 #define PATH_MAX 255
 #define _MAX_LFN 255
 #endif
-#include "../../../source/config.h"
-#include "../../../source/patch_format.h"
-/*
-int
-memcmp(const void *buf1, const void *buf2, u32 size)
-{
-    const u8 *buf1c = (const u8 *)buf1;
-    const u8 *buf2c = (const u8 *)buf2;
-
-    for (u32 i = 0; i < size; i++) {
-        int cmp = buf1c[i] - buf2c[i];
-        if (cmp)
-            return cmp;
-    }
-
-    return 0;
-}
-*/
+#include <option.h>
+#include <patch_format.h>
 
 // Quick Search algorithm, adapted from
 // http://igm.univ-mlv.fr/~lecroq/string/node19.html#SECTION00190

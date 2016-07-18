@@ -17,3 +17,6 @@ all: $(OBJECTS)
 .PHONY: clean
 clean:
 	rm -f *.bin *.elf *.o
+
+.PHONY: install
+install:

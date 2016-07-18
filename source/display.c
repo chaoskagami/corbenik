@@ -1,6 +1,4 @@
-#include "common.h"
-#include "firm/firm.h"
-#include "firm/headers.h"
+#include <common.h>
 
 void header(char *append);
 

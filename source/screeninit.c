@@ -1,9 +1,7 @@
+#include <common.h>
 #include <ctr9/io.h>
 #include <ctr9/ctr_screen.h>
 #include <ctr9/i2c.h>
-#include "common.h"
-#include "std/fs.h"
-#include "patch_format.h"
 
 #define PDN_GPU_CNT (*(volatile uint8_t *)0x10141200)
 

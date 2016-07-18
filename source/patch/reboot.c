@@ -1,13 +1,5 @@
-#include "emunand.h"
-#include "../std/memory.h"
-#include "../std/draw.h"
-#include "../std/fs.h"
-#include "../std/abort.h"
-#include "../firm/firm.h"
-#include "../firm/fcram.h"
+#include <common.h>
 #include <ctr9/io.h>
-#include "../firm/headers.h"
-#include "../patch_format.h"
 
 int wait();
 

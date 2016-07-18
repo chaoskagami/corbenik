@@ -1,5 +1,6 @@
-#include "common.h"
+#include <common.h>
 #include <ctr9/ctr_interrupt.h>
+#include <ctr9/ctr_irq.h>
 
 void dump_state_printf(uint32_t* regs) {
 	fprintf(stderr, "  cpsr:%x sp:%x lr:%x\n"
@@ -40,10 +41,6 @@ void databrt_INT(uint32_t* regs) {
 	abort("Cannot continue. Halting.\n");
 }
 
-void irq_INT(_UNUSED uint32_t* regs) {
-	fprintf(stderr, "IRQ called. Returning.\n");
-}
-
 void fiq_INT(_UNUSED uint32_t* regs) {
 	fprintf(stderr, "FIQ called. Returning.\n");
 }
@@ -51,12 +48,12 @@ void fiq_INT(_UNUSED uint32_t* regs) {
 
 void install_interrupts() {
 	ctr_interrupt_prepare();
+    ctr_irq_initialize();
 
     ctr_interrupt_set(CTR_INTERRUPT_RESET,   reset_INT);
     ctr_interrupt_set(CTR_INTERRUPT_UNDEF,   undef_INT);
     ctr_interrupt_set(CTR_INTERRUPT_SWI,     swi_INT);
     ctr_interrupt_set(CTR_INTERRUPT_PREABRT, preabrt_INT);
     ctr_interrupt_set(CTR_INTERRUPT_DATABRT, databrt_INT);
-    ctr_interrupt_set(CTR_INTERRUPT_IRQ,     irq_INT);
     ctr_interrupt_set(CTR_INTERRUPT_FIQ,     fiq_INT);
 }

@@ -1,5 +1,4 @@
-#include "firm.h"
-#include "../common.h"
+#include <common.h>
 
 // We use the firm's section 0's hash to identify the version
 struct firm_signature firm_signatures[] = {

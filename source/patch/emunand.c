@@ -2,17 +2,8 @@
 *   emunand.c
 */
 
-#include "emunand.h"
-#include "../std/memory.h"
-#include "../std/draw.h"
-#include "../std/fs.h"
-#include "../std/abort.h"
-#include "../firm/firm.h"
-#include "../firm/fcram.h"
 #include <ctr9/io.h>
-#include "../firm/headers.h"
-#include "../patch_format.h"
-#include "../config.h"
+#include <common.h>
 
 uint8_t *emunand_temp = (uint8_t *)FCRAM_JUNK_LOC;
 

@@ -1,8 +1,4 @@
-#include "common.h"
-#include "firm/firm.h"
-#include "firm/headers.h"
-#include "std/unused.h"
-
+#include <common.h>
 #include <ctr9/ctr_system.h>
 
 #define MAX_PATCHES ((FCRAM_SPACING / 2) / sizeof(struct options_s))

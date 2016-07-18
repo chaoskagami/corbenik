@@ -1,9 +1,9 @@
 #if defined(CHAINLOADER) && CHAINLOADER == 1
 
-#include "common.h"
-#include "screeninit.h"
-#include "firm/firm.h"
-#include "firm/headers.h"
+#include <common.h>
+#include <screeninit.h>
+#include <firm/firm.h>
+#include <firm/headers.h>
 
 uint32_t current_chain_index = 0;
 

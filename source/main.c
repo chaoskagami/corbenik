@@ -1,12 +1,6 @@
 #include <ctr9/ctr_hid.h>
 
-#include "common.h"
-#include "firm/firm.h"
-#include "input.h"
-#include "config.h"
-#include "screeninit.h"
-#include "std/abort.h"
-#include "interrupt.h"
+#include <common.h>
 
 int is_n3ds = 0;
 int doing_autoboot = 0;

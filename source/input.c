@@ -1,7 +1,5 @@
 #include <stdint.h>
-#include "std/unused.h"
-#include "std/draw.h"
-#include "input.h"
+#include <common.h>
 
 extern void waitcycles(uint32_t cycles);
 

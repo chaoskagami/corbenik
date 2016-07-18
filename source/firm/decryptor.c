@@ -2,12 +2,9 @@
   This is all fairly minimal and based on @d0k3's decrypt9 code.
 */
 
-#include "../std/memory.h"
+#include <common.h>
 #include <ctr9/aes.h>
 #include <ctr9/sha.h>
-
-#include "firm.h"
-#include "decryptor.h"
 
 void
 ncch_getctr(const ncch_h *ncch, uint8_t *ctr, uint8_t type)
@@ -53,19 +50,15 @@ aes_batch(void *dst, const void *src, uint32_t blockCount)
     while (rbc) {
         if (wbc && ((*REG_AESCNT & 0x1F) <= 0xC)) // There's space for at least 4 ints
         {
-            *REG_AESWRFIFO = *src32++;
-            *REG_AESWRFIFO = *src32++;
-            *REG_AESWRFIFO = *src32++;
-            *REG_AESWRFIFO = *src32++;
+			for(int i=0; i < 4; i++)
+	            *REG_AESWRFIFO = *src32++;
             wbc--;
         }
 
         if (rbc && ((*REG_AESCNT & (0x1F << 0x5)) >= (0x4 << 0x5))) // At least 4 ints available for read
         {
-            *dst32++ = *REG_AESRDFIFO;
-            *dst32++ = *REG_AESRDFIFO;
-            *dst32++ = *REG_AESRDFIFO;
-            *dst32++ = *REG_AESRDFIFO;
+			for(int i=0; i < 4; i++)
+	            *dst32++ = *REG_AESRDFIFO;
             rbc--;
         }
     }

@@ -1,16 +1,10 @@
-#include "firm.h"
-
 #include <stdint.h>
 #include <stddef.h>
 
 #include <ctr9/io.h>
 #include <ctr9/aes.h>
 #include <ctr9/sha.h>
-
-#include "../common.h"
-#include <ctr9/io.h>
-
-#include "decryptor.h"
+#include <common.h>
 
 firm_h *firm_loc = (firm_h *)FCRAM_FIRM_LOC;
 uint32_t firm_size = FCRAM_SPACING;

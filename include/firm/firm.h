@@ -1,7 +1,6 @@
 #ifndef __FIRM_H
 
 #include <stdint.h>
-#include "headers.h"
 
 enum consoles
 {

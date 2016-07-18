@@ -1,4 +1,7 @@
 #include <ctr9/ctr_hid.h>
+#include <ctr9/io.h>
+#include <ctr9/ctr_screen.h>
+#include <ctr9/i2c.h>
 
 #include "common.h"
 #include "firm/firm.h"
@@ -23,12 +26,18 @@ main(int argc, char** argv)
     std_init();
 
     int c = fmount();
-    screen_mode(0);
+
+    screen_mode(0); // Use RGBA8 mode.
+
     clear_bg();
-    load_bg_top(PATH_BITS "/top.bin");
+
+    load_bg_top   (PATH_BITS "/top.bin");
     load_bg_bottom(PATH_BITS "/bottom.bin"); // This is basically a menuhax splash (90deg rotated BGR8 pixel data)
+
     clear_disp(TOP_SCREEN);
     clear_disp(BOTTOM_SCREEN);
+
+    ctr_screen_enable_backlight(CTR_SCREEN_BOTH);
 
     set_font(PATH_BITS "/termfont.bin");
 

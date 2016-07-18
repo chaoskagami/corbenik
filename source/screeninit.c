@@ -27,19 +27,18 @@ screen_mode(uint32_t mode)
     // And no, 3dbrew didn't help. Partial init seems to be a superset of what
     // I was attempting.
 
-//    if (PDN_GPU_CNT == 1) {
+    screenInitAddress[2] = 1; // Do a partial init.
+
+    if (PDN_GPU_CNT == 1)
         screenInitAddress[2] = 0; // Do a full init.
-        screenInitAddress[3] = 0xFF; // Brightness
-        screenInitAddress[4] = mode; // Mode
 
-        *a11_entry = (uint32_t)screenInitAddress;
+    screenInitAddress[3] = 0xFF; // Brightness
+    screenInitAddress[4] = mode; // Mode
 
-        while (*a11_entry);
+    *a11_entry = (uint32_t)screenInitAddress;
 
-        // Turn on backlight
-        i2cWriteRegister(I2C_DEV_MCU, 0x22, 1 << 1);
+    while (*a11_entry);
 
-        // FIXME - Time to yell at Gelex now. :|
-        ctr_screen_enable_backlight(CTR_SCREEN_BOTH);
-//    }
+    // Turn on backlight
+    i2cWriteRegister(I2C_DEV_MCU, 0x22, 1 << 1);
 }

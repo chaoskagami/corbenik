@@ -41,10 +41,15 @@ void main(void) {
    *(vu32 *)0x10141200 = 0x1007F;
    *(vu32 *)0x10202014 = 0x00000001;
    *(vu32 *)0x1020200C &= 0xFFFEFFFE;
+   }
+
    *(vu32 *)0x10202240 = brightnessLevel; // Alteration; directly read brightness.
    *(vu32 *)0x10202A40 = brightnessLevel;
+
+   if (do_init == INIT_FULL) {
    *(vu32 *)0x10202244 = 0x1023E;
    *(vu32 *)0x10202A44 = 0x1023E;
+   }
 
    // Top screen
    *(vu32 *)0x10400400 = 0x000001c2;
@@ -101,7 +106,6 @@ void main(void) {
    *(vu32 *)0x10400540 = 0x01980194;
    *(vu32 *)0x10400544 = 0x00000000;
    *(vu32 *)0x10400548 = 0x00000011;
-
    *(vu32 *)0x1040055C = 0x00f00140;
    *(vu32 *)0x10400560 = 0x01c100d1;
    *(vu32 *)0x10400564 = 0x01920052;
@@ -127,9 +131,6 @@ void main(void) {
    *((vu32 *)0x23FFFE00) = 0x18300000;
    *((vu32 *)0x23FFFE04) = 0x18300000;
    *((vu32 *)0x23FFFE08) = 0x18300000 + (yaw * 400);
-   } else if (do_init == INIT_DEINIT) {
-
-   }
 
    //Clear ARM11 entry offset
    *arm11 = 0;

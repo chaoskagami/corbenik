@@ -79,9 +79,9 @@ hosttools:
 
 .PHONY: font
 font: hosttools
-	./host/conv-font-bin.sh
+	make -C host/bdfe
 	mkdir -p $(dir_out)/$(fw_folder)/bits
-	cp host/termfont.bin $(dir_out)/$(fw_folder)/bits/
+	./host/bdfe/bdfe -A -n external/tewi-font/tewi-medium-11.bdf >  $(dir_out)/$(fw_folder)/bits/termfont.bin
 
 .PHONY: full
 full: all contrib $(dir_out)/$(fw_folder)/locale

@@ -9,4 +9,4 @@ build
 *.elf
 *.vco
 input
-modules/template/src/symtab.h
+host/copy.sh

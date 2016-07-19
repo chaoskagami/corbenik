@@ -29,6 +29,7 @@ depcomp
 /Makefile
 /source/Makefile
 /external/Makefile
+/include/Makefile
 /source/corbenik
 /m4
 /include/config.h

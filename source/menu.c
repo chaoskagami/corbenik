@@ -47,7 +47,7 @@ static struct options_s options[] = {
 
     { OPTION_TRACE, "Step Through", "After each important step, [WAIT] will be shown and you'll need to press a key. Debug feature.", boolean_val, 0, 0 },
     { OPTION_OVERLY_VERBOSE, "Verbose", "Output more debug information than the average user needs.", boolean_val, 0, 0 },
-    { OPTION_SAVE_LOGS, "Logging", "Save logs to `" PATH_CFW "` as `boot.log` and `loader.log`. Slows operation a bit.", boolean_val, 0, 0 },
+    { OPTION_SAVE_LOGS, "Logging", "Save logs to `" LOCALSTATEDIR "` as `boot.log` and `loader.log`. Slows operation a bit.", boolean_val, 0, 0 },
 
     //    { OPTION_ARM9THREAD,        "ARM9 Thread", boolean_val, 0, 0 },
     //    { IGNORE_PATCH_DEPS,   "Ignore dependencies", boolean_val, 0, 0 },
@@ -276,7 +276,7 @@ poweroff()
     ctr_system_poweroff();
 }
 
-#ifdef CHAINLOADER
+#if defined(CHAINLOADER) && CHAINLOADER == 1
 void chainload_menu();
 #endif
 
@@ -288,7 +288,7 @@ static struct options_s main_s[] = {
     { 0, "Reboot",             "Reboots the console.", call_fun, (uint32_t)reset,        0 },
     { 0, "Power off",          "Powers off the console.", call_fun, (uint32_t)poweroff,     0 },
     { 0, "Save Configuration", "Save the configuration.\nYou must do this prior to booting,\notherwise the cache will not be (re)generated..", call_fun, (uint32_t)save_config,  0 },
-#ifdef CHAINLOADER
+#if defined(CHAINLOADER) && CHAINLOADER == 1
     { 0, "Chainload",          "Boot another ARM9 payload file.", call_fun, (uint32_t)chainload_menu, 0 },
 #endif
     { 0, "Boot Firmware",      "Generates caches, patches the firmware, and boots it.\nMake sure to 'Save Configuration' first if any options changed.", break_menu, 0, 0 },

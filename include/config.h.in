@@ -1,6 +1,3 @@
-/* use chainloader code */
-#define CHAINLOADER %CHAINLOADER%
-
 /* CFW data dirs */
 #define PREFIX        "%PREFIX%"
 
@@ -18,5 +15,5 @@
 #define PACKAGE "%PACKAGE%"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "%VERSION%"
+#define PACKAGE_VERSION "%PACKAGE_VERSION%"
 

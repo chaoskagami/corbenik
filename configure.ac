@@ -19,13 +19,13 @@ AC_ARG_ENABLE([chainloader],
 
 AC_PREFIX_DEFAULT([/corbenik])
 
-if ! "$enable_chainloader" == "no" ; then
-	CHAINLOADER=1
+if "x$enable_chainloader" == "xyes" ; then
+	CHAINLOADER="1"
 else
-	CHAINLOADER=0
+	CHAINLOADER="0"
 fi
 
-AC_DEFINE([CHAINLOADER], [$CHAINLOADER])
+AC_DEFINE_UNQUOTED([CHAINLOADER], [$CHAINLOADER])
 
 AC_CONFIG_FILES([Makefile source/Makefile external/Makefile include/Makefile])
 

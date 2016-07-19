@@ -18,31 +18,14 @@ Skip to `Installing` if you are installing this for the first time, otherwise fo
 Updating
 -------------------------
 
-When updating Corbenik, usually you should (at minimum) perform the following steps to SAFELY update:
-
- * Delete these files/directories in `/corbenik`:
-   * `cache`
-   * `config`
-   * `boot.log`
-   * `loader.log`
- * If you're upgrading from earlier versions:
-   * 0.0.6 and older:
-     * Delete everything
-   * 0.0.7
-     * Delete `patch`.
-   * 0.0.8
-     * Delete `patch`.
-     * Delete `svc`. Backdoor was folded into `bits`.
- * Unzip all files in-place, overwriting if prompted.
- * Reconfigure settings on boot (follow `Setup` for defaults)
-
+This version is a mandatory clean install. Please wipe your corbenik folder and start fresh.
 
 Installing
 -------------------------
 
 Copy the files to the root of your SD (and optionally, rename arm9loaderhax.bin and set it up with a bootloader.)
 
-Without the FIRMs, it cannot boot up your system. You'll need to fetch the following at minimum, and put it at `/corbenik/firmware/native`:
+Without the FIRMs, it cannot boot up your system. You'll need to fetch the following at minimum, putting the firm at `/corbenik/lib/firmware/native` and cetk at `/corbenik/share/keys/native.cetk`:
 
 Old 3DS (Native FIRM, 11.0):
  * firm: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000002/00000052
@@ -52,16 +35,9 @@ New 3DS (Native FIRM, 11.0):
  * firm: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000002/00000021
  * cetk: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000002/cetk
 
-Note that this is only a recommendation - you can supply near any valid firmware file for your console.
+Note that this is only a recommendation - you can supply near any valid firmware file for your console. You can also supply a decrypted native_firm titlekey as `/corbenik/share/keys/native.key`, although this is no longer required.
 
-You'll need the firmkey for it as well unless you have decrypted your firmware, and it should be placed at `/corbenik/keys/native.key`. I can't tell you where to get it obviously, but there are a few ways to get valid firmware with/without a firmkey and not involving a download from a questionable place:
-
- * Decrypt the CETK using D9 and extract the firmkey using D9's scripts
- * Extract the encTitleKey using D9's scripts, and have D9 convert it
- * Decrypt the firmware with D9 directly
- * Boot another CFW, then reboot into Corbenik with a cetk for native at `/corbenik/keys/native.cetk`
-
-You can also fetch the agb firm and twl firms to `/corbenik/firmware/agb` and `/corbenik/firmware/twl` respectively. If you don't have the firmkeys for these, you can fetch the cetk for each of them to `/corbenik/keys/agb.cetk` and `/corbenik/keys/twl.cetk`. Boot up the system, go to system settings, and it will extract the firm keys for them after rebooting.
+You can also fetch the agb firm and twl firms to `/corbenik/lib/firmware/agb` and `/corbenik/lib/firmware/twl` respectively. If you don't have the firmkeys for these, you can fetch the cetk for each of them to `/corbenik/keys/agb.cetk` and `/corbenik/keys/twl.cetk`, or acquire decrypted titlekeys (firmkeys) for them.
 
 Old 3DS TWL_FIRM (Firmware for DS/DSi games):
  * cetk: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000102/cetk
@@ -79,11 +55,11 @@ New 3DS AGB_FIRM (Firmware for GBA games):
  * cetk: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000202/cetk
  * firm: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000202/00000000
 
-On New3DS units, there's additional encryption on arm9loader which requires the 9.6 key to decrypt. It usually is named `Slot0x11Key96.bin`, and I also can't tell you where to find this, aside from "check Plailect's guide." Corbenik will attempt to read this from the root as well as `/corbenik/keys/11.key`. In a future version, keydb reading may be implemented, but no guarantees.
+On New3DS units, there's additional encryption on arm9loader which requires the 9.6 key to decrypt. This key also happens to be trashed by arm9loaderhax, so you'll need to acquire it elsewhere. It usually is named as `Slot0x11Key96.bin`. I can't tell you where to find this. Corbenik will attempt to read this from the root as well as `/corbenik/keys/11key96.key`. In a future version, keydb reading may be implemented, but no guarantees.
 
-The folder `/corbenik/locale` is automatically generated language emulation files from 3dbrew for games that only specify one region and one language. Games which support more than one language are not generated, because there's no 'correct' language. You can remove this if the number of files unnerves you. It isn't required. You can also add new files if you have specific needs.
+The folder `/corbenik/share/locale/emu` is automatically generated language emulation files from 3dsdb for games that only specify one region and one language. Games which support more than one language are not generated, because there's no 'correct' language. You can remove this if the number of files unnerves you. It isn't required. You can also add new files if you have specific needs.
 
-The folder `/contrib` contains additional patches you may add at your own discretion. These are not as well tested as official patches and don't generally affect core functionality. Documentation is usually found on the header of the source code for them (contrib/*.pco) in the git repo.
+The folder `/corbenik/bin` contains additional patches you may add at your own discretion. These are not as well tested as official patches and don't generally affect core functionality. Documentation is usually found on the header of the source code for them (contrib/*.pco) in the git repo. Everything in `/corbenik/sbin` is core mostly-essential patches.
 
 Setup
 -------------------------
@@ -150,11 +126,11 @@ Before booting, you should select 'Save Configuration' from the menu.
 Customization
 -------------------------
 
-Extra patches may be supplied in the `/corbenik/contrib` folder. Copy any of these patches to `patch` if you wish to use them.
-
 You can copy some 90° rotated BGR8 pixel data sized to the screen (essentially, a menuhax splash) and it will be used as backgrounds for menus. Put them at:
- * Top: `/corbenik/bits/top.bin`
- * Bottom: `/corbenik/bits/bottom.bin`
+ * Top: `/corbenik/libexec/top.bin`
+ * Bottom: `/corbenik/libexec/bottom.bin`
+
+The font is also customizable - read the github wiki for details.
 
 Reporting issues
 -------------------------
@@ -164,6 +140,7 @@ If you think you've found a bug, please do the following first, to save me some 
  * Check if a recently enabled patch is the cause of the issue. If so, you should include this in the report.
  * Enable `Logging` and `Verbose` in `Options` then `Save Configuration` and retrieve the files `/corbenik/boot.log` and `/corbenik/loader.log` if they exist. I will want them. Do not report bugs without them, unless they are not created with the above enabled.
  * Please at least try to reproduce the bug from a clean installation.
+ * Try to reproduce the problem from another CFW like luma or cakes, optionally.
 
 Contributions
 -------------------------
@@ -172,7 +149,7 @@ If you have a feature or bugfix, PR or hit me on freenode/#Cakey. However, pleas
 
  * Do NOT base any code on Nintendo's SDK. Additionally, if you are under NDA, do not even bother to PR. I cannot accept tainted code. This is for my own legal safety (and sanity)
  * Please attempt to obey coding standards. The .clang-format is a loose guide to this. I'll tell you if I need reformatting.
- * Please ensure your changes are functional and don't break consoles, O3DS or N3DS. Do not assume anything about the environment.
+ * Please ensure your changes are functional and don't break consoles, O3DS or N3DS. Do not assume anything about the environment you are running under.
 
 Credits
 -------------------------

@@ -37,11 +37,15 @@ mk_structure()
         f_mkdir(PATH_FIRMWARES);
         f_mkdir(PATH_MODULES);
       f_mkdir(BINDIR);
+#if defined(CHAINLOADER) && CHAINLOADER == 1
+      f_mkdir(PATH_CHAINS);
+#endif
       f_mkdir(SBINDIR);
       f_mkdir(SYSCONFDIR);
       f_mkdir(LOCALSTATEDIR);
         f_mkdir(PATH_TEMP);
           f_mkdir(PATH_LOADER_CACHE);
+        f_mkdir(PATH_LOG);
       f_mkdir(SHAREDIR);
         f_mkdir(PATH_KEYS);
         f_mkdir(LOCALEDIR);

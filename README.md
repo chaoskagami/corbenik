@@ -35,9 +35,9 @@ New 3DS (Native FIRM, 11.0):
  * firm: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000002/00000021
  * cetk: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000002/cetk
 
-Note that this is only a recommendation - you can supply near any valid firmware file for your console. You can also supply a decrypted native_firm titlekey as `/corbenik/share/keys/native.key`, although this is no longer required.
+Note that this is only a recommendation - you can supply near any valid firmware file for your console. You can also supply a decrypted native_firm titlekey as `/corbenik/share/keys/native.key`, although this is no longer required and it can be automatically retrieved from the cetk.
 
-You can also fetch the agb firm and twl firms to `/corbenik/lib/firmware/agb` and `/corbenik/lib/firmware/twl` respectively. If you don't have the firmkeys for these, you can fetch the cetk for each of them to `/corbenik/keys/agb.cetk` and `/corbenik/keys/twl.cetk`, or acquire decrypted titlekeys (firmkeys) for them.
+You can also fetch the agb firm and twl firms to `/corbenik/lib/firmware/agb` and `/corbenik/lib/firmware/twl` respectively. You can fetch the cetk for each of them to `/corbenik/share/keys/agb.cetk` and `/corbenik/share/keys/twl.cetk`, or acquire decrypted titlekeys (firmkeys) for them.
 
 Old 3DS TWL_FIRM (Firmware for DS/DSi games):
  * cetk: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000102/cetk
@@ -55,11 +55,11 @@ New 3DS AGB_FIRM (Firmware for GBA games):
  * cetk: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000202/cetk
  * firm: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000202/00000000
 
-On New3DS units, there's additional encryption on arm9loader which requires the 9.6 key to decrypt. This key also happens to be trashed by arm9loaderhax, so you'll need to acquire it elsewhere. It usually is named as `Slot0x11Key96.bin`. I can't tell you where to find this. Corbenik will attempt to read this from the root as well as `/corbenik/keys/11key96.key`. In a future version, keydb reading may be implemented, but no guarantees.
+On New3DS units, there's additional encryption on arm9loader which requires the 9.6 key to decrypt. This key also happens to be trashed by arm9loaderhax, so you'll need to acquire it elsewhere. It usually is named as `Slot0x11Key96.bin`. I can't tell you where to find this. Corbenik will attempt to read this from the root as well as `/corbenik/share/keys/11key96.key`. In a future version, keydb reading may be implemented, but no guarantees.
 
 The folder `/corbenik/share/locale/emu` is automatically generated language emulation files from 3dsdb for games that only specify one region and one language. Games which support more than one language are not generated, because there's no 'correct' language. You can remove this if the number of files unnerves you. It isn't required. You can also add new files if you have specific needs.
 
-The folder `/corbenik/bin` contains additional patches you may add at your own discretion. These are not as well tested as official patches and don't generally affect core functionality. Documentation is usually found on the header of the source code for them (contrib/*.pco) in the git repo. Everything in `/corbenik/sbin` is core mostly-essential patches.
+The folder `/corbenik/bin` contains additional patches you may enable at your own discretion. These are not as well tested as official patches and don't generally affect core functionality. Documentation is usually found on the header of the source code for them (contrib/*.pco) in the git repo. Everything in `/corbenik/sbin` is core mostly-essential patches.
 
 Setup
 -------------------------
@@ -127,10 +127,10 @@ Customization
 -------------------------
 
 You can copy some 90° rotated BGR8 pixel data sized to the screen (essentially, a menuhax splash) and it will be used as backgrounds for menus. Put them at:
- * Top: `/corbenik/libexec/top.bin`
- * Bottom: `/corbenik/libexec/bottom.bin`
+ * Top: `/corbenik/share/top.bin`
+ * Bottom: `/corbenik/share/bottom.bin`
 
-The font is also customizable - read the github wiki for details.
+The font is also customizable (`/corbenik/share/termfont.bin`) - read the github wiki for details.
 
 Reporting issues
 -------------------------
@@ -138,7 +138,7 @@ Reporting issues
 If you think you've found a bug, please do the following first, to save me some time:
 
  * Check if a recently enabled patch is the cause of the issue. If so, you should include this in the report.
- * Enable `Logging` and `Verbose` in `Options` then `Save Configuration` and retrieve the files `/corbenik/boot.log` and `/corbenik/loader.log` if they exist. I will want them. Do not report bugs without them, unless they are not created with the above enabled.
+ * Enable `Logging` and `Verbose` in `Options` then `Save Configuration` and retrieve the files `/corbenik/var/log/boot.log` and `/corbenik/var/log/loader.log` if they exist. I will want them. Do not report bugs without them, unless they are not created with the above enabled.
  * Please at least try to reproduce the bug from a clean installation.
  * Try to reproduce the problem from another CFW like luma or cakes, optionally.
 

@@ -19,11 +19,8 @@ AC_ARG_ENABLE([chainloader],
 
 AC_PREFIX_DEFAULT([/corbenik])
 
-if "x$enable_chainloader" == "xyes" ; then
-	CHAINLOADER="1"
-else
-	CHAINLOADER="0"
-fi
+CHAINLOADER=1
+test "$enable_chainloader" = "no" && CHAINLOADER=0
 
 AC_DEFINE_UNQUOTED([CHAINLOADER], [$CHAINLOADER])
 

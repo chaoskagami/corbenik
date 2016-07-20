@@ -25,15 +25,15 @@ main(int argc, char** argv)
 
     clear_bg();
 
-    load_bg_top   (PATH_BITS "/top.bin");
-    load_bg_bottom(PATH_BITS "/bottom.bin"); // This is basically a menuhax splash (90deg rotated BGR8 pixel data)
+    load_bg_top   (PATH_TOP_BG);
+    load_bg_bottom(PATH_BOTTOM_BG); // This is basically a menuhax splash (90deg rotated BGR8 pixel data)
 
     clear_disp(TOP_SCREEN);
     clear_disp(BOTTOM_SCREEN);
 
     ctr_screen_enable_backlight(CTR_SCREEN_BOTH);
 
-    set_font(PATH_BITS "/termfont.bin");
+    set_font(PATH_TERMFONT);
 
     install_interrupts(); // Get some free debug info.
 

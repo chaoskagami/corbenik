@@ -35,12 +35,16 @@
 #define PATH_REBOOT_HOOK     PATH_BITS "/reboot_hook.bin"   // Reboot hook
 #define PATH_REBOOT_CODE     PATH_BITS "/reboot_code.bin"   // Reboot entry code
 
+#define PATH_TOP_BG          PATH_SHARE "/top.bin"
+#define PATH_BOTTOM_BG       PATH_SHARE "/bottom.bin"
+#define PATH_TERMFONT        PATH_SHARE "/termfont.bin"
+
 #define PATH_CHAINS          PREFIX "/boot"
 
-#define PATH_TEMP            LOCALSTATEDIR               // Files that are transient and used to speed operation
-#define PATH_LOADER_CACHE    PATH_TEMP "/loader" // Cached patch bytecode for loader.
+#define PATH_TEMP            LOCALSTATEDIR "/cache"  // Files that are transient and used to speed operation
+#define PATH_LOADER_CACHE    PATH_TEMP "/loader"     // Cached patch bytecode for loader.
 
-#define PATH_LOCEMU          LOCALEDIR "/emu"    // Locale emulation config
+#define PATH_LOCEMU          LOCALEDIR "/emu"     // Locale emulation config
 #define PATH_FIRMWARES       LIBDIR   "/firmware" // Firmware folder.
 
 #define PATH_CONFIG_DIR      SYSCONFDIR                   // Config file directory.
@@ -54,7 +58,7 @@
 #define PATH_KEYS            SHAREDIR "/keys" // Keyfiles will be loaded from this dir, and
                                               // additionally the root if not found.
 
-#define PATH_EXEFS           LIBDIR "/exe"         // ExeFS overrides/dumps, named by titleid
+#define PATH_EXEFS           LIBDIR "/exefs"       // ExeFS overrides/dumps, named by titleid
 #define PATH_EXEFS_TEXT      PATH_EXEFS "/text"    // Text segment overrides/dumps, named by titleid
 #define PATH_EXEFS_RO        PATH_EXEFS "/ro"      // RO segment overrides/dumps, named by titleid
 #define PATH_EXEFS_DATA      PATH_EXEFS "/data"    // Data segment overrides/dumps, named by titleid
@@ -76,8 +80,10 @@
 #define PATH_ALT_SLOT0X11KEY96 "/slot0x11key96.bin" // Hey, your perrogative, buddy. I like cleaned up
                                                     // paths.
 
-#define PATH_BOOTLOG         LOCALSTATEDIR "/boot.log"
-#define PATH_LOADERLOG       LOCALSTATEDIR "/loader.log"
+#define PATH_LOG             LOCALSTATEDIR "/log"
+
+#define PATH_BOOTLOG         PATH_LOG "/boot.log"
+#define PATH_LOADERLOG       PATH_LOG "/loader.log"
 
 #define PATCH_FLAG_REQUIRE (1 << 0) // Force enable patch unless 'Unsafe Options' is checked.
 #define PATCH_FLAG_DEVMODE (1 << 1) // Require 'Developer Options' to be checked.

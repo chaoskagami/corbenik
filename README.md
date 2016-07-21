@@ -37,7 +37,7 @@ New 3DS (Native FIRM, 11.0):
 
 Note that this is only a recommendation - you can supply near any valid firmware file for your console. You can also supply a decrypted native_firm titlekey as `/corbenik/share/keys/native.key`, although this is no longer required.
 
-You can also fetch the agb firm and twl firms to `/corbenik/lib/firmware/agb` and `/corbenik/lib/firmware/twl` respectively. If you don't have the firmkeys for these, you can fetch the cetk for each of them to `/corbenik/keys/agb.cetk` and `/corbenik/keys/twl.cetk`, or acquire decrypted titlekeys (firmkeys) for them.
+You can also fetch the agb firm and twl firms to `/corbenik/lib/firmware/agb` and `/corbenik/lib/firmware/twl` respectively. If you don't have the firmkeys for these, you can fetch the cetk for each of them to `/corbenik/share/keys/agb.cetk` and `/corbenik/share/keys/twl.cetk`, or acquire decrypted titlekeys (firmkeys) for them.
 
 Old 3DS TWL_FIRM (Firmware for DS/DSi games):
  * cetk: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000102/cetk

@@ -17,7 +17,6 @@ all-local:
 	mkdir -p out@sysconfdir@
 	mkdir -p out@localstatedir@
 	cp source/corbenik.bin out/arm9loaderhax.bin
-	cp source/corbenik.bin out@prefix@/boot/Corbenik
 	cp external/loader/loader.cxi out@libdir@/module/loader.cxi
 	cp external/bits/*.bin out@libexecdir@/
 	cp external/screeninit/build/screeninit.bin out@libexecdir@/

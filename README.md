@@ -27,7 +27,9 @@ Installing
 
 Copy the files to the root of your SD (and optionally, rename arm9loaderhax.bin and set it up with a bootloader.)
 
-Without the FIRMs, it cannot boot up your system. You'll need to fetch the following at minimum, putting the firm at `/corbenik/lib/firmware/native` and cetk at `/corbenik/share/keys/native.cetk`:
+Without the FIRMs, it cannot boot up your system. You'll need to fetch the following at minimum, putting the firm at `/corbenik/lib/firmware/native` and cetk at `/corbenik/share/keys/native.cetk`. If you are using a POSIX shell and have the wget command available, you can run the shell scripts provided to automatically fetch for your console.
+
+Otherwise, manually fetching firmware should be done from the following URLs:
 
 Old 3DS (Native FIRM, 11.0):
  * firm: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000002/00000052
@@ -37,7 +39,7 @@ New 3DS (Native FIRM, 11.0):
  * firm: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000002/00000021
  * cetk: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000002/cetk
 
-Note that this is only a recommendation - you can supply near any valid firmware file for your console. You can also supply a decrypted native_firm titlekey as `/corbenik/share/keys/native.key`, although this is no longer required and it can be automatically retrieved from the cetk.
+This is only a recommendation - you can supply near any valid firmware file for your console (it has only been tested until 9.2 backwards, however.) You can also supply a decrypted native_firm titlekey as `/corbenik/share/keys/native.key`, although this is no longer required and it can be automatically retrieved from the cetk.
 
 You can also fetch the agb firm and twl firms to `/corbenik/lib/firmware/agb` and `/corbenik/lib/firmware/twl` respectively. You can fetch the cetk for each of them to `/corbenik/share/keys/agb.cetk` and `/corbenik/share/keys/twl.cetk`, or acquire decrypted titlekeys (firmkeys) for them.
 
@@ -57,11 +59,11 @@ New 3DS AGB_FIRM (Firmware for GBA games):
  * cetk: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000202/cetk
  * firm: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000202/00000000
 
-On New3DS units, there's additional encryption on arm9loader which requires the 9.6 key to decrypt. This key also happens to be trashed by arm9loaderhax, so you'll need to acquire it elsewhere. It usually is named as `Slot0x11Key96.bin`. I can't tell you where to find this. Corbenik will attempt to read this from the root as well as `/corbenik/share/keys/11key96.key`. In a future version, keydb reading may be implemented, but no guarantees.
+**IMPORTANT** - On New3DS units, there's additional encryption on arm9loader which requires the 9.6 key to decrypt. This key also happens to be trashed by arm9loaderhax, so you'll need to acquire it elsewhere. It usually is named as `Slot0x11Key96.bin`. I can't tell you where to find this. Corbenik will attempt to read this from the root as well as `/corbenik/share/keys/11key96.key`. In a future version, keydb reading may be implemented, but no guarantees.
 
 The folder `/corbenik/share/locale/emu` is automatically generated language emulation files from 3dsdb for games that only specify one region and one language. Games which support more than one language are not generated, because there's no 'correct' language. You can remove this if the number of files unnerves you. It isn't required. You can also add new files if you have specific needs.
 
-The folder `/corbenik/bin` contains additional patches you may enable at your own discretion. These are not as well tested as official patches and don't generally affect core functionality. Documentation is usually found on the header of the source code for them (contrib/*.pco) in the git repo. Everything in `/corbenik/sbin` is core mostly-essential patches.
+The folder `/corbenik/bin` contains additional patches you may enable at your own discretion. These are not as well tested as official patches and don't generally affect core functionality. Documentation is usually found on the header of the source code for them (contrib/*.pco) in the git repo. Everything in `/corbenik/sbin` is core mostly-essential patches. Patches in `/corbenik/bin` will not yet be automatically indexed.
 
 Setup
 -------------------------

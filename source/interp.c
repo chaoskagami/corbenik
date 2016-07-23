@@ -3,11 +3,7 @@
 #include "std/unused.h"
 
 #ifndef LOADER
-  #include "std/memory.h"
-  #include "firm/firm.h"
-  #include "config.h"
-  #include "common.h"
-  #include "firm/fcram.h"
+  #include <common.h>
 #else
   #include <string.h>
 #endif

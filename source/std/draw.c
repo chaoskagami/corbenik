@@ -1,16 +1,8 @@
-#include "draw.h"
-
 #include <stdint.h>
 #include <assert.h>
 #include <stdarg.h>
-#include "memory.h"
+#include <common.h>
 #include <ctr9/io.h>
-#include "../firm/fcram.h"
-#include "fs.h"
-#include "unused.h"
-#include "../config.h"
-#include "../patch_format.h"
-#include "abort.h"
 
 static unsigned int top_cursor_x = 0, top_cursor_y = 0;
 static unsigned int bottom_cursor_x = 0, bottom_cursor_y = 0;

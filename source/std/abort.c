@@ -2,7 +2,7 @@
 #define __ABORT_H
 
 #include <stdarg.h>
-#include "draw.h"
+#include <common.h>
 
 void poweroff();
 uint32_t wait_key(int sleep);

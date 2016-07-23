@@ -6,15 +6,15 @@
 #include "internal.h"
 #include "memory.h"
 #include "logger.h"
-#include "../../../source/patch_format.h"
-#include "../../../source/std/unused.h"
+#include <patch_format.h>
+#include <std/unused.h>
 #include "interp.h"
 
 #ifndef PATH_MAX
 #define PATH_MAX 255
 #define _MAX_LFN 255
 #endif
-#include "../../../source/config.h"
+#include <option.h>
 
 #define TEXT_PATH PATH_EXEFS_TEXT "/0000000000000000"
 #define DATA_PATH PATH_EXEFS_DATA "/0000000000000000"

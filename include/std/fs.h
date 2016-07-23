@@ -1,8 +1,6 @@
 #ifndef __STD_FS_H
 #define __STD_FS_H
 
-#include "types.h"
-#include "memory.h"
 #include <ctr9/io.h>
 
 #define MAX_FILES_OPEN 64

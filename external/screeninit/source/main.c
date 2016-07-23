@@ -12,7 +12,7 @@
 #define INIT_PARAMS  1
 #define INIT_DEINIT  2
 
-void main(void) {
+void __attribute__((naked)) main(void) {
    // FIXME - We could use some serious macros here...
 
    u32 do_init         = *(vu32 *)0x24FFFC08;

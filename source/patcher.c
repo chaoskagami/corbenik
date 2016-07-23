@@ -1,11 +1,5 @@
+#include <common.h>
 #include <stdint.h>
-#include "std/unused.h"
-#include "std/memory.h"
-#include "firm/firm.h"
-#include "config.h"
-#include "common.h"
-#include "interp.h"
-#include "patch/emunand.h"
 
 // TODO - Basically all this needs to move to patcher programs.
 

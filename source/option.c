@@ -1,4 +1,4 @@
-#include "common.h"
+#include <common.h>
 
 FILE *conf_handle;
 
@@ -26,18 +26,30 @@ regenerate_config()
 void
 mk_structure()
 {
-    f_mkdir(PATH_CFW);
-    f_mkdir(PATH_CONFIG_DIR);
-    f_mkdir(PATH_PATCHES);
-    f_mkdir(PATH_FIRMWARES);
-    f_mkdir(PATH_MODULES);
-    f_mkdir(PATH_KEYS);
-    f_mkdir(PATH_EXEFS);
-    f_mkdir(PATH_EXEFS_TEXT);
-    f_mkdir(PATH_EXEFS_DATA);
-    f_mkdir(PATH_EXEFS_RO);
-    f_mkdir(PATH_TEMP);
-    f_mkdir(PATH_LOADER_CACHE);
+    f_mkdir(ROOT);
+    f_mkdir(DATA);
+      f_mkdir(LIBEXECDIR);
+      f_mkdir(LIBDIR);
+        f_mkdir(PATH_EXEFS);
+          f_mkdir(PATH_EXEFS_TEXT);
+          f_mkdir(PATH_EXEFS_DATA);
+          f_mkdir(PATH_EXEFS_RO);
+        f_mkdir(PATH_FIRMWARES);
+        f_mkdir(PATH_MODULES);
+      f_mkdir(BINDIR);
+#if defined(CHAINLOADER) && CHAINLOADER == 1
+      f_mkdir(PATH_CHAINS);
+#endif
+      f_mkdir(SBINDIR);
+      f_mkdir(SYSCONFDIR);
+      f_mkdir(LOCALSTATEDIR);
+        f_mkdir(PATH_TEMP);
+          f_mkdir(PATH_LOADER_CACHE);
+        f_mkdir(PATH_LOG);
+      f_mkdir(SHAREDIR);
+        f_mkdir(PATH_KEYS);
+        f_mkdir(LOCALEDIR);
+          f_mkdir(PATH_LOCEMU);
 }
 
 void

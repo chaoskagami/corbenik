@@ -1,8 +1,4 @@
-#include "common.h"
-#include "firm/firm.h"
-#include "firm/headers.h"
-#include "std/unused.h"
-
+#include <common.h>
 #include <ctr9/ctr_system.h>
 
 #define MAX_PATCHES ((FCRAM_SPACING / 2) / sizeof(struct options_s))
@@ -51,7 +47,7 @@ static struct options_s options[] = {
 
     { OPTION_TRACE, "Step Through", "After each important step, [WAIT] will be shown and you'll need to press a key. Debug feature.", boolean_val, 0, 0 },
     { OPTION_OVERLY_VERBOSE, "Verbose", "Output more debug information than the average user needs.", boolean_val, 0, 0 },
-    { OPTION_SAVE_LOGS, "Logging", "Save logs to `" PATH_CFW "` as `boot.log` and `loader.log`. Slows operation a bit.", boolean_val, 0, 0 },
+    { OPTION_SAVE_LOGS, "Logging", "Save logs to `" LOCALSTATEDIR "` as `boot.log` and `loader.log`. Slows operation a bit.", boolean_val, 0, 0 },
 
     //    { OPTION_ARM9THREAD,        "ARM9 Thread", boolean_val, 0, 0 },
     //    { IGNORE_PATCH_DEPS,   "Ignore dependencies", boolean_val, 0, 0 },

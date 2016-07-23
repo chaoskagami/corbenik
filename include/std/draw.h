@@ -25,8 +25,6 @@ enum screen
     screen_bottom
 };
 
-#include "unused.h"
-
 _UNUSED static struct framebuffers
 {
     uint8_t *top_left;

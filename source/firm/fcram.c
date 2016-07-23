@@ -1,4 +1,4 @@
-#include "fcram.h"
+#include <common.h>
 
 void *fcram_temp = (void *)0x23000000;
 

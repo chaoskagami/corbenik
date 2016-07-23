@@ -1,4 +1,4 @@
-#include "patch_file.h"
+#include <common.h>
 
 uint8_t *arm11Section1 = NULL;
 uint32_t *svc_tab_open = NULL, *exceptionsPage = NULL, *svcTable = NULL;

@@ -1,4 +1,4 @@
-#include "patch_file.h"
+#include <common.h>
 
 /* Not possible to be implemented as bytecode. Hey, can't win em all. */
 

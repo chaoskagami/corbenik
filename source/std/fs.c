@@ -1,10 +1,6 @@
 #include <stddef.h>
-#include "fs.h"
-#include "memory.h"
 #include <ctr9/io.h>
-#include "draw.h"
-#include "memory.h"
-#include "../config.h"
+#include <common.h>
 
 // ctr_nand_crypto_interface ctr_io;
 // ctr_nand_crypto_interface twl_io;

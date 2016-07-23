@@ -7,8 +7,6 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include "../std/unused.h"
-
 extern void *fcram_temp;
 
 // Space between most of the locations

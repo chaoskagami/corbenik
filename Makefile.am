@@ -24,6 +24,8 @@ all-local:
 	cp host/termfont.bin out@datarootdir@/
 	cp patch/*.vco out@sbindir@
 	cp contrib/*.vco out@bindir@
+	cat host/generate_localeemu.sh | sed "s|\@localedir\@|@localedir@|g" > out/generate_localeemu.sh
+	chmod +x out/generate_localeemu.sh
 	echo "#!/bin/bash" > out/o3ds_firm.sh
 	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000002/00000052 -O .@libdir@/firmware/native"       >> out/o3ds_firm.sh
 	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000002/cetk     -O .@datarootdir@/keys/native.cetk" >> out/o3ds_firm.sh

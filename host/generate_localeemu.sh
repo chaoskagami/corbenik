@@ -4,7 +4,9 @@
 # a langemu config for single-language single-region games, which can have langemu
 # without any ill consequences.
 
-rm -rf locale
+ROOT=.@localedir@/emu
+
+mkdir -p $ROOT
 
 # Fetch XML.
 wget "http://3dsdb.com/xml.php" -O 3ds.tmp
@@ -29,13 +31,12 @@ while true; do
     if [ ! $R = 0 ]; then
       # Only one language found, since no comma.
       # Output an entry.
-      mkdir -p locale
-      echo "$region $languages" | tr [:lower:] [:upper:] | sed -e 's|GER|EUR|g' -e 's|ITA|EUR|g' -e 's|FRA|EUR|g' -e 's|UKV|EUR|g' -e 's|NLD|EUR|g' > "locale/$titleid"
+      echo "$region $languages" | tr [:lower:] [:upper:] | sed -e 's|GER|EUR|g' -e 's|ITA|EUR|g' -e 's|FRA|EUR|g' -e 's|UKV|EUR|g' -e 's|NLD|EUR|g' > "$ROOT/$titleid"
       ENTS=$((ENTS + 1))
     fi
   fi
 done 3<titleid.tmp 4<region.tmp 5<languages.tmp
 
-echo "$(date) - $ENTS entries" > locale/info
+echo "$(date) - $ENTS entries" > $ROOT/info
 
 rm *.tmp

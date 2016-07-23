@@ -35,9 +35,9 @@
 #define PATH_REBOOT_HOOK     PATH_BITS "/reboot_hook.bin"   // Reboot hook
 #define PATH_REBOOT_CODE     PATH_BITS "/reboot_code.bin"   // Reboot entry code
 
-#define PATH_TOP_BG          PATH_SHARE "/top.bin"
-#define PATH_BOTTOM_BG       PATH_SHARE "/bottom.bin"
-#define PATH_TERMFONT        PATH_SHARE "/termfont.bin"
+#define PATH_TOP_BG          SHAREDIR "/top.bin"
+#define PATH_BOTTOM_BG       SHAREDIR "/bottom.bin"
+#define PATH_TERMFONT        SHAREDIR "/termfont.bin"
 
 #define PATH_CHAINS          PREFIX "/boot"
 

@@ -1,4 +1,4 @@
-AC_INIT([corbenik], [0.1.2], [https://github.com/chaoskagami/corbenik], [])
+AC_INIT([Corbenik], [0.1.2], [https://github.com/chaoskagami/corbenik], [])
 AM_INIT_AUTOMAKE([foreign no-dist-gzip dist-xz subdir-objects])
 
 AC_CONFIG_MACRO_DIRS([m4])

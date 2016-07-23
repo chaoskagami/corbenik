@@ -61,7 +61,7 @@ New 3DS AGB_FIRM (Firmware for GBA games):
 
 **IMPORTANT** - On New3DS units, there's additional encryption on arm9loader which requires the 9.6 key to decrypt. This key also happens to be trashed by arm9loaderhax, so you'll need to acquire it elsewhere. It usually is named as `Slot0x11Key96.bin`. I can't tell you where to find this. Corbenik will attempt to read this from the root as well as `/corbenik/share/keys/11key96.key`. In a future version, keydb reading may be implemented, but no guarantees.
 
-The folder `/corbenik/share/locale/emu` is automatically generated language emulation files from 3dsdb for games that only specify one region and one language. Games which support more than one language are not generated, because there's no 'correct' language. You can remove this if the number of files unnerves you. It isn't required. You can also add new files if you have specific needs.
+The folder `/corbenik/share/locale/emu` is for language emulation files. You can retrieve a set of files from 3dsdb for games that only specify one region and one language by running the `generate_localeemu.sh` shell script. Games which support more than one language are not generated, because there's no 'correct' language.
 
 The folder `/corbenik/bin` contains additional patches you may enable at your own discretion. These are not as well tested as official patches and don't generally affect core functionality. Documentation is usually found on the header of the source code for them (contrib/*.pco) in the git repo. Everything in `/corbenik/sbin` is core mostly-essential patches. Patches in `/corbenik/bin` will not yet be automatically indexed.
 

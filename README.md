@@ -11,6 +11,8 @@ Corbenik is licensed under the terms of the GPLv3. Please obey it. You should ha
 Usage
 -------------------------
 
+If you're compiling this from source code, see at the bottom the `Building` section.
+
 If you are using a nightly build off of https://github.com/chaoskagami/skeith - treat all paths starting in `/corbenik` as `/skeith` instead for these instructions.
 
 Skip to `Installing` if you are installing this for the first time, otherwise follow `Updating` and then `Installing`.
@@ -131,6 +133,40 @@ You can copy some 90° rotated BGR8 pixel data sized to the screen (essentially,
  * Bottom: `/corbenik/share/bottom.bin`
 
 The font is also customizable (`/corbenik/share/termfont.bin`) - read the github wiki for details.
+
+Building
+-------------------------
+
+First; make sure you have submodules properly checked out. If you do not, the build will fail in odd and unintelligible ways.
+
+You will need at minimum the following:
+
+ * devkitARM
+ * ctrulib (from git)
+ * Host gcc (as in a native system compiler)
+ * Python2
+ * Autotools (as in, automake/autoconf)
+
+Briefly; the following commands are enough to build, assuming devkitarm is in your `PATH`:
+
+```
+./autogen.sh
+./configure --host=arm-none-eabi
+```
+
+If you REALLY don't like the new directory structure for some reason, you can configure with the following to sort-of revert to the old paths:
+
+```
+./configure --host=arm-none-eabi --prefix=/corbenik --bindir=/corbenik/contrib --sbindir=/corbenik/patch --libexecdir=/corbenik/bits --sysconfdir=/corbenik/config --localstatedir=/corbenik/tmp --localedir=/corbenik/locale --datarootdir=/corbenik --libdir=/corbenik
+```
+
+Keep in mind I can't support every possible method of building, but that should work fine for the most part.
+
+Output will be produced in a directory named `out` after a successful build. This produces a build largely identical to normal releases from master.
+
+There's additional options one can provide - see `./configure --help` for information on these.
+
+Building corbenik on Windows never has and never will be supported. Your mileage may vary.
 
 Reporting issues
 -------------------------

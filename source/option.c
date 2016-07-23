@@ -12,7 +12,7 @@ regenerate_config()
     memset(&config, 0, sizeof(config));
     memcpy(&(config.magic), CONFIG_MAGIC, 4);
     config.config_ver = config_version;
-    config.options[OPTION_ACCENT_COLOR] = 0x2;
+    config.options[OPTION_ACCENT_COLOR] = 2;
 
     if (!(conf_handle = fopen(PATH_CONFIG, "w")))
         abort("Failed to open config for write?\n");
@@ -50,6 +50,22 @@ mk_structure()
         f_mkdir(PATH_KEYS);
         f_mkdir(LOCALEDIR);
           f_mkdir(PATH_LOCEMU);
+}
+
+void
+update_config()
+{
+    int updated = 0;
+
+    if (config.options[OPTION_ACCENT_COLOR] == 0) {
+        fprintf(stderr, "Config update: accent color\n");
+        config.options[OPTION_ACCENT_COLOR] = 2;
+        updated = 1;
+    }
+
+    if (updated) {
+        save_config(); // Save the configuration.
+    }
 }
 
 void
@@ -93,6 +109,8 @@ load_config()
 
     if (!config.options[OPTION_SILENCE])
         fprintf(BOTTOM_SCREEN, "Config file loaded.\n");
+
+    update_config();
 }
 
 void

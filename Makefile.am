@@ -8,8 +8,10 @@ install:
 all-local:
 	mkdir -p out
 	mkdir -p out@prefix@
-	mkdir -p out@libdir@/{module,firmware}
-	mkdir -p out@datarootdir@/{keys,locale/emu}
+	mkdir -p out@libdir@/module
+	mkdir -p out@libdir@/firmware
+	mkdir -p out@datarootdir@/keys
+	mkdir -p out@datarootdir@/locale/emu
 	mkdir -p out@bindir@
 	mkdir -p out@sbindir@
 	mkdir -p out@prefix@/boot

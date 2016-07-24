@@ -146,8 +146,9 @@ You will need at minimum the following:
  * devkitARM
  * ctrulib (from git)
  * Host gcc (as in a native system compiler)
- * Python2
- * Autotools (as in, automake/autoconf)
+ * Python 2.7 (for patches)
+ * Autotools (as in, automake/autoconf - mandatory)
+ * libtool (expect weird link errors if this is missing)
 
 Briefly; the following commands are enough to build, assuming devkitarm is in your `PATH`:
 

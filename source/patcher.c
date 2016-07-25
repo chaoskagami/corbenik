@@ -13,6 +13,8 @@ extern int doing_autoboot;
 
 extern uint8_t *enable_list;
 
+extern struct options_s* patches;
+
 void
 wait()
 {
@@ -33,8 +35,6 @@ generate_patch_cache()
     f_mkdir(PATH_LOADER_CACHE);
 
     list_patches_build(PATH_PATCHES, 1);
-
-    struct options_s *patches = (struct options_s *)FCRAM_MENU_LOC;
 
     for (int i = 0; patches[i].index != -1; i++) {
         if (enable_list[patches[i].index]) {

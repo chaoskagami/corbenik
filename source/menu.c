@@ -1,9 +1,10 @@
 #include <common.h>
 #include <ctr9/ctr_system.h>
 
-#define MAX_PATCHES ((FCRAM_SPACING / 2) / sizeof(struct options_s))
-struct options_s *patches = (struct options_s *)FCRAM_MENU_LOC;
-uint8_t *enable_list = (uint8_t *)FCRAM_PATCHLIST_LOC;
+// FIXME - Remove limit
+#define MAX_PATCHES 256
+struct options_s *patches = NULL;
+uint8_t *enable_list = NULL;
 
 static struct options_s options[] = {
     // Patches.
@@ -137,6 +138,12 @@ void
 list_patches_build(char *name, int desc_is_fname)
 {
     current_menu_index_patches = 0;
+
+	if (!enable_list)
+		enable_list = malloc(FCRAM_SPACING / 2); // FIXME - the PATCHENABLE file has to go. Badly.
+
+	if (!patches)
+		patches = malloc(sizeof(struct options_s) * 258); // FIXME - hard limit. Implement realloc.
 
     memset(enable_list, 0, FCRAM_SPACING / 2);
 

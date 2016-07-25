@@ -29,6 +29,8 @@ unsigned char color_top = 0xf0;
 unsigned char color_bottom = 0xf0;
 int kill_output = 0;
 
+uint8_t* font_data = NULL;
+
 #define TRANSP_THRESH 178
 
 static uint8_t alphamap[256] = {0};
@@ -40,9 +42,9 @@ void std_init() {
 			alphamap[i] = i - 0x7F;
 	}
 
-    top_bg     = static_allocate(TOP_SIZE);
-    bottom_bg  = static_allocate(BOTTOM_SIZE);
-    log_buffer = static_allocate(LOG_BUFFER_SIZE);
+    top_bg     = malloc(TOP_SIZE);
+    bottom_bg  = malloc(BOTTOM_SIZE);
+    log_buffer = malloc(LOG_BUFFER_SIZE);
 }
 
 static uint32_t colors[16] = {
@@ -190,7 +192,9 @@ void set_font(const char* filename) {
 
     unsigned int c_font_w = (new_w / 8) + (new_w % 8 ? 1 : 0);
 
-    fread((void*)FCRAM_FONT_LOC, 1, c_font_w * new_h * (256 - ' '), f); // Skip non-printing chars.
+	font_data = malloc(c_font_w * new_h * (256 - ' '));
+
+    fread(font_data, 1, c_font_w * new_h * (256 - ' '), f); // Skip non-printing chars.
 
     fclose(f);
 
@@ -314,7 +318,7 @@ draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, co
         int yDisplacementBg = ((height - (y + yy) - 1) * 3);
         unsigned int pos_b  = xDisplacementBg + yDisplacementBg;
 
-        unsigned char char_dat = ((char*)FCRAM_FONT_LOC)[(character - ' ') * (c_font_w * font_h) + yy];
+        unsigned char char_dat = font_data[(character - ' ') * (c_font_w * font_h) + yy];
 
         for(unsigned int i=0; i < font_w + font_kern; i++) {
             screen[pos] = 0xFF;

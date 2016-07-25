@@ -20,28 +20,19 @@ extern void *fcram_temp;
 #define FCRAM_TWL_FIRM_LOC (FCRAM_FIRM_LOC + FCRAM_SPACING) // Double size
 #define FCRAM_AGB_FIRM_LOC (FCRAM_TWL_FIRM_LOC + FCRAM_SPACING * 2)
 
-// Location patches get loaded to.
-#define FCRAM_PATCH_LOC (FCRAM_AGB_FIRM_LOC + FCRAM_SPACING * 2)
-
 // Throwaway temporary space. Don't expect it to stay sane.
-#define FCRAM_JUNK_LOC (FCRAM_PATCH_LOC + FCRAM_SPACING)
-
-// Path that the patch menu is created at.
-#define FCRAM_MENU_LOC (FCRAM_JUNK_LOC + FCRAM_SPACING)
-
-// Path that the patch enable list is located at.
-#define FCRAM_PATCHLIST_LOC (FCRAM_MENU_LOC + (FCRAM_SPACING / 2))
-
-// Path that the font will be loaded at.
-#define FCRAM_FONT_LOC (FCRAM_PATCHLIST_LOC + (FCRAM_SPACING / 2))
-
-// Path that the menu for chains will be at
-#define FCRAM_CHAIN_LOC (FCRAM_FONT_LOC + FCRAM_SPACING)
+#define FCRAM_JUNK_LOC FCRAM_START
 
 // Location to perform static allocations at.
-#define FCRAM_STATIC_ALLOC_LOC (0x25000000)
+#define FCRAM_STATIC_ALLOC_LOC (FCRAM_START + FCRAM_SPACING)
 
-// Allocate static memory.
-void *static_allocate(size_t bytes);
+// Grow memory segment.
+void *fake_sbrk(size_t bytes);
+
+// Allocate memory for use.
+void *malloc   (size_t size);
+
+// Free in-use memory.
+void  free     (void* ptr);
 
 #endif

@@ -647,12 +647,16 @@ execb(char *filename, int build_cache)
         // File wasn't found. The user didn't enable anything.
         return 0;
     }
+
     uint32_t len = fsize(f);
-    fread((uint8_t *)FCRAM_PATCH_LOC, 1, len, f);
+
+	uint8_t* patch_loc = malloc(len);
+
+    fread(patch_loc, 1, len, f);
     fclose(f);
 
     if (build_cache == 1) {
-        patch = (struct system_patch *)FCRAM_PATCH_LOC;
+        patch = (struct system_patch*)patch_loc;
 
         // Make sure various bits are correct.
         if (memcmp(patch->magic, "AIDA", 4)) {
@@ -711,7 +715,7 @@ execb(char *filename, int build_cache)
 
         return 0;
     } else {
-        patch_mem = (uint8_t *)FCRAM_PATCH_LOC;
+        patch_mem = patch_loc;
         patch_len = len;
     }
 #endif
@@ -723,7 +727,7 @@ execb(char *filename, int build_cache)
 
 #ifndef LOADER
     if (stack_glob == NULL) {
-        stack_glob = static_allocate(STACK_SIZE);
+        stack_glob = malloc(STACK_SIZE);
     }
 #endif
 

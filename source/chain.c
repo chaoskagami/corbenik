@@ -8,7 +8,7 @@
 
 uint32_t current_chain_index = 0;
 
-struct options_s *chains = (struct options_s*)FCRAM_CHAIN_LOC;
+struct options_s *chains = NULL;
 
 int show_menu(struct options_s *options, uint8_t *toggles);
 
@@ -153,7 +153,10 @@ list_chain_build(char *name)
 }
 
 void chainload_menu() {
-    list_chain_build(PATH_CHAINS);
+	if (chains == NULL) {
+		chains = malloc(sizeof(struct options_s) * 100);
+	    list_chain_build(PATH_CHAINS);
+	}
 
     show_menu(chains, NULL);
 }

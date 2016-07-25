@@ -6,17 +6,17 @@
 #include <ctr9/sha.h>
 #include <common.h>
 
-firm_h *firm_loc = (firm_h *)FCRAM_FIRM_LOC;
+firm_h *firm_loc = NULL;
 uint32_t firm_size = FCRAM_SPACING;
 firm_section_h firm_proc9;
 exefs_h *firm_p9_exefs;
 
-firm_h *twl_firm_loc = (firm_h *)FCRAM_TWL_FIRM_LOC;
+firm_h *twl_firm_loc = NULL;
 uint32_t twl_firm_size = FCRAM_SPACING * 2;
 firm_section_h twl_firm_proc9;
 exefs_h *twl_firm_p9_exefs;
 
-firm_h *agb_firm_loc = (firm_h *)FCRAM_AGB_FIRM_LOC;
+firm_h *agb_firm_loc = NULL;
 uint32_t agb_firm_size = FCRAM_SPACING * 2;
 firm_section_h agb_firm_proc9;
 exefs_h *agb_firm_p9_exefs;
@@ -40,7 +40,7 @@ void dump_firm(firm_h** buffer, uint8_t index) {
     uint32_t firm_offset = 0x0B130000 + (index % 2) * 0x400000,
              firm_size   = 0x00100000; // 1MB, because
 
-    buffer[0] = static_allocate(firm_size);
+    buffer[0] = malloc(firm_size);
 
     uint8_t ctr[0x10],
             cid[0x10],
@@ -514,12 +514,16 @@ load_firms()
 
     fprintf(stderr, "FIRM load triggered.\n");
 
+	firm_loc = malloc(firm_size);
+
     fprintf(stderr, "Loading NATIVE_FIRM\n");
     if (load_firm(firm_loc, PATH_NATIVE_F, PATH_NATIVE_FIRMKEY, PATH_NATIVE_CETK, &firm_size, NATIVE_FIRM_TITLEID) != 0) {
         abort("\n  Failed to load NATIVE_FIRM.\n");
     }
     find_proc9(firm_loc, &firm_proc9, &firm_p9_exefs);
     fprintf(stderr, "  Ver: %x, %u\n", get_firm_info(firm_loc)->version, get_firm_info(firm_loc)->console );
+
+	twl_firm_loc = malloc(twl_firm_size);
 
     fprintf(stderr, "TWL_FIRM\n");
     if (load_firm(twl_firm_loc, PATH_TWL_F, PATH_TWL_FIRMKEY, PATH_TWL_CETK, &twl_firm_size, TWL_FIRM_TITLEID) != 0) {
@@ -529,6 +533,8 @@ load_firms()
         find_proc9(twl_firm_loc, &twl_firm_proc9, &twl_firm_p9_exefs);
         fprintf(stderr, "  Ver: %x, %u\n", get_firm_info(twl_firm_loc)->version, get_firm_info(twl_firm_loc)->console );
     }
+
+	agb_firm_loc = malloc(agb_firm_size);
 
     fprintf(stderr, "AGB_FIRM\n");
     if (load_firm(agb_firm_loc, PATH_AGB_F, PATH_AGB_FIRMKEY, PATH_AGB_CETK, &agb_firm_size, AGB_FIRM_TITLEID) != 0) {

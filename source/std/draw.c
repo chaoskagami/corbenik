@@ -370,9 +370,90 @@ shut_up()
     clear_disp(BOTTOM_SCREEN);
 }
 
+#define TEXT       0
+#define ANSI_NEXT  1
+#define ANSI_END   2
+#define ANSI_PARSE 3
+
+int stdout_state = TEXT, stderr_state = TEXT;
+int stdout_val   = 0,    stderr_val   = 0;
+
+// Returns 1 if state machine is parsing - and will not output.
+int
+ansi_statemach(void* buf, const int c)
+{
+	int* state = NULL, *val = NULL;
+    unsigned char *color = NULL;
+
+	if (buf == stdout) {
+        color = &color_top;
+		state = &stdout_state;
+		val = &stdout_val;
+	} else if (buf == stderr) {
+        color = &color_bottom;
+		state = &stderr_state;
+		val = &stderr_val;
+	} else {
+		return 0; // Just dump it to the file.
+	}
+
+	switch(state[0]) {
+		case TEXT:
+			if (c == 0x1B) {
+				state[0] = ANSI_BEGIN;
+				return 1;
+			}
+			return 0;
+		case ANSI_NEXT:
+			if (c == '[') {
+				state[0] = ANSI_PARSE;
+				val[0] = 0;
+				return 1;
+			}
+			// INVALID; this is a bad ansi sequence. Term early.
+			state[0] = TEXT;
+			return 0;
+		case ANSI_END:
+			if (c == ';') {
+				state[0] = ANSI_PARSE; // Another code coming up.
+			} else if(c >= 0x40 && c <= 0x7E) {
+				state[0] = TEXT;
+			}
+
+			return 1;
+		case ANSI_PARSE:
+			if (c >= '0' && c <= '9') {
+				val[0] *= 10;
+				val[0] += c - '0';
+
+				if (val[0] == 0) {
+					// Reset formatting.
+					color[0] = 0xf0;
+				}
+
+				if (val[0] >= 10) {
+					switch(val[0] / 10) {
+						case 3: // Foreground color
+		                    color[0] &= 0x0f; // Remove fg color.
+		                    color[0] |= ((val[0] % 10) - '0') << 4;
+						case 4: // Background color
+		                    color[0] &= 0xf0; // Remove bg color.
+		                    color[0] |= ((val[0] % 10) - '0');
+					}
+				}
+
+				state[0] = ANSI_END;
+			}
+			return 1;
+	}
+}
+
 void
 putc(void *buf, const int c)
 {
+	if(ansi_statemach(buf, c) == 1) // Inside ANSI escape?
+		return;
+
     if (buf == stdout || buf == stderr) {
         if (kill_output)
             return;
@@ -409,12 +490,6 @@ putc(void *buf, const int c)
             clear_disp(buf);
             cursor_x[0] = 0;
             cursor_y[0] = 0;
-
-/*            uint32_t col = SCREEN_TOP_HEIGHT * SCREEN_DEPTH;
-            uint32_t one_c = 8 * SCREEN_DEPTH;
-            for (unsigned int x = 0; x < width * 8; x++) {
-                memmove(&screen[x * col + one_c], &screen[x * col + one_c], col - one_c);
-            } */
         }
 
         if ((isprint(c) || c == '\n') && buf == BOTTOM_SCREEN) {
@@ -562,43 +637,7 @@ vfprintf(void *channel, const char *format, va_list ap)
         color = &color_bottom;
 
     while (ref[0] != '\0') {
-        if (ref[0] == 0x1B && (++ref)[0] == '[' && (channel == stdout || channel == stderr)) {
-        ansi_codes:
-            // Ansi escape code.
-            ++ref;
-            // [30-37] Set text color
-            if (ref[0] == '3') {
-                ++ref;
-                if (ref[0] >= '0' && ref[0] <= '7') {
-                    // Valid FG color.
-                    color[0] &= 0x0f; // Remove fg color.
-                    color[0] |= (ref[0] - '0') << 4;
-                }
-            }
-            // [40-47] Set bg color
-            else if (ref[0] == '4') {
-                ++ref;
-                if (ref[0] >= '0' && ref[0] <= '7') {
-                    // Valid BG color.
-                    color[0] &= 0xf0; // Remove bg color.
-                    color[0] |= ref[0] - '0';
-                }
-            } else if (ref[0] == '0') {
-                // Reset.
-                color[0] = 0xf0;
-            }
-
-            ++ref;
-
-            if (ref[0] == ';') {
-                goto ansi_codes; // Another code.
-            }
-
-            // Loop until the character is somewhere 0x40 - 0x7E, which
-            // terminates an ANSI sequence
-            while (!(ref[0] >= 0x40 && ref[0] <= 0x7E))
-                ref++;
-        } else if (ref[0] == '%' && !disable_format) {
+        if (ref[0] == '%' && !disable_format) {
             int type_size = 0;
             int length = -1;
         check_format:

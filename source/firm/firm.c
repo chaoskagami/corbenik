@@ -60,12 +60,12 @@ void dump_firm(firm_h** buffer, uint8_t index) {
 
     use_aeskey(0x06);
     set_ctr(ctr);
-    aes(firm, firm, firm_size / AES_BLOCK_SIZE, ctr, AES_CTR_MODE);
-
-    fprintf(stderr, "  AES decrypted FIRM%u.\n", index);
+	ctr_decrypt(firm, firm, firm_size / AES_BLOCK_SIZE, AES_CTR_MODE|AES_CNT_INPUT_ENDIAN|AES_CNT_OUTPUT_ENDIAN|AES_CNT_INPUT_ORDER|AES_CNT_OUTPUT_ORDER, ctr);
 
     if (memcmp((char*) & firm->magic, "FIRM", 4))
         abort("  Decryption failed on FIRM.\n");
+
+    fprintf(stderr, "  AES decrypted FIRM%u.\n", index);
 
     fprintf(stderr, "  Magic is intact on FIRM%u.\n", index);
 
@@ -197,18 +197,20 @@ decrypt_cetk_key(void *key, const void *cetk)
 		return 1;
 
 	if (got_cetk == 0) {
+		fprintf(stderr, "  Retrieving 0x3D KeyY...\n");
 		extract_slot0x3DkeyY();
 		got_cetk = 1;
 	}
 
 	use_aeskey(0x3D);
 
-	memcpy(iv, ticket->titleID, sizeof(ticket->titleID));
+	memcpy(iv,  ticket->titleID,  sizeof(ticket->titleID));
 	memcpy(key, ticket->titleKey, sizeof(ticket->titleKey));
 
-	aes(key, key, 1, iv, AES_CBC_DECRYPT_MODE);
+	set_ctr(iv);
+	cbc_decrypt(key, key, 1, AES_CBC_DECRYPT_MODE|AES_CNT_INPUT_ENDIAN|AES_CNT_OUTPUT_ENDIAN|AES_CNT_INPUT_ORDER|AES_CNT_OUTPUT_ORDER, iv);
 
-	fprintf(stderr, " Extracted titlekey from cetk.\n");
+	fprintf(stderr, "  Extracted titlekey from cetk.\n");
 
 	return 0;
 }
@@ -221,9 +223,11 @@ decrypt_firm_title(firm_h *dest, ncch_h *ncch, uint32_t *size, void *key)
     uint8_t exefs_iv[16] = { 0 };
 
     fprintf(stderr, "  Decrypting FIRM container\n");
+
     setup_aeskey(0x16, key);
     use_aeskey(0x16);
-    aes(ncch, ncch, *size / AES_BLOCK_SIZE, firm_iv, AES_CBC_DECRYPT_MODE);
+	set_ctr(firm_iv);
+    cbc_decrypt(ncch, ncch, *size / AES_BLOCK_SIZE, AES_CBC_DECRYPT_MODE|AES_CNT_INPUT_ENDIAN|AES_CNT_OUTPUT_ENDIAN|AES_CNT_INPUT_ORDER|AES_CNT_OUTPUT_ORDER, firm_iv);
 
     if (ncch->magic != NCCH_MAGIC)
         return 1;
@@ -238,7 +242,7 @@ decrypt_firm_title(firm_h *dest, ncch_h *ncch, uint32_t *size, void *key)
     fprintf(stderr, "  Decrypting ExeFs for FIRM\n");
     setup_aeskeyY(0x2C, exefs_key);
     use_aeskey(0x2C);
-    aes(exefs, exefs, exefs_size / AES_BLOCK_SIZE, exefs_iv, AES_CTR_MODE);
+    ctr_decrypt(exefs, exefs, exefs_size / AES_BLOCK_SIZE, AES_CTR_MODE|AES_CNT_INPUT_ENDIAN|AES_CNT_OUTPUT_ENDIAN|AES_CNT_INPUT_ORDER|AES_CNT_OUTPUT_ORDER, exefs_iv);
 
     // Get the decrypted FIRM
     // We assume the firm.bin is always the first file
@@ -266,7 +270,7 @@ decrypt_arm9bin(arm9bin_h *header, uint64_t firm_title, uint8_t version)
         slot = 0x16;
 
         use_aeskey(0x11);
-        aes(decrypted_keyx, header->slot0x16keyX, 1, NULL, AES_ECB_DECRYPT_MODE);
+        aes_decrypt(decrypted_keyx, header->slot0x16keyX, 1, AES_ECB_DECRYPT_MODE|AES_CNT_INPUT_ENDIAN|AES_CNT_OUTPUT_ENDIAN|AES_CNT_INPUT_ORDER|AES_CNT_OUTPUT_ORDER);
         setup_aeskeyX(slot, decrypted_keyx);
     }
 
@@ -277,7 +281,7 @@ decrypt_arm9bin(arm9bin_h *header, uint64_t firm_title, uint8_t version)
     int size = atoi(header->size);
 
     use_aeskey(slot);
-    aes(arm9bin, arm9bin, size / AES_BLOCK_SIZE, header->ctr, AES_CTR_MODE);
+    ctr_decrypt(arm9bin, arm9bin, size / AES_BLOCK_SIZE, AES_CTR_MODE|AES_CNT_INPUT_ENDIAN|AES_CNT_OUTPUT_ENDIAN|AES_CNT_INPUT_ORDER|AES_CNT_OUTPUT_ORDER, header->ctr);
 
     if (firm_title == NATIVE_FIRM_TITLEID)
         return *(uint32_t *)arm9bin != ARM9BIN_MAGIC;
@@ -439,7 +443,7 @@ boot_firm()
         use_aeskey(0x11);
         uint8_t keyx[AES_BLOCK_SIZE];
         for (int slot = 0x19; slot < 0x20; slot++) {
-            aes(keyx, keydata, 1, NULL, AES_ECB_DECRYPT_MODE);
+            aes_decrypt(keyx, keydata, 1, AES_ECB_DECRYPT_MODE|AES_CNT_INPUT_ENDIAN|AES_CNT_OUTPUT_ENDIAN|AES_CNT_INPUT_ORDER|AES_CNT_OUTPUT_ORDER);
             setup_aeskeyX(slot, keyx);
             *(uint8_t *)(keydata + 0xF) += 1;
         }

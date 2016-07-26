@@ -222,24 +222,26 @@ decrypt_firm_title(firm_h *dest, ncch_h *ncch, uint32_t *size, void *key)
     uint8_t exefs_key[16] = { 0 };
     uint8_t exefs_iv[16] = { 0 };
 
-    fprintf(stderr, "  Decrypting FIRM container\n");
+    fprintf(stderr, "  Decrypting FIRM container (size is %u blocks)\n", *size / AES_BLOCK_SIZE);
 
     setup_aeskey(0x16, key);
     use_aeskey(0x16);
-	set_ctr(firm_iv);
+
     cbc_decrypt(ncch, ncch, *size / AES_BLOCK_SIZE, AES_CBC_DECRYPT_MODE|AES_CNT_INPUT_ENDIAN|AES_CNT_OUTPUT_ENDIAN|AES_CNT_INPUT_ORDER|AES_CNT_OUTPUT_ORDER, firm_iv);
 
     if (ncch->magic != NCCH_MAGIC)
         return 1;
 
     memcpy(exefs_key, ncch, 16);
+
     ncch_getctr(ncch, exefs_iv, NCCHTYPE_EXEFS);
 
     // Get the exefs offset and size from the NCCH
     exefs_h *exefs = (exefs_h *)((uint8_t *)ncch + ncch->exeFSOffset * MEDIA_UNITS);
     uint32_t exefs_size = ncch->exeFSSize * MEDIA_UNITS;
 
-    fprintf(stderr, "  Decrypting ExeFs for FIRM\n");
+    fprintf(stderr, "  Decrypting ExeFs for FIRM (size is %u blocks)\n", exefs_size / 16);
+
     setup_aeskeyY(0x2C, exefs_key);
     use_aeskey(0x2C);
     ctr_decrypt(exefs, exefs, exefs_size / AES_BLOCK_SIZE, AES_CTR_MODE|AES_CNT_INPUT_ENDIAN|AES_CNT_OUTPUT_ENDIAN|AES_CNT_INPUT_ORDER|AES_CNT_OUTPUT_ORDER, exefs_iv);

@@ -48,7 +48,7 @@ cbc_decrypt(void *inbuf, void *outbuf, size_t size, uint32_t mode, uint8_t *iv)
 
         aes_decrypt(in, out, current_blocks, mode);
 
-        memcpy(iv, out + (blocks - 1) * AES_BLOCK_SIZE, AES_BLOCK_SIZE);
+        memcpy(iv, out + (current_blocks - 1) * AES_BLOCK_SIZE, AES_BLOCK_SIZE);
 
         blocks -= current_blocks;
         in  += AES_BLOCK_SIZE * current_blocks;

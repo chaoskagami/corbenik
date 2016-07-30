@@ -37,10 +37,11 @@ int decrypt_arm9bin(arm9bin_h *header, uint64_t firm_title, uint8_t version);
 void dump_firm(firm_h** buffer, uint8_t index) {
     if (*buffer != NULL) return;
 
-    uint32_t firm_offset = 0x0B130000 + (index % 2) * 0x400000,
-             firm_size   = 0x00100000; // 1MB, because
+    // NOTE - Cast, because GCC is making assumptions about 'index'.
+    uint32_t firm_offset = (uint32_t)(0x0B130000 + (index % 2) * 0x400000),
+             firm_b_size = 0x00100000; // 1MB, because
 
-    buffer[0] = static_allocate(firm_size);
+    buffer[0] = static_allocate(firm_b_size);
 
     uint8_t ctr[0x10],
             cid[0x10],
@@ -48,7 +49,7 @@ void dump_firm(firm_h** buffer, uint8_t index) {
 
     firm_h* firm = buffer[0];
 
-    if (sdmmc_nand_readsectors(firm_offset / SECTOR_SIZE, firm_size / SECTOR_SIZE, (uint8_t*)firm))
+    if (sdmmc_nand_readsectors(firm_offset / SECTOR_SIZE, firm_b_size / SECTOR_SIZE, (uint8_t*)firm))
         abort("  Failed to read NAND!\n");
 
     fprintf(stderr, "  Read FIRM%u off NAND.\n", index);
@@ -60,7 +61,7 @@ void dump_firm(firm_h** buffer, uint8_t index) {
 
     use_aeskey(0x06);
     set_ctr(ctr);
-    aes(firm, firm, firm_size / AES_BLOCK_SIZE, ctr, AES_CTR_MODE);
+    aes(firm, firm, firm_b_size / AES_BLOCK_SIZE, ctr, AES_CTR_MODE);
 
     fprintf(stderr, "  AES decrypted FIRM%u.\n", index);
 
@@ -489,7 +490,7 @@ find_proc9(firm_h *firm, firm_section_h *process9, exefs_h **p9exefs)
                         *p9exefs = (exefs_h *)(p9exheader + 1);
                         process9->address = p9exheader->sci.textCodeSet.address;
                         process9->size = (*p9exefs)->fileHeaders[0].size;
-                        process9->offset = (void *)((*p9exefs) + 1) - (void *)firm;
+                        process9->offset = (uint32_t)((*p9exefs) + 1) - (uint32_t)firm;
                         fprintf(stderr, "  Found process9 offset\n");
                         return 0;
                     }

@@ -23,6 +23,8 @@ static struct options_s options[] = {
 
     { OPTION_ACCENT_COLOR, "Accent color", "Changes the accent color in menus.", ranged_val, 1, 7},
 
+    { OPTION_BRIGHTNESS, "Brightness", "Changes the screeninit brightness in menu. WIP, only takes effect on reboot (this will change.)", ranged_val, 0, 3},
+
     // space
     { 0, "", "", not_option, 0, 0 },
     // Patches.

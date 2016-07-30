@@ -28,7 +28,9 @@ show_menu(struct options_s *options, uint8_t *toggles)
     int cursor_min = -1;
     int cursor_max = -1;
     int exit = 0;
-    int window_size = (TOP_HEIGHT / font_h) - 3;
+
+    // Font height is user-controlled. Realistically, if it's higher than a signed int, that's not my fault.
+    int window_size = (TOP_HEIGHT / (int)font_h) - 3;
     int window_top = 0, window_bottom = window_size;
     int less_mode = 0;
 
@@ -82,12 +84,12 @@ show_menu(struct options_s *options, uint8_t *toggles)
             header("A:Enter B:Back DPAD:Nav Select:Info");
 
 
-        int i = window_top;
-        while (options[i].index != -1) { // -1 Sentinel.
+        for (int i = window_top; options[i].index != -1; ++i) { // -1 Sentinel.
             if (i > window_bottom)
                 break;
 
-            set_cursor(TOP_SCREEN, 0, i-window_top+2);
+            // NOTE - Signed to unsigned conversion here. Again, not an issue.
+            set_cursor(TOP_SCREEN, 0, (unsigned int)(i - window_top + 2) );
 
             if (options[i].allowed == boolean_val || (is_n3ds && options[i].allowed == boolean_val_n3ds)) {
                 if (cursor_y == i) {
@@ -120,7 +122,6 @@ show_menu(struct options_s *options, uint8_t *toggles)
                     accent_color(TOP_SCREEN, 1);
                 fprintf(TOP_SCREEN, "%s\x1b[0m", options[i].name);
             }
-            ++i;
         }
 
         uint32_t key = wait_key(1);
@@ -191,6 +192,8 @@ show_menu(struct options_s *options, uint8_t *toggles)
                     show_help(options[cursor_y].desc);
                     clear_disp(TOP_SCREEN);
                 }
+                break;
+            default:
                 break;
         }
 

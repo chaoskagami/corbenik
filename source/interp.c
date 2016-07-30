@@ -440,7 +440,7 @@ exec_bytecode(uint8_t *bytecode, uint32_t len, uint8_t* stack, uint32_t stack_si
                 break;
             case OP_SEEK: // Jump to offset if greater than or equal
                 code++;
-                offset = code[0] + (code[1] << 8) + (code[2] << 16) + (code[3] << 24);
+                offset = (uint32_t)(code[0] + (code[1] << 8) + (code[2] << 16) + (code[3] << 24));
                 if (debug) {
 #ifdef LOADER
                     log("seek\n");

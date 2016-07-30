@@ -23,6 +23,8 @@ static struct options_s options[] = {
 
     { OPTION_ACCENT_COLOR, "Accent color", "Changes the accent color in menus.", ranged_val, 1, 7},
 
+    { OPTION_BRIGHTNESS, "Brightness", "Changes the screeninit brightness in menu. WIP, only takes effect on reboot (this will change.)", ranged_val, 0, 3},
+
     // space
     { 0, "", "", not_option, 0, 0 },
     // Patches.
@@ -54,7 +56,7 @@ static struct options_s options[] = {
     //    { IGNORE_BROKEN_SHIT,  "Allow unsafe options", boolean_val, 0, 0 },
 
     // Sentinel.
-    { -1, "", "", 0, -1, -1 }, // cursor_min and cursor_max are stored in the last two.
+    { -1, "", "", 0, 0, 0 }, // cursor_min and cursor_max are stored in the last two.
 };
 
 extern unsigned int font_w;
@@ -185,7 +187,7 @@ static struct options_s info_d[] = {
     { 0, "  Native FIRM: ", "The version of NATIVE_FIRM in use.", not_option, 0, 0},
     { 0, "  AGB FIRM:    ", "The version of AGB_FIRM in use. This is used to run GBA games.", not_option, 0, 0},
     { 0, "  TWL FIRM:    ", "The version of TWL_FIRM in use. This is used to run DS games and DSiWare.", not_option, 0, 0},
-    { 0, "  " FW_NAME ":    " VERSION " (" REL ")", FW_NAME "'s version.", not_option, 0, 0},
+    { 0, "  " FW_NAME ":    " REVISION " (" REL ")", FW_NAME "'s version.", not_option, 0, 0},
     { -1, "", "", not_option, 0, 0 }
 };
 static int is_setup_info = 0;
@@ -294,7 +296,7 @@ static struct options_s main_s[] = {
     { 0, "Boot Firmware",      "Generates caches, patches the firmware, and boots it.\nMake sure to 'Save Configuration' first if any options changed.", break_menu, 0, 0 },
 
     // Sentinel.
-    { -1, "", "", 0, -1, -1 }, // cursor_min and cursor_max are stored in the last two.
+    { -1, "", "", 0, 0, 0 }, // cursor_min and cursor_max are stored in the last two.
 };
 
 void

@@ -2,7 +2,8 @@
 
 /* Not possible to be implemented as bytecode. Hey, can't win em all. */
 
-PATCH(modules)
+int
+patch_modules()
 {
     // TODO - load other module cxis here
     FILE *f = fopen(PATH_MODULES "/loader.cxi", "r");
@@ -71,7 +72,7 @@ PATCH(modules)
             // Copy the module into the firm
             memcpy(sysmodule, module, module->contentSize * 0x200);
         }
-        sysmodule = (ncch_h *)((uintptr_t)sysmodule + sysmodule->contentSize * 0x200);
+        sysmodule = (ncch_h *)((uint32_t)sysmodule + sysmodule->contentSize * 0x200);
     }
 
     fprintf(stderr, "Module: injected modules.\n");

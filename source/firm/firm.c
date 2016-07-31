@@ -233,7 +233,7 @@ decrypt_firm_title(firm_h *dest, ncch_h *ncch, uint32_t *size, void *key)
     if (ncch->magic != NCCH_MAGIC)
         return 1;
 
-    memcpy(exefs_key, ncch, 16);
+    memcpy(exefs_key, ncch, AES_BLOCK_SIZE);
 
     ncch_getctr(ncch, exefs_iv, NCCHTYPE_EXEFS);
 
@@ -241,7 +241,7 @@ decrypt_firm_title(firm_h *dest, ncch_h *ncch, uint32_t *size, void *key)
     exefs_h *exefs = (exefs_h *)((uint8_t *)ncch + ncch->exeFSOffset * MEDIA_UNITS);
     uint32_t exefs_size = ncch->exeFSSize * MEDIA_UNITS;
 
-    fprintf(stderr, "  Decrypting ExeFs for FIRM (size is %u blocks)\n", exefs_size / 16);
+    fprintf(stderr, "  Decrypting ExeFs for FIRM (size is %u blocks)\n", exefs_size / AES_BLOCK_SIZE);
 
     setup_aeskeyY(0x2C, exefs_key);
     use_aeskey(0x2C);

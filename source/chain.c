@@ -1,5 +1,4 @@
 #include <corbconf.h>
-#if defined(CHAINLOADER) && CHAINLOADER == 1
 
 #include <common.h>
 #include <screeninit.h>
@@ -158,4 +157,3 @@ void chainload_menu() {
     show_menu(chains, NULL);
 }
 
-#endif

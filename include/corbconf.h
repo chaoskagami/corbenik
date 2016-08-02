@@ -4,7 +4,7 @@
 #include <config.h>
 
 #ifndef ROOT
-#define ROOT "/corbenik"
+#define ROOT ""
 #endif
 
 #ifndef DATA

@@ -23,10 +23,5 @@
 #include <interrupt.h>
 #include <option.h>
 #include <input.h>
-#include <interp.h>
-#include <patcher.h>
-
-#include <patch/patch_file.h>
-#include <patch/emunand.h>
 
 #endif

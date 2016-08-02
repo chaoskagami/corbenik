@@ -1,3 +1,3 @@
-SUBDIRS = libctr9 loader bits screeninit
+SUBDIRS = libctr9 bits screeninit
 
 install:

@@ -3,8 +3,6 @@
 FILE *conf_handle;
 
 struct config_file config;
-extern uint8_t *enable_list;
-void list_patches_build(char *name, int desc_is_fname);
 
 void
 regenerate_config()
@@ -106,8 +104,6 @@ load_config()
         }
     }
 
-    list_patches_build(PATH_PATCHES, 0);
-
     if (!config.options[OPTION_SILENCE])
         fprintf(BOTTOM_SCREEN, "Config file loaded.\n");
 
@@ -117,8 +113,6 @@ load_config()
 void
 save_config()
 {
-    write_file(enable_list, PATH_TEMP "/PATCHENABLE", FCRAM_SPACING / 2);
-
     f_unlink(PATH_CONFIG);
 
     if (!(conf_handle = fopen(PATH_CONFIG, "w")))

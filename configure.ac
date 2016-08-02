@@ -1,4 +1,4 @@
-AC_INIT([Corbenik], [0.1.2], [https://github.com/chaoskagami/corbenik], [corbenik])
+AC_INIT([Corbchain], [0.1.2], [https://github.com/chaoskagami/corbenik], [corbenik])
 AM_INIT_AUTOMAKE([foreign no-dist-gzip dist-xz subdir-objects])
 
 AC_CONFIG_MACRO_DIRS([m4])
@@ -16,14 +16,9 @@ AC_CHECK_TOOL([OBJCOPY],objcopy)
 
 LT_INIT
 
-AC_ARG_ENABLE([chainloader],
-	AS_HELP_STRING([--disable-chainloader], [Disable chainloading of external programs]))
-
-AC_PREFIX_DEFAULT([/corbenik])
+AC_PREFIX_DEFAULT([])
 
 CHAINLOADER=1
-test "$enable_chainloader" = "no" && CHAINLOADER=0
-
 AC_DEFINE_UNQUOTED([CHAINLOADER], [$CHAINLOADER])
 
 AC_CONFIG_FILES([Makefile source/Makefile external/Makefile include/Makefile])
@@ -31,7 +26,7 @@ AC_CONFIG_FILES([Makefile source/Makefile external/Makefile include/Makefile])
 AC_CONFIG_SUBDIRS([external/libctr9])
 
 echo "
-Corbenik $VERSION
+Corbenik (chainloader only) $VERSION
 ========================
 Prefix:          ${prefix}
 
@@ -46,8 +41,6 @@ cflags:          ${CFLAGS}
 cxxflags:        ${CXXFLAGS}
 ldflags:         ${LDFLAGS}
 ocflags:         ${OCFLAGS}
-
-Chainloader:     ${CHAINLOADER}
 "
 
 AC_OUTPUT

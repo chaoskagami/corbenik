@@ -383,66 +383,72 @@ int
 ansi_statemach(void* buf, const int c)
 {
 	int* state = NULL, *val = NULL;
-    unsigned char *color = NULL;
+    uint8_t *color = NULL;
 
-	if (buf == stdout) {
+    uint8_t color_tmp = 0;
+
+    if (buf == stdout) {
         color = &color_top;
-		state = &stdout_state;
-		val = &stdout_val;
-	} else if (buf == stderr) {
+	    state = &stdout_state;
+	    val = &stdout_val;
+    } else if (buf == stderr) {
         color = &color_bottom;
-		state = &stderr_state;
-		val = &stderr_val;
-	} else {
-		return 0; // Just dump it to the file.
-	}
+	    state = &stderr_state;
+	    val = &stderr_val;
+    } else {
+        return 0;
+    }
 
-	switch(state[0]) {
+	switch(*state) {
 		case TEXT:
-			if (c == 0x1B) {
-				state[0] = ANSI_BEGIN;
+			if (c == '\x1b') {
+				*state = ANSI_NEXT;
 				return 1;
 			}
 			return 0;
 		case ANSI_NEXT:
 			if (c == '[') {
-				state[0] = ANSI_PARSE;
-				val[0] = 0;
+				*state = ANSI_PARSE;
+				*val = 0;
 				return 1;
 			}
 			// INVALID; this is a bad ansi sequence. Term early.
-			state[0] = TEXT;
+			*state = TEXT;
 			return 0;
 		case ANSI_END:
 			if (c == ';') {
-				state[0] = ANSI_PARSE; // Another code coming up.
+				*state = ANSI_PARSE; // Another code coming up.
 			} else if(c >= 0x40 && c <= 0x7E) {
-				state[0] = TEXT;
+				*state = TEXT;
 			}
 
 			return 1;
 		case ANSI_PARSE:
 			if (c >= '0' && c <= '9') {
-				val[0] *= 10;
-				val[0] += c - '0';
+				*val *= 10;
+				*val += (c - '0');
 
-				if (val[0] == 0) {
+				*state = ANSI_PARSE;
+
+				if (*val == 0) {
 					// Reset formatting.
-					color[0] = 0xf0;
+					*color = 0xf0;
+					*state = ANSI_END;
 				}
 
-				if (val[0] >= 10) {
-					switch(val[0] / 10) {
+				if (*val >= 10) {
+					switch(*val / 10) {
 						case 3: // Foreground color
-		                    color[0] &= 0x0f; // Remove fg color.
-		                    color[0] |= ((val[0] % 10) - '0') << 4;
+		                    *color &= 0x0f; // Remove fg color.
+		                    *color |= ((*val % 30) & 0xf) << 4;
+                            break;
 						case 4: // Background color
-		                    color[0] &= 0xf0; // Remove bg color.
-		                    color[0] |= ((val[0] % 10) - '0');
+		                    *color &= 0xf0; // Remove bg color.
+		                    *color |= ((*val % 40) & 0xf);
+                            break;
 					}
+					*state = ANSI_END;
 				}
-
-				state[0] = ANSI_END;
 			}
 			return 1;
 	}

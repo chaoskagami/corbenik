@@ -3,8 +3,6 @@
 
 // TODO - Basically all this needs to move to patcher programs.
 
-uint32_t wait_key(int sleep);
-
 extern int patch_services();
 extern int patch_modules();
 extern int patch_reboot();

@@ -14,6 +14,7 @@ regenerate_config()
 
     config->config_ver = config_version;
     config->options[OPTION_ACCENT_COLOR] = 2;
+    config->options[OPTION_BRIGHTNESS]   = 3;
 
     if (!(conf_handle = fopen(PATH_CONFIG, "w")))
         abort("Failed to open config for write?\n");
@@ -81,7 +82,7 @@ load_config()
     if (!(conf_handle = fopen(PATH_CONFIG, "r"))) {
         fprintf(BOTTOM_SCREEN, "Config file is missing:\n"
                                "  %s\n"
-                               "Will create it with defaults.\n",
+                               "Regenerating with defaults.\n",
                 PATH_CONFIG);
         regenerate_config();
     } else {
@@ -102,7 +103,7 @@ load_config()
         if (config->config_ver < config_version) {
             fprintf(BOTTOM_SCREEN, "Config file has outdated version:\n"
                                    "  %s\n"
-                                   "Regenerating with defaults...\n",
+                                   "Regenerating with defaults.\n",
                     PATH_CONFIG);
             f_unlink(PATH_CONFIG);
             regenerate_config();
@@ -120,8 +121,6 @@ load_config()
 void
 save_config()
 {
-    fprintf(stderr, "Saving config...\n");
-
     write_file(enable_list, PATH_TEMP "/PATCHENABLE", FCRAM_SPACING / 2);
 
     f_unlink(PATH_CONFIG);
@@ -135,4 +134,6 @@ save_config()
     fclose(conf_handle);
 
     config->options[OPTION_RECONFIGURED] = 1; // Save caches on boot.
+
+    fprintf(stderr, "Saved config successfully.\n");
 }

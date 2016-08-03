@@ -5,7 +5,6 @@
 #include <common.h>
 
 void poweroff();
-uint32_t wait_key(int sleep);
 
 void abort(const char* x, ...) {
     va_list ap;

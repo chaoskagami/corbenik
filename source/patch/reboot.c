@@ -1,3 +1,6 @@
+/* This code was all nicked from Luma (before the GPL headers were corrected by TuxSH)
+   Someone please remind me to fix this code.*/
+
 #include <common.h>
 #include <ctr9/io.h>
 

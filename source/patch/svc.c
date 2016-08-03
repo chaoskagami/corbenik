@@ -6,7 +6,8 @@ int svc_offs_init = 0;
 
 // This code handles restoration of backdoor
 
-PATCH(services)
+int
+patch_services()
 {
     if (svc_offs_init == 0) {
         arm11Section1 = (uint8_t *)firm_loc + firm_loc->section[1].offset;
@@ -41,7 +42,7 @@ PATCH(services)
         fclose(data);
 
         //        memcpy(svc_tab_open, svcbackdoor, sizeof(svcbackdoor));
-        svcTable[0x7B] = 0xFFFF0000 + ((uint8_t *)svc_tab_open - (uint8_t *)exceptionsPage);
+        svcTable[0x7B] = 0xFFFF0000 + (uint32_t)((uint8_t *)svc_tab_open - (uint8_t *)exceptionsPage);
 
         svc_tab_open += size;
 

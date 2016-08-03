@@ -30,7 +30,9 @@ screen_mode(uint32_t mode)
     if (PDN_GPU_CNT == 1)
         screenInitAddress[2] = 0; // Do a full init.
 
-    screenInitAddress[3] = 0xFF; // Brightness
+	// FIXME - God awful syntactical hack.
+    screenInitAddress[3] = ("\x40\x8F\xC0\xFF")[config->options[OPTION_BRIGHTNESS]];
+
     screenInitAddress[4] = mode; // Mode
 
     *a11_entry = (uint32_t)screenInitAddress;

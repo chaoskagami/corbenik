@@ -671,7 +671,11 @@ vfprintf(void *channel, const char *format, va_list ap)
                     }
                     break;
                 case 's':
-                    // Using puts isn't correct here...
+                    // FIXME - Substring ANSI colors will screw up hard, so don't do that.
+                    //         once the color handling is moved to putc as a state machine this
+                    //         will no longer be an issue.
+
+                    //         For now, this warning stays.
                     disable_format = 1; // Disable format strings.
                     fprintf(channel, va_arg(ap, char *));
                     disable_format = 0; // Reenable.

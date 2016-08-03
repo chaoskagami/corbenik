@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <ctr9/io.h>
 #include <common.h>
+#include <firm/fcram.h>
 
 // ctr_nand_crypto_interface ctr_io;
 // ctr_nand_crypto_interface twl_io;
@@ -8,8 +9,6 @@ static ctr_sd_interface   sd_io;
 static ctr_nand_interface nand_io;
 static FATFS fs;
 static int set_up_fs = 0;
-
-FILE files[MAX_FILES_OPEN];
 
 // This function is based on PathDeleteWorker from GodMode9.
 // It was easier to just import it.
@@ -72,19 +71,12 @@ fmount(void)
     if (f_chdrive("SD:"))
         return 1;
 
-    for (int i = 0; i < MAX_FILES_OPEN; i++)
-        memset(&files[i], 0, sizeof(FILE));
-
     return 0;
 }
 
 int
 fumount(void)
 {
-    for (int i = 0; i < MAX_FILES_OPEN; i++)
-        if (files[i].is_open)
-            fclose(&files[i]);
-
     if (f_mount(NULL, "SD:", 1))
         return 1;
 
@@ -99,17 +91,7 @@ fopen(const char *filename, const char *mode)
     if (mode[0] != 'r' && mode[0] != 'w' && mode[0] != 'a')
         return NULL; // Mode not valid.
 
-    FILE *fp;
-    int i;
-    for (i = 0; i < MAX_FILES_OPEN; i++) {
-        if (!files[i].is_open) {
-            fp = &files[i];
-            break;
-        }
-    }
-
-    if (i == MAX_FILES_OPEN)
-        return NULL; // Out of handles.
+    FILE *fp = (FILE*)malloc(sizeof(FILE));
 
     fp->mode = (mode[0] == 'r' ? FA_READ : (FA_WRITE | FA_OPEN_ALWAYS));
 
@@ -130,6 +112,8 @@ fclose(FILE *fp)
     f_close(&(fp->handle));
 
     memset(fp, 0, sizeof(FILE));
+
+    free(fp);
 }
 
 void

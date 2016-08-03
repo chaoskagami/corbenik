@@ -18,7 +18,7 @@ extern struct options_s* patches;
 void
 wait()
 {
-    if (config.options[OPTION_TRACE] && !doing_autoboot) {
+    if (config->options[OPTION_TRACE] && !doing_autoboot) {
         fprintf(stderr, "[Waiting...]");
         wait_key(0); // No delay on traces.
     }
@@ -58,22 +58,22 @@ patch_firm_all()
     fprintf(stderr, "VM exited without issue\n");
 
     // Hook firmlaunch?
-    if (config.options[OPTION_REBOOT]) {
+    if (config->options[OPTION_REBOOT]) {
         patch_reboot();
 
         wait();
     }
 
     // Use EmuNAND?
-    if (config.options[OPTION_EMUNAND]) {
+    if (config->options[OPTION_EMUNAND]) {
         // Yes.
-        patch_emunand(config.options[OPTION_EMUNAND_INDEX]);
+        patch_emunand(config->options[OPTION_EMUNAND_INDEX]);
 
         wait();
     }
 
     // Inject services?
-    if (config.options[OPTION_SVCS]) {
+    if (config->options[OPTION_SVCS]) {
         if (patch_services()) {
             abort("Fatal. Svc inject has failed.");
         }
@@ -81,7 +81,7 @@ patch_firm_all()
     }
 
     // Replace loader?
-    if (config.options[OPTION_LOADER]) {
+    if (config->options[OPTION_LOADER]) {
         if (patch_modules()) {
             abort("Fatal. Loader inject has failed.");
         }
@@ -90,7 +90,7 @@ patch_firm_all()
     }
 
     // Use ARM9 hook thread?
-    if (config.options[OPTION_ARM9THREAD]) {
+    if (config->options[OPTION_ARM9THREAD]) {
         // Yes.
 
         // FIXME - NYI

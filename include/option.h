@@ -26,7 +26,11 @@ struct patch_state
     uint8_t state;
 } __attribute__((packed));
 
+#ifdef LOADER
 extern struct config_file config;
+#else
+extern struct config_file *config;
+#endif
 
 enum type
 {

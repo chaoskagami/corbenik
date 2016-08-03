@@ -17,7 +17,7 @@ void show_help(char* help) {
 void accent_color(void* screen, int fg) {
     char color[] = "\x1b[30m";
     if (!fg) color[2] = '4';
-    color[3] = ("01234567")[config.options[OPTION_ACCENT_COLOR]];
+    color[3] = ("01234567")[config->options[OPTION_ACCENT_COLOR]];
     fprintf(screen, "%s", color);
 }
 

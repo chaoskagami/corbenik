@@ -66,7 +66,7 @@ void
 header(char *append)
 {
     set_cursor(TOP_SCREEN, 0, 0);
-    fill_line(stdout, 0, config.options[OPTION_ACCENT_COLOR]);
+    fill_line(stdout, 0, config->options[OPTION_ACCENT_COLOR]);
     accent_color(TOP_SCREEN, 0);
     fprintf(stdout, "\x1b[30m ." FW_NAME " // %s\x1b[0m\n\n", append);
 }
@@ -181,7 +181,7 @@ menu_patches()
 void
 menu_options()
 {
-    show_menu(options, config.options);
+    show_menu(options, config->options);
 }
 
 #ifndef REL

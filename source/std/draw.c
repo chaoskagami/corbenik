@@ -209,7 +209,7 @@ void set_font(const char* filename) {
 }
 
 void dump_log(unsigned int force) {
-    if(!config.options[OPTION_SAVE_LOGS])
+    if(!config->options[OPTION_SAVE_LOGS])
         return;
 
     if (force == 0 && log_size < LOG_BUFFER_SIZE-1)
@@ -241,7 +241,7 @@ clear_disp(uint8_t *screen)
             screen[j + 1] = top_bg[i];
             screen[j + 2] = top_bg[i + 1];
             screen[j + 3] = top_bg[i + 2];
-            if (!kill_output && config.options[OPTION_DIM_MODE]) {
+            if (!kill_output && config->options[OPTION_DIM_MODE]) {
                 screen[j + 1] = alphamap[screen[j + 1]];
                 screen[j + 2] = alphamap[screen[j + 2]];
                 screen[j + 3] = alphamap[screen[j + 3]];
@@ -256,7 +256,7 @@ clear_disp(uint8_t *screen)
             screen[j + 1] = bottom_bg[i];
             screen[j + 2] = bottom_bg[i + 1];
             screen[j + 3] = bottom_bg[i + 2];
-            if (!kill_output && config.options[OPTION_DIM_MODE]) {
+            if (!kill_output && config->options[OPTION_DIM_MODE]) {
                 screen[j + 1] = alphamap[screen[j + 1]];
                 screen[j + 2] = alphamap[screen[j + 2]];
                 screen[j + 3] = alphamap[screen[j + 3]];
@@ -327,7 +327,7 @@ draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, co
                 screen[pos + 1] = buffer_bg[pos_b];
                 screen[pos + 2] = buffer_bg[pos_b + 1];
                 screen[pos + 3] = buffer_bg[pos_b + 2];
-                if (config.options[OPTION_DIM_MODE]) {
+                if (config->options[OPTION_DIM_MODE]) {
                     screen[pos + 1] = alphamap[screen[pos + 1]];
                     screen[pos + 2] = alphamap[screen[pos + 2]];
                     screen[pos + 3] = alphamap[screen[pos + 3]];
@@ -343,7 +343,7 @@ draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, co
                     screen[pos + 1] = buffer_bg[pos_b];
                     screen[pos + 2] = buffer_bg[pos_b + 1];
                     screen[pos + 3] = buffer_bg[pos_b + 2];
-                    if (config.options[OPTION_DIM_MODE]) {
+                    if (config->options[OPTION_DIM_MODE]) {
                         screen[pos + 1] = alphamap[screen[pos + 1]];
                         screen[pos + 2] = alphamap[screen[pos + 2]];
                         screen[pos + 3] = alphamap[screen[pos + 3]];

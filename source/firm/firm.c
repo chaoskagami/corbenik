@@ -557,7 +557,7 @@ boot_cfw()
 
     load_firms();
 
-    if (config.options[OPTION_RECONFIGURED]) {
+    if (config->options[OPTION_RECONFIGURED]) {
         fprintf(stderr, "Generating patch cache...\n");
         generate_patch_cache();
     }
@@ -566,7 +566,7 @@ boot_cfw()
     if (patch_firm_all() != 0)
         return;
 
-    if (config.options[OPTION_REBOOT] && config.options[OPTION_RECONFIGURED]) {
+    if (config->options[OPTION_REBOOT] && config->options[OPTION_RECONFIGURED]) {
         fprintf(stderr, "Saving FIRM for reboot...\n");
         if (!write_file(firm_loc, PATH_NATIVE_P, firm_size))
             abort("Failed to save prepatched native\n");

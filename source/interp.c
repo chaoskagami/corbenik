@@ -721,7 +721,11 @@ execb(char *filename, int build_cache)
 #endif
 
     int debug = 0;
+#ifdef LOADER
     if (config.options[OPTION_OVERLY_VERBOSE]) {
+#else
+    if (config->options[OPTION_OVERLY_VERBOSE]) {
+#endif
         debug = 1;
     }
 

@@ -296,14 +296,16 @@ decrypt_firm(firm_h *dest, char *path_firmkey, char *path_cetk, uint32_t *size)
 
     // Firmware is likely encrypted. Decrypt.
     if (!read_file(firm_key, path_firmkey, AES_BLOCK_SIZE)) {
+        uint8_t* temp = malloc(FCRAM_SPACING);
         // Missing firmkey. Attempt to get from CETK (only works if system was booted)
-        if (!read_file((void *)FCRAM_JUNK_LOC, path_cetk, FCRAM_SPACING) || decrypt_cetk_key(firm_key, (void *)FCRAM_JUNK_LOC)) {
+        if (!read_file(temp, path_cetk, FCRAM_SPACING) || decrypt_cetk_key(firm_key, temp)) {
             fprintf(stderr, "  No firmkey and failed to extract from cetk\n");
             return 1;
         } else {
             fprintf(stderr, "  Saving firmkey for future use.\n");
             write_file(firm_key, path_firmkey, AES_BLOCK_SIZE);
         }
+        free(temp);
     } else {
         fprintf(stderr, "  Read firmkey from filesystem.\n");
     }

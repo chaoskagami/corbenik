@@ -3,19 +3,23 @@
 // 16 <- AES block size.
 #define SALLOC_ALIGN 16
 
-void *fcram_temp = (void *)0x23000000;
-
-void *fcram_static_mem = (void*)FCRAM_STATIC_ALLOC_LOC;
-
 struct alloc_info* first_mem = NULL;
 
-// Low level static allocator / sbrk-like function.
-void *fake_sbrk(size_t bytes) {
-    void *ret = fcram_static_mem;
+void* sbrk(int incr) {
+  extern uint32_t __end__; /* Defined by the linker */
+  static uint32_t *heap_end;
+  uint32_t        *prev_heap_end;
 
-    fcram_static_mem = (uint8_t*)fcram_static_mem + bytes;
+  if (heap_end == 0) {
+    heap_end = &__end__;
+  }
 
-    return ret;
+  prev_heap_end = heap_end;
+  if (heap_end + incr > stack_ptr)
+    abort("Heap overflowed!\n");
+
+  heap_end += incr;
+  return (void*) prev_heap_end;
 }
 
 // This is an incredibly crappy and inefficient implementation of malloc/free nicked from stackoverflow.
@@ -44,7 +48,7 @@ void* malloc(size_t size) {
         block = block->next;
     }
 
-    block = (free_block*)fake_sbrk(size);
+    block = (free_block*)sbrk(size);
     block->size = size;
 
     return ((char*)block) + sizeof(free_block);

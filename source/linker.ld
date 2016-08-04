@@ -48,5 +48,5 @@ SECTIONS
 
     . = ALIGN(4);
 
-    __end__ = 0x20400000;
+    __end__ = .;
 }

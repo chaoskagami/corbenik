@@ -13,7 +13,8 @@ patch_modules()
     }
 
     size_t size = fsize(f);
-    fread((void *)FCRAM_JUNK_LOC, 1, size, f);
+    uint8_t* temp = malloc(size);
+    fread(temp, 1, size, f);
     fclose(f);
 
     // Look for the section that holds all the sysmodules
@@ -29,10 +30,11 @@ patch_modules()
 
     if (!sysmodule_section) {
         fprintf(stderr, "Module: sysmodule section not found\n");
+        free(temp);
         return 1;
     }
 
-    ncch_h *module = (ncch_h *)FCRAM_JUNK_LOC;
+    ncch_h *module = (ncch_h *)temp;
     ncch_h *sysmodule = (ncch_h *)((uint32_t)firm_loc + sysmodule_section->offset);
 
     // Check if we want to replace an existing sysmodule
@@ -76,6 +78,8 @@ patch_modules()
     }
 
     fprintf(stderr, "Module: injected modules.\n");
+
+    free(temp);
 
     return 0;
 }

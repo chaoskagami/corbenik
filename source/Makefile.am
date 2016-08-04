@@ -19,4 +19,4 @@ corbenikdir = $(top_srcdir)/source
 
 inc_dir = $(top_srcdir)/include
 
-corbenik_SOURCES = patch/reboot.c patch/svc.c patch/module.c patch/emunand.c main.c option.c std/fs.c std/draw.c std/memory.c std/abort.c menu.c chain.c firm/version.c firm/firm.c firm/decryptor.c firm/fcram.c interp.c input.c patcher.c display.c start.s interrupt.c screeninit.c
+corbenik_SOURCES = patch/reboot.c patch/svc.c patch/module.c patch/emunand.c main.c option.c std/fs.c std/draw.c std/memory.c std/abort.c menu.c chain.c firm/version.c firm/firm.c firm/decryptor.c std/allocator.c interp.c input.c patcher.c display.c start.s interrupt.c screeninit.c

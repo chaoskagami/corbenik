@@ -54,8 +54,8 @@ cbc_decrypt(void *inbuf, void *outbuf, size_t size, uint32_t mode, uint8_t *iv)
 
         blocks -= current_blocks;
 
-        in  += AES_BLOCK_SIZE;
-        out += AES_BLOCK_SIZE;
+        in  += AES_BLOCK_SIZE * current_blocks;
+        out += AES_BLOCK_SIZE * current_blocks;
     }
 }
 

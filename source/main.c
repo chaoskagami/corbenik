@@ -19,19 +19,8 @@ main(int argc, char** argv)
 
     std_init();
 
-    int c = fmount();
-
-    if (c) {
-        // Failed to mount SD. Bomb out.
-        // TODO - What the hell does one even do in this situation?
-        //        Spin until the card is available to mount, maybe?
-        abort("Failed to mount SD card.\n");
-    }
-
-    if (argc >= 1 && argc < 2) {
-        // Valid argc passed.
-        fprintf(stderr, "Chainloaded. Path: %s\n", argv[0]);
-    }
+    if (fmount())
+        poweroff(); // Failed to mount SD. Bomb out.
 
     set_font(PATH_TERMFONT); // Read the font before all else.
 

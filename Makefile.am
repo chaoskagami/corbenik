@@ -43,3 +43,6 @@ all-local:
 	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000202/cetk     -O .@datarootdir@/keys/agb.cetk" >> out/n3ds_firm.sh
 	chmod 755 out/*.sh
 	cp README.md LICENSE.txt out/
+
+clean-local:
+	rm -rf out

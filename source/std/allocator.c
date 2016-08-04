@@ -14,6 +14,8 @@ void* sbrk(size_t incr) {
     heap_end = &__end__;
   }
 
+  // FIXME - Make sure heap isn't leaking into stack here. That would be bad.
+
   prev_heap_end = heap_end;
 
   heap_end += incr;

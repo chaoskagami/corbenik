@@ -25,12 +25,15 @@ enum screen
     screen_bottom
 };
 
-_UNUSED static struct framebuffers
+struct framebuffers
 {
     uint8_t *top_left;
     uint8_t *top_right;
     uint8_t *bottom;
-} *framebuffers = (struct framebuffers *)0x23FFFE00;
+};
+
+_UNUSED static struct framebuffers *framebuffers_cakehax = (struct framebuffers *)0x23FFFE00;
+extern struct framebuffers *framebuffers;
 // This is marked unused since it occurs in all files.
 
 #define TOP_FB framebuffers->top_left

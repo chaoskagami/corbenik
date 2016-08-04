@@ -1,8 +1,6 @@
 AC_INIT([Corbenik], [0.1.2], [https://github.com/chaoskagami/corbenik], [corbenik])
 AM_INIT_AUTOMAKE([foreign no-dist-gzip dist-xz subdir-objects])
 
-AC_CONFIG_MACRO_DIRS([m4])
-
 # Find AR and RANLIB for lto support before initializing libtool
 AC_CHECK_TOOL([AR],gcc-ar)
 AC_CHECK_TOOL([RANLIB],gcc-ranlib)

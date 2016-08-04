@@ -7,6 +7,8 @@
 
 static volatile uint32_t *const a11_entry = (volatile uint32_t *)0x1FFFFFF8;
 
+struct framebuffers* framebuffers = NULL;
+
 void
 screen_mode(uint32_t mode)
 {
@@ -38,6 +40,11 @@ screen_mode(uint32_t mode)
     *a11_entry = (uint32_t)screenInitAddress;
 
     while (*a11_entry);
+
+    if (!framebuffers) {
+        framebuffers = malloc(sizeof(struct framebuffers));
+        memcpy(framebuffers, framebuffers_cakehax, sizeof(struct framebuffers));
+    }
 
     // Turn on backlight
     i2cWriteRegister(I2C_DEV_MCU, 0x22, 1 << 1);

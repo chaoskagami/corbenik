@@ -1,7 +1,6 @@
 #include <stddef.h>
 #include <ctr9/io.h>
 #include <common.h>
-#include <firm/fcram.h>
 
 // ctr_nand_crypto_interface ctr_io;
 // ctr_nand_crypto_interface twl_io;

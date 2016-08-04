@@ -15,7 +15,7 @@
 #include <std/draw.h>
 
 #include <firm/headers.h>
-#include <firm/fcram.h>
+#include <std/allocator.h>
 #include <firm/decryptor.h>
 #include <firm/firm.h>
 

@@ -4,19 +4,17 @@
 #define SALLOC_ALIGN 16
 
 struct alloc_info* first_mem = NULL;
+static uint32_t *heap_end = NULL;
+extern uint32_t __end__; /* Defined by the linker */
 
-void* sbrk(int incr) {
-  extern uint32_t __end__; /* Defined by the linker */
-  static uint32_t *heap_end;
+void* sbrk(size_t incr) {
   uint32_t        *prev_heap_end;
 
-  if (heap_end == 0) {
+  if (heap_end == NULL) {
     heap_end = &__end__;
   }
 
   prev_heap_end = heap_end;
-  if (heap_end + incr > stack_ptr)
-    abort("Heap overflowed!\n");
 
   heap_end += incr;
   return (void*) prev_heap_end;

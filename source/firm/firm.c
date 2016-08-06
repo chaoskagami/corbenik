@@ -272,7 +272,7 @@ decrypt_arm9bin(arm9bin_h *header, uint64_t firm_title, uint8_t version)
         slot = 0x16;
 
         use_aeskey(0x11);
-        aes_decrypt(decrypted_keyx, header->slot0x16keyX, 1, AES_CNT_ECB_DECRYPT_MODE);
+        ecb_decrypt(header->slot0x16keyX, decrypted_keyx, 1, AES_CNT_ECB_DECRYPT_MODE);
         setup_aeskeyX(slot, decrypted_keyx);
     }
 
@@ -366,6 +366,7 @@ load_firm(firm_h *dest, char *path, char *path_firmkey, char *path_cetk, uint32_
                 if (arm9bin_iscrypt) {
                     // Decrypt the arm9bin.
                     if (decrypt_arm9bin((arm9bin_h *)((uintptr_t)dest + section->offset), firm_title, fsig->version)) {
+                        fprintf(stderr, "  ARM9 segment is encrypted\n");
                         return 1;
                     }
                     firmware_changed = 1; // Decryption of arm9bin performed.
@@ -445,7 +446,7 @@ boot_firm()
         use_aeskey(0x11);
         uint8_t keyx[AES_BLOCK_SIZE];
         for (int slot = 0x19; slot < 0x20; slot++) {
-            ecb_decrypt(keyx, keydata, 1, AES_CNT_ECB_DECRYPT_MODE);
+            ecb_decrypt(keydata, keyx, 1, AES_CNT_ECB_DECRYPT_MODE);
             setup_aeskeyX(slot, keyx);
             *(uint8_t *)(keydata + 0xF) += 1;
         }

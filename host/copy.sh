@@ -12,6 +12,7 @@ mount -t vfat ${dev}1 $mnt || exit 0
 rm -rf $mnt/corbenik
 cp -r out/* $mnt/ || exit 0
 ( cd $mnt/ && ./n3ds_firm.sh )
+mv $mnt/arm9loaderhax{,_si}.bin
 umount $mnt || exit 0
 sync || exit 0
 eject ${dev} || exit 0

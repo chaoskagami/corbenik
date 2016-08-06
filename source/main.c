@@ -26,7 +26,7 @@ main(int argc, char** argv)
 
     load_config(); // Load configuration.
 
-    screen_mode(0); // Use RGBA8 mode.
+    screen_mode(RGBA8); // Use RGBA8 mode.
 
     clear_bg();
 
@@ -36,9 +36,9 @@ main(int argc, char** argv)
     clear_disp(TOP_SCREEN);
     clear_disp(BOTTOM_SCREEN);
 
-    ctr_screen_enable_backlight(CTR_SCREEN_BOTH);
+//    ctr_screen_enable_backlight(CTR_SCREEN_BOTH);
 
-    install_interrupts(); // Get some free debug info.
+//    install_interrupts(); // Get some free debug info.
 
     if (CFG_BOOTENV == 7) {
         fprintf(stderr, "Rebooted from AGB, disabling EmuNAND.\n");

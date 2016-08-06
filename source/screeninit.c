@@ -1,187 +1,263 @@
+//   Copyright (C) 2016 Aurora Wright, TuxSH
+
+//   This program is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General Public License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+
+//   This program is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//   GNU General Public License for more details.
+
+//   You should have received a copy of the GNU General Public License
+//   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+//   Additional Terms 7.b of GPLv3 applies to this file: Requiring preservation of specified
+//   reasonable legal notices or author attributions in that material or in the Appropriate Legal
+//   Notices displayed by works containing it.
+
+// ============================================
+
+//   Screen init code by dark_samus, bil1s, Normmatt, delebile and others.
+//   Screen deinit code by tiniVi.
+//   More readable screeninit by Gelex.
+
+// ============================================
+
+//   This is less a permanent solution and more a quickfix since I'd rather use libctr11
+//   whenever Gelex finishes it. Don't rely on it staying here.
+
+//   Also, you are correct in thinking this looks near nothing like Luma's code at this point.
+
 #include <common.h>
 #include <ctr9/io.h>
 #include <ctr9/ctr_screen.h>
+#include <ctr9/ctr_cache.h>
 #include <ctr9/i2c.h>
 
-#define PDN_GPU_CNT (*(volatile uint8_t *)0x10141200)
+struct framebuffers *framebuffers;
 
-static volatile uint32_t *const a11_entry = (volatile uint32_t *)0x1FFFFFF8;
+volatile uint32_t *const arm11Entry = (volatile uint32_t *)0x1FFFFFF8;
+static const uint32_t brightness[4] = {0x26, 0x39, 0x4C, 0x5F};
 
-struct framebuffers* framebuffers = NULL;
+void  __attribute__((naked)) arm11Stub(void)
+{
+    //Disable interrupts
+    __asm(".word 0xF10C01C0");
 
-#define FB_FMT(col, plx, screen) ((col & 0b111) | ((plx & 1) << 5) | ((screen & 1) << 6) | 0b10000000001100000000)
+    //Wait for the entry to be set
+    while(*arm11Entry == ARM11_STUB_ADDRESS);
 
-#define RGBA8        0
-#define BGR8         1
-#define RGB565_OES   2
-#define RGB5_A1_OES  3
-#define RGBA4_OES    4
-
-#define INIT_FULL    0
-#define INIT_PARAMS  1
-#define INIT_DEINIT  2
-
-uint32_t do_init = 0;
-uint32_t brightnessLevel = 0;
-uint32_t init_mode = 0;
-
-void __attribute__((naked)) screen11(void) {
-   // FIXME - We could use some serious macros here...
-
-   uint32_t yaw, init_top, init_bottom;
-   switch(init_mode) {
-       case RGBA8:
-           yaw = 240 * 4;
-           break;
-       case BGR8:
-       case RGB565_OES:
-       case RGB5_A1_OES:
-       case RGBA4_OES:
-           yaw = 240 * 3;
-           break;
-   }
-
-   init_top    = FB_FMT(init_mode, 0, 1);
-   init_bottom = FB_FMT(init_mode, 0, 0);
-
-   volatile uint32_t *const arm11 = (uint32_t *)0x1FFFFFF8;
-
-   if (do_init == INIT_FULL) {
-   *(volatile uint32_t *)0x10141200 = 0x1007F;
-   *(volatile uint32_t *)0x10202014 = 0x00000001;
-   *(volatile uint32_t *)0x1020200C &= 0xFFFEFFFE;
-   }
-
-   *(volatile uint32_t *)0x10202240 = brightnessLevel; // Alteration; directly read brightness.
-   *(volatile uint32_t *)0x10202A40 = brightnessLevel;
-
-   if (do_init == INIT_FULL) {
-   *(volatile uint32_t *)0x10202244 = 0x1023E;
-   *(volatile uint32_t *)0x10202A44 = 0x1023E;
-   }
-
-   // Top screen
-   *(volatile uint32_t *)0x10400400 = 0x000001c2;
-   *(volatile uint32_t *)0x10400404 = 0x000000d1;
-   *(volatile uint32_t *)0x10400408 = 0x000001c1;
-   *(volatile uint32_t *)0x1040040c = 0x000001c1;
-   *(volatile uint32_t *)0x10400410 = 0x00000000;
-   *(volatile uint32_t *)0x10400414 = 0x000000cf;
-   *(volatile uint32_t *)0x10400418 = 0x000000d1;
-   *(volatile uint32_t *)0x1040041c = 0x01c501c1;
-   *(volatile uint32_t *)0x10400420 = 0x00010000;
-   *(volatile uint32_t *)0x10400424 = 0x0000019d;
-   *(volatile uint32_t *)0x10400428 = 0x00000002;
-   *(volatile uint32_t *)0x1040042c = 0x00000192;
-   *(volatile uint32_t *)0x10400430 = 0x00000192;
-   *(volatile uint32_t *)0x10400434 = 0x00000192;
-   *(volatile uint32_t *)0x10400438 = 0x00000001;
-   *(volatile uint32_t *)0x1040043c = 0x00000002;
-   *(volatile uint32_t *)0x10400440 = 0x01960192;
-   *(volatile uint32_t *)0x10400444 = 0x00000000;
-   *(volatile uint32_t *)0x10400448 = 0x00000000;
-
-   *(volatile uint32_t *)0x1040045C = 0x00f00190;
-   *(volatile uint32_t *)0x10400460 = 0x01c100d1;
-   *(volatile uint32_t *)0x10400464 = 0x01920002;
-   *(volatile uint32_t *)0x10400468 = 0x18300000;
-   *(volatile uint32_t *)0x10400470 = init_top; // Format
-   *(volatile uint32_t *)0x10400474 = 0x00010501;
-   *(volatile uint32_t *)0x10400478 = 0;
-   *(volatile uint32_t *)0x10400490 = yaw;
-   *(volatile uint32_t *)0x1040049C = 0x00000000;
-
-   // Disco register
-   for(uint32_t i = 0; i < 256; i++)
-       *(volatile uint32_t *)0x10400484 = 0x10101 * i;
-
-   // Bottom screen
-   *(volatile uint32_t *)0x10400500 = 0x000001c2;
-   *(volatile uint32_t *)0x10400504 = 0x000000d1;
-   *(volatile uint32_t *)0x10400508 = 0x000001c1;
-   *(volatile uint32_t *)0x1040050c = 0x000001c1;
-   *(volatile uint32_t *)0x10400510 = 0x000000cd;
-   *(volatile uint32_t *)0x10400514 = 0x000000cf;
-   *(volatile uint32_t *)0x10400518 = 0x000000d1;
-   *(volatile uint32_t *)0x1040051c = 0x01c501c1;
-   *(volatile uint32_t *)0x10400520 = 0x00010000;
-   *(volatile uint32_t *)0x10400524 = 0x0000019d;
-   *(volatile uint32_t *)0x10400528 = 0x00000052;
-   *(volatile uint32_t *)0x1040052c = 0x00000192;
-   *(volatile uint32_t *)0x10400530 = 0x00000192;
-   *(volatile uint32_t *)0x10400534 = 0x0000004f;
-   *(volatile uint32_t *)0x10400538 = 0x00000050;
-   *(volatile uint32_t *)0x1040053c = 0x00000052;
-   *(volatile uint32_t *)0x10400540 = 0x01980194;
-   *(volatile uint32_t *)0x10400544 = 0x00000000;
-   *(volatile uint32_t *)0x10400548 = 0x00000011;
-   *(volatile uint32_t *)0x1040055C = 0x00f00140;
-   *(volatile uint32_t *)0x10400560 = 0x01c100d1;
-   *(volatile uint32_t *)0x10400564 = 0x01920052;
-   *(volatile uint32_t *)0x10400568 = 0x18300000 + (yaw * 400);
-   *(volatile uint32_t *)0x10400570 = init_bottom; // Format
-   *(volatile uint32_t *)0x10400574 = 0x00010501;
-   *(volatile uint32_t *)0x10400578 = 0;
-   *(volatile uint32_t *)0x10400590 = yaw;
-   *(volatile uint32_t *)0x1040059C = 0x00000000;
-
-   // Disco register
-   for(uint32_t i = 0; i < 256; i++)
-       *(volatile uint32_t *)0x10400584 = 0x10101 * i;
-
-   *(volatile uint32_t *)0x10400468 = 0x18300000;
-   *(volatile uint32_t *)0x1040046c = 0x18300000;
-   *(volatile uint32_t *)0x10400494 = 0x18300000;
-   *(volatile uint32_t *)0x10400498 = 0x18300000;
-   *(volatile uint32_t *)0x10400568 = 0x18300000 + (yaw * 400);
-   *(volatile uint32_t *)0x1040056c = 0x18300000 + (yaw * 400);
-
-   //Set CakeBrah framebuffers
-   *((volatile uint32_t *)0x23FFFE00) = 0x18300000;
-   *((volatile uint32_t *)0x23FFFE04) = 0x18300000;
-   *((volatile uint32_t *)0x23FFFE08) = 0x18300000 + (yaw * 400);
-
-   //Clear ARM11 entry offset
-   *arm11 = 0;
-
-   //Wait for the entry to be set
-   while(!*arm11);
-
-   //Jump to it
-   ((void (*)())*arm11)();
+    //Jump to it
+    ((void (*)())*arm11Entry)();
 }
 
-void
-screen_mode(uint32_t mode)
+static void invokeArm11Function(void (*func)())
 {
-    // FIXME - At the moment, this seems mandatory to do full screeninit.
-
-    // I get very fucked up results from just changing the framebuffer offsets
-    // and display color mode. Until I figure out WHY a full screeninit has to
-    // be performed, I have to do a full screeninit.
-
-    // And no, 3dbrew didn't help. Partial init seems to be a superset of what
-    // I was attempting.
-
-    do_init = 1; // Do a partial init.
-
-    if (PDN_GPU_CNT == 1)
-        do_init = 0; // Do a full init.
-
-	// FIXME - God awful syntactical hack.
-    brightnessLevel = ("\x40\x8F\xC0\xFF")[config->options[OPTION_BRIGHTNESS]];
-
-    init_mode = mode; // Mode
-
-    *a11_entry = (uint32_t)screen11;
-
-    while (*a11_entry);
-
-    if (!framebuffers) {
-        framebuffers = malloc(sizeof(struct framebuffers));
-        memcpy(framebuffers, framebuffers_cakehax, sizeof(struct framebuffers));
+    static int hasCopiedStub = false;
+    if(!hasCopiedStub)
+    {
+        memcpy((void *)ARM11_STUB_ADDRESS, arm11Stub, 0x30);
+		ctr_cache_clean_and_flush_all();
+        hasCopiedStub = true;
     }
 
+    *arm11Entry = (uint32_t)func;
+    while(*arm11Entry);
+    *arm11Entry = ARM11_STUB_ADDRESS;
+}
+
+void deinitScreens(void)
+{
+    void __attribute__((naked)) ARM11(void)
+    {
+        //Disable interrupts
+        __asm(".word 0xF10C01C0");
+
+        //Shutdown LCDs
+        *(volatile uint32_t *)0x10202A44 = 0;
+        *(volatile uint32_t *)0x10202244 = 0;
+        *(volatile uint32_t *)0x10202014 = 0;
+
+        WAIT_FOR_ARM9();
+    }
+
+    if(PDN_GPU_CNT != 1) invokeArm11Function(ARM11);
+}
+
+void updateBrightness(uint32_t brightnessIndex)
+{
+    static uint32_t brightnessLevel;
+    brightnessLevel = brightness[brightnessIndex];
+
+    void __attribute__((naked)) ARM11(void)
+    {
+        //Disable interrupts
+        __asm(".word 0xF10C01C0");
+
+        //Change brightness
+        *(volatile uint32_t *)0x10202240 = brightnessLevel;
+        *(volatile uint32_t *)0x10202A40 = brightnessLevel;
+
+        WAIT_FOR_ARM9();
+    }
+
+	ctr_cache_clean_and_flush_all();
+    invokeArm11Function(ARM11);
+}
+
+void clearScreens(void) {
+    void __attribute__((naked)) ARM11(void)
+    {
+        //Disable interrupts
+        __asm(".word 0xF10C01C0");
+
+        //Setting up two simultaneous memory fills using the GPU
+        volatile uint32_t *REGs_PSC0 = (volatile uint32_t *)0x10400010;
+
+        REGs_PSC0[0] = (uint32_t)framebuffers->top_left >> 3; //Start address
+        REGs_PSC0[1] = (uint32_t)(framebuffers->top_left + (400 * 240 * 4)) >> 3; //End address
+        REGs_PSC0[2] = 0; //Fill value
+        REGs_PSC0[3] = (2 << 8) | 1; //32-bit pattern; start
+
+        volatile uint32_t *REGs_PSC1 = (volatile uint32_t *)0x10400020;
+
+        REGs_PSC1[0] = (uint32_t)framebuffers->bottom >> 3; //Start address
+        REGs_PSC1[1] = (uint32_t)(framebuffers->bottom + (320 * 240 * 4)) >> 3; //End address
+        REGs_PSC1[2] = 0; //Fill value
+        REGs_PSC1[3] = (2 << 8) | 1; //32-bit pattern; start
+
+        while(!((REGs_PSC0[3] & 2) && (REGs_PSC1[3] & 2)));
+
+        WAIT_FOR_ARM9();
+    }
+
+	ctr_cache_clean_and_flush_all();
+    invokeArm11Function(ARM11);
+}
+
+void screen_mode(uint32_t mode) {
+    static uint32_t stride, init_top, init_bottom, bright;
+
+    bright = brightness[config->options[OPTION_BRIGHTNESS]];
+
+	stride = 240 * 3;
+	if (mode == RGBA8)
+		stride = 240 * 4;
+
+    init_top    = MAKE_FRAMEBUFFER_PIXFMT(mode, 0, 1);
+    init_bottom = MAKE_FRAMEBUFFER_PIXFMT(mode, 0, 0);
+
+	// We literally just discard the previous state - for sanity's sake.
+    if (!framebuffers) {
+        framebuffers = malloc(sizeof(struct framebuffers));
+    }
+
+    void __attribute__((naked)) ARM11(void) {
+        //Disable interrupts
+        __asm(".word 0xF10C01C0");
+
+		PDN_GPU_CNT = 0x1007F; //bit0: Enable GPU regs 0x10400000+, bit16 turn on LCD backlight?
+		LCD_REG(0x14) = 0x00000001; //UNKNOWN register, maybe LCD related? 0x10202000
+		LCD_REG(0xC) &= 0xFFFEFFFE; //UNKNOWN register, maybe LCD related?
+
+		LCD_TOP_CONF_BRIGHTNESS = bright;
+		LCD_BOT_CONF_BRIGHTNESS = bright;
+		LCD_TOP_CONF_REG(0x44) = 0x1023E; //unknown
+		LCD_BOT_CONF_REG(0x44) = 0x1023E; //unknown
+
+		// Top screen
+		PDC0_FRAMEBUFFER_SETUP_REG(0x00) = 0x000001c2; //unknown
+		PDC0_FRAMEBUFFER_SETUP_REG(0x04) = 0x000000d1; //unknown
+		PDC0_FRAMEBUFFER_SETUP_REG(0x08) = 0x000001c1;
+		PDC0_FRAMEBUFFER_SETUP_REG(0x0c) = 0x000001c1;
+		PDC0_FRAMEBUFFER_SETUP_REG(0x10) = 0x00000000;
+		PDC0_FRAMEBUFFER_SETUP_REG(0x14) = 0x000000cf;
+		PDC0_FRAMEBUFFER_SETUP_REG(0x18) = 0x000000d1;
+		PDC0_FRAMEBUFFER_SETUP_REG(0x1c) = 0x01c501c1;
+		PDC0_FRAMEBUFFER_SETUP_REG(0x20) = 0x00010000;
+		PDC0_FRAMEBUFFER_SETUP_REG(0x24) = 0x0000019d;
+		PDC0_FRAMEBUFFER_SETUP_REG(0x28) = 0x00000002;
+		PDC0_FRAMEBUFFER_SETUP_REG(0x2c) = 0x00000192;
+		PDC0_FRAMEBUFFER_SETUP_REG(0x30) = 0x00000192;
+		PDC0_FRAMEBUFFER_SETUP_REG(0x34) = 0x00000192;
+		PDC0_FRAMEBUFFER_SETUP_REG(0x38) = 0x00000001;
+		PDC0_FRAMEBUFFER_SETUP_REG(0x3c) = 0x00000002;
+		PDC0_FRAMEBUFFER_SETUP_REG(0x40) = 0x01960192;
+		PDC0_FRAMEBUFFER_SETUP_REG(0x44) = 0x00000000;
+		PDC0_FRAMEBUFFER_SETUP_REG(0x48) = 0x00000000;
+		PDC0_FRAMEBUFFER_SETUP_DIMS = (240u << 16) | (400u);
+		PDC0_FRAMEBUFFER_SETUP_REG(0x60) = 0x01c100d1;
+		PDC0_FRAMEBUFFER_SETUP_REG(0x64) = 0x01920002;
+		PDC0_FRAMEBUFFER_SETUP_FBA_ADDR_1 = 0x18300000;
+		PDC0_FRAMEBUFFER_SETUP_FB_FORMAT = init_top;
+		PDC0_FRAMEBUFFER_SETUP_REG(0x74) = 0x00010501;
+		PDC0_FRAMEBUFFER_SETUP_FB_SELECT = 0;
+		PDC0_FRAMEBUFFER_SETUP_FB_STRIDE = stride;
+		PDC0_FRAMEBUFFER_SETUP_REG(0x9C) = 0x00000000;
+
+		// Disco register
+		for(volatile uint32_t i = 0; i < 256; i++)
+			PDC0_FRAMEBUFFER_SETUP_DISCO = 0x10101 * i;
+
+		// Bottom screen
+		PDC1_FRAMEBUFFER_SETUP_REG(0x00) = 0x000001c2;
+		PDC1_FRAMEBUFFER_SETUP_REG(0x04) = 0x000000d1;
+		PDC1_FRAMEBUFFER_SETUP_REG(0x08) = 0x000001c1;
+		PDC1_FRAMEBUFFER_SETUP_REG(0x0c) = 0x000001c1;
+		PDC1_FRAMEBUFFER_SETUP_REG(0x10) = 0x000000cd;
+		PDC1_FRAMEBUFFER_SETUP_REG(0x14) = 0x000000cf;
+		PDC1_FRAMEBUFFER_SETUP_REG(0x18) = 0x000000d1;
+		PDC1_FRAMEBUFFER_SETUP_REG(0x1c) = 0x01c501c1;
+		PDC1_FRAMEBUFFER_SETUP_REG(0x20) = 0x00010000;
+		PDC1_FRAMEBUFFER_SETUP_REG(0x24) = 0x0000019d;
+		PDC1_FRAMEBUFFER_SETUP_REG(0x28) = 0x00000052;
+		PDC1_FRAMEBUFFER_SETUP_REG(0x2c) = 0x00000192;
+		PDC1_FRAMEBUFFER_SETUP_REG(0x30) = 0x00000192;
+		PDC1_FRAMEBUFFER_SETUP_REG(0x34) = 0x0000004f;
+		PDC1_FRAMEBUFFER_SETUP_REG(0x38) = 0x00000050;
+		PDC1_FRAMEBUFFER_SETUP_REG(0x3c) = 0x00000052;
+		PDC1_FRAMEBUFFER_SETUP_REG(0x40) = 0x01980194;
+		PDC1_FRAMEBUFFER_SETUP_REG(0x44) = 0x00000000;
+		PDC1_FRAMEBUFFER_SETUP_REG(0x48) = 0x00000011;
+		PDC1_FRAMEBUFFER_SETUP_DIMS = (240u << 16) | 320u;
+		PDC1_FRAMEBUFFER_SETUP_REG(0x60) = 0x01c100d1;
+		PDC1_FRAMEBUFFER_SETUP_REG(0x64) = 0x01920052;
+		PDC1_FRAMEBUFFER_SETUP_FBA_ADDR_1 = 0x1835dc00;
+		PDC1_FRAMEBUFFER_SETUP_FB_FORMAT = init_bottom;
+		PDC1_FRAMEBUFFER_SETUP_REG(0x74) = 0x00010501;
+		PDC1_FRAMEBUFFER_SETUP_FB_SELECT = 0;
+		PDC1_FRAMEBUFFER_SETUP_FB_STRIDE = stride;
+		PDC1_FRAMEBUFFER_SETUP_REG(0x9C) = 0x00000000;
+
+		// Disco register
+		for(volatile uint32_t i = 0; i < 256; i++)
+			PDC1_FRAMEBUFFER_SETUP_DISCO = 0x10101 * i;
+
+		PDC0_FRAMEBUFFER_SETUP_FBA_ADDR_1 = 0x18300000;
+		PDC0_FRAMEBUFFER_SETUP_FBA_ADDR_2 = 0x18300000;
+		PDC0_FRAMEBUFFER_SETUP_FBB_ADDR_1 = 0x18300000;
+		PDC0_FRAMEBUFFER_SETUP_FBB_ADDR_2 = 0x18300000;
+
+		PDC1_FRAMEBUFFER_SETUP_FBA_ADDR_1 = 0x1835dc00;
+		PDC1_FRAMEBUFFER_SETUP_FBA_ADDR_2 = 0x1835dc00;
+
+        //Set CakeBrah framebuffers
+        framebuffers->top_left  = (uint8_t *)0x18300000;
+        framebuffers->top_right = (uint8_t *)0x18300000;
+        framebuffers->bottom    = (uint8_t *)0x1835dc00;
+
+        WAIT_FOR_ARM9();
+    }
+
+	ctr_cache_clean_and_flush_all();
+    invokeArm11Function(ARM11);
+
+    clearScreens();
+
     // Turn on backlight
-    i2cWriteRegister(I2C_DEV_MCU, 0x22, 1 << 1);
+//    i2cWriteRegister(I2C_DEV_MCU, 0x22, 1 << 1);
+    //Turn on backlight
+    i2cWriteRegister(I2C_DEV_MCU, 0x22, 0x2A);
 }

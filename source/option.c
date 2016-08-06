@@ -105,7 +105,7 @@ save_config()
     f_unlink(PATH_CONFIG);
 
     if (!(conf_handle = fopen(PATH_CONFIG, "w")))
-        abort("Failed to open config for write?\n");
+		while(1);
 
     config->options[OPTION_RECONFIGURED] = 0; // This should not persist to disk.
 
@@ -113,6 +113,4 @@ save_config()
     fclose(conf_handle);
 
     config->options[OPTION_RECONFIGURED] = 1; // Save caches on boot.
-
-    fprintf(stderr, "Saved config successfully.\n");
 }

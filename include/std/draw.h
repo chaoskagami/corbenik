@@ -25,14 +25,12 @@ enum screen
     screen_bottom
 };
 
-struct framebuffers
-{
+struct framebuffers {
     uint8_t *top_left;
     uint8_t *top_right;
     uint8_t *bottom;
 };
 
-_UNUSED static struct framebuffers *framebuffers_cakehax = (struct framebuffers *)0x23FFFE00;
 extern struct framebuffers *framebuffers;
 // This is marked unused since it occurs in all files.
 

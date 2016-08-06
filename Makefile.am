@@ -21,7 +21,6 @@ all-local:
 	cp source/corbenik.bin out/arm9loaderhax.bin
 	cp external/loader/loader.cxi out@libdir@/module/loader.cxi
 	cp external/bits/*.bin out@libexecdir@/
-	cp external/screeninit/build/screeninit.bin out@libexecdir@/
 	cp host/termfont.bin out@datarootdir@/
 	cp patch/*.vco out@sbindir@
 	cp contrib/*.vco out@bindir@

@@ -61,12 +61,12 @@ void dump_firm(firm_h** buffer, uint8_t index) {
 
     use_aeskey(0x06);
     set_ctr(ctr);
-    aes(firm, firm, firm_b_size / AES_BLOCK_SIZE, ctr, AES_CTR_MODE);
-
-    fprintf(stderr, "  AES decrypted FIRM%u.\n", index);
+	ctr_decrypt(firm, firm, firm_b_size / AES_BLOCK_SIZE, AES_CNT_CTRNAND_MODE, ctr);
 
     if (memcmp((char*) & firm->magic, "FIRM", 4))
         abort("  Decryption failed on FIRM.\n");
+
+    fprintf(stderr, "  AES decrypted FIRM%u.\n", index);
 
     fprintf(stderr, "  Magic is intact on FIRM%u.\n", index);
 
@@ -198,18 +198,19 @@ decrypt_cetk_key(void *key, const void *cetk)
 		return 1;
 
 	if (got_cetk == 0) {
+		fprintf(stderr, "  Retrieving 0x3D KeyY...\n");
 		extract_slot0x3DkeyY();
 		got_cetk = 1;
 	}
 
 	use_aeskey(0x3D);
 
-	memcpy(iv, ticket->titleID, sizeof(ticket->titleID));
+	memcpy(iv,  ticket->titleID,  sizeof(ticket->titleID));
 	memcpy(key, ticket->titleKey, sizeof(ticket->titleKey));
 
-	aes(key, key, 1, iv, AES_CBC_DECRYPT_MODE);
+	cbc_decrypt(key, key, 1, AES_CNT_TITLEKEY_DECRYPT_MODE, iv);
 
-	fprintf(stderr, " Extracted titlekey from cetk.\n");
+	fprintf(stderr, "  Extracted titlekey from cetk.\n");
 
 	return 0;
 }
@@ -221,25 +222,29 @@ decrypt_firm_title(firm_h *dest, ncch_h *ncch, uint32_t *size, void *key)
     uint8_t exefs_key[16] = { 0 };
     uint8_t exefs_iv[16] = { 0 };
 
-    fprintf(stderr, "  Decrypting FIRM container\n");
+    fprintf(stderr, "  Decrypting FIRM container (size is %u blocks)\n", *size / AES_BLOCK_SIZE);
+
     setup_aeskey(0x16, key);
     use_aeskey(0x16);
-    aes(ncch, ncch, *size / AES_BLOCK_SIZE, firm_iv, AES_CBC_DECRYPT_MODE);
+
+    cbc_decrypt(ncch, ncch, *size / AES_BLOCK_SIZE, AES_CNT_CBC_DECRYPT_MODE, firm_iv);
 
     if (ncch->magic != NCCH_MAGIC)
         return 1;
 
-    memcpy(exefs_key, ncch, 16);
+    memcpy(exefs_key, ncch, AES_BLOCK_SIZE);
+
     ncch_getctr(ncch, exefs_iv, NCCHTYPE_EXEFS);
 
     // Get the exefs offset and size from the NCCH
     exefs_h *exefs = (exefs_h *)((uint8_t *)ncch + ncch->exeFSOffset * MEDIA_UNITS);
     uint32_t exefs_size = ncch->exeFSSize * MEDIA_UNITS;
 
-    fprintf(stderr, "  Decrypting ExeFs for FIRM\n");
+    fprintf(stderr, "  Decrypting ExeFs for FIRM (size is %u blocks)\n", exefs_size / AES_BLOCK_SIZE);
+
     setup_aeskeyY(0x2C, exefs_key);
     use_aeskey(0x2C);
-    aes(exefs, exefs, exefs_size / AES_BLOCK_SIZE, exefs_iv, AES_CTR_MODE);
+    ctr_decrypt(exefs, exefs, exefs_size / AES_BLOCK_SIZE, AES_CNT_CTRNAND_MODE, exefs_iv);
 
     // Get the decrypted FIRM
     // We assume the firm.bin is always the first file
@@ -267,7 +272,7 @@ decrypt_arm9bin(arm9bin_h *header, uint64_t firm_title, uint8_t version)
         slot = 0x16;
 
         use_aeskey(0x11);
-        aes(decrypted_keyx, header->slot0x16keyX, 1, NULL, AES_ECB_DECRYPT_MODE);
+        ecb_decrypt(header->slot0x16keyX, decrypted_keyx, 1, AES_CNT_ECB_DECRYPT_MODE);
         setup_aeskeyX(slot, decrypted_keyx);
     }
 
@@ -278,7 +283,7 @@ decrypt_arm9bin(arm9bin_h *header, uint64_t firm_title, uint8_t version)
     int size = atoi(header->size);
 
     use_aeskey(slot);
-    aes(arm9bin, arm9bin, size / AES_BLOCK_SIZE, header->ctr, AES_CTR_MODE);
+    ctr_decrypt(arm9bin, arm9bin, size / AES_BLOCK_SIZE, AES_CNT_CTRNAND_MODE, header->ctr);
 
     if (firm_title == NATIVE_FIRM_TITLEID)
         return *(uint32_t *)arm9bin != ARM9BIN_MAGIC;
@@ -361,6 +366,7 @@ load_firm(firm_h *dest, char *path, char *path_firmkey, char *path_cetk, uint32_
                 if (arm9bin_iscrypt) {
                     // Decrypt the arm9bin.
                     if (decrypt_arm9bin((arm9bin_h *)((uintptr_t)dest + section->offset), firm_title, fsig->version)) {
+                        fprintf(stderr, "  ARM9 segment is encrypted\n");
                         return 1;
                     }
                     firmware_changed = 1; // Decryption of arm9bin performed.
@@ -440,7 +446,7 @@ boot_firm()
         use_aeskey(0x11);
         uint8_t keyx[AES_BLOCK_SIZE];
         for (int slot = 0x19; slot < 0x20; slot++) {
-            aes(keyx, keydata, 1, NULL, AES_ECB_DECRYPT_MODE);
+            ecb_decrypt(keydata, keyx, 1, AES_CNT_ECB_DECRYPT_MODE);
             setup_aeskeyX(slot, keyx);
             *(uint8_t *)(keydata + 0xF) += 1;
         }

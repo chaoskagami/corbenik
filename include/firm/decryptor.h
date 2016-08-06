@@ -1,7 +1,6 @@
 #ifndef __DECRYPTOR_H
 #define __DECRYPTOR_H
 
-void aes(void *dst, void *src, uint32_t blockCount, void *iv, uint32_t mode);
 void sha256sum(void* sum, void* data, uint32_t size);
 
 typedef enum {

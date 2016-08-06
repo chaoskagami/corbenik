@@ -25,19 +25,19 @@ main(int argc, char** argv)
         // Failed to mount SD. Bomb out.
         // TODO - What the hell does one even do in this situation?
         //        Spin until the card is available to mount, maybe?
-        abort("Failed to mount SD card.\n");
+		while(1);
     }
 
     if (argc >= 1 && argc < 2) {
         // Valid argc passed.
-        fprintf(stderr, "Chainloaded. Path: %s\n", argv[0]);
+//        fprintf(stderr, "Chainloaded. Path: %s\n", argv[0]);
     }
 
     set_font(PATH_TERMFONT); // Read the font before all else.
 
     load_config(); // Load configuration.
 
-    screen_mode(0); // Use RGBA8 mode.
+    screen_mode(RGBA8); // Use RGBA8 mode.
 
     clear_bg();
 
@@ -47,9 +47,9 @@ main(int argc, char** argv)
     clear_disp(TOP_SCREEN);
     clear_disp(BOTTOM_SCREEN);
 
-    ctr_screen_enable_backlight(CTR_SCREEN_BOTH);
+//    ctr_screen_enable_backlight(CTR_SCREEN_BOTH);
 
-    install_interrupts(); // Get some free debug info.
+//    install_interrupts(); // Get some free debug info.
 
     if (CFG_BOOTENV == 7) {
         fprintf(stderr, "Rebooted from AGB, disabling EmuNAND.\n");

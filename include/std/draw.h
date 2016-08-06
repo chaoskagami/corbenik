@@ -25,7 +25,7 @@ enum screen
     screen_bottom
 };
 
-_UNUSED static struct framebuffers
+_UNUSED static volatile struct framebuffers
 {
     uint8_t *top_left;
     uint8_t *top_right;

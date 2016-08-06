@@ -36,30 +36,6 @@ ncch_getctr(const ncch_h *ncch, uint8_t *ctr, uint8_t type)
 }
 
 void
-cbc_decrypt(void *inbuf, void *outbuf, size_t size, uint32_t mode, uint8_t *iv)
-{
-    size_t   blocks = size;
-
-    uint8_t *in     = inbuf;
-    uint8_t *out    = outbuf;
-
-    while (blocks) {
-		size_t current_blocks = (blocks > 0xFFFF) ? 0xFFFF : blocks;
-
-		set_ctr(iv);
-
-		memcpy(iv, in + (current_blocks - 1) * AES_BLOCK_SIZE, AES_BLOCK_SIZE);
-
-        aes_decrypt(in, out, current_blocks, mode);
-
-        blocks -= current_blocks;
-
-        in  += AES_BLOCK_SIZE * current_blocks;
-        out += AES_BLOCK_SIZE * current_blocks;
-    }
-}
-
-void
 sha256sum(void* sum, void* data, uint32_t size)
 {
 	sha_init(SHA256_MODE);

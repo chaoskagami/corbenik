@@ -26,8 +26,7 @@ regenerate_config()
 void
 mk_structure()
 {
-    f_mkdir(ROOT);
-    f_mkdir(DATA);
+    f_mkdir(PREFIX);
       f_mkdir(LIBEXECDIR);
       f_mkdir(LIBDIR);
         f_mkdir(PATH_EXEFS);

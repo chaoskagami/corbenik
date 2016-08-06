@@ -3,12 +3,4 @@
 
 #include <config.h>
 
-#ifndef ROOT
-#define ROOT "/corbenik"
-#endif
-
-#ifndef DATA
-#define DATA ROOT
-#endif
-
 #endif

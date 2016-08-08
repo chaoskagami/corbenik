@@ -1,7 +1,6 @@
 #ifndef __SCREENINIT_H
 #define __SCREENINIT_H
 
-
 #define PDN_GPU_CNT (*(volatile uint32_t*)0x10141200)
 
 #define LCD_REG(offset) (*((volatile uint32_t*)(0x10202000 + (offset))))

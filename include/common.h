@@ -19,7 +19,7 @@
 #include <firm/decryptor.h>
 #include <firm/firm.h>
 
-#include <screeninit.h>
+#include <arm11.h>
 #include <interrupt.h>
 #include <option.h>
 #include <input.h>

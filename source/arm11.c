@@ -149,8 +149,10 @@ void screen_mode(uint32_t mode) {
     init_top    = MAKE_FRAMEBUFFER_PIXFMT(mode, 0, 1);
     init_bottom = MAKE_FRAMEBUFFER_PIXFMT(mode, 0, 0);
 
-	// We literally just discard the previous state - for sanity's sake.
     if (!framebuffers) {
+        // Look ma, dynamically allocating the CakeHax struct! (joking)
+		// We literally just discard the previous state - for sanity's sake.
+        // On chainload, it is needed to copy the framebuffer struct.
         framebuffers = malloc(sizeof(struct framebuffers));
     }
 
@@ -243,7 +245,7 @@ void screen_mode(uint32_t mode) {
 		PDC1_FRAMEBUFFER_SETUP_FBA_ADDR_1 = 0x1835dc00;
 		PDC1_FRAMEBUFFER_SETUP_FBA_ADDR_2 = 0x1835dc00;
 
-        //Set CakeBrah framebuffers
+        // Set not-actually cakebrah framebuffers. Meh.
         framebuffers->top_left  = (uint8_t *)0x18300000;
         framebuffers->top_right = (uint8_t *)0x18300000;
         framebuffers->bottom    = (uint8_t *)0x1835dc00;

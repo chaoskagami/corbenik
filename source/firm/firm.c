@@ -429,6 +429,7 @@ void __attribute__((naked)) arm11_preboot_halt()
 
 extern void wait();
 
+__attribute__ ((noreturn))
 void
 boot_firm()
 {

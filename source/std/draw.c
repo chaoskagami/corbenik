@@ -379,6 +379,7 @@ int stdout_state = TEXT, stderr_state = TEXT;
 int stdout_val   = 0,    stderr_val   = 0;
 
 // Returns 1 if state machine is parsing - and will not output.
+// This is how colors are now handled.
 int
 ansi_statemach(void* buf, const int c)
 {
@@ -671,10 +672,6 @@ vfprintf(void *channel, const char *format, va_list ap)
                     }
                     break;
                 case 's':
-                    // FIXME - Substring ANSI colors will screw up hard, so don't do that.
-                    //         once the color handling is moved to putc as a state machine this
-                    //         will no longer be an issue.
-
                     //         For now, this warning stays.
                     disable_format = 1; // Disable format strings.
                     fprintf(channel, va_arg(ap, char *));
@@ -724,6 +721,17 @@ fprintf(void *channel, const char *format, ...)
     va_start(ap, format);
 
     vfprintf(channel, format, ap);
+
+    va_end(ap);
+}
+
+void
+printf(void *channel, const char *format, ...)
+{
+    va_list ap;
+    va_start(ap, format);
+
+    vfprintf(stdout, format, ap);
 
     va_end(ap);
 }

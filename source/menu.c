@@ -60,19 +60,6 @@ static struct options_s options[] = {
     { -1, "", "", 0, 0, 0 }, // cursor_min and cursor_max are stored in the last two.
 };
 
-extern unsigned int font_w;
-
-void accent_color(void* screen, int fg);
-
-void
-header(char *append)
-{
-    set_cursor(TOP_SCREEN, 0, 0);
-    fill_line(stdout, 0, config->options[OPTION_ACCENT_COLOR]);
-    accent_color(TOP_SCREEN, 0);
-    fprintf(stdout, "\x1b[30m ." FW_NAME " // %s\x1b[0m\n\n", append);
-}
-
 static int current_menu_index_patches = 0;
 
 // This function is based on PathDeleteWorker from GodMode9.
@@ -171,8 +158,6 @@ list_patches_build(char *name, int desc_is_fname)
         fclose(f);
     }
 }
-
-int show_menu(struct options_s *options, uint8_t *toggles);
 
 void
 menu_patches()

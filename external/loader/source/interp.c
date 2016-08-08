@@ -25,7 +25,7 @@
 #define MAX_PATCHSIZE 16384
 
 // Yes, we're including a C file. Problem?
-#include "../../../source/interp.c"
+#include "../../../source/interpreter.c"
 
 #if 0
 

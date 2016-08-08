@@ -1,10 +1,17 @@
 #include <common.h>
 
-void header(char *append);
-
 extern int is_n3ds;
-
+extern unsigned int font_w;
 extern unsigned int font_h;
+
+void
+header(char *append)
+{
+    set_cursor(TOP_SCREEN, 0, 0);
+    fill_line(stdout, 0, config->options[OPTION_ACCENT_COLOR]);
+    accent_color(TOP_SCREEN, 0);
+    fprintf(stdout, "\x1b[30m ." FW_NAME " // %s\x1b[0m\n\n", append);
+}
 
 void show_help(char* help) {
     clear_disp(TOP_SCREEN);

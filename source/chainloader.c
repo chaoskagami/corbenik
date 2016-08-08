@@ -2,9 +2,6 @@
 #if defined(CHAINLOADER) && CHAINLOADER == 1
 
 #include <common.h>
-#include <screeninit.h>
-#include <firm/firm.h>
-#include <firm/headers.h>
 
 uint32_t current_chain_index = 0;
 
@@ -16,7 +13,9 @@ int show_menu(struct options_s *options, uint8_t *toggles);
 //        be better to have a recursive listing that calls a function for
 //        each entry (it would cut code density)
 
-void chainload_file(char* chain_file_data) {
+__attribute__ ((noreturn))
+void chainload_file(char* chain_file_data)
+{
     // We copy because it's possible the payload will overwrite us in memory.
     char chain_file[256];
     strncpy(chain_file, chain_file_data, 255);
@@ -67,9 +66,14 @@ void chainload_file(char* chain_file_data) {
     argc_off[0] = 1;
     argv_off[0] = (uint32_t)off;
 
-    fprintf(stderr, "Chaining to copy payload...\n");
+    fprintf(stderr, "Changing display mode and chainloading...\n");
 
     screen_mode(1); // TODO - Because RGBA8 screeninit is non-standard...ugh
+
+    // Copy CakeHax struct where it is expected (at 0x23FFFE00)
+    // It's very very likely we'll corrupt memory with this, but we aren't coming back anyways as of the
+    // next call, so not my problem
+	memcpy((void*)0x23FFFE00, framebuffers, sizeof(struct framebuffers));
 
     ((void(*)(void*, uint32_t))0x24F00000)(chain_data, size + 256 + 8); // Size of payload + argv.
 }

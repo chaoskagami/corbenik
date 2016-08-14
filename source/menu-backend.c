@@ -98,6 +98,10 @@ show_menu(struct options_s *options, uint8_t *toggles)
             // NOTE - Signed to unsigned conversion here. Again, not an issue.
             set_cursor(TOP_SCREEN, 0, (unsigned int)(i - window_top + 2) );
 
+            int indent = options[i].indent;
+            for(int i=0; i < indent; i++)
+                fprintf(TOP_SCREEN, "  ");
+
             if (options[i].allowed == boolean_val || (is_n3ds && options[i].allowed == boolean_val_n3ds)) {
                 if (cursor_y == i) {
                     accent_color(TOP_SCREEN, 1);

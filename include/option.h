@@ -57,6 +57,7 @@ struct options_s
     char desc[256];
     enum type allowed;
     uint32_t a, b;
+    uint8_t indent;
 } __attribute__((packed));
 
 // Use builtin loader module replacer.

@@ -117,6 +117,7 @@ list_chain_build_back(char *fpath)
             chains[current_chain_index].allowed = call_fun;
             chains[current_chain_index].a = (uint32_t) chainload_file;
             chains[current_chain_index].b = (uint32_t) chains[current_chain_index].desc;
+            chains[current_chain_index].indent = 0;
 
             current_chain_index++;
         }
@@ -144,6 +145,7 @@ list_chain_build(char *name)
     chains[0].allowed = not_option;
     chains[0].a = 1;
     chains[0].b = 0;
+    chains[0].indent = 0;
 
     current_chain_index += 1;
 

@@ -6,7 +6,7 @@
 
 int wait();
 
-uint8_t *
+uint8_t*
 getProcess9(uint8_t *pos, uint32_t size, uint32_t *process9Size, uint32_t *process9MemAddr)
 {
     uint8_t *off = memfind(pos, size, "ess9", 4);
@@ -76,7 +76,7 @@ patch_reboot()
     // it might be needed to replace a svc call to access it. I'm rather sure that NTR does this.
 
     *pos_native = (uint32_t)mem;
-    memcpy(mem, L"sdmc:", 10);
+    memcpy(mem, u"sdmc:", 10);
     mem += 10;
     for (size_t i = 0; i < sizeof(PATH_NATIVE_P); i++, mem += 2) {
         *mem = PATH_NATIVE_P[i];
@@ -84,7 +84,7 @@ patch_reboot()
     }
 
     *pos_twl = (uint32_t)mem;
-    memcpy(mem, L"sdmc:", 10);
+    memcpy(mem, u"sdmc:", 10);
     mem += 10;
     for (size_t i = 0; i < sizeof(PATH_TWL_P); i++, mem += 2) {
         *mem = PATH_TWL_P[i];
@@ -92,7 +92,7 @@ patch_reboot()
     }
 
     *pos_agb = (uint32_t)mem;
-    memcpy(mem, L"sdmc:", 10);
+    memcpy(mem, u"sdmc:", 10);
     mem += 10;
     for (size_t i = 0; i < sizeof(PATH_AGB_P); i++, mem += 2) {
         *mem = PATH_AGB_P[i];

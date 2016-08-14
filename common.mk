@@ -12,7 +12,7 @@ AM_CFLAGS= -std=gnu11 -Os -g -fomit-frame-pointer -ffast-math \
 	-Wmissing-include-dirs -Wredundant-decls \
 	-Wshadow -Wsign-conversion -Wstrict-overflow=5 -Wswitch-default \
 	-Wundef -Wno-unused $(THUMBFLAGS) $(SIZE_OPTIMIZATION) $(INCPATHS) $(C9FLAGS) \
-	-fshort-wchar -fno-builtin -std=gnu11 -DREVISION=\"$(REVISION)\" \
+	-fno-builtin -std=gnu11 -DREVISION=\"$(REVISION)\" \
 	-DFW_NAME=\"corbenik\" $(PATHARGS)
 
 

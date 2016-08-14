@@ -43,6 +43,8 @@
 #define OP_JMPF  0x77
 #define OP_JMPNF 0x87
 
+#define OP_INJECT 0x90
+
 #define OP_NEXT 0xFF
 
 #ifdef LOADER
@@ -518,6 +520,27 @@ exec_bytecode(uint8_t *bytecode, uint32_t len, uint8_t* stack, uint32_t stack_si
 #endif
                 offset = new_offset = 0;
                 code = bytecode;
+                break;
+            case OP_INJECT: // Read in data (from filename)
+                if (debug) {
+#ifdef LOADER
+                    log("set\n");
+#else
+                    fprintf(stderr, "set %s\n", &code[1]);
+#endif
+                }
+
+                char* fname = (char*)&code[1];
+#ifdef LOADER
+                (void)fname;
+                // NYI
+#else
+                FILE* f = fopen(fname, "r");
+                fread(current_mode->memory + offset, 1, fsize(f), f);
+                offset += fsize(f);
+                code += strlen(fname);
+                fclose(f);
+#endif
                 break;
             default:
 #ifndef LOADER

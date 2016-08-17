@@ -128,8 +128,10 @@ int
 atoi(const char *str)
 {
     int res = 0;
+
     while (str[0] && str[0] >= '0' && str[0] <= '9') {
-        res = str[0] - '0' + res * 10;
+        res *= 10;
+        res += str[0] - '0';
         str++;
     }
 

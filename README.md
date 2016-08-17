@@ -203,7 +203,7 @@ Credits
  * Code segment dumping + loading, ideas, and a lot of miscellaneous code.
 
 @AuroraWright
- * RE work, patches, EmuNAND, and Reboot/Firmlaunch C code. https://github.com/AuroraWright/Luma3ds
+ * RE work, patches, EmuNAND, SVC replacement/injection, and Reboot/Firmlaunch C code. https://github.com/AuroraWright/Luma3ds
 
 @Reisyukaku
  * For the 'Force TestMenu' patch, and RE work. Also coded ReiNand, which some parts of Luma are derived from and thus some parts of this.

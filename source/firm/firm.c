@@ -409,24 +409,6 @@ load_firm(firm_h *dest, char *path, char *path_firmkey, char *path_cetk, uint32_
     return 0;
 }
 
-// FAIR WARNING; This function is arm11 code, not ARM9.
-// They share enough in common that this isn't a problem,
-// but still worth documenting.
-void __attribute__((naked)) arm11_preboot_halt()
-{
-    *a11_entry = 0; // Don't wait for us
-
-    // Disables the LCD.
-    *(volatile uint32_t *)0x10202A44 = 0;
-    *(volatile uint32_t *)0x10202244 = 0;
-    *(volatile uint32_t *)0x1020200C = 0;
-    *(volatile uint32_t *)0x10202014 = 0;
-
-    while (!*a11_entry)
-        ;
-    ((void (*)()) * a11_entry)();
-}
-
 extern void wait();
 
 __attribute__ ((noreturn))

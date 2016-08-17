@@ -5,7 +5,7 @@
 #include "fsreg.h"
 #include "pxipm.h"
 #include "srvsys.h"
-#include "lzss.h"
+#include <lzss.c>
 #include "internal.h"
 #include "logger.h"
 

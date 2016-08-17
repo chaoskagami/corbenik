@@ -45,5 +45,10 @@
 
 // Inits the screen if needed.
 void screen_mode(uint32_t mode);
+void invokeArm11Function(void (*func)());
+void deinitScreens(void);
+void updateBrightness(uint32_t brightnessIndex);
+void clearScreens(void);
+void installArm11Stub(void);
 
 #endif

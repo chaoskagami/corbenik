@@ -1,14 +1,11 @@
-#include <3ds.h>
+#ifndef __LZSS_H
+#define __LZSS_H
 
-// TODO - In the future, why not ADD code compression modes? Like, zlib, for example. Or lzss+zlib.
-
-int
+static int
 lzss_decompress(u8 *buffer)
 {
     // This WAS originally a decompilation in @yifan_lu's repo; it was rewritten
     // for readability following ctrtool's namings.
-    // You can thank me for making it more readable if you'd like; I don't
-    // really care. Did it for myself.
     unsigned int decompSize, v15;
     u8 *compressEndOff, *index, *stopIndex;
     char control;
@@ -55,3 +52,5 @@ lzss_decompress(u8 *buffer)
 
     return ret;
 }
+
+#endif

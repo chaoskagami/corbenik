@@ -121,6 +121,9 @@ struct options_s
 // (e.g. SaltySD)
 #define OPTION_LOADER_LOADCODE 21
 
+// Silenced autoboot will not init the screen.
+#define OPTION_SILENT_NOSCREEN 22
+
 // Calculate EmuNAND at the back of the disk, rather than the front.
 // There's many good reasons for this to be supported:
 //   - Resizable FAT partition

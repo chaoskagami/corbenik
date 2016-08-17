@@ -473,9 +473,8 @@ boot_firm()
 
     // No fprintf will work from here on out.
 
-    *a11_entry = (uint32_t)arm11_preboot_halt;
-    while (*a11_entry)
-        ; // Make sure it jumped there correctly before changing it.
+    deinitScreens();
+
     *a11_entry = (uint32_t)firm_loc->a11Entry;
 
     ((void (*)())firm_loc->a9Entry)();

@@ -22,38 +22,41 @@ main(int argc, char** argv)
     if (fmount())
         poweroff(); // Failed to mount SD. Bomb out.
 
-    set_font(PATH_TERMFONT); // Read the font before all else.
-
     load_config(); // Load configuration.
 
+    install_interrupts(); // Get some free debug info.
+
+    installArm11Stub();
+
+    if (CFG_BOOTENV == 7)
+        config->options[OPTION_EMUNAND] = 0; // Disable EmuNAND on AGB reboot.
+
+    if (config->options[OPTION_AUTOBOOT] && !(ctr_hid_get_buttons() & CTR_HID_RT)) {
+        doing_autoboot = 1;
+
+        if (config->options[OPTION_SILENCE] || config->options[OPTION_SILENT_NOSCREEN])
+            shut_up(); // This does exactly what it sounds like.
+
+        if (config->options[OPTION_SILENT_NOSCREEN])
+            boot_cfw(); // Skip all other checks and just boot.
+    }
+
+    set_font(PATH_TERMFONT); // Read the font before all else.
+
+    // Check key down for autoboot
     screen_mode(RGBA8); // Use RGBA8 mode.
 
     clear_bg();
 
     load_bg_top   (PATH_TOP_BG);
-    load_bg_bottom(PATH_BOTTOM_BG); // This is basically a menuhax splash (90deg rotated BGR8 pixel data)
+    load_bg_bottom(PATH_BOTTOM_BG); // This is a menuhax splash (90deg rotated BGR8 pixel data)
 
     clear_disp(TOP_SCREEN);
     clear_disp(BOTTOM_SCREEN);
 
-//    ctr_screen_enable_backlight(CTR_SCREEN_BOTH);
-
-//    install_interrupts(); // Get some free debug info.
-
-    if (CFG_BOOTENV == 7) {
-        fprintf(stderr, "Rebooted from AGB, disabling EmuNAND.\n");
-        config->options[OPTION_EMUNAND] = 0;
-    }
-
     // Autoboot. Non-standard code path.
-    if (config->options[OPTION_AUTOBOOT] && !(ctr_hid_get_buttons() & CTR_HID_RT)) {
-        if (config->options[OPTION_SILENCE])
-            shut_up(); // This does exactly what it sounds like.
-        doing_autoboot = 1;
-    } else {
+    if (!doing_autoboot)
         menu_handler();
-    }
 
     boot_cfw();
-    // Under ideal conditions, we never get here.
 }

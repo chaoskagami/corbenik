@@ -53,8 +53,7 @@ void  __attribute__((naked)) arm11Stub(void)
     ((void (*)())*arm11Entry)();
 }
 
-static void invokeArm11Function(void (*func)())
-{
+void installArm11Stub(void) {
     static int hasCopiedStub = false;
     if(!hasCopiedStub)
     {
@@ -62,6 +61,11 @@ static void invokeArm11Function(void (*func)())
 		ctr_cache_clean_and_flush_all();
         hasCopiedStub = true;
     }
+}
+
+void invokeArm11Function(void (*func)())
+{
+    installArm11Stub();
 
     *arm11Entry = (uint32_t)func;
     while(*arm11Entry);
@@ -78,11 +82,13 @@ void deinitScreens(void)
         //Shutdown LCDs
         *(volatile uint32_t *)0x10202A44 = 0;
         *(volatile uint32_t *)0x10202244 = 0;
+        *(volatile uint32_t *)0x1020200C = 0;
         *(volatile uint32_t *)0x10202014 = 0;
 
         WAIT_FOR_ARM9();
     }
 
+    // If screen is initialized, invoke.
     if(PDN_GPU_CNT != 1) invokeArm11Function(ARM11);
 }
 

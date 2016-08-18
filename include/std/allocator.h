@@ -4,16 +4,24 @@
 #include <stdint.h>
 #include <stddef.h>
 
-// Space between most of the locations (remove me)
-#define FCRAM_SPACING 0x100000
+#define FCRAM_SPACING 0x100000 ///< Space between most of the locations (remove me)
 
-// Grow program break
+/* Grow program break.
+ *
+ * \param bytes Number of bytes to grow by.
+ */
 void *sbrk(size_t bytes);
 
-// Allocate memory for use.
+/* Allocate memory for use.
+ *
+ * \param size Size in bytes to allocate.
+ */
 void *malloc   (size_t size);
 
-// Free in-use memory.
+/* Free in-use memory allocated by malloc.
+ *
+ * \param ptr Pointer to free.
+ */
 void  free     (void* ptr);
 
 #endif

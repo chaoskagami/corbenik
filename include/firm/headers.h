@@ -11,10 +11,10 @@
 
 #define MEDIA_UNITS 0x200
 
-#define NCCH_MAGIC (0x4843434E)
-#define NCSD_MAGIC (0x4453434E)
-#define FIRM_MAGIC (0x4D524946)
-#define ARM9BIN_MAGIC (0x47704770)
+#define NCCH_MAGIC        (0x4843434E) ///< Lit. "NCCH"
+#define NCSD_MAGIC        (0x4453434E) ///< Lit. "NCSD"
+#define FIRM_MAGIC        (0x4D524946) ///< Lit. "FIRM"
+#define ARM9BIN_MAGIC     (0x47704770)
 #define LGY_ARM9BIN_MAGIC (0xB0862000)
 
 typedef struct firm_section_h

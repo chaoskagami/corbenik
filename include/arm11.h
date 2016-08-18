@@ -43,12 +43,34 @@
 #define ARM11_STUB_ADDRESS (0x25000000 - 0x30) //It's currently only 0x28 bytes large. We're putting 0x30 just to be sure here
 #define WAIT_FOR_ARM9() *arm11Entry = 0; while(!*arm11Entry); ((void (*)())*arm11Entry)();
 
-// Inits the screen if needed.
+/* Initializes the screen and sets the display mode.
+ *
+ * \param mode Screen mode to initialize in, one of RGBA8, BGR8, RGB565_OES, RGB5_A1_OES, or RGBA4_OES
+ */
 void screen_mode(uint32_t mode);
+
+/* Invokes a bare ARM11 function. For usage, see arm11.c.
+ *
+ * \param func Function to call.
+ */
 void invokeArm11Function(void (*func)());
+
+/* Deinitializes the screens.
+ */
 void deinitScreens(void);
+
+/* Sets the brightness.
+ *
+ * \param brightnessIndex The brightness level, in the range 0-4.
+ */
 void updateBrightness(uint32_t brightnessIndex);
+
+/* Clears screens to black via GPU fill.
+ */
 void clearScreens(void);
+
+/* Copies the ARM11 stub. Called automatically by invokeArm11Function if needed.
+ */
 void installArm11Stub(void);
 
 #endif

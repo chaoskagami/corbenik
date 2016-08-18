@@ -365,7 +365,7 @@ draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, co
 void
 shut_up()
 {
-    kill_output = !kill_output;
+    kill_output = 1; // Immediately cancel all output operations.
     clear_disp(TOP_SCREEN);
     clear_disp(BOTTOM_SCREEN);
 }

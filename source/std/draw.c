@@ -366,8 +366,6 @@ void
 shut_up()
 {
     kill_output = 1; // Immediately cancel all output operations.
-    clear_disp(TOP_SCREEN);
-    clear_disp(BOTTOM_SCREEN);
 }
 
 #define TEXT       0

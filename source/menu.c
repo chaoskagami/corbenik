@@ -62,62 +62,35 @@ static struct options_s options[] = {
 
 static int current_menu_index_patches = 0;
 
-// This function is based on PathDeleteWorker from GodMode9.
-// It was easier to just import it.
-int
-list_patches_build_back(char *fpath, int desc_is_path)
-{
-    FILINFO fno;
-    DIR pdir;
-    char *fname = &fpath[strnlen(fpath, 255)];
-    if (f_opendir(&pdir, fpath) != FR_OK)
-        return 1;
+static int desc_is_fname_sto = 0;
 
-    fname[0] = '/';
-    fname++;
+void patch_func(char* fpath) {
+    FILINFO f2;
+    if (f_stat(fpath, &f2) != FR_OK)
+        return;
 
-    while (f_readdir(&pdir, &fno) == FR_OK) {
-        strncpy(fname, fno.fname, strlen(fno.fname));
+    if (!(f2.fattrib & AM_DIR)) {
+        struct system_patch p;
+        read_file(&p, fpath, sizeof(struct system_patch));
 
-        if (fno.fname[0] == 0)
-            break;
+        if (memcmp(p.magic, "AIDA", 4))
+            return;
 
-        FILINFO f2;
-        if (f_stat(fpath, &f2) != FR_OK)
-            break;
+        strncpy(patches[current_menu_index_patches].name, p.name, 64);
+        if (desc_is_fname_sto)
+            strncpy(patches[current_menu_index_patches].desc, fpath, 255);
+        else
+            strncpy(patches[current_menu_index_patches].desc, p.desc, 255);
+        patches[current_menu_index_patches].index = p.uuid;
+        patches[current_menu_index_patches].allowed = boolean_val;
+        patches[current_menu_index_patches].a = 0;
+        patches[current_menu_index_patches].b = 0;
+        patches[current_menu_index_patches].indent = 0;
+        if (desc_is_fname_sto)
+            enable_list[p.uuid] = 0;
 
-        if (f2.fattrib & AM_DIR) {
-            // return value won't matter
-            list_patches_build_back(fpath, desc_is_path);
-        } else {
-            struct system_patch p;
-            read_file(&p, fpath, sizeof(struct system_patch));
-
-            if (memcmp(p.magic, "AIDA", 4))
-                return 0;
-
-            strncpy(patches[current_menu_index_patches].name, p.name, 64);
-            if (desc_is_path)
-                strncpy(patches[current_menu_index_patches].desc, fpath, 255);
-            else
-                strncpy(patches[current_menu_index_patches].desc, p.desc, 255);
-            patches[current_menu_index_patches].index = p.uuid;
-            patches[current_menu_index_patches].allowed = boolean_val;
-            patches[current_menu_index_patches].a = 0;
-            patches[current_menu_index_patches].b = 0;
-            patches[current_menu_index_patches].indent = 0;
-            if (desc_is_path)
-                enable_list[p.uuid] = 0;
-
-            current_menu_index_patches++;
-        }
+        current_menu_index_patches++;
     }
-
-    f_closedir(&pdir);
-    --fname;
-    fname[0] = 0;
-
-    return 0;
 }
 
 // This is dual purpose. When we actually list
@@ -127,6 +100,8 @@ list_patches_build_back(char *fpath, int desc_is_path)
 void
 list_patches_build(char *name, int desc_is_fname)
 {
+    desc_is_fname_sto = desc_is_fname;
+
     current_menu_index_patches = 0;
 
 	if (!enable_list)
@@ -149,9 +124,8 @@ list_patches_build(char *name, int desc_is_fname)
         current_menu_index_patches += 1;
     }
 
-    char fpath[256];
-    strncpy(fpath, name, 256);
-    list_patches_build_back(fpath, desc_is_fname);
+    recurse_call(name, patch_func);
+
     patches[current_menu_index_patches].index = -1;
 
     FILE *f;

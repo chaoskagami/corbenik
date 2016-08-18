@@ -78,56 +78,27 @@ void chainload_file(char* chain_file_data)
     ((void(*)(void*, uint32_t))0x24F00000)(chain_data, size + 256 + 8); // Size of payload + argv.
 }
 
-// This function is based on PathDeleteWorker from GodMode9.
-// It was easier to just import it.
-int
-list_chain_build_back(char *fpath)
-{
-    FILINFO fno;
-    DIR pdir;
-    char *fname = &fpath[strnlen(fpath, 255)];
-    if (f_opendir(&pdir, fpath) != FR_OK)
-        return 1;
+void chain_file_hdl(char* fpath) {
+    FILINFO f2;
+    if (f_stat(fpath, &f2) != FR_OK)
+        return;
 
-    fname[0] = '/';
-    fname++;
+    if (!(f2.fattrib & AM_DIR)) {
+        char* basename = &fpath[strlen(fpath) - 1];
+        while(basename[0] != '/') basename--;
+        basename++;
 
-    while (f_readdir(&pdir, &fno) == FR_OK) {
-        strncpy(fname, fno.fname, strlen(fno.fname));
+        strncpy(chains[current_chain_index].name, basename, 64);
+        strncpy(chains[current_chain_index].desc, fpath, 255);
 
-        if (fno.fname[0] == 0)
-            break;
+        chains[current_chain_index].index = 0;
+        chains[current_chain_index].allowed = call_fun;
+        chains[current_chain_index].a = (uint32_t) chainload_file;
+        chains[current_chain_index].b = (uint32_t) chains[current_chain_index].desc;
+        chains[current_chain_index].indent = 0;
 
-        FILINFO f2;
-        if (f_stat(fpath, &f2) != FR_OK)
-            break;
-
-        if (f2.fattrib & AM_DIR) {
-            // return value won't matter
-            list_chain_build_back(fpath);
-        } else {
-            char* basename = &fpath[strlen(fpath) - 1];
-            while(basename[0] != '/') basename--;
-            basename++;
-
-            strncpy(chains[current_chain_index].name, basename, 64);
-            strncpy(chains[current_chain_index].desc, fpath, 255);
-
-            chains[current_chain_index].index = 0;
-            chains[current_chain_index].allowed = call_fun;
-            chains[current_chain_index].a = (uint32_t) chainload_file;
-            chains[current_chain_index].b = (uint32_t) chains[current_chain_index].desc;
-            chains[current_chain_index].indent = 0;
-
-            current_chain_index++;
-        }
+        current_chain_index++;
     }
-
-    f_closedir(&pdir);
-    --fname;
-    fname[0] = 0;
-
-    return 0;
 }
 
 // This is dual purpose. When we actually list
@@ -149,9 +120,8 @@ list_chain_build(char *name)
 
     current_chain_index += 1;
 
-    char fpath[256];
-    strncpy(fpath, name, 256);
-    list_chain_build_back(fpath);
+    recurse_call(name, chain_file_hdl);
+
     chains[current_chain_index].index = -1;
 
     if (chains[1].index == -1)

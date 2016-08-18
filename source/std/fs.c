@@ -12,7 +12,7 @@ static int set_up_fs = 0;
 // This function is based on PathDeleteWorker from GodMode9.
 // It was easier to just import it.
 int
-rrmdir_back(char *fpath)
+recurse_call_back(char *fpath, void (*call_fun)(char*))
 {
     FILINFO fno;
     DIR pdir;
@@ -35,9 +35,9 @@ rrmdir_back(char *fpath)
 
         if (f2.fattrib & AM_DIR) {
             // return value won't matter
-            rrmdir_back(fpath);
+            recurse_call_back(fpath, call_fun);
         } else {
-            f_unlink(fpath);
+            call_fun(fpath);
         }
     }
 
@@ -45,7 +45,15 @@ rrmdir_back(char *fpath)
     --fname;
     fname[0] = 0;
 
-    return f_unlink(fpath);
+    call_fun(fpath);
+
+    return 0;
+}
+
+void recurse_call(char *name, void (*call_fun)(char*)) {
+    char fpath[256];
+    strncpy(fpath, name, 256);
+    recurse_call_back(fpath, call_fun);
 }
 
 int
@@ -53,7 +61,8 @@ rrmdir(char *name)
 {
     char fpath[256];
     strncpy(fpath, name, 256);
-    return rrmdir_back(fpath);
+    recurse_call(fpath, f_unlink);
+    return 0;
 }
 
 int

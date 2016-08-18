@@ -24,7 +24,7 @@ recurse_call_back(char *fpath, void (*call_fun_param)(char*))
     fname++;
 
     while (f_readdir(&pdir, &fno) == FR_OK) {
-        strncpy(fname, fno.fname, strlen(fno.fname));
+        strcpy(fname, fno.fname);
 
         if (fno.fname[0] == 0)
             break;
@@ -59,9 +59,7 @@ void recurse_call(char *name, void (*call_fun_param)(char*)) {
 int
 rrmdir(char *name)
 {
-    char fpath[256];
-    strncpy(fpath, name, 256);
-    recurse_call(fpath, (void (*)(char*))f_unlink);
+    recurse_call(name, (void (*)(char*))f_unlink);
     return 0;
 }
 

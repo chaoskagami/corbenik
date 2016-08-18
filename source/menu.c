@@ -16,10 +16,10 @@ static struct options_s options[] = {
 
     { OPTION_EMUNAND, "Use EmuNAND", "Redirects NAND write/read to the SD. This supports both Gateway and redirected layouts.", boolean_val, 0, 0, 0 },
     { OPTION_EMUNAND_INDEX, "Index", "Which EmuNAND to use. If you only have one, you want 0. Currently the maximum supported is 10 (0-9), but this is arbitrary.", ranged_val, 0, 0x9, 1 },
-//    { OPTION_EMUNAND_REVERSE, "  Reverse layout", "(Warning - Experimental!) Calculate EmuNAND sector from the end of the disk, not the start. This isn't supported by tools like Decrypt9, but has some advantages.", boolean_val, 0, 0x9 },
 
     { OPTION_AUTOBOOT, "Autoboot", "Boot the system automatically, unless the R key is held while booting.", boolean_val, 0, 0, 0 },
     { OPTION_SILENCE, "Silent mode", "Suppress all debug output during autoboot. You'll see the screen turn on and then off once.", boolean_val, 0, 0, 1 },
+
     { OPTION_DIM_MODE, "Dim Background", "Experimental! Dims colors on lighter backgrounds to improve readability with text. You won't notice the change until scrolling or exiting the current menu due to the way rendering works.", boolean_val, 0, 0, 0 },
 
     { OPTION_ACCENT_COLOR, "Accent color", "Changes the accent color in menus.", ranged_val, 1, 7, 0},
@@ -76,11 +76,11 @@ void patch_func(char* fpath) {
         if (memcmp(p.magic, "AIDA", 4))
             return;
 
-        strncpy(patches[current_menu_index_patches].name, p.name, 64);
+        memcpy(patches[current_menu_index_patches].name, p.name, 64);
         if (desc_is_fname_sto)
-            strncpy(patches[current_menu_index_patches].desc, fpath, 255);
+            memcpy(patches[current_menu_index_patches].desc, fpath, 255);
         else
-            strncpy(patches[current_menu_index_patches].desc, p.desc, 255);
+            memcpy(patches[current_menu_index_patches].desc, p.desc, 255);
         patches[current_menu_index_patches].index = (int64_t)p.uuid;
         patches[current_menu_index_patches].allowed = boolean_val;
         patches[current_menu_index_patches].a = 0;

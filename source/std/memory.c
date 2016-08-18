@@ -4,12 +4,12 @@
 #include <stddef.h>
 
 size_t
-strlen(const char *string)
+strlen(char *string)
 {
-    char *string_end = (char *)string;
+    char *string_end = string;
     while (string_end[0])
         string_end++;
-    return string_end - string;
+    return (size_t)(string_end - string);
 }
 
 size_t
@@ -46,7 +46,7 @@ void
 memmove(void *dest, const void *src, size_t size)
 {
     // memcpy does the job of moving backwards just fine
-    if (dest < src || (uint8_t*)src + size <= (uint8_t*)dest) {
+    if (dest < src || (const uint8_t*)src + size <= (uint8_t*)dest) {
         memcpy(dest, src, size);
         return;
     }

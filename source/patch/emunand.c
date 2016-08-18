@@ -63,7 +63,7 @@ getSDMMC(uint8_t *pos, uint32_t size)
     const uint8_t pattern[] = { 0x21, 0x20, 0x18, 0x20 };
     const uint8_t *off = memfind(pos, size, pattern, 4);
 
-    uint32_t ret = *(uint32_t *)(off + 9) + *(uint32_t *)(off + 0xD);
+    uint32_t ret = *(const uint32_t *)(off + 9) + *(const uint32_t *)(off + 0xD);
 
     fprintf(stderr, "emunand: SDMMC code @ %lx\n", ret);
 

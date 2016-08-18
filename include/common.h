@@ -19,6 +19,8 @@
 #include <firm/decryptor.h>
 #include <firm/firm.h>
 
+#include <menu.h>
+#include <menu-backend.h>
 #include <arm11.h>
 #include <interrupt.h>
 #include <option.h>

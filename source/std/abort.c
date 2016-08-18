@@ -4,9 +4,7 @@
 #include <stdarg.h>
 #include <common.h>
 
-void poweroff();
-
-void abort(const char* x, ...) {
+void abort(char* x, ...) {
     va_list ap;
     va_start(ap, x);
 

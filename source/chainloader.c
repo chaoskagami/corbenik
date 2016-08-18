@@ -4,10 +4,7 @@
 #include <common.h>
 
 uint32_t current_chain_index = 0;
-
 struct options_s *chains = NULL;
-
-int show_menu(struct options_s *options, uint8_t *toggles);
 
 // TODO - The near same function is called in different places. It would
 //        be better to have a recursive listing that calls a function for
@@ -76,6 +73,8 @@ void chainload_file(char* chain_file_data)
 	memcpy((void*)0x23FFFE00, framebuffers, sizeof(struct framebuffers));
 
     ((void(*)(void*, uint32_t))0x24F00000)(chain_data, size + 256 + 8); // Size of payload + argv.
+
+    while(1);
 }
 
 void chain_file_hdl(char* fpath) {

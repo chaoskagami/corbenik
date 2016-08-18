@@ -36,37 +36,6 @@ extern struct config_file config;
 extern struct config_file *config;
 #endif
 
-/* Menu entry type. Determines how the menu is displayed and which (if any) options
- * can be changed.
- */
-enum type
-{
-    boolean_val = 0,      ///< Toggleable boolean
-    ranged_val = 1,       ///< N1 - N2, left and right to pick.
-    mask_val = 2,         ///< Bitmask allowed values.
-    not_option = 3,       ///< Skip over this.
-    call_fun = 4,         ///< Call a function. Treat (a) as (void)(*)(void).
-    boolean_val_n3ds = 5, ///< Toggle, but only show on n3DS
-    break_menu = 6        ///< Exit the menu (same as B)
-};
-
-typedef void (*func_call_t)(uint32_t data);
-
-struct range_str
-{
-    int a, b;
-};
-
-struct options_s
-{
-    int64_t index;     ///< Option index. Used for displaying values.
-    char name[64];     ///< Name of patch to display in menus.
-    char desc[256];    ///< Description of option, shown when pressing select
-    enum type allowed; ///< Misnomer, FIXME. Type of menu entry. See enum type.
-    uint32_t a, b;     ///< Should be union, FIXME. Data values used for menu entry.
-    uint8_t indent;    ///< Indentation/ownership level of menu.
-} __attribute__((packed));
-
 #define OPTION_LOADER              2   ///< Use builtin loader module replacer.
 
 #define OPTION_SVCS                3   ///< Inject svcBackdoor (FIXME, misnomer)

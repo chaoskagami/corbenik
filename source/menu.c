@@ -81,7 +81,7 @@ void patch_func(char* fpath) {
             strncpy(patches[current_menu_index_patches].desc, fpath, 255);
         else
             strncpy(patches[current_menu_index_patches].desc, p.desc, 255);
-        patches[current_menu_index_patches].index = p.uuid;
+        patches[current_menu_index_patches].index = (int64_t)p.uuid;
         patches[current_menu_index_patches].allowed = boolean_val;
         patches[current_menu_index_patches].a = 0;
         patches[current_menu_index_patches].b = 0;

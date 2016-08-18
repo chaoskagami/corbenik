@@ -66,9 +66,9 @@ static uint32_t colors[16] = {
     0xffffff  // White
 }; // VGA color table.
 
-void rect(void* channel, int x, int y, int x2, int y2, uint8_t color) {
+void rect(void* channel, unsigned int x, unsigned int y, unsigned int x2, unsigned int y2, uint8_t color) {
     uint8_t* screen = NULL;
-    int height = 0;
+    unsigned int height = 0;
     if (channel == stdout) {
         screen = framebuffers->top_left;
         height = TOP_HEIGHT;
@@ -79,11 +79,11 @@ void rect(void* channel, int x, int y, int x2, int y2, uint8_t color) {
         return; // Invalid on non-screen displays.
     }
 
-    for(int y_a = y; y_a < y2; y_a++) {
-        for(int x_a = x; x_a < x2; x_a++) {
-            int xDisplacement = (x_a * SCREEN_DEPTH * height);
-            int yDisplacement = ((height - y_a - 1) * SCREEN_DEPTH);
-            int pos = xDisplacement + yDisplacement;
+    for(unsigned int y_a = y; y_a < y2; y_a++) {
+        for(unsigned int x_a = x; x_a < x2; x_a++) {
+            unsigned int xDisplacement = (x_a * SCREEN_DEPTH * height);
+            unsigned int yDisplacement = ((height - y_a - 1) * SCREEN_DEPTH);
+            unsigned int pos = xDisplacement + yDisplacement;
 
             screen[pos + 1] = colors[color & 0xF];
             screen[pos + 2] = colors[color & 0xF] >> 8;
@@ -93,8 +93,8 @@ void rect(void* channel, int x, int y, int x2, int y2, uint8_t color) {
     }
 }
 
-void fill_line(void* channel, int y, uint8_t color) {
-    int x2 = 0;
+void fill_line(void* channel, unsigned int y, uint8_t color) {
+    unsigned int x2 = 0;
     if (channel == stdout)
         x2 = TOP_WIDTH;
     else if (channel == stderr)
@@ -281,13 +281,13 @@ set_cursor(void *channel, unsigned int x, unsigned int y)
 }
 
 void
-draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, const uint32_t color_fg, const uint32_t color_bg)
+draw_character(uint8_t *screen, const unsigned int character, unsigned int ch_x, unsigned int ch_y, const uint32_t color_fg, const uint32_t color_bg)
 {
     if (!isprint(character))
         return; // Don't output non-printables.
 
-    _UNUSED int width = 0;
-    int height = 0;
+    _UNUSED unsigned int width = 0;
+    unsigned int height = 0;
     uint8_t* buffer_bg;
     if (screen == framebuffers->top_left || screen == framebuffers->top_right) {
         width = TOP_WIDTH;
@@ -301,8 +301,8 @@ draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, co
         return; // Invalid buffer.
     }
 
-    int x = (font_w + font_kern) * ch_x;
-    int y = font_h * ch_y;
+    unsigned int x = (font_w + font_kern) * ch_x;
+    unsigned int y = font_h * ch_y;
 
     if (x >= width || y >= height)
         return; // OOB
@@ -310,12 +310,12 @@ draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, co
     unsigned int c_font_w = (font_w / 8) + (font_w % 8 ? 1 : 0);
 
     for (unsigned int yy = 0; yy < font_h; yy++) {
-        int xDisplacement   = (x * SCREEN_DEPTH * height);
-        int yDisplacement   = ((height - (y + yy) - 1) * SCREEN_DEPTH);
+        unsigned int xDisplacement   = (x * SCREEN_DEPTH * height);
+        unsigned int yDisplacement   = ((height - (y + yy) - 1) * SCREEN_DEPTH);
         unsigned int pos    = xDisplacement + yDisplacement;
 
-        int xDisplacementBg = (x * 3 * height);
-        int yDisplacementBg = ((height - (y + yy) - 1) * 3);
+        unsigned int xDisplacementBg = (x * 3 * height);
+        unsigned int yDisplacementBg = ((height - (y + yy) - 1) * 3);
         unsigned int pos_b  = xDisplacementBg + yDisplacementBg;
 
         unsigned char char_dat = font_data[(character - ' ') * (c_font_w * font_h) + yy];
@@ -447,16 +447,23 @@ ansi_statemach(void* buf, const int c)
 		                    *color &= 0xf0; // Remove bg color.
 		                    *color |= ((*val % 40) & 0xf);
                             break;
+                        default: // ???
+                            break;
 					}
 					*state = ANSI_END;
 				}
 			}
 			return 1;
+        default:
+            *state = TEXT;
+            return 1;
 	}
+
+    return 0; // Should not be reached.
 }
 
 void
-putc(void *buf, const int c)
+putc(void *buf, int c)
 {
 	if(ansi_statemach(buf, c) == 1) // Inside ANSI escape?
 		return;
@@ -513,7 +520,7 @@ putc(void *buf, const int c)
                 cursor_x[0] = 0; // Reset to beginning of line.
                 break;
             default:
-                draw_character(screen, c, cursor_x[0], cursor_y[0], colors[(color[0] >> 4) & 0xF], colors[color[0] & 0xF]);
+                draw_character(screen, (unsigned int)c, cursor_x[0], cursor_y[0], colors[(color[0] >> 4) & 0xF], colors[color[0] & 0xF]);
 
                 cursor_x[0]++;
 
@@ -526,12 +533,12 @@ putc(void *buf, const int c)
 }
 
 void
-puts(void *buf, const char *string)
+puts(void *buf, char *string)
 {
     if ((buf == stdout || buf == stderr) && kill_output)
         return;
 
-    char *ref = (char *)string;
+    char *ref = string;
 
     while (ref[0] != 0) {
         putc(buf, ref[0]);
@@ -543,10 +550,11 @@ void
 put_int64(void *channel, int64_t n, int length)
 {
     char conv[32], out[32];
+    size_t i = 0, sign = 0;
+
     memset(conv, 0, 32);
     memset(out, 0, 32);
 
-    int i = 0, sign = 0;
     if (n < 0) {
         n = -n;
         sign = 1;
@@ -563,8 +571,8 @@ put_int64(void *channel, int64_t n, int length)
     if (length > 0)
         out[length] = '\0';
 
-    int len = strlen(conv);
-    for (int i = 0; i < len; i++)
+    size_t len = strlen(conv);
+    for (i = 0; i < len; i++)
         out[i] = conv[(len - 1) - i];
 
     puts(channel, out);
@@ -574,10 +582,11 @@ void
 put_uint64(void *channel, uint64_t n, int length)
 {
     char conv[32], out[32];
+    size_t i = 0;
+
     memset(conv, 0, 32);
     memset(out, 0, 32);
 
-    int i = 0;
     do {
         conv[i++] = (n % 10) + '0';
     } while ((n /= 10) != 0);
@@ -585,8 +594,8 @@ put_uint64(void *channel, uint64_t n, int length)
     if (length > 0)
         out[length] = '\0';
 
-    int len = strlen(conv);
-    for (int i = 0; i < len; i++)
+    size_t len = strlen(conv);
+    for (i = 0; i < len; i++)
         out[i] = conv[(len - 1) - i];
 
     puts(channel, out);
@@ -630,7 +639,7 @@ fflush(void *channel)
 int disable_format = 0;
 
 void
-vfprintf(void *channel, const char *format, va_list ap)
+vfprintf(void *channel, char *format, va_list ap)
 {
     if ((channel == stdout || channel == stderr) && kill_output)
         return;
@@ -671,15 +680,10 @@ vfprintf(void *channel, const char *format, va_list ap)
                             break;
                     }
                     break;
-                case 's':
-                    //         For now, this warning stays.
-                    disable_format = 1; // Disable format strings.
-                    fprintf(channel, va_arg(ap, char *));
-                    disable_format = 0; // Reenable.
-                    break;
                 case 'c':
                     putc(channel, va_arg(ap, int));
                     break;
+                case 's':
                 case 'p':
                     puts(channel, va_arg(ap, char *));
                     break;
@@ -709,7 +713,7 @@ vfprintf(void *channel, const char *format, va_list ap)
 }
 
 void
-fprintf(void *channel, const char *format, ...)
+fprintf(void *channel, char *format, ...)
 {
     // The output suppression is in all the functions to minimize overhead.
     // Function calls and format conversions take time and we don't just want
@@ -726,7 +730,7 @@ fprintf(void *channel, const char *format, ...)
 }
 
 void
-printf(void *channel, const char *format, ...)
+printf(char *format, ...)
 {
     va_list ap;
     va_start(ap, format);

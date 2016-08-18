@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-size_t strlen(const char *string);
+size_t strlen(char *string);
 void memcpy(void *dest, const void *src, size_t size);
 void memmove(void *dest, const void *src, size_t size);
 void memset(void *dest, const int filler, size_t size);

@@ -188,12 +188,12 @@ decrypt_cetk_key(void *key, const void *cetk)
 {
 	static int got_cetk = 0;
 	uint8_t iv[AES_BLOCK_SIZE] = { 0 };
-	uint32_t sigtype = __builtin_bswap32(*(uint32_t *)cetk);
+	uint32_t sigtype = __builtin_bswap32(*(const uint32_t *)cetk);
 
 	if (sigtype != SIG_TYPE_RSA2048_SHA256)
 		return 1;
 
-	ticket_h *ticket = (ticket_h *)(cetk + sizeof(sigtype) + 0x13C);
+	const ticket_h *ticket = (const ticket_h *)((const uint8_t*)cetk + sizeof(sigtype) + 0x13C);
 	if (ticket->ticketCommonKeyYIndex != 1)
 		return 1;
 
@@ -222,7 +222,7 @@ decrypt_firm_title(firm_h *dest, ncch_h *ncch, uint32_t *size, void *key)
     uint8_t exefs_key[16] = { 0 };
     uint8_t exefs_iv[16] = { 0 };
 
-    fprintf(stderr, "  Decrypting FIRM container (size is %u blocks)\n", *size / AES_BLOCK_SIZE);
+    fprintf(stderr, "  Decrypting FIRM container (size is %lu blocks)\n", *size / AES_BLOCK_SIZE);
 
     setup_aeskey(0x16, key);
     use_aeskey(0x16);
@@ -240,7 +240,7 @@ decrypt_firm_title(firm_h *dest, ncch_h *ncch, uint32_t *size, void *key)
     exefs_h *exefs = (exefs_h *)((uint8_t *)ncch + ncch->exeFSOffset * MEDIA_UNITS);
     uint32_t exefs_size = ncch->exeFSSize * MEDIA_UNITS;
 
-    fprintf(stderr, "  Decrypting ExeFs for FIRM (size is %u blocks)\n", exefs_size / AES_BLOCK_SIZE);
+    fprintf(stderr, "  Decrypting ExeFs for FIRM (size is %lu blocks)\n", exefs_size / AES_BLOCK_SIZE);
 
     setup_aeskeyY(0x2C, exefs_key);
     use_aeskey(0x2C);
@@ -283,7 +283,7 @@ decrypt_arm9bin(arm9bin_h *header, uint64_t firm_title, uint8_t version)
     int size = atoi(header->size);
 
     use_aeskey(slot);
-    ctr_decrypt(arm9bin, arm9bin, size / AES_BLOCK_SIZE, AES_CNT_CTRNAND_MODE, header->ctr);
+    ctr_decrypt(arm9bin, arm9bin, (size_t)size / AES_BLOCK_SIZE, AES_CNT_CTRNAND_MODE, header->ctr);
 
     if (firm_title == NATIVE_FIRM_TITLEID)
         return *(uint32_t *)arm9bin != ARM9BIN_MAGIC;
@@ -460,6 +460,8 @@ boot_firm()
     *a11_entry = (uint32_t)firm_loc->a11Entry;
 
     ((void (*)())firm_loc->a9Entry)();
+
+    while(1);
 }
 
 int

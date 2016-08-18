@@ -54,7 +54,7 @@ void screenshot();
  * \param y2 Y2 coordinate
  * \param color Color to fill with
  */
-void rect(void* channel, int x, int y, int x2, int y2, uint8_t color);
+void rect(void* channel, unsigned int x, unsigned int y, unsigned int x2, unsigned int y2, uint8_t color);
 
 /* Fill a line behind characters with a color.
  *
@@ -62,7 +62,7 @@ void rect(void* channel, int x, int y, int x2, int y2, uint8_t color);
  * \param y Which line to fill
  * \param color Color to fill with
  */
-void fill_line(void* channel, int y, uint8_t color);
+void fill_line(void* channel, unsigned int y, uint8_t color);
 
 /* Clears background image bitmaps.
  */
@@ -93,7 +93,7 @@ void clear_screens();
  * \param color_fg RGB color to draw character as (as uint32_t)
  * \param color_bg RGB color to draw behind character (as uint32_t)
  */
-void draw_character(uint8_t *screen, const uint32_t character, int ch_x, int ch_y, const uint32_t color_fg, const uint32_t color_bg);
+void draw_character(uint8_t *screen, const unsigned int character, unsigned int ch_x, unsigned int ch_y, const uint32_t color_fg, const uint32_t color_bg);
 
 /* Sets the font.
  *
@@ -112,14 +112,14 @@ void set_font(const char* filename);
  * \param buf Handle to output to.
  * \param c Character (as int) to output
  */
-void putc(void *buf, const int c);
+void putc(void *buf, int c);
 
 /* Outputs a string to a handle
  *
  * \param buf Handle to output to.
  * \param string String to output
  */
-void puts(void *buf, const char *string);
+void puts(void *buf, char *string);
 
 /* Flushes a handle
  *
@@ -159,11 +159,11 @@ void clear_disp(uint8_t *screen);
  * \param Format string.
  * \param ... Format arguments
  */
-void fprintf(void *channel, const char *format, ...) __attribute__ ((format (printf, 2, 3)));
+void fprintf(void *channel, char *format, ...) __attribute__ ((format (printf, 2, 3)));
 
 /* See fprintf. Takes a va_list instead of variable arguments.
  */
-void vfprintf(void *channel, const char *format, va_list ap);
+void vfprintf(void *channel, char *format, va_list ap);
 
 #define BLACK     0
 #define BLUE      1

@@ -45,7 +45,7 @@ patch_modules()
                 uint32_t need_units = (module->contentSize - sysmodule->contentSize);
 
                 memmove((uint8_t *)sysmodule + module->contentSize * 0x200, (uint8_t *)sysmodule + sysmodule->contentSize * 0x200,
-                        ((uint8_t *)firm_loc + firm_size) - ((uint8_t *)sysmodule + (module->contentSize * 0x200)));
+                        ((uint32_t)firm_loc + firm_size) - ((uint32_t)sysmodule + (module->contentSize * 0x200)));
 
                 sysmodule_section->size += 0x200 * need_units;
                 for (int i = section_index + 1; i < 4; i++) {
@@ -62,7 +62,7 @@ patch_modules()
             else if (module->contentSize < sysmodule->contentSize) {
                 // NOTE - This doesn't change the sysmodule section size; it isn't needed to do so.
                 fprintf(stderr, "Module: Shrink %lu units\n", sysmodule->contentSize - module->contentSize);
-                int remaining_size =
+                uint32_t remaining_size =
                     sysmodule_section->size - (((uint32_t)sysmodule + sysmodule->contentSize * 0x200) - ((uint32_t)firm_loc + sysmodule_section->offset));
                 // Sysmodule section size - (End location of this sysmodule -
                 // Sysmodule section) =>

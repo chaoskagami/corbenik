@@ -21,7 +21,7 @@ ncch_getctr(const ncch_h *ncch, uint8_t *ctr, uint8_t type)
             ctr[i] = partitionID[7 - i]; // Convert to big endian & normal input
         ctr[8] = type;
     } else if (version == 1) {
-        int x = 0;
+        unsigned int x = 0;
         if (type == NCCHTYPE_EXHEADER)
             x = MEDIA_UNITS;
         else if (type == NCCHTYPE_EXEFS)

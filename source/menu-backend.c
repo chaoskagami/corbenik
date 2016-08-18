@@ -99,7 +99,7 @@ show_menu(struct options_s *options, uint8_t *toggles)
             set_cursor(TOP_SCREEN, 0, (unsigned int)(i - window_top + 2) );
 
             int indent = options[i].indent;
-            for(int i=0; i < indent; i++)
+            for(int j=0; j < indent; j++)
                 fprintf(TOP_SCREEN, "  ");
 
             if (options[i].allowed == boolean_val || (is_n3ds && options[i].allowed == boolean_val_n3ds)) {

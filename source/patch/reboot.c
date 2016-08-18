@@ -35,7 +35,7 @@ patch_reboot()
     fprintf(stderr, "reboot: firmlaunch @ %lx\n", (uint32_t)off);
 
     // Firmlaunch function offset - offset in BLX opcode (A4-16 - ARM DDI 0100E) + 1
-    uint32_t fOpenOffset = (uint32_t)(off + 9 - (-((*(uint32_t *)off & 0x00FFFFFF) << 2) & (0xFFFFFF << 2)) - process9Offset + process9MemAddr);
+    uint32_t fOpenOffset = (uint32_t)(off + 9 - (-((*(uint32_t *)off & 0x00FFFFFF) << 2) & (0xFFFFFF << 2)) - (uint32_t)process9Offset + process9MemAddr);
 
     fprintf(stderr, "reboot: fopen @ %lx\n", fOpenOffset);
 

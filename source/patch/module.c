@@ -17,22 +17,8 @@ patch_modules()
     fread(temp, 1, size, f);
     fclose(f);
 
-    // Look for the section that holds all the sysmodules
     int section_index = 0;
-    firm_section_h *sysmodule_section = NULL;
-    for (firm_section_h *section = firm_loc->section; section < firm_loc->section + 4; section++) {
-        if (section->address == 0x1FF00000 && section->type == FIRM_TYPE_ARM11) {
-            sysmodule_section = section;
-            break;
-        }
-        section_index++;
-    }
-
-    if (!sysmodule_section) {
-        fprintf(stderr, "Module: sysmodule section not found\n");
-        free(temp);
-        return 1;
-    }
+    firm_section_h *sysmodule_section = &firm_loc->section[0];
 
     ncch_h *module = (ncch_h *)temp;
     ncch_h *sysmodule = (ncch_h *)((uint32_t)firm_loc + sysmodule_section->offset);
@@ -48,7 +34,7 @@ patch_modules()
                         ((uint32_t)firm_loc + firm_size) - ((uint32_t)sysmodule + (module->contentSize * 0x200)));
 
                 sysmodule_section->size += 0x200 * need_units;
-                for (int i = section_index + 1; i < 4; i++) {
+                for (int i = 1; i < 4; i++) {
                     if (firm_loc->section[i].size != 0) { // The last section (3) is usually empty.
                         firm_loc->section[i].offset += 0x200 * need_units;
                         firm_loc->section[i].size += 0x200 * need_units;

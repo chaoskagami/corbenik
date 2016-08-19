@@ -4,6 +4,8 @@ FILE *conf_handle;
 
 struct config_file *config;
 extern uint8_t *enable_list;
+char *config_file_path;
+
 void list_patches_build(char *name, int desc_is_fname);
 
 void
@@ -16,7 +18,7 @@ regenerate_config()
     config->options[OPTION_ACCENT_COLOR] = 2;
     config->options[OPTION_BRIGHTNESS]   = 3;
 
-    if (!(conf_handle = fopen(PATH_CONFIG, "w")))
+    if (!(conf_handle = fopen(config_file_path, "w")))
         poweroff();
 
     fwrite(config, 1, sizeof(struct config_file), conf_handle);
@@ -66,28 +68,47 @@ update_config()
     }
 }
 
+void get_cfg_path();
+
 void
 load_config()
 {
-    config = (struct config_file*)malloc(sizeof(struct config_file));
-    memset(config, 0, sizeof(struct config_file));
-
     mk_structure(); // Make directory structure if needed.
 
+    if (!config_file_path) {
+        config_file_path = malloc(256); // MAX_PATH
+        memset(config_file_path, 0, 256);
+
+        uint32_t cid[4];
+        sdmmc_get_cid(1, cid);
+
+        strcpy(config_file_path, SYSCONFDIR "/config-");
+
+        size_t len = strlen(config_file_path) + 7;
+        while (cid[0]) {
+            static const char hexDigits[] = "0123456789ABCDEF";
+            config_file_path[len--] = hexDigits[(uint32_t)(cid[0] & 0xF)];
+            cid[0] >>= 4;
+        }
+
+        config = (struct config_file*)malloc(sizeof(struct config_file));
+        memset(config, 0, sizeof(struct config_file));
+    }
+
     // Zero on success.
-    if (!(conf_handle = fopen(PATH_CONFIG, "r"))) {
+    if (!(conf_handle = fopen(config_file_path, "r"))) {
         regenerate_config();
     } else {
         fread(config, 1, sizeof(struct config_file), conf_handle);
         fclose(conf_handle);
 
         if (memcmp(&(config->magic), CONFIG_MAGIC, 4)) {
-            f_unlink(PATH_CONFIG);
+            f_unlink(config_file_path);
             regenerate_config();
         }
 
         if (config->config_ver < config_version) {
-            f_unlink(PATH_CONFIG);
+            f_unlink(config_file_path);
             regenerate_config();
         }
     }
@@ -102,9 +123,9 @@ save_config()
 {
     write_file(enable_list, PATH_TEMP "/PATCHENABLE", FCRAM_SPACING / 2);
 
-    f_unlink(PATH_CONFIG);
+    f_unlink(config_file_path);
 
-    if (!(conf_handle = fopen(PATH_CONFIG, "w")))
+    if (!(conf_handle = fopen(config_file_path, "w")))
 		while(1);
 
     fwrite(config, 1, sizeof(struct config_file), conf_handle);

@@ -4,7 +4,7 @@ FILE *conf_handle;
 
 struct config_file *config;
 extern uint8_t *enable_list;
-char *config_file_path;
+char *config_file_path = NULL;
 int changed_consoles = 0;
 uint32_t cid[4];
 
@@ -102,10 +102,11 @@ load_config()
         strcpy(config_file_path, SYSCONFDIR "/config-");
 
         size_t len = strlen(config_file_path) + 7;
-        while (cid[0]) {
+        uint32_t cid_cp = cid[0];
+        while (cid_cp) {
             static const char hexDigits[] = "0123456789ABCDEF";
-            config_file_path[len--] = hexDigits[(uint32_t)(cid[0] & 0xF)];
-            cid[0] >>= 4;
+            config_file_path[len--] = hexDigits[(uint32_t)(cid_cp & 0xF)];
+            cid_cp >>= 4;
         }
 
         config = (struct config_file*)malloc(sizeof(struct config_file) + FCRAM_SPACING / 2);

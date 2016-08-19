@@ -116,3 +116,20 @@ FSLDR_OpenFileDirectly(Handle *out, FS_ArchiveID archiveId, FS_Path archivePath,
 
     return cmdbuf[1];
 }
+
+Result
+FSLDR_GetNandCid(u8* out, u32 length)
+{
+	u32 *cmdbuf = getThreadCommandBuffer();
+
+	cmdbuf[0] = IPC_MakeHeader(0x81A, 1, 2); // 0x81A0042
+	cmdbuf[1] = length;
+	cmdbuf[2] = IPC_Desc_Buffer(length, IPC_BUFFER_W);
+	cmdbuf[3] = (u32) out;
+
+	Result ret = 0;
+	if(R_FAILED(ret = svcSendSyncRequest(fsldrHandle)))
+		return ret;
+
+	return cmdbuf[1];
+}

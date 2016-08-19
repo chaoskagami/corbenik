@@ -48,9 +48,25 @@ load_config()
 {
     static Handle file;
     static u32 total;
+    static u32 cid[4];
+    static char config_file_path[] = SYSCONFDIR "/config-00000000";
+
+    if (!R_SUCCEEDED(FSLDR_GetNandCid((u8*)cid, 0x10))) {
+        return;
+    }
+
+    char* cfg = config_file_path;
+    while(cfg[1] != 0) cfg++;
+
+    // Get path of actual config.
+    while (cid[0]) {
+        cfg[0] = hexDigits[(uint32_t)(cid[0] & 0xF)];
+        cfg--;
+        cid[0] >>= 4;
+    }
 
     // Open file.
-    if (!R_SUCCEEDED(fileOpen(&file, ARCHIVE_SDMC, PATH_CONFIG, FS_OPEN_READ))) {
+    if (!R_SUCCEEDED(fileOpen(&file, ARCHIVE_SDMC, config_file_path, FS_OPEN_READ))) {
         // Failed to open.
         return;
     }

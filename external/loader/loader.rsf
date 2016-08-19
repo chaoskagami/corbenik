@@ -112,6 +112,7 @@ AccessControlInfo:
   FileSystemAccess:
     - DirectSdmc
     - CtrNandRw
+    - CategoryFileSystemTool # For FSLDR_GetNandCID
 
 SystemControlInfo:
   SaveDataSize: 0KB # It doesn't use any save data.

@@ -25,6 +25,31 @@ wait()
 
 void list_patches_build(char *name, int desc_is_fname);
 
+void
+patch_cache_func(char* fpath)
+{
+    FILINFO f2;
+    if (f_stat(fpath, &f2) != FR_OK)
+        return;
+
+    if (!(f2.fattrib & AM_DIR)) {
+        struct system_patch p;
+        read_file(&p, fpath, sizeof(struct system_patch));
+
+        if (memcmp(p.magic, "AIDA", 4))
+            return;
+
+        if (enable_list[p.uuid]) {
+            // Patch is enabled. Cache it.
+            if (execb(fpath, 1)) {
+                abort("Failed to cache:\n  %s\n", fpath);
+            }
+
+            wait();
+        }
+    }
+}
+
 int
 generate_patch_cache()
 {
@@ -32,18 +57,7 @@ generate_patch_cache()
     rrmdir(PATH_LOADER_CACHE);
     f_mkdir(PATH_LOADER_CACHE);
 
-    list_patches_build(PATH_PATCHES, 1);
-
-    for (int i = 0; patches[i].index != -1; i++) {
-        if (enable_list[patches[i].index]) {
-            // Patch is enabled. Cache it.
-            if (execb(patches[i].desc, 1)) {
-                abort("Failed to apply:\n  %s\n", patches[i].name);
-            }
-
-            wait();
-        }
-    }
+    recurse_call(PATH_PATCHES, patch_cache_func);
 
     return 0;
 }

@@ -4,7 +4,7 @@
 // FIXME - Remove limit
 #define MAX_PATCHES 256
 struct options_s *patches = NULL;
-uint8_t *enable_list = NULL;
+uint8_t *enable_list;
 
 static struct options_s options[] = {
     // Patches.
@@ -105,35 +105,22 @@ list_patches_build(char *name, int desc_is_fname)
 
     current_menu_index_patches = 0;
 
-	if (!enable_list)
-		enable_list = malloc(FCRAM_SPACING / 2); // FIXME - the PATCHENABLE file has to go. Badly.
+    if (!patches)
+        patches = malloc(sizeof(struct options_s) * 258); // FIXME - hard limit. Implement realloc.
 
-	if (!patches)
-		patches = malloc(sizeof(struct options_s) * 258); // FIXME - hard limit. Implement realloc.
+    strncpy(patches[0].name, "Patches", 64);
+    strncpy(patches[0].desc, "", 255);
+    patches[0].index = 0;
+    patches[0].allowed = not_option;
+    patches[0].a = 1;
+    patches[0].b = 0;
+    patches[0].indent = 0;
 
-    memset(enable_list, 0, FCRAM_SPACING / 2);
-
-    if (!desc_is_fname) {
-        strncpy(patches[0].name, "Patches", 64);
-        strncpy(patches[0].desc, "", 255);
-        patches[0].index = 0;
-        patches[0].allowed = not_option;
-        patches[0].a = 1;
-        patches[0].b = 0;
-        patches[0].indent = 0;
-
-        current_menu_index_patches += 1;
-    }
+    current_menu_index_patches += 1;
 
     recurse_call(name, patch_func);
 
     patches[current_menu_index_patches].index = -1;
-
-    FILE *f;
-    if ((f = fopen(PATH_TEMP "/PATCHENABLE", "r"))) {
-        fread(enable_list, 1, FCRAM_SPACING / 2, f);
-        fclose(f);
-    }
 }
 
 void

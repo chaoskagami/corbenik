@@ -1,7 +1,7 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
-#define config_version 1      ///< Static version of the config. Updated when the config has changed in an
+#define config_version 2      ///< Static version of the config. Updated when the config has changed in an
                               ///< incompatible way.
 
 #define CONFIG_MAGIC   "OVAN" ///< Magic to identify config files.
@@ -16,18 +16,6 @@ struct config_file
 
     uint8_t options[256]; ///< Options in the menu - deliberately large to avoid
                           ///< config version bumps.
-
-    uint64_t patch_ids[256]; ///< What patches are enabled by UUID. 256 is an
-                             ///< arbitrary limit - contact me if you hit it.
-} __attribute__((packed));
-
-/* State of a patch file
- */
-struct patch_state
-{
-    char filename[256]; ///< Patch filename.
-
-    uint8_t state;      ///< Status of patch.
 } __attribute__((packed));
 
 #ifdef LOADER

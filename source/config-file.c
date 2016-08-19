@@ -21,7 +21,7 @@ regenerate_config()
     if (!(conf_handle = fopen(config_file_path, "w")))
         poweroff();
 
-    fwrite(config, 1, sizeof(struct config_file), conf_handle);
+    fwrite(config, 1, sizeof(struct config_file) + FCRAM_SPACING / 2, conf_handle);
     fclose(conf_handle);
 }
 
@@ -91,15 +91,17 @@ load_config()
             cid[0] >>= 4;
         }
 
-        config = (struct config_file*)malloc(sizeof(struct config_file));
-        memset(config, 0, sizeof(struct config_file));
+        config = (struct config_file*)malloc(sizeof(struct config_file) + FCRAM_SPACING / 2);
+        memset(config, 0, sizeof(struct config_file) + FCRAM_SPACING / 2);
+        enable_list = (uint8_t*)config + sizeof(struct config_file);
     }
 
     // Zero on success.
     if (!(conf_handle = fopen(config_file_path, "r"))) {
         regenerate_config();
     } else {
-        fread(config, 1, sizeof(struct config_file), conf_handle);
+        fread(config, 1, sizeof(struct config_file) + FCRAM_SPACING / 2, conf_handle);
+
         fclose(conf_handle);
 
         if (memcmp(&(config->magic), CONFIG_MAGIC, 4)) {
@@ -107,7 +109,7 @@ load_config()
             regenerate_config();
         }
 
-        if (config->config_ver < config_version) {
+        if (config->config_ver != config_version) {
             f_unlink(config_file_path);
             regenerate_config();
         }
@@ -121,13 +123,12 @@ load_config()
 void
 save_config()
 {
-    write_file(enable_list, PATH_TEMP "/PATCHENABLE", FCRAM_SPACING / 2);
-
     f_unlink(config_file_path);
 
     if (!(conf_handle = fopen(config_file_path, "w")))
 		while(1);
 
-    fwrite(config, 1, sizeof(struct config_file), conf_handle);
+    fwrite(config, 1, sizeof(struct config_file) + FCRAM_SPACING / 2, conf_handle);
+
     fclose(conf_handle);
 }

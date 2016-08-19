@@ -5,6 +5,8 @@ FILE *conf_handle;
 struct config_file *config;
 extern uint8_t *enable_list;
 char *config_file_path;
+int changed_consoles = 0;
+uint32_t cid[4];
 
 void list_patches_build(char *name, int desc_is_fname);
 
@@ -79,8 +81,23 @@ load_config()
         config_file_path = malloc(256); // MAX_PATH
         memset(config_file_path, 0, 256);
 
-        uint32_t cid[4];
         sdmmc_get_cid(1, cid);
+
+        FILE* f = fopen(SYSCONFDIR "/current-nand-cid", "r");
+        if (!f) {
+            // Nonexistent. Write it.
+            f = fopen(SYSCONFDIR "/current-nand-cid", "w");
+            fwrite(cid, 1, 4, f);
+            fclose(f);
+            f = fopen(SYSCONFDIR "/current-nand-cid", "r");
+        }
+
+        fread(&cid[1], 1, 4, f);
+
+        // If our console's CID doesn't match what was read, we need to regenerate caches immediately when we can.
+        if (cid[0] != cid[1]) {
+            changed_consoles = 1;
+        }
 
         strcpy(config_file_path, SYSCONFDIR "/config-");
 
@@ -123,6 +140,12 @@ load_config()
 void
 save_config()
 {
+    if (changed_consoles) {
+        FILE* f = fopen(SYSCONFDIR "/current-nand-cid", "w");
+        fwrite(cid, 1, 4, f);
+        fclose(f);
+    }
+
     f_unlink(config_file_path);
 
     if (!(conf_handle = fopen(config_file_path, "w")))

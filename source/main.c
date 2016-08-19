@@ -11,6 +11,8 @@ int doing_autoboot = 0;
 int menu_handler();
 void shut_up();
 
+extern int changed_consoles;
+
 int
 main(int argc, char** argv)
 {
@@ -53,6 +55,12 @@ main(int argc, char** argv)
             shut_up(); // This does exactly what it sounds like.
     } else {
         menu_handler();
+    }
+
+    if (changed_consoles) {
+        fprintf(stderr, "Console changed, regenerating caches\n");
+        save_config();
+        generate_patch_cache();
     }
 
     boot_cfw();

@@ -107,10 +107,6 @@ save_config()
     if (!(conf_handle = fopen(PATH_CONFIG, "w")))
 		while(1);
 
-    config->options[OPTION_RECONFIGURED] = 0; // This should not persist to disk.
-
     fwrite(config, 1, sizeof(struct config_file), conf_handle);
     fclose(conf_handle);
-
-    config->options[OPTION_RECONFIGURED] = 1; // Save caches on boot.
 }

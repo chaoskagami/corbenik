@@ -2,14 +2,21 @@
 
 /* Not possible to be implemented as bytecode. Hey, can't win em all. */
 
-int
-patch_modules()
+void
+inject_module(char* fpath)
 {
+    FILINFO f2;
+    if (f_stat(fpath, &f2) != FR_OK)
+        return;
+
+    if (f2.fattrib & AM_DIR)
+        return;
+
     // TODO - load other module cxis here
-    FILE *f = fopen(PATH_MODULES "/loader.cxi", "r");
+    FILE *f = fopen(fpath, "r");
     if (!f) {
-        fprintf(stderr, "Module: loader.cxi not found on FS\n");
-        return 2;
+        fprintf(stderr, "Module: %s not found\n", fpath);
+        return;
     }
 
     size_t size = fsize(f);
@@ -41,7 +48,7 @@ patch_modules()
                     }
                 }
 
-                fprintf(stderr, "module: Grow %lu units\n", need_units);
+                fprintf(stderr, "Module: Grow %lu units\n", need_units);
             }
 
             // Move the remaining modules closer
@@ -56,16 +63,28 @@ patch_modules()
                 // Move end of section to be adjacent
             }
 
-            fprintf(stderr, "Module: Injecting module\n");
             // Copy the module into the firm
             memcpy(sysmodule, module, module->contentSize * 0x200);
+
+            fprintf(stderr, "Module: injected %s\n", fpath);
+
+            goto end_inj;
         }
         sysmodule = (ncch_h *)((uint32_t)sysmodule + sysmodule->contentSize * 0x200);
     }
 
-    fprintf(stderr, "Module: injected modules.\n");
+    fprintf(stderr, "Module: Failed to inject %s\n", fpath);
+
+end_inj:
 
     free(temp);
+    return;
+}
+
+int
+patch_modules()
+{
+    recurse_call(PATH_MODULES, inject_module);
 
     return 0;
 }

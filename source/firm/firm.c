@@ -546,14 +546,7 @@ load_firms()
 void
 boot_cfw()
 {
-    fprintf(stderr, "Loading firmware...\n");
-
     load_firms();
-
-    if (config->options[OPTION_RECONFIGURED]) {
-        fprintf(stderr, "Generating patch cache...\n");
-        generate_patch_cache();
-    }
 
     fprintf(stderr, "Patching firmware...\n");
     if (patch_firm_all() != 0)

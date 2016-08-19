@@ -10,9 +10,11 @@ static struct options_s options[] = {
     // Patches.
     { 0, "General Options", "", not_option, 1, 0, 0 },
 
+    { OPTION_LOADER, "System Module Inject", "Replaces system modules in FIRM like loader, fs, pxi, etc.", boolean_val, 0, 0, 0 },
+
     { OPTION_SVCS, "svcBackdoor Fixup", "Reinserts svcBackdoor on 11.0 NATIVE_FIRM. svcBackdoor allows executing arbitrary functions with ARM11 kernel permissions, and is required by some (poorly coded) applications.", boolean_val, 0, 0, 0 },
 
-    { OPTION_REBOOT, "Reboot Hook", "Hooks firmlaunch to allow largemem games on o3DS. Also allows patching TWL/AGB on all consoles.", boolean_val, 0, 0, 0 },
+    { OPTION_REBOOT, "Firmlaunch Hook", "Hooks firmlaunch to allow largemem games on o3DS. Also allows patching TWL/AGB on all consoles. Previously called 'Reboot hook' but renamed for accuracy.", boolean_val, 0, 0, 0 },
 
     { OPTION_EMUNAND, "Use EmuNAND", "Redirects NAND write/read to the SD. This supports both Gateway and redirected layouts.", boolean_val, 0, 0, 0 },
     { OPTION_EMUNAND_INDEX, "Index", "Which EmuNAND to use. If you only have one, you want 0. Currently the maximum supported is 10 (0-9), but this is arbitrary.", ranged_val, 0, 0x9, 1 },
@@ -31,17 +33,16 @@ static struct options_s options[] = {
     // Patches.
     { 0, "Loader Options", "", not_option, 1, 0, 0 },
 
-    { OPTION_LOADER, "Use Loader Replacement", "Replaces loader with one capable of extra features. You should enable this even if you don't plan to use loader-based patches to kill ASLR and the Ninjhax/OOThax checks.", boolean_val, 0, 0, 0 },
-    { OPTION_LOADER_CPU_L2, "CPU - L2 cache", "Forces the system to use the L2 cache on all applications. If you have issues with crashes, try turning this off.", boolean_val_n3ds, 0, 0, 1 },
-    { OPTION_LOADER_CPU_800MHZ, "CPU - 804Mhz", "Forces the system to run in 804Mhz mode on all applications.", boolean_val_n3ds, 0, 0, 1 },
-    { OPTION_LOADER_LANGEMU, "Language Emulation", "Reads language emulation configuration from `" PATH_LOCEMU "` and imitates the region/language.", boolean_val, 0, 0, 1 },
-    { OPTION_LOADER_LOADCODE, "Load Code Sections", "Loads code sections (text/ro/data) from SD card and patches afterwards.", boolean_val, 0, 0, 1 },
+    { OPTION_LOADER_CPU_L2, "CPU - L2 cache", "Forces the system to use the L2 cache on all applications. If you have issues with crashes, try turning this off.", boolean_val_n3ds, 0, 0, 0 },
+    { OPTION_LOADER_CPU_800MHZ, "CPU - 804Mhz", "Forces the system to run in 804Mhz mode on all applications.", boolean_val_n3ds, 0, 0, 0 },
+    { OPTION_LOADER_LANGEMU, "Language Emulation", "Reads language emulation configuration from `" PATH_LOCEMU "` and imitates the region/language.", boolean_val, 0, 0, 0 },
+    { OPTION_LOADER_LOADCODE, "Load Code Sections", "Loads code sections (text/ro/data) from SD card and patches afterwards.", boolean_val, 0, 0, 0 },
 
     { OPTION_LOADER_DUMPCODE, "Dump Code Sections",
-      "Dumps code sections for titles to SD card the first time they're loaded. Slows things down on first launch.", boolean_val, 0, 0, 1 },
+      "Dumps code sections for titles to SD card the first time they're loaded. Slows things down on first launch.", boolean_val, 0, 0, 0 },
 
     { OPTION_LOADER_DUMPCODE_ALL, "+ System Titles",
-      "Dumps code sections for system titles, too. Expect to sit at a blank screen for >3mins on the first time you do this, because it dumps everything.", boolean_val, 0, 0, 2 },
+      "Dumps code sections for system titles, too. Expect to sit at a blank screen for >3mins on the first time you do this, because it dumps everything.", boolean_val, 0, 0, 1 },
 
     // space
     { 0, "", "", not_option, 0, 0, 0 },
@@ -250,14 +251,28 @@ poweroff()
 void chainload_menu();
 #endif
 
-static struct options_s main_s[] = {
+static struct options_s config_opts[] = {
     { 0, "Options",            "Internal options for the CFW.\nThese are part of " FW_NAME " itself.", call_fun, (uint32_t)menu_options, 0, 0 },
     { 0, "Patches",            "External bytecode patches found in `" PATH_PATCHES "`.\nYou can choose which to enable.", call_fun, (uint32_t)menu_patches, 0, 0 },
+
+    // Sentinel.
+    { -1, "", "", 0, 0, 0, 0 },
+};
+
+void config_main_menu() {
+	show_menu(config_opts, NULL);
+
+    save_config(); // Save config when exiting.
+
+    generate_patch_cache();
+}
+
+static struct options_s main_s[] = {
+    { 0, "Configuration",      "Configuration options for the CFW.", call_fun, (uint32_t)config_main_menu, 0, 0 },
     { 0, "Info",               "Shows the current FIRM versions (and loads them, if needed)", call_fun, (uint32_t)menu_info,    0, 0 },
     { 0, "Readme",             "Mini-readme.\nWhy are you opening help on this, though?\nThat's kind of silly.", call_fun, (uint32_t)menu_help,    0, 0 },
     { 0, "Reboot",             "Reboots the console.", call_fun, (uint32_t)reset,        0, 0 },
     { 0, "Power off",          "Powers off the console.", call_fun, (uint32_t)poweroff,     0, 0 },
-    { 0, "Save Configuration", "Save the configuration.\nYou must do this prior to booting,\notherwise the cache will not be (re)generated..", call_fun, (uint32_t)save_config,  0, 0 },
 #if defined(CHAINLOADER) && CHAINLOADER == 1
     { 0, "Chainload",          "Boot another ARM9 payload file.", call_fun, (uint32_t)chainload_menu, 0, 0 },
 #endif

@@ -133,7 +133,7 @@ void extract_slot0x05keyY() {
     if (!key_data)
         abort("  0x05 KeyY not found!\n");
 
-    fprintf(stderr, "  0x05 KeyY at %lx in FIRM1\n", (uint32_t)key_data - (uint32_t)key_loc);
+    fprintf(stderr, "  0x05 KeyY at %u in FIRM1\n", (uint32_t)key_data - (uint32_t)key_loc);
 
     memcpy(mem, key_data, 16);
 
@@ -157,7 +157,7 @@ void extract_slot0x3DkeyY() {
     if (!key_data)
         abort("  0x3D KeyY #1 not found!\n");
 
-    fprintf(stderr, "  0x3D KeyY #1 at %lx in FIRM0\n", (uint32_t)key_data - (uint32_t)key_loc);
+    fprintf(stderr, "  0x3D KeyY #1 at %u in FIRM0\n", (uint32_t)key_data - (uint32_t)key_loc);
 
     memcpy(mem, key_data, 16);
 
@@ -178,7 +178,7 @@ void* find_section_key() {
     if (!key_data)
         abort("  FIRM Section key not found!\n");
 
-    fprintf(stderr, "  FIRM Section key at %lx in FIRM\n", (uint32_t)key_data - (uint32_t)key_loc);
+    fprintf(stderr, "  FIRM Section key at %u in FIRM\n", (uint32_t)key_data - (uint32_t)key_loc);
 
     return key_data;
 }

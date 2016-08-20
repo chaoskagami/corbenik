@@ -190,7 +190,7 @@ void set_font(const char* filename) {
         abort("Invalid font file: w/h is 0 - not loaded\n");
     }
 
-    unsigned int c_font_w = (new_w / 8) + (new_w % 8 ? 1 : 0);
+    unsigned int c_font_w = (new_w / 8) + ((new_w % 8) ? 1 : 0);
 
 	font_data = malloc(c_font_w * new_h * (256 - ' '));
 
@@ -307,7 +307,7 @@ draw_character(uint8_t *screen, const unsigned int character, unsigned int ch_x,
     if (x >= width || y >= height)
         return; // OOB
 
-    unsigned int c_font_w = (font_w / 8) + (font_w % 8 ? 1 : 0);
+    unsigned int c_font_w = (font_w / 8) + ((font_w % 8) ? 1 : 0);
 
     for (unsigned int yy = 0; yy < font_h; yy++) {
         unsigned int xDisplacement   = (x * SCREEN_DEPTH * height);

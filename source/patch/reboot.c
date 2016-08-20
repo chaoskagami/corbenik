@@ -26,13 +26,13 @@ patch_reboot()
     uint8_t *process9Offset =
         getProcess9((uint8_t *)firm_loc + firm_loc->section[2].offset + 0x15000, firm_loc->section[2].size - 0x15000, &process9Size, &process9MemAddr);
 
-    fprintf(stderr, "reboot: proc9 mem @ %lx\n", (uint32_t)process9MemAddr);
+    fprintf(stderr, "reboot: proc9 mem @ %u\n", (uint32_t)process9MemAddr);
 
     wait();
 
     uint8_t *off = memfind(process9Offset, process9Size, pattern, 4) - 0x10;
 
-    fprintf(stderr, "reboot: firmlaunch @ %lx\n", (uint32_t)off);
+    fprintf(stderr, "reboot: firmlaunch @ %u\n", (uint32_t)off);
 
     // Firmlaunch function offset - offset in BLX opcode (A4-16 - ARM DDI 0100E) + 1
     uint32_t fOpenOffset = (uint32_t)(off + 9 - (-((*(uint32_t *)off & 0x00FFFFFF) << 2) & (0xFFFFFF << 2)) - (uint32_t)process9Offset + process9MemAddr);
@@ -64,9 +64,9 @@ patch_reboot()
     if (!pos_native && !pos_twl && !pos_agb)
         abort("reboot: missing string placeholder?\n");
 
-    fprintf(stderr, "reboot: NATF @ %lx\n", (uint32_t)pos_native);
-    fprintf(stderr, "reboot: TWLF @ %lx\n", (uint32_t)pos_twl);
-    fprintf(stderr, "reboot: AGBF @ %lx\n", (uint32_t)pos_agb);
+    fprintf(stderr, "reboot: NATF @ %u\n", (uint32_t)pos_native);
+    fprintf(stderr, "reboot: TWLF @ %u\n", (uint32_t)pos_twl);
+    fprintf(stderr, "reboot: AGBF @ %u\n", (uint32_t)pos_agb);
 
     uint8_t *mem = (uint8_t *)0x01FF8000; // 0x8000 space that will be resident. This is AXI WRAM. We have about 0x3700 bytes here.
     // According to 3dbrew, this space's props from userland:
@@ -102,7 +102,7 @@ patch_reboot()
     uint32_t *pos_rebc = (uint32_t *)memfind(off, size, "rebc", 4);
     *pos_rebc = (uint32_t)mem;
 
-    fprintf(stderr, "reboot: rebc @ %lx\n", (uint32_t)pos_rebc);
+    fprintf(stderr, "reboot: rebc @ %u\n", (uint32_t)pos_rebc);
 
     f = fopen(PATH_REBOOT_CODE, "r");
     if (!f)

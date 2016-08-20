@@ -101,8 +101,9 @@ fopen(const char *filename, const char *mode)
 
     fp->mode = (mode[0] == 'r' ? FA_READ : (FA_WRITE | FA_OPEN_ALWAYS));
 
-    if (f_open(&(fp->handle), filename, fp->mode))
-        return NULL;
+    if (f_open(&(fp->handle), filename, fp->mode)) {
+       free(fp);
+       return NULL; }
 
     fp->is_open = 1;
 

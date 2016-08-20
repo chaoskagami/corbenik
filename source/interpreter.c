@@ -546,13 +546,13 @@ exec_bytecode(uint8_t *bytecode, uint32_t len, uint8_t* stack, uint32_t stack_si
 #ifndef LOADER
                 // Panic; not proper opcode.
                 fprintf(stderr, "Invalid opcode. State:\n"
-                                "  Relative:  %lu\n"
-                                "    Actual:  %lx:%lu\n"
-                                "  Memory:    %lx\n"
-                                "    Actual:  %lx\n"
-                                "  Code Loc:  %lx\n"
-                                "    Actual:  %lx\n"
-                                "  Opcode:    %hhu\n",
+                                "  Relative:  %u\n"
+                                "    Actual:  %u:%u\n"
+                                "  Memory:    %u\n"
+                                "    Actual:  %u\n"
+                                "  Code Loc:  %u\n"
+                                "    Actual:  %u\n"
+                                "  Opcode:    %u\n",
                         (uint32_t)set_mode,
                         (uint32_t)current_mode->memory,
                         (uint32_t)current_mode->size,
@@ -575,7 +575,7 @@ exec_bytecode(uint8_t *bytecode, uint32_t len, uint8_t* stack, uint32_t stack_si
 
 #ifndef LOADER
         if (debug) {
-            fprintf(stderr, "l:%d g:%d e:%d f:%d m:%lu o:0x%lx\nc:0x%lx m:0x%lx n:%lx\n",
+            fprintf(stderr, "l:%d g:%d e:%d f:%d m:%lu o:0x%u\nc:0x%u m:0x%u n:%u\n",
                 lt, gt, eq, found,
                 set_mode,
                 (uint32_t)offset, (uint32_t)(code - bytecode), (uint32_t)(current_mode->memory + offset), (uint32_t)code);

@@ -35,7 +35,7 @@ patch_services()
         uint32_t size = fsize(data);
 
         fprintf(stderr, "Svc: backdoor is %lu bytes\n", size);
-        fprintf(stderr, "Svc: Read code to %lx\n", (uint32_t)svc_tab_open);
+        fprintf(stderr, "Svc: Read code to %u\n", (uint32_t)svc_tab_open);
 
         fread(svc_tab_open, 1, size, data);
 

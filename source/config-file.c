@@ -112,6 +112,7 @@ load_config()
         config = (struct config_file*)malloc(sizeof(struct config_file) + FCRAM_SPACING / 2);
         memset(config, 0, sizeof(struct config_file) + FCRAM_SPACING / 2);
         enable_list = (uint8_t*)config + sizeof(struct config_file);
+        fclose(f);
     }
 
     // Zero on success.

@@ -673,7 +673,7 @@ execb(char *filename, int build_cache)
 
     uint32_t len = fsize(f);
 
-	uint8_t* patch_loc = malloc(len);
+    uint8_t* patch_loc = malloc(len);
 
     fread(patch_loc, 1, len, f);
     fclose(f);

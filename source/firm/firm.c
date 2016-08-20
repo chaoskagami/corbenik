@@ -61,7 +61,7 @@ void dump_firm(firm_h** buffer, uint8_t index) {
 
     use_aeskey(0x06);
     set_ctr(ctr);
-	ctr_decrypt(firm, firm, firm_b_size / AES_BLOCK_SIZE, AES_CNT_CTRNAND_MODE, ctr);
+    ctr_decrypt(firm, firm, firm_b_size / AES_BLOCK_SIZE, AES_CNT_CTRNAND_MODE, ctr);
 
     if (memcmp((char*) & firm->magic, "FIRM", 4))
         abort("  Decryption failed on FIRM.\n");
@@ -186,33 +186,33 @@ void* find_section_key() {
 int
 decrypt_cetk_key(void *key, const void *cetk)
 {
-	static int got_cetk = 0;
-	uint8_t iv[AES_BLOCK_SIZE] = { 0 };
-	uint32_t sigtype = __builtin_bswap32(*(const uint32_t *)cetk);
+    static int got_cetk = 0;
+    uint8_t iv[AES_BLOCK_SIZE] = { 0 };
+    uint32_t sigtype = __builtin_bswap32(*(const uint32_t *)cetk);
 
-	if (sigtype != SIG_TYPE_RSA2048_SHA256)
-		return 1;
+    if (sigtype != SIG_TYPE_RSA2048_SHA256)
+        return 1;
 
-	const ticket_h *ticket = (const ticket_h *)((const uint8_t*)cetk + sizeof(sigtype) + 0x13C);
-	if (ticket->ticketCommonKeyYIndex != 1)
-		return 1;
+    const ticket_h *ticket = (const ticket_h *)((const uint8_t*)cetk + sizeof(sigtype) + 0x13C);
+    if (ticket->ticketCommonKeyYIndex != 1)
+        return 1;
 
-	if (got_cetk == 0) {
-		fprintf(stderr, "  Retrieving 0x3D KeyY...\n");
-		extract_slot0x3DkeyY();
-		got_cetk = 1;
-	}
+    if (got_cetk == 0) {
+        fprintf(stderr, "  Retrieving 0x3D KeyY...\n");
+        extract_slot0x3DkeyY();
+        got_cetk = 1;
+    }
 
-	use_aeskey(0x3D);
+    use_aeskey(0x3D);
 
-	memcpy(iv,  ticket->titleID,  sizeof(ticket->titleID));
-	memcpy(key, ticket->titleKey, sizeof(ticket->titleKey));
+    memcpy(iv,  ticket->titleID,  sizeof(ticket->titleID));
+    memcpy(key, ticket->titleKey, sizeof(ticket->titleKey));
 
-	cbc_decrypt(key, key, 1, AES_CNT_TITLEKEY_DECRYPT_MODE, iv);
+    cbc_decrypt(key, key, 1, AES_CNT_TITLEKEY_DECRYPT_MODE, iv);
 
-	fprintf(stderr, "  Extracted titlekey from cetk.\n");
+    fprintf(stderr, "  Extracted titlekey from cetk.\n");
 
-	return 0;
+    return 0;
 }
 
 int
@@ -507,7 +507,7 @@ load_firms()
 
     fprintf(stderr, "FIRM load triggered.\n");
 
-	firm_loc = malloc(firm_size);
+    firm_loc = malloc(firm_size);
 
     fprintf(stderr, "Loading NATIVE_FIRM\n");
     if (load_firm(firm_loc, PATH_NATIVE_F, PATH_NATIVE_FIRMKEY, PATH_NATIVE_CETK, &firm_size, NATIVE_FIRM_TITLEID) != 0) {
@@ -516,7 +516,7 @@ load_firms()
     find_proc9(firm_loc, &firm_proc9, &firm_p9_exefs);
     fprintf(stderr, "  Ver: %x, %u\n", get_firm_info(firm_loc)->version, get_firm_info(firm_loc)->console );
 
-	twl_firm_loc = malloc(twl_firm_size);
+    twl_firm_loc = malloc(twl_firm_size);
 
     fprintf(stderr, "TWL_FIRM\n");
     if (load_firm(twl_firm_loc, PATH_TWL_F, PATH_TWL_FIRMKEY, PATH_TWL_CETK, &twl_firm_size, TWL_FIRM_TITLEID) != 0) {
@@ -527,7 +527,7 @@ load_firms()
         fprintf(stderr, "  Ver: %x, %u\n", get_firm_info(twl_firm_loc)->version, get_firm_info(twl_firm_loc)->console );
     }
 
-	agb_firm_loc = malloc(agb_firm_size);
+    agb_firm_loc = malloc(agb_firm_size);
 
     fprintf(stderr, "AGB_FIRM\n");
     if (load_firm(agb_firm_loc, PATH_AGB_F, PATH_AGB_FIRMKEY, PATH_AGB_CETK, &agb_firm_size, AGB_FIRM_TITLEID) != 0) {

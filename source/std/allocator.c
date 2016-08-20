@@ -55,7 +55,7 @@ void* malloc(size_t size) {
 }
 
 void free(void* ptr) {
-	if (ptr == NULL) return;
+    if (ptr == NULL) return;
 
     free_block* block = (free_block*)(((char*)ptr) - sizeof(free_block ));
     block->next = free_block_list_head.next;

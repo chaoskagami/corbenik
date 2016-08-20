@@ -70,7 +70,7 @@ void chainload_file(char* chain_file_data)
     // Copy CakeHax struct where it is expected (at 0x23FFFE00)
     // It's very very likely we'll corrupt memory with this, but we aren't coming back anyways as of the
     // next call, so not my problem
-	memcpy((void*)0x23FFFE00, framebuffers, sizeof(struct framebuffers));
+    memcpy((void*)0x23FFFE00, framebuffers, sizeof(struct framebuffers));
 
     ((void(*)(void*, uint32_t))0x24F00000)(chain_data, size + 256 + 8); // Size of payload + argv.
 
@@ -128,10 +128,10 @@ list_chain_build(char *name)
 }
 
 void chainload_menu() {
-	if (chains == NULL) {
-		chains = malloc(sizeof(struct options_s) * 100);
-	    list_chain_build(PATH_CHAINS);
-	}
+    if (chains == NULL) {
+        chains = malloc(sizeof(struct options_s) * 100);
+        list_chain_build(PATH_CHAINS);
+    }
 
     show_menu(chains, NULL);
 }

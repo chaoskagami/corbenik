@@ -247,7 +247,7 @@ static struct options_s config_opts[] = {
 };
 
 void config_main_menu() {
-	show_menu(config_opts, NULL);
+    show_menu(config_opts, NULL);
 
     save_config(); // Save config when exiting.
 

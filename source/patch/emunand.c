@@ -10,7 +10,7 @@ verify_emunand(uint32_t index, uint32_t *off, uint32_t *head)
 {
     uint32_t nandSize = getMMCDevice(0)->total_size;
 
-	uint8_t *emunand_temp = (uint8_t*)malloc(2048);
+    uint8_t *emunand_temp = (uint8_t*)malloc(2048);
 
     uint32_t offset;
     if (nandSize > 0x200000)

@@ -150,7 +150,7 @@ save_config()
     f_unlink(config_file_path);
 
     if (!(conf_handle = fopen(config_file_path, "w")))
-		while(1);
+        while(1);
 
     fwrite(config, 1, sizeof(struct config_file) + FCRAM_SPACING / 2, conf_handle);
 

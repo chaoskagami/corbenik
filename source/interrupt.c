@@ -3,7 +3,7 @@
 #include <ctr9/ctr_irq.h>
 
 void dump_state_printf(uint32_t* regs) {
-	fprintf(stderr, "  cpsr:%x sp:%x lr:%x\n"
+    fprintf(stderr, "  cpsr:%x sp:%x lr:%x\n"
                     "  r0:%x r1:%x r2:%x r3:%x\n"
                     "  r4:%x r5:%x r6:%x r7:%x\n"
                     "  r8:%x r9:%x r10:%x r11:%x\n"
@@ -16,38 +16,38 @@ void dump_state_printf(uint32_t* regs) {
 }
 
 void reset_INT(_UNUSED uint32_t* regs) {
-	fprintf(stderr, "Reset called.\n");
+    fprintf(stderr, "Reset called.\n");
 }
 
 void undef_INT(uint32_t* regs) {
-	fprintf(stderr, "Undefined instruction.\n");
-	dump_state_printf(regs);
-	abort("Cannot continue. Halting.\n");
+    fprintf(stderr, "Undefined instruction.\n");
+    dump_state_printf(regs);
+    abort("Cannot continue. Halting.\n");
 }
 
 void swi_INT(_UNUSED uint32_t* regs) {
-	fprintf(stderr, "SWI called. Returning.\n");
+    fprintf(stderr, "SWI called. Returning.\n");
 }
 
 void preabrt_INT(uint32_t* regs) {
-	fprintf(stderr, "Prefetch Abort.\n");
-	dump_state_printf(regs);
-	abort("Cannot continue. Halting.\n");
+    fprintf(stderr, "Prefetch Abort.\n");
+    dump_state_printf(regs);
+    abort("Cannot continue. Halting.\n");
 }
 
 void databrt_INT(uint32_t* regs) {
-	fprintf(stderr, "Data abort.\n");
-	dump_state_printf(regs);
-	abort("Cannot continue. Halting.\n");
+    fprintf(stderr, "Data abort.\n");
+    dump_state_printf(regs);
+    abort("Cannot continue. Halting.\n");
 }
 
 void fiq_INT(_UNUSED uint32_t* regs) {
-	fprintf(stderr, "FIQ called. Returning.\n");
+    fprintf(stderr, "FIQ called. Returning.\n");
 }
 
 
 void install_interrupts() {
-	ctr_interrupt_prepare();
+    ctr_interrupt_prepare();
     ctr_irq_initialize();
 
     ctr_interrupt_set(CTR_INTERRUPT_RESET,   reset_INT);

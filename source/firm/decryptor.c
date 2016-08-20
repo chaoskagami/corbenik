@@ -38,7 +38,7 @@ ncch_getctr(const ncch_h *ncch, uint8_t *ctr, uint8_t type)
 void
 sha256sum(void* sum, void* data, uint32_t size)
 {
-	sha_init(SHA256_MODE);
+    sha_init(SHA256_MODE);
     sha_update(data, size);
     sha_get(sum);
 }

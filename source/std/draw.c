@@ -36,11 +36,11 @@ uint8_t* font_data = NULL;
 static uint8_t alphamap[256] = {0};
 
 void std_init() {
-	for(uint16_t i=0; i < 0x100; i++) {
-		alphamap[i] = 0;
-		if (i > 0x7F)
-			alphamap[i] = i - 0x7F;
-	}
+    for(uint16_t i=0; i < 0x100; i++) {
+        alphamap[i] = 0;
+        if (i > 0x7F)
+            alphamap[i] = i - 0x7F;
+    }
 
     top_bg     = malloc(TOP_SIZE);
     bottom_bg  = malloc(BOTTOM_SIZE);
@@ -192,7 +192,7 @@ void set_font(const char* filename) {
 
     unsigned int c_font_w = (new_w / 8) + (new_w % 8 ? 1 : 0);
 
-	font_data = malloc(c_font_w * new_h * (256 - ' '));
+    font_data = malloc(c_font_w * new_h * (256 - ' '));
 
     fread(font_data, 1, c_font_w * new_h * (256 - ' '), f); // Skip non-printing chars.
 
@@ -381,81 +381,81 @@ int stdout_val   = 0,    stderr_val   = 0;
 int
 ansi_statemach(void* buf, const int c)
 {
-	int* state = NULL, *val = NULL;
+    int* state = NULL, *val = NULL;
     uint8_t *color = NULL;
 
     uint8_t color_tmp = 0;
 
     if (buf == stdout) {
         color = &color_top;
-	    state = &stdout_state;
-	    val = &stdout_val;
+        state = &stdout_state;
+        val = &stdout_val;
     } else if (buf == stderr) {
         color = &color_bottom;
-	    state = &stderr_state;
-	    val = &stderr_val;
+        state = &stderr_state;
+        val = &stderr_val;
     } else {
         return 0;
     }
 
-	switch(*state) {
-		case TEXT:
-			if (c == '\x1b') {
-				*state = ANSI_NEXT;
-				return 1;
-			}
-			return 0;
-		case ANSI_NEXT:
-			if (c == '[') {
-				*state = ANSI_PARSE;
-				*val = 0;
-				return 1;
-			}
-			// INVALID; this is a bad ansi sequence. Term early.
-			*state = TEXT;
-			return 0;
-		case ANSI_END:
-			if (c == ';') {
-				*state = ANSI_PARSE; // Another code coming up.
-			} else if(c >= 0x40 && c <= 0x7E) {
-				*state = TEXT;
-			}
+    switch(*state) {
+        case TEXT:
+            if (c == '\x1b') {
+                *state = ANSI_NEXT;
+                return 1;
+            }
+            return 0;
+        case ANSI_NEXT:
+            if (c == '[') {
+                *state = ANSI_PARSE;
+                *val = 0;
+                return 1;
+            }
+            // INVALID; this is a bad ansi sequence. Term early.
+            *state = TEXT;
+            return 0;
+        case ANSI_END:
+            if (c == ';') {
+                *state = ANSI_PARSE; // Another code coming up.
+            } else if(c >= 0x40 && c <= 0x7E) {
+                *state = TEXT;
+            }
 
-			return 1;
-		case ANSI_PARSE:
-			if (c >= '0' && c <= '9') {
-				*val *= 10;
-				*val += (c - '0');
+            return 1;
+        case ANSI_PARSE:
+            if (c >= '0' && c <= '9') {
+                *val *= 10;
+                *val += (c - '0');
 
-				*state = ANSI_PARSE;
+                *state = ANSI_PARSE;
 
-				if (*val == 0) {
-					// Reset formatting.
-					*color = 0xf0;
-					*state = ANSI_END;
-				}
+                if (*val == 0) {
+                    // Reset formatting.
+                    *color = 0xf0;
+                    *state = ANSI_END;
+                }
 
-				if (*val >= 10) {
-					switch(*val / 10) {
-						case 3: // Foreground color
-		                    *color &= 0x0f; // Remove fg color.
-		                    *color |= ((*val % 30) & 0xf) << 4;
+                if (*val >= 10) {
+                    switch(*val / 10) {
+                        case 3: // Foreground color
+                            *color &= 0x0f; // Remove fg color.
+                            *color |= ((*val % 30) & 0xf) << 4;
                             break;
-						case 4: // Background color
-		                    *color &= 0xf0; // Remove bg color.
-		                    *color |= ((*val % 40) & 0xf);
+                        case 4: // Background color
+                            *color &= 0xf0; // Remove bg color.
+                            *color |= ((*val % 40) & 0xf);
                             break;
                         default: // ???
                             break;
-					}
-					*state = ANSI_END;
-				}
-			}
-			return 1;
+                    }
+                    *state = ANSI_END;
+                }
+            }
+            return 1;
         default:
             *state = TEXT;
             return 1;
-	}
+    }
 
     return 0; // Should not be reached.
 }
@@ -463,8 +463,8 @@ ansi_statemach(void* buf, const int c)
 void
 putc(void *buf, int c)
 {
-	if(ansi_statemach(buf, c) == 1) // Inside ANSI escape?
-		return;
+    if(ansi_statemach(buf, c) == 1) // Inside ANSI escape?
+        return;
 
     if (buf == stdout || buf == stderr) {
         if (kill_output)

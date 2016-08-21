@@ -2,6 +2,8 @@
 
 /* Not possible to be implemented as bytecode. Hey, can't win em all. */
 
+firm_h* firm_modules;
+
 void
 inject_module(char* fpath)
 {
@@ -25,10 +27,10 @@ inject_module(char* fpath)
     fclose(f);
 
     int section_index = 0;
-    firm_section_h *sysmodule_section = &firm_loc->section[0];
+    firm_section_h *sysmodule_section = &firm_modules->section[0];
 
     ncch_h *module = (ncch_h *)temp;
-    ncch_h *sysmodule = (ncch_h *)((uint32_t)firm_loc + sysmodule_section->offset);
+    ncch_h *sysmodule = (ncch_h *)((uint32_t)firm_modules + sysmodule_section->offset);
 
     // Check if we want to replace an existing sysmodule
     while (sysmodule->magic == NCCH_MAGIC) {
@@ -38,13 +40,13 @@ inject_module(char* fpath)
                 uint32_t need_units = (module->contentSize - sysmodule->contentSize);
 
                 memmove((uint8_t *)sysmodule + module->contentSize * 0x200, (uint8_t *)sysmodule + sysmodule->contentSize * 0x200,
-                        ((uint32_t)firm_loc + firm_size) - ((uint32_t)sysmodule + (module->contentSize * 0x200)));
+                        ((uint32_t)firm_modules + firm_size) - ((uint32_t)sysmodule + (module->contentSize * 0x200)));
 
                 sysmodule_section->size += 0x200 * need_units;
                 for (int i = 1; i < 4; i++) {
-                    if (firm_loc->section[i].size != 0) { // The last section (3) is usually empty.
-                        firm_loc->section[i].offset += 0x200 * need_units;
-                        firm_loc->section[i].size += 0x200 * need_units;
+                    if (firm_modules->section[i].size != 0) { // The last section (3) is usually empty.
+                        firm_modules->section[i].offset += 0x200 * need_units;
+                        firm_modules->section[i].size += 0x200 * need_units;
                     }
                 }
 
@@ -56,7 +58,7 @@ inject_module(char* fpath)
                 // NOTE - This doesn't change the sysmodule section size; it isn't needed to do so.
                 fprintf(stderr, "Module: Shrink %lu units\n", sysmodule->contentSize - module->contentSize);
                 uint32_t remaining_size =
-                    sysmodule_section->size - (((uint32_t)sysmodule + sysmodule->contentSize * 0x200) - ((uint32_t)firm_loc + sysmodule_section->offset));
+                    sysmodule_section->size - (((uint32_t)sysmodule + sysmodule->contentSize * 0x200) - ((uint32_t)firm_modules + sysmodule_section->offset));
                 // Sysmodule section size - (End location of this sysmodule -
                 // Sysmodule section) =>
                 memmove((uint8_t *)sysmodule + module->contentSize * 0x200, (uint8_t *)sysmodule + sysmodule->contentSize * 0x200, remaining_size);
@@ -84,7 +86,13 @@ end_inj:
 int
 patch_modules()
 {
-    recurse_call(PATH_MODULES, inject_module);
+    firm_modules = firm_loc;
+    recurse_call(PATH_MODULE_NATIVE, inject_module);
+    firm_modules = twl_firm_loc;
+    recurse_call(PATH_MODULE_TWL, inject_module);
+    firm_modules = agb_firm_loc;
+    recurse_call(PATH_MODULE_AGB, inject_module);
 
     return 0;
 }
+

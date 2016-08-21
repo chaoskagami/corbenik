@@ -21,6 +21,11 @@
 // TODO - We also need to handle patches for internal system modules here, performing lzss decompression (and either recompression, or getting a patch to skip that if needed
 
 #define PATH_MODULES         LIBDIR "/module"        ///< Sysmodule location
+
+#define PATH_MODULE_NATIVE   PATH_MODULES "/native"     ///< Native FIRM Sysmodule location
+#define PATH_MODULE_AGB      PATH_MODULES "/agb"        ///< AGB FIRM Sysmodule location
+#define PATH_MODULE_TWL      PATH_MODULES "/twl"        ///< TWL FIRM Sysmodule location
+
 #define PATH_PATCHES         SBINDIR                 ///< Patch binary folder.
 
 #define PATH_BITS            LIBEXECDIR              ///< Path to misc bits we need (emunand code, reboot code, etc)

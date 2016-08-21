@@ -9,6 +9,9 @@ all-local:
 	mkdir -p out
 	mkdir -p out@prefix@
 	mkdir -p out@libdir@/module
+	mkdir -p out@libdir@/module/native
+	mkdir -p out@libdir@/module/twl
+	mkdir -p out@libdir@/module/agb
 	mkdir -p out@libdir@/firmware
 	mkdir -p out@datarootdir@/keys
 	mkdir -p out@datarootdir@/locale/emu
@@ -19,7 +22,7 @@ all-local:
 	mkdir -p out@sysconfdir@
 	mkdir -p out@localstatedir@
 	cp source/corbenik.bin out/arm9loaderhax.bin
-	cp external/loader/loader.cxi out@libdir@/module/loader.cxi
+	cp external/loader/loader.cxi out@libdir@/module/native/loader.cxi
 	cp external/bits/*.bin out@libexecdir@/
 	cp host/termfont.bin out@datarootdir@/
 	cp patch/*.vco out@sbindir@

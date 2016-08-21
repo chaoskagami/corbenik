@@ -56,7 +56,6 @@
       }
 #else
   #define log(a) fprintf(stderr, a)
-  int wait();
 #endif
 
 struct mode

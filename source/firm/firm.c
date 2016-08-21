@@ -409,8 +409,6 @@ load_firm(firm_h *dest, char *path, char *path_firmkey, char *path_cetk, uint32_
     return 0;
 }
 
-extern void wait();
-
 __attribute__ ((noreturn))
 void
 boot_firm()
@@ -438,6 +436,14 @@ boot_firm()
 
         fprintf(stderr, "Updated keyX keyslots.\n");
     }
+
+#ifdef MALLOC_DEBUG
+    print_alloc_stats();
+    wait();
+#endif
+
+    // Beyond this point, using malloc() memory is unsafe, since we're trashing memory possibly.
+    // free() is also irrelevant from here on.
 
     for (firm_section_h *section = firm_loc->section; section < firm_loc->section + 4 && section->address != 0; section++) {
         memcpy((void *)section->address, (void *)((uint8_t*)firm_loc + section->offset), section->size);

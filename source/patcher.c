@@ -13,16 +13,6 @@ extern uint8_t *enable_list;
 
 extern struct options_s* patches;
 
-void
-wait()
-{
-    if (config->options[OPTION_TRACE] && !doing_autoboot) {
-        fprintf(stderr, "[Waiting...]");
-        wait_key(0); // No delay on traces.
-    }
-    fprintf(stderr, "            \r");
-}
-
 void list_patches_build(char *name, int desc_is_fname);
 
 void

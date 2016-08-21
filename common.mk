@@ -14,7 +14,7 @@ AM_CFLAGS= -std=gnu11 -Os -g -ffast-math \
 	-Wundef -Wno-unused -Werror -Wno-error=cast-align -Wno-error=strict-overflow -Wno-error=pedantic \
 	$(THUMBFLAGS) $(SIZE_OPTIMIZATION) $(INCPATHS) $(C9FLAGS) \
 	-fno-builtin -std=gnu11 -DREVISION=\"$(REVISION)\" \
-	-DFW_NAME=\"corbenik\" $(PATHARGS)
+	-DFW_NAME=\"corbenik\" $(PATHARGS) -DMALLOC_DEBUG=1
 
 
 AM_LDFLAGS=-Wl,--use-blx,--pic-veneer,-q -nostdlib -nodefaultlibs -Wl,-z,defs -lgcc \

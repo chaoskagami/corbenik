@@ -10,4 +10,9 @@
  */
 uint32_t wait_key(_UNUSED int sleep);
 
+/* Displays a prompt on the bottom screen if the relevant option is enabled and waits on input
+ * to continue.
+ */
+void wait();
+
 #endif

@@ -4,8 +4,6 @@
 #include <common.h>
 #include <ctr9/io.h>
 
-int wait();
-
 uint8_t*
 getProcess9(uint8_t *pos, uint32_t size, uint32_t *process9Size, uint32_t *process9MemAddr)
 {

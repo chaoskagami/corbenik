@@ -26,38 +26,104 @@ void* sbrk(size_t incr) {
 
 typedef struct free_block {
     size_t size;
+#ifdef MALLOC_DEBUG
+    char* info;
+#endif
     struct free_block* next;
 } free_block;
 
-static free_block free_block_list_head = { 0, 0 };
+static free_block free_block_list_head = {
+    0,
+#ifdef MALLOC_DEBUG
+    NULL,
+#endif
+    0
+};
 
 // static const size_t overhead = sizeof(size_t);
 
 static const size_t align_to = 16;
 
+#ifdef MALLOC_DEBUG
+static size_t alloc_count      = 0;
+static size_t free_count       = 0;
+static size_t allocated_memory = 0;
+#endif
+
+#ifdef MALLOC_DEBUG
+void* malloc_chkd(size_t size, char* info) {
+#else
 void* malloc(size_t size) {
-    size = (size + sizeof(free_block) + (align_to - 1)) & ~ (align_to - 1);
+#endif
+    size_t bsize = (size + sizeof(free_block) + (align_to - 1)) & ~ (align_to - 1);
+
     free_block* block = free_block_list_head.next;
     free_block** head = &(free_block_list_head.next);
+
     while (block != 0) {
-        if (block->size >= size) {
+        if (block->size >= bsize) {
             *head = block->next;
+
+#ifdef MALLOC_DEBUG
+            block->info = info;
+
+            ++alloc_count;
+            allocated_memory += block->size;
+#endif
+
             return ((char*)block) + sizeof(free_block);
         }
         head = &(block->next);
         block = block->next;
     }
 
-    block = (free_block*)sbrk(size);
-    block->size = size;
+    block = (free_block*)sbrk(bsize);
+    block->size = bsize;
+
+#ifdef MALLOC_DEBUG
+    block->info = info;
+
+    ++alloc_count;
+    allocated_memory += bsize;
+#endif
 
     return ((char*)block) + sizeof(free_block);
 }
 
+void* malloc_zero(size_t size) {
+    void* ret = malloc(size);
+
+    if (ret)
+        memset(ret, 0, size);
+
+    return ret;
+}
+
+#ifdef MALLOC_DEBUG
+void free_chkd(void* ptr, char* info) {
+#else
 void free(void* ptr) {
+#endif
     if (ptr == NULL) return;
 
     free_block* block = (free_block*)(((char*)ptr) - sizeof(free_block ));
+
+#ifdef MALLOC_DEBUG
+    ++free_count;
+    if (allocated_memory < block->size) {
+        fprintf(stderr, "%s: Invalid free detected.\n"
+                        "  Allocated at: %s\n",
+                        info, block->info);
+    }
+    allocated_memory -= block->size;
+#endif
+
     block->next = free_block_list_head.next;
     free_block_list_head.next = block;
 }
+
+#ifdef MALLOC_DEBUG
+void print_alloc_stats() {
+	fprintf(stderr, "[A] %u [F] %u [M] %u [B] %lu\n", alloc_count, free_count, allocated_memory, (uint32_t)heap_end - (uint32_t)&__end__);
+}
+#endif

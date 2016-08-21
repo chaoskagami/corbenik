@@ -38,3 +38,15 @@ wait_key(_UNUSED int sleep)
     return ret;
 }
 
+extern int doing_autoboot;
+
+void
+wait()
+{
+    if (config->options[OPTION_TRACE] && !doing_autoboot) {
+        fprintf(stderr, "[Waiting...]");
+        wait_key(0); // No delay on traces.
+    }
+    fprintf(stderr, "\r            \r");
+}
+

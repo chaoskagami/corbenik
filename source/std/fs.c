@@ -104,7 +104,7 @@ fopen(const char *filename, const char *mode)
     if (f_open(&(fp->handle), filename, fp->mode)) {
         free(fp);
         return NULL;
-      }
+    }
 
     fp->is_open = 1;
 
@@ -114,7 +114,7 @@ fopen(const char *filename, const char *mode)
 void
 fclose(FILE *fp)
 {
-    if (!fp->is_open)
+    if (fp == NULL || !fp->is_open)
         return;
 
     f_close(&(fp->handle));
@@ -127,7 +127,7 @@ fclose(FILE *fp)
 void
 fseek(FILE *fp, int64_t offset, int whence)
 {
-    if (!fp->is_open)
+    if (fp == NULL || !fp->is_open)
         return;
 
     uint32_t fixed_offset;
@@ -151,7 +151,7 @@ fseek(FILE *fp, int64_t offset, int whence)
 size_t
 ftell(FILE *fp)
 {
-    if (!fp->is_open)
+    if (fp == NULL || !fp->is_open)
         return 0;
 
     return f_tell(&(fp->handle));
@@ -160,7 +160,7 @@ ftell(FILE *fp)
 int
 feof(FILE *fp)
 {
-    if (!fp->is_open)
+    if (fp == NULL || !fp->is_open)
         return 0;
 
     return f_eof(&(fp->handle));
@@ -169,7 +169,7 @@ feof(FILE *fp)
 size_t
 fsize(FILE *fp)
 {
-    if (!fp->is_open)
+    if (fp == NULL || !fp->is_open)
         return 0;
 
     return f_size(&(fp->handle));
@@ -178,7 +178,7 @@ fsize(FILE *fp)
 size_t
 fwrite(const void *buffer, size_t elementSize, size_t elementCnt, FILE *fp)
 {
-    if (!fp->is_open)
+    if (fp == NULL || !fp->is_open)
         return 0;
 
     UINT br;
@@ -209,8 +209,13 @@ write_file(void *data, char *path, size_t size)
 {
     FILE *temp = fopen(path, "w");
 
-    if (!temp || !temp->is_open)
+    if (!temp)
         return 0;
+
+    if (!temp->is_open) {
+        fclose(temp);
+        return 0;
+    }
 
     size_t wrote = fwrite(data, 1, size, temp);
 
@@ -224,8 +229,13 @@ read_file(void *data, char *path, size_t size)
 {
     FILE *temp = fopen(path, "r");
 
-    if (!temp || !temp->is_open)
+    if (!temp)
         return 0;
+
+    if (!temp->is_open) {
+        fclose(temp);
+        return 0;
+    }
 
     size_t read = fread(data, 1, size, temp);
 

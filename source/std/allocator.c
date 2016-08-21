@@ -26,6 +26,7 @@ void* sbrk(size_t incr) {
 
 typedef struct free_block {
     size_t size;
+    size_t real_size;
 #ifdef MALLOC_DEBUG
     char* info;
 #endif
@@ -34,15 +35,14 @@ typedef struct free_block {
 
 static free_block free_block_list_head = {
     0,
+    0,
 #ifdef MALLOC_DEBUG
     NULL,
 #endif
     0
 };
 
-// static const size_t overhead = sizeof(size_t);
-
-static const size_t align_to = 16;
+static const size_t align_to = 64;
 
 #ifdef MALLOC_DEBUG
 static size_t alloc_count      = 0;
@@ -64,6 +64,7 @@ void* malloc(size_t size) {
         if (block->size >= bsize) {
             *head = block->next;
 
+            block->real_size = size;
 #ifdef MALLOC_DEBUG
             block->info = info;
 
@@ -79,6 +80,7 @@ void* malloc(size_t size) {
 
     block = (free_block*)sbrk(bsize);
     block->size = bsize;
+    block->real_size = size;
 
 #ifdef MALLOC_DEBUG
     block->info = info;
@@ -127,3 +129,21 @@ void print_alloc_stats() {
 	fprintf(stderr, "[A] %u [F] %u [M] %u [B] %lu\n", alloc_count, free_count, allocated_memory, (uint32_t)heap_end - (uint32_t)&__end__);
 }
 #endif
+
+void *realloc(void* ptr, size_t size) {
+    if (ptr == NULL)
+        return malloc(size);
+
+    free_block* current = (free_block*)(((char*)ptr) - sizeof(free_block));
+
+    if (size < current->size || size < current->real_size)
+        return ptr;
+
+    void* new_ptr = malloc(size);
+
+    memcpy(new_ptr, ptr, current->real_size);
+
+    free(ptr);
+
+    return new_ptr;
+}

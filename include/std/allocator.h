@@ -51,6 +51,13 @@ void *malloc   (size_t size);
  */
 void  free     (void* ptr);
 
+/* Reallocates memory to size. Guaranteed to preserve the original data.
+ *
+ * \param ptr Pointer to reallocate
+ * \param size Size to reallocate as
+ */
+void *realloc(void* ptr, size_t size);
+
 #endif
 
 #endif

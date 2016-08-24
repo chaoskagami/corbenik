@@ -39,6 +39,8 @@ inject_module(char* fpath)
             if (module->contentSize > sysmodule->contentSize) {
                 uint32_t need_units = (module->contentSize - sysmodule->contentSize);
 
+                // FIXME - We're potentially corrupting memory here depending on whether we go over the theoretical maximum size of FIRM
+
                 memmove((uint8_t *)sysmodule + module->contentSize * 0x200, (uint8_t *)sysmodule + sysmodule->contentSize * 0x200,
                         ((uint32_t)firm_modules + firm_size) - ((uint32_t)sysmodule + (module->contentSize * 0x200)));
 

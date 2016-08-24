@@ -90,19 +90,23 @@ show_menu(struct options_s *options, uint8_t *toggles)
         else
             header("A:Enter B:Back DPAD:Nav Select:Info");
 
-
-        for (int i = window_top; options[i].index != -1; ++i) { // -1 Sentinel.
-            if (i > window_bottom)
+        for (int i = window_top, skip = 0; options[i].index != -1; ++i) { // -1 Sentinel.
+            if (i > window_bottom + skip)
                 break;
 
+            if (options[i].allowed == boolean_val_n3ds && !is_n3ds) {
+                ++skip;
+                continue;
+            }
+
             // NOTE - Signed to unsigned conversion here. Again, not an issue.
-            set_cursor(TOP_SCREEN, 0, (unsigned int)(i - window_top + 2) );
+            set_cursor(TOP_SCREEN, 0, (unsigned int)(i - window_top - skip + 2) );
 
             int indent = options[i].indent;
             for(int j=0; j < indent; j++)
                 fprintf(TOP_SCREEN, "  ");
 
-            if (options[i].allowed == boolean_val || (is_n3ds && options[i].allowed == boolean_val_n3ds)) {
+            if (options[i].allowed == boolean_val || options[i].allowed == boolean_val_n3ds) {
                 if (cursor_y == i) {
                     accent_color(TOP_SCREEN, 1);
                     fprintf(TOP_SCREEN, ">>\x1b[0m ");

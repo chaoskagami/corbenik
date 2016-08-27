@@ -93,14 +93,4 @@ void save_config();
 
 #endif
 
-/*
-[CORBENIK]
-version=1
-option_<name>=<int>
-...
-[PATCHES]
-<uuid>=<1|0>
-...
-*/
-
 #endif

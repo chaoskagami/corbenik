@@ -13,8 +13,6 @@ extern uint8_t *enable_list;
 
 extern struct options_s* patches;
 
-void list_patches_build(char *name, int desc_is_fname);
-
 void
 patch_cache_func(char* fpath)
 {

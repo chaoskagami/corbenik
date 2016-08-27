@@ -4,7 +4,7 @@
 # You don't and shouldn't need to use it.
 
 mnt=/media/sd
-dev=/dev/sdb
+dev=/dev/sdc
 
 mnt=/mnt/ext1
 

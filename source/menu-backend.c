@@ -29,7 +29,7 @@ void accent_color(void* screen, int fg) {
 }
 
 int
-show_menu(struct options_s *options, uint8_t *toggles)
+show_menu(struct options_s *options)
 {
     int cursor_y = 0;
     int cursor_min = -1;
@@ -43,7 +43,7 @@ show_menu(struct options_s *options, uint8_t *toggles)
 
     clear_disp(TOP_SCREEN);
 
-    if (options[0].index == -1) {
+    if (options[0].name == NULL) {
         set_cursor(TOP_SCREEN, 0, 0);
         header("Any:Back");
         fprintf(stdout, "No entries.\n");
@@ -57,10 +57,10 @@ show_menu(struct options_s *options, uint8_t *toggles)
         // Figure out the max if unset.
         if (cursor_max == -1) {
             cursor_max = 0;
-            while (options[cursor_max].index != -1)
+            while (options[cursor_max].name != NULL)
                 ++cursor_max;
 
-            while (options[cursor_max].allowed == not_option && cursor_max > 0)
+            while (options[cursor_max].handle == unselectable && cursor_max > 0)
                 --cursor_max;
         }
 
@@ -71,13 +71,13 @@ show_menu(struct options_s *options, uint8_t *toggles)
         if (cursor_min == -1) {
             if (less_mode == 1) {
                 cursor_max = 0;
-                while (options[cursor_max].index != -1)
+                while (options[cursor_max].name != NULL)
                     ++cursor_max;
 
                 cursor_min = 0;
             } else {
                 cursor_min = 0;
-                while (options[cursor_min].allowed == not_option)
+                while (options[cursor_min].handle == unselectable)
                     ++cursor_min;
                 cursor_y = cursor_min;
             }
@@ -90,11 +90,11 @@ show_menu(struct options_s *options, uint8_t *toggles)
         else
             header("A:Enter B:Back DPAD:Nav Select:Info");
 
-        for (int i = window_top, skip = 0; options[i].index != -1; ++i) { // -1 Sentinel.
+        for (int i = window_top, skip = 0; options[i].name != NULL; ++i) { // -1 Sentinel.
             if (i > window_bottom + skip)
                 break;
 
-            if (options[i].allowed == boolean_val_n3ds && !is_n3ds) {
+            if (options[i].handle == option_n3ds && !is_n3ds) {
                 ++skip;
                 continue;
             }
@@ -102,11 +102,12 @@ show_menu(struct options_s *options, uint8_t *toggles)
             // NOTE - Signed to unsigned conversion here. Again, not an issue.
             set_cursor(TOP_SCREEN, 0, (unsigned int)(i - window_top - skip + 2) );
 
-            int indent = options[i].indent;
-            for(int j=0; j < indent; j++)
-                fprintf(TOP_SCREEN, "  ");
+            // Print option
+            if (options[i].handle != unselectable) {
+                int indent = options[i].indent;
+                for(int j=0; j < indent; j++)
+                    fprintf(TOP_SCREEN, "  ");
 
-            if (options[i].allowed == boolean_val || options[i].allowed == boolean_val_n3ds) {
                 if (cursor_y == i) {
                     accent_color(TOP_SCREEN, 1);
                     fprintf(TOP_SCREEN, ">>\x1b[0m ");
@@ -114,29 +115,12 @@ show_menu(struct options_s *options, uint8_t *toggles)
                     fprintf(TOP_SCREEN, "   ");
                 }
 
-                fprintf(TOP_SCREEN, "[%c]  %s", (toggles[options[i].index] ? '*' : ' '), options[i].name);
-            } else if (options[i].allowed == call_fun || options[i].allowed == break_menu) {
-                if (cursor_y == i) {
-                    accent_color(TOP_SCREEN, 1);
-                    fprintf(TOP_SCREEN, ">>\x1b[0m ");
-                } else {
-                    fprintf(TOP_SCREEN, "   ");
+                if (options[i].handle != break_menu && options[i].value != NULL) {
+                    fprintf(TOP_SCREEN, "[%s]  ", options[i].value(options[i].param));
                 }
-
-                fprintf(TOP_SCREEN, "%s", options[i].name);
-            } else if (options[i].allowed == ranged_val) {
-                if (cursor_y == i) {
-                    accent_color(TOP_SCREEN, 1);
-                    fprintf(TOP_SCREEN, ">>\x1b[0m ");
-                } else {
-                    fprintf(TOP_SCREEN, "   ");
-                }
-                fprintf(TOP_SCREEN, "[%u]  %s  ", toggles[options[i].index], options[i].name);
-            } else if (options[i].allowed == not_option) {
-                if (options[i].a == 1)
-                    accent_color(TOP_SCREEN, 1);
-                fprintf(TOP_SCREEN, "%s\x1b[0m", options[i].name);
             }
+
+            fprintf(TOP_SCREEN, "%s", options[i].name);
         }
 
         uint32_t key = wait_key(1);
@@ -146,55 +130,40 @@ show_menu(struct options_s *options, uint8_t *toggles)
                 if (cursor_min == cursor_max)
                     break;
                 cursor_y -= 1;
-                while ((options[cursor_y].allowed == not_option || (options[cursor_y].allowed == boolean_val_n3ds && !is_n3ds)) && cursor_y >= cursor_min && !less_mode)
+                while ((options[cursor_y].handle == unselectable || (options[cursor_y].handle == option_n3ds && !is_n3ds)) && cursor_y >= cursor_min && !less_mode)
                     cursor_y--;
                 break;
             case CTR_HID_DOWN:
                 if (cursor_min == cursor_max)
                     break;
                 cursor_y += 1;
-                while ((options[cursor_y].allowed == not_option || (options[cursor_y].allowed == boolean_val_n3ds && !is_n3ds)) && cursor_y < cursor_max && !less_mode)
+                while ((options[cursor_y].handle == unselectable || (options[cursor_y].handle == option_n3ds && !is_n3ds)) && cursor_y < cursor_max && !less_mode)
                     cursor_y++;
                 break;
             case CTR_HID_LEFT:
                 if (cursor_min == cursor_max)
                     break;
                 cursor_y -= 5;
-                while ((options[cursor_y].allowed == not_option || (options[cursor_y].allowed == boolean_val_n3ds && !is_n3ds)) && cursor_y >= cursor_min && !less_mode)
+                while ((options[cursor_y].handle == unselectable || (options[cursor_y].handle == option_n3ds && !is_n3ds)) && cursor_y >= cursor_min && !less_mode)
                     cursor_y--;
                 break;
             case CTR_HID_RIGHT:
                 if (cursor_min == cursor_max)
                     break;
                 cursor_y += 5;
-                while ((options[cursor_y].allowed == not_option || (options[cursor_y].allowed == boolean_val_n3ds && !is_n3ds)) && cursor_y < cursor_max && !less_mode)
+                while ((options[cursor_y].handle == unselectable || (options[cursor_y].handle == option_n3ds && !is_n3ds)) && cursor_y < cursor_max && !less_mode)
                     cursor_y++;
                 break;
             case CTR_HID_A:
                 if (less_mode)
                     break;
 
-                if (options[cursor_y].allowed == boolean_val || options[cursor_y].allowed == boolean_val_n3ds) {
-                    toggles[options[cursor_y].index] = !toggles[options[cursor_y].index];
-                } else if (options[cursor_y].allowed == ranged_val) {
-                    if (toggles[options[cursor_y].index] == options[cursor_y].b)
-                        toggles[options[cursor_y].index] = options[cursor_y].a;
-                    else
-                        toggles[options[cursor_y].index]++;
-                } else if (options[cursor_y].allowed == call_fun) {
-                    ((func_call_t)(options[cursor_y].a))(options[cursor_y].b); // Call 'a' as a function.
-                } else if (options[cursor_y].allowed == break_menu) {
+                if (options[cursor_y].handle == option || options[cursor_y].handle == option_n3ds) {
+                    options[cursor_y].func(options[cursor_y].param);
+                } else if (options[cursor_y].handle == break_menu) {
                     exit = 1;
                     clear_disp(TOP_SCREEN);
                     cursor_y = cursor_min;
-                }
-                break;
-            case CTR_HID_X:
-                if (options[cursor_y].allowed == ranged_val) {
-                    if (toggles[options[cursor_y].index] == options[cursor_y].a)
-                        toggles[options[cursor_y].index] = options[cursor_y].b;
-                    else
-                        toggles[options[cursor_y].index]--;
                 }
                 break;
             case CTR_HID_B:

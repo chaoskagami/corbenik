@@ -6,29 +6,23 @@
  */
 enum type
 {
-    boolean_val = 0,      ///< Toggleable boolean
-    ranged_val = 1,       ///< N1 - N2, left and right to pick.
-    mask_val = 2,         ///< Bitmask allowed values.
-    not_option = 3,       ///< Skip over this.
-    call_fun = 4,         ///< Call a function. Treat (a) as (void)(*)(void).
-    boolean_val_n3ds = 5, ///< Toggle, but only show on n3DS
-    break_menu = 6        ///< Exit the menu (same as B)
+    option       = 0,      ///< Option
+    option_n3ds  = 1,      ///< Option (N3DS only)
+    unselectable = 2,      ///< Skip over this.
+    break_menu   = 3       ///< Exit the menu (same as B)
 };
 
-typedef void (*func_call_t)(uint32_t data);
-
-struct range_str
-{
-    int a, b;
-};
+typedef void  (*func_call_t)(void* data);
+typedef char* (*get_value_t)(void* data);
 
 struct options_s
 {
-    int64_t index;     ///< Option index. Used for displaying values.
-    char name[64];     ///< Name of patch to display in menus.
-    char desc[256];    ///< Description of option, shown when pressing select
-    enum type allowed; ///< Misnomer, FIXME. Type of menu entry. See enum type.
-    uint32_t a, b;     ///< Should be union, FIXME. Data values used for menu entry.
+    char *name;        ///< Name of menu option
+    char *desc;        ///< Description of option, shown when pressing select
+    enum type handle;  ///< Type of menu entry. See enum type.
+    void *param;       ///< Parameter to pass to func_call_t
+    func_call_t func;  ///< Function to call on selection of option
+    get_value_t value; ///< Function to get the value of the menu entry
     uint8_t indent;    ///< Indentation/ownership level of menu.
 } __attribute__((packed));
 
@@ -42,8 +36,7 @@ void accent_color(void* screen, int fg);
 /* Display a menu structure.
  *
  * \param options Menu structure to display
- * \param toggles Array of bytes to have values changed according to options
  */
-int show_menu(struct options_s *options, uint8_t *toggles);
+int show_menu(struct options_s *options);
 
 #endif

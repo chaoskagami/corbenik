@@ -3,6 +3,15 @@
 #include <stdint.h>
 #include <stddef.h>
 
+char*
+strdup_self(char* str)
+{
+    size_t l = strlen(str);
+    char* new_st = malloc(l+1);
+    memcpy(new_st, str, l+1); // Copy the nul byte
+    return new_st;
+}
+
 int
 atoi(const char *str)
 {

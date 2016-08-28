@@ -1,0 +1,15 @@
+# $name  FIRM Protection (2.x)
+# $desc  Patches FIRM writes in 2.x FIRMs.
+# $ver   01
+# $uuid  0004
+
+# This patch was originally implemented in Luma3ds and I really
+# haven't given it the testing needed.
+
+# Credit obviously goes to AuroraWright/TuxSH for RE.
+
+rel native_p9
+
+find  041E1DDB
+abortnf
+set   00241DE0

@@ -11,8 +11,10 @@ struct options_s *chains = NULL;
 //        each entry (it would cut code density)
 
 __attribute__ ((noreturn))
-void chainload_file(char* chain_file_data)
+void chainload_file(void* data)
 {
+    char* chain_file_data = (char*)data;
+
     // We copy because it's possible the payload will overwrite us in memory.
     char chain_file[256];
     strncpy(chain_file, chain_file_data, 255);
@@ -87,13 +89,15 @@ void chain_file_hdl(char* fpath) {
         while(basename[0] != '/') basename--;
         basename++;
 
-        strncpy(chains[current_chain_index].name, basename, 64);
-        strncpy(chains[current_chain_index].desc, fpath, 255);
+        char* dup = strdup_self(fpath);
 
-        chains[current_chain_index].index = 0;
-        chains[current_chain_index].allowed = call_fun;
-        chains[current_chain_index].a = (uint32_t) chainload_file;
-        chains[current_chain_index].b = (uint32_t) chains[current_chain_index].desc;
+        chains[current_chain_index].name = strdup_self(basename);
+        chains[current_chain_index].desc = dup;
+
+        chains[current_chain_index].handle = option;
+        chains[current_chain_index].func  = chainload_file;
+        chains[current_chain_index].value  = NULL;
+        chains[current_chain_index].param = dup;
         chains[current_chain_index].indent = 0;
 
         current_chain_index++;
@@ -105,26 +109,26 @@ void chain_file_hdl(char* fpath) {
 // will be set to 1.
 
 void
-list_chain_build(char *name)
+list_chain_build(const char *name)
 {
     current_chain_index = 0;
 
-    strncpy(chains[0].name, "Chainloader Payloads", 64);
-    strncpy(chains[0].desc, "", 255);
-    chains[0].index = 0;
-    chains[0].allowed = not_option;
-    chains[0].a = 1;
-    chains[0].b = 0;
+    chains[0].name = "Chainloader Payloads";
+    chains[0].desc = "";
+    chains[0].param = 0;
+    chains[0].func = NULL;
+    chains[0].value = NULL;
+    chains[0].handle = unselectable;
     chains[0].indent = 0;
 
     current_chain_index += 1;
 
     recurse_call(name, chain_file_hdl);
 
-    chains[current_chain_index].index = -1;
+    chains[current_chain_index].name = NULL;
 
-    if (chains[1].index == -1)
-        chains[0].index = -1; // No chainloadable files.
+    if (chains[1].name == NULL)
+        chains[0].name = NULL; // No chainloadable files.
 }
 
 void chainload_menu() {
@@ -133,7 +137,7 @@ void chainload_menu() {
         list_chain_build(PATH_CHAINS);
     }
 
-    show_menu(chains, NULL);
+    show_menu(chains);
 }
 
 #endif

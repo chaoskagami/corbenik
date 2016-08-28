@@ -561,7 +561,7 @@ boot_cfw()
     if (patch_firm_all() != 0)
         return;
 
-    if (get_opt_raw(OPTION_REBOOT)) {
+    if (get_opt_u32(OPTION_REBOOT)) {
         fprintf(stderr, "Saving FIRM for reboot...\n");
         if (!write_file(firm_loc, PATH_NATIVE_P, firm_size))
             abort("Failed to save prepatched native\n");

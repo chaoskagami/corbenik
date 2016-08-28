@@ -58,22 +58,22 @@ patch_firm_all()
     fprintf(stderr, "VM exited without issue\n");
 
     // Hook firmlaunch?
-    if (get_opt_raw(OPTION_REBOOT)) {
+    if (get_opt_u32(OPTION_REBOOT)) {
         patch_reboot();
 
         wait();
     }
 
     // Use EmuNAND?
-    if (get_opt_raw(OPTION_EMUNAND)) {
+    if (get_opt_u32(OPTION_EMUNAND)) {
         // Yes.
-        patch_emunand(get_opt_raw(OPTION_EMUNAND_INDEX));
+        patch_emunand(get_opt_u32(OPTION_EMUNAND_INDEX));
 
         wait();
     }
 
     // Inject services?
-    if (get_opt_raw(OPTION_SVCS)) {
+    if (get_opt_u32(OPTION_SVCS)) {
         if (patch_services()) {
             abort("Fatal. Svc inject has failed.");
         }
@@ -81,7 +81,7 @@ patch_firm_all()
     }
 
     // Replace loader?
-    if (get_opt_raw(OPTION_LOADER)) {
+    if (get_opt_u32(OPTION_LOADER)) {
         if (patch_modules()) {
             abort("Fatal. Loader inject has failed.");
         }

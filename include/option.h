@@ -16,6 +16,8 @@ struct config_file
 
     uint8_t options[256]; ///< Options in the menu - deliberately large to avoid
                           ///< config version bumps.
+
+    char firm[3][256]; ///< FIRMS.
 } __attribute__((packed));
 
 #ifdef LOADER
@@ -76,6 +78,10 @@ extern struct config_file *config;
 #define OPTION_RECONFIGURED        255 ///< This is for internal use only. It's set when any changes
                                        ///< require caches to be regenerated.
 
+#define OPTION_NFIRM_PATH 0xFFFD
+#define OPTION_TFIRM_PATH 0xFFFE
+#define OPTION_AFIRM_PATH 0xFFFF
+
 //#define HEADER_COLOR        12 // Color of header text.
 //#define BG_COLOR            13 // Color of background.
 //#define TEXT_COLOR          14 // Color of most text.
@@ -95,7 +101,7 @@ void load_config();
  */
 void save_config();
 
-/* Changes an option according to internal rules.
+/* Changes an option according to internal rules. Used in menus.
  */
 void  change_opt(void* val);
 
@@ -103,13 +109,17 @@ void  change_opt(void* val);
  */
 char* get_opt(void* val);
 
-/* Gets an option in raw form.
+/* Gets an option in uint32_t form.
  */
-uint32_t get_opt_raw(uint32_t val);
+uint32_t get_opt_u32(uint32_t val);
 
-/* Sets an option in raw form
+/* Sets an option in uint32_t form
  */
-void set_opt_raw(uint32_t key, uint32_t val);
+int set_opt_u32(uint32_t key, uint32_t val);
+
+/* Sets an option in uint32_t form
+ */
+int set_opt_str(uint32_t key, const char* val);
 
 #endif
 

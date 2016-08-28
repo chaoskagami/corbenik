@@ -8,7 +8,7 @@ void
 header(const char *append)
 {
     set_cursor(TOP_SCREEN, 0, 0);
-    fill_line(stdout, 0, get_opt_raw(OPTION_ACCENT_COLOR));
+    fill_line(stdout, 0, get_opt_u32(OPTION_ACCENT_COLOR));
     accent_color(TOP_SCREEN, 0);
     fprintf(stdout, "\x1b[30m ." FW_NAME " // %s\x1b[0m\n\n", append);
 }
@@ -24,7 +24,7 @@ void show_help(const char* help) {
 void accent_color(void* screen, int fg) {
     char color[] = "\x1b[30m";
     if (!fg) color[2] = '4';
-    color[3] = ("01234567")[get_opt_raw(OPTION_ACCENT_COLOR)];
+    color[3] = ("01234567")[get_opt_u32(OPTION_ACCENT_COLOR)];
     fprintf(screen, "%s", color);
 }
 

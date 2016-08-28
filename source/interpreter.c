@@ -746,7 +746,7 @@ execb(const char *filename, int build_cache)
 #ifdef LOADER
     if (config.options[OPTION_OVERLY_VERBOSE]) {
 #else
-    if (get_opt_raw(OPTION_OVERLY_VERBOSE)) {
+    if (get_opt_u32(OPTION_OVERLY_VERBOSE)) {
 #endif
         debug = 1;
     }

@@ -147,47 +147,6 @@ void patch_func(char* fpath) {
     }
 }
 
-// This is dual purpose. When we actually list
-// patches to build the cache - desc_is_fname
-// will be set to 1.
-
-void
-list_patches_build(const char *name, int desc_is_fname)
-{
-    desc_is_fname_sto = desc_is_fname;
-
-    current_menu_index_patches = 0;
-
-    if (!patches)
-        patches = malloc(sizeof(struct options_s) * 258); // FIXME - hard limit. Implement realloc.
-
-    patches[0].name   = "Patches";
-    patches[0].desc   = "";
-    patches[0].handle = unselectable;
-    patches[0].indent = 0;
-    patches[0].func   = NULL;
-    patches[0].value  = NULL;
-    patches[0].highlight = 1;
-
-    current_menu_index_patches += 1;
-
-    recurse_call(name, patch_func);
-
-    patches[current_menu_index_patches].name = NULL;
-}
-
-void
-menu_patches()
-{
-    show_menu(patches);
-}
-
-void
-menu_options()
-{
-    show_menu(options);
-}
-
 #ifndef REL
 #define REL "master"
 #endif
@@ -226,12 +185,6 @@ static struct options_s help_d[] = {
 };
 
 void
-menu_help()
-{
-    show_menu(help_d);
-}
-
-void
 reset()
 {
     fflush(stderr);
@@ -264,14 +217,45 @@ void chainload_menu();
 static struct options_s config_opts[] = {
     { "Options",
       "Internal options for the CFW.\nThese are part of " FW_NAME " itself.",
-      option, 0, menu_options, NULL, 0, 0 },
+      option, options, (void(*)(void*))show_menu, NULL, 0, 0 },
     { "Patches",
       "External bytecode patches found in `" PATH_PATCHES "`.\nYou can choose which to enable.",
-      option, 0, menu_patches, NULL, 0, 0 },
+      option, NULL, (void(*)(void*))show_menu, NULL, 0, 0 },
 
     // Sentinel.
     { NULL, NULL, 0, 0, NULL, NULL, 0, 0 }, // cursor_min and cursor_max are stored in the last two.
 };
+
+// This is dual purpose. When we actually list
+// patches to build the cache - desc_is_fname
+// will be set to 1.
+
+void
+list_patches_build(const char *name, int desc_is_fname)
+{
+    desc_is_fname_sto = desc_is_fname;
+
+    current_menu_index_patches = 0;
+
+    if (!patches)
+        patches = malloc(sizeof(struct options_s) * 258); // FIXME - hard limit. Implement realloc.
+
+    patches[0].name   = "Patches";
+    patches[0].desc   = "";
+    patches[0].handle = unselectable;
+    patches[0].indent = 0;
+    patches[0].func   = NULL;
+    patches[0].value  = NULL;
+    patches[0].highlight = 1;
+
+    current_menu_index_patches += 1;
+
+    recurse_call(name, patch_func);
+
+    patches[current_menu_index_patches].name = NULL;
+
+    config_opts[1].param = (void*)patches;
+}
 
 void config_main_menu() {
     show_menu(config_opts);
@@ -287,7 +271,7 @@ static struct options_s main_s[] = {
       option, 0, config_main_menu, NULL, 0, 0 },
     { "Readme",
       "Mini-readme.\nWhy are you opening help on this, though?\nThat's kind of silly.",
-      option, 0, menu_help, NULL, 0, 0 },
+      option, help_d, (void(*)(void*))show_menu, NULL, 0, 0 },
     { "Reboot",
       "Reboots the console.",
       option, 0, reset, NULL, 0, 0 },

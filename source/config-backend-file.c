@@ -207,11 +207,28 @@ char* get_opt(void* val) {
     return str;
 }
 
-uint32_t get_opt_raw(uint32_t val) {
+uint32_t get_opt_u32(uint32_t val) {
     uint32_t opt = config->options[(uint32_t)val];
+
     return opt;
 }
 
-void set_opt_raw(uint32_t key, uint32_t val) {
+int set_opt_u32(uint32_t key, uint32_t val) {
+    if (key >= OPTION_NFIRM_PATH && key <= OPTION_AFIRM_PATH)
+        return 1;
+
     config->options[(uint32_t)key] = (uint8_t)val;
+
+    return 0;
+}
+
+int set_opt_str(uint32_t key, const char* val) {
+    if (!(key >= OPTION_NFIRM_PATH && key <= OPTION_AFIRM_PATH))
+        return 1;
+
+    key -= OPTION_NFIRM_PATH;
+
+    strncpy(config->firm[key], val, 255);
+
+    return 0;
 }

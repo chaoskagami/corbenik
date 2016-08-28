@@ -6,55 +6,6 @@
 struct options_s *patches = NULL;
 uint8_t *enable_list;
 
-void change_opt(void* val) {
-    uint32_t opt = (uint32_t)val;
-    uint8_t* set = & (config->options[opt]);
-    switch(opt) {
-        case OPTION_EMUNAND_INDEX:
-            // 0-9
-            set[0]++;
-            if (set[0] > 9)
-                set[0] = 0;
-            break;
-        case OPTION_BRIGHTNESS:
-            // 0-3
-            set[0]++;
-            if (set[0] > 3)
-                set[0] = 0;
-            break;
-        case OPTION_ACCENT_COLOR:
-            // 1-7
-            set[0]++;
-            if (set[0] > 7 || set[0] < 1)
-                set[0] = 1;
-            break;
-        default:
-            set[0] = !(set[0]);
-            break;
-    }
-}
-
-char* get_opt(void* val) {
-    uint32_t opt = (uint32_t)val;
-    char raw = config->options[opt];
-    static char str[2] = "0";
-    str[0] = '0';
-    switch(opt) {
-        case OPTION_EMUNAND_INDEX:
-        case OPTION_BRIGHTNESS:
-        case OPTION_ACCENT_COLOR:
-            str[0] += raw;
-            break;
-        default:
-            if (raw)
-                str[0] = '*';
-            else
-                str[0] = ' ';
-            break;
-    }
-    return str;
-}
-
 static struct options_s options[] = {
     // Patches.
     { "General Options", "", unselectable, 0, NULL, NULL, 0, 1 },

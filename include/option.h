@@ -83,6 +83,10 @@ extern struct config_file *config;
 
 #ifndef LOADER
 
+/// Bear in mind the following functions are only defined insofar
+/// as that they exist. Do not make assumptions as to what is
+/// backing these functions on disk.
+
 /* Loads the config file off SD from the configured location.
  */
 void load_config();
@@ -90,6 +94,22 @@ void load_config();
 /* Saves the config file to SD at the configured location.
  */
 void save_config();
+
+/* Changes an option according to internal rules.
+ */
+void  change_opt(void* val);
+
+/* Gets an option as a readable string.
+ */
+char* get_opt(void* val);
+
+/* Gets an option in raw form.
+ */
+uint32_t get_opt_raw(uint32_t val);
+
+/* Sets an option in raw form
+ */
+void set_opt_raw(uint32_t key, uint32_t val);
 
 #endif
 

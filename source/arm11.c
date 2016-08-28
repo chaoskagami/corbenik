@@ -146,7 +146,7 @@ void clearScreens(void) {
 void screen_mode(uint32_t mode) {
     static uint32_t stride, init_top, init_bottom, bright;
 
-    bright = brightness[config->options[OPTION_BRIGHTNESS]];
+    bright = brightness[get_opt_raw(OPTION_BRIGHTNESS)];
 
     stride = 240 * 3;
     if (mode == RGBA8)

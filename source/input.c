@@ -43,7 +43,7 @@ extern int doing_autoboot;
 void
 wait()
 {
-    if (config->options[OPTION_TRACE] && !doing_autoboot) {
+    if (get_opt_raw(OPTION_TRACE) && !doing_autoboot) {
         fprintf(stderr, "[Waiting...]");
         wait_key(0); // No delay on traces.
     }

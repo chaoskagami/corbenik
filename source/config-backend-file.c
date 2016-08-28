@@ -157,3 +157,61 @@ save_config()
 
     fclose(conf_handle);
 }
+
+void change_opt(void* val) {
+    uint32_t opt = (uint32_t)val;
+    uint8_t* set = & (config->options[opt]);
+    switch(opt) {
+        case OPTION_EMUNAND_INDEX:
+            // 0-9
+            set[0]++;
+            if (set[0] > 9)
+                set[0] = 0;
+            break;
+        case OPTION_BRIGHTNESS:
+            // 0-3
+            set[0]++;
+            if (set[0] > 3)
+                set[0] = 0;
+            break;
+        case OPTION_ACCENT_COLOR:
+            // 1-7
+            set[0]++;
+            if (set[0] > 7 || set[0] < 1)
+                set[0] = 1;
+            break;
+        default:
+            set[0] = !(set[0]);
+            break;
+    }
+}
+
+char* get_opt(void* val) {
+    uint32_t opt = (uint32_t)val;
+    char raw = config->options[opt];
+    static char str[2] = "0";
+    str[0] = '0';
+    switch(opt) {
+        case OPTION_EMUNAND_INDEX:
+        case OPTION_BRIGHTNESS:
+        case OPTION_ACCENT_COLOR:
+            str[0] += raw;
+            break;
+        default:
+            if (raw)
+                str[0] = '*';
+            else
+                str[0] = ' ';
+            break;
+    }
+    return str;
+}
+
+uint32_t get_opt_raw(uint32_t val) {
+    uint32_t opt = config->options[(uint32_t)val];
+    return opt;
+}
+
+void set_opt_raw(uint32_t key, uint32_t val) {
+    config->options[(uint32_t)key] = (uint8_t)val;
+}

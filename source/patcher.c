@@ -58,22 +58,22 @@ patch_firm_all()
     fprintf(stderr, "VM exited without issue\n");
 
     // Hook firmlaunch?
-    if (config->options[OPTION_REBOOT]) {
+    if (get_opt_raw(OPTION_REBOOT)) {
         patch_reboot();
 
         wait();
     }
 
     // Use EmuNAND?
-    if (config->options[OPTION_EMUNAND]) {
+    if (get_opt_raw(OPTION_EMUNAND)) {
         // Yes.
-        patch_emunand(config->options[OPTION_EMUNAND_INDEX]);
+        patch_emunand(get_opt_raw(OPTION_EMUNAND_INDEX));
 
         wait();
     }
 
     // Inject services?
-    if (config->options[OPTION_SVCS]) {
+    if (get_opt_raw(OPTION_SVCS)) {
         if (patch_services()) {
             abort("Fatal. Svc inject has failed.");
         }
@@ -81,19 +81,11 @@ patch_firm_all()
     }
 
     // Replace loader?
-    if (config->options[OPTION_LOADER]) {
+    if (get_opt_raw(OPTION_LOADER)) {
         if (patch_modules()) {
             abort("Fatal. Loader inject has failed.");
         }
         // This requires OPTION_SIGPATCH.
-        wait();
-    }
-
-    // Use ARM9 hook thread?
-    if (config->options[OPTION_ARM9THREAD]) {
-        // Yes.
-
-        // FIXME - NYI
         wait();
     }
 

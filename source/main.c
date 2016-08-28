@@ -33,7 +33,7 @@ main(int argc, char** argv)
     installArm11Stub();
 
     if (CFG_BOOTENV == 7)
-        config->options[OPTION_EMUNAND] = 0; // Disable EmuNAND on AGB reboot.
+        set_opt_raw(OPTION_EMUNAND, 0); // Disable EmuNAND on AGB reboot.
 
     set_font(PATH_TERMFONT); // Read the font before all else.
 
@@ -48,10 +48,10 @@ main(int argc, char** argv)
     clear_disp(TOP_SCREEN);
     clear_disp(BOTTOM_SCREEN);
 
-    if (config->options[OPTION_AUTOBOOT] && !r_held) {
+    if (get_opt_raw(OPTION_AUTOBOOT) && !r_held) {
         doing_autoboot = 1;
 
-        if (config->options[OPTION_SILENCE])
+        if (get_opt_raw(OPTION_SILENCE))
             shut_up(); // This does exactly what it sounds like.
     } else {
         menu_handler();

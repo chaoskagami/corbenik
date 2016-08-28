@@ -460,13 +460,6 @@ boot_firm()
 
     fflush(stderr); // Flush logs if need be before unmount.
 
-    FILE* f = fopen("/arm9loaderhax_si.bin", "r");
-    size_t s = fsize(f);
-    fclose(f);
-    f = fopen("/corbenik_dump.bin", "w");
-    fwrite((uint8_t*)0x23F00000, 1, s, f);
-    fclose(f);
-
     fumount(); // Unmount SD. No longer needed.
 
     // No fprintf will work from here on out.

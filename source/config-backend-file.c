@@ -65,6 +65,13 @@ update_config()
         updated = 1;
     }
 
+    if (config->firm[0][0] == 0)
+        strncpy(config->firm[0], PATH_NATIVE_F, 255);
+    if (config->firm[1][0] == 0)
+        strncpy(config->firm[1], PATH_TWL_F, 255);
+    if (config->firm[2][0] == 0)
+        strncpy(config->firm[2], PATH_AGB_F, 255);
+
     if (updated) {
         save_config(); // Save the configuration.
     }
@@ -188,6 +195,11 @@ void change_opt(void* val) {
 
 char* get_opt(void* val) {
     uint32_t opt = (uint32_t)val;
+    if (opt >= OPTION_NFIRM_PATH && opt <= OPTION_AFIRM_PATH) {
+        opt -= OPTION_NFIRM_PATH;
+        return config->firm[opt];
+    }
+
     char raw = config->options[opt];
     static char str[2] = "0";
     str[0] = '0';

@@ -519,7 +519,7 @@ load_firms()
     firm_loc = malloc(firm_size);
 
     fprintf(stderr, "Loading NATIVE_FIRM\n");
-    if (load_firm(firm_loc, PATH_NATIVE_F, PATH_NATIVE_FIRMKEY, PATH_NATIVE_CETK, &firm_size, NATIVE_FIRM_TITLEID) != 0) {
+    if (load_firm(firm_loc, get_opt((void*)OPTION_NFIRM_PATH), PATH_NATIVE_FIRMKEY, PATH_NATIVE_CETK, &firm_size, NATIVE_FIRM_TITLEID) != 0) {
         abort("\n  Failed to load NATIVE_FIRM.\n");
     }
     find_proc9(firm_loc, &firm_proc9, &firm_p9_exefs);
@@ -528,7 +528,7 @@ load_firms()
     twl_firm_loc = malloc(twl_firm_size);
 
     fprintf(stderr, "TWL_FIRM\n");
-    if (load_firm(twl_firm_loc, PATH_TWL_F, PATH_TWL_FIRMKEY, PATH_TWL_CETK, &twl_firm_size, TWL_FIRM_TITLEID) != 0) {
+    if (load_firm(twl_firm_loc, get_opt((void*)OPTION_TFIRM_PATH), PATH_TWL_FIRMKEY, PATH_TWL_CETK, &twl_firm_size, TWL_FIRM_TITLEID) != 0) {
         fprintf(stderr, "\n  TWL_FIRM failed to load.\n");
         state = 1;
     } else {
@@ -539,7 +539,7 @@ load_firms()
     agb_firm_loc = malloc(agb_firm_size);
 
     fprintf(stderr, "AGB_FIRM\n");
-    if (load_firm(agb_firm_loc, PATH_AGB_F, PATH_AGB_FIRMKEY, PATH_AGB_CETK, &agb_firm_size, AGB_FIRM_TITLEID) != 0) {
+    if (load_firm(agb_firm_loc, get_opt((void*)OPTION_AFIRM_PATH), PATH_AGB_FIRMKEY, PATH_AGB_CETK, &agb_firm_size, AGB_FIRM_TITLEID) != 0) {
         fprintf(stderr, "\n  AGB_FIRM failed to load.\n");
         state = 1;
     } else {

@@ -86,7 +86,7 @@ fumount(void)
     if (f_mount(NULL, "SD:", 1))
         return 1;
 
-    config->options[OPTION_SAVE_LOGS] = 0; // FS unmounted, can't log anymore
+    set_opt_raw(OPTION_SAVE_LOGS, 0); // FS unmounted, can't log anymore
 
     return 0;
 }

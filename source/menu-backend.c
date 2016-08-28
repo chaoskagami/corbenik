@@ -120,7 +120,9 @@ show_menu(struct options_s *options)
                 }
             }
 
-            fprintf(TOP_SCREEN, "%s", options[i].name);
+            if (options[i].highlight == 1)
+                accent_color(TOP_SCREEN, 1);
+            fprintf(TOP_SCREEN, "%s\x1b[0m", options[i].name);
         }
 
         uint32_t key = wait_key(1);

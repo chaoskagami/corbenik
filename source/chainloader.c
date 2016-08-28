@@ -120,6 +120,7 @@ list_chain_build(const char *name)
     chains[0].value = NULL;
     chains[0].handle = unselectable;
     chains[0].indent = 0;
+    chains[0].highlight = 1;
 
     current_chain_index += 1;
 

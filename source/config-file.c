@@ -8,7 +8,7 @@ char *config_file_path = NULL;
 int changed_consoles = 0;
 uint32_t cid[4];
 
-void list_patches_build(char *name, int desc_is_fname);
+void list_patches_build(const char *name, int desc_is_fname);
 
 void
 regenerate_config()

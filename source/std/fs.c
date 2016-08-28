@@ -50,14 +50,14 @@ recurse_call_back(char *fpath, void (*call_fun_param)(char*))
     return 0;
 }
 
-void recurse_call(char *name, void (*call_fun_param)(char*)) {
-    char fpath[256];
+void recurse_call(const char *name, void (*call_fun_param)(char*)) {
+    static char fpath[256];
     strncpy(fpath, name, 256);
     recurse_call_back(fpath, call_fun_param);
 }
 
 int
-rrmdir(char *name)
+rrmdir(const char *name)
 {
     recurse_call(name, (void (*)(char*))f_unlink);
     return 0;
@@ -205,7 +205,7 @@ fread(void *buffer, size_t elementSize, size_t elementCnt, FILE *fp)
 }
 
 size_t
-write_file(void *data, char *path, size_t size)
+write_file(void *data, const char *path, size_t size)
 {
     FILE *temp = fopen(path, "w");
 
@@ -225,7 +225,7 @@ write_file(void *data, char *path, size_t size)
 }
 
 size_t
-read_file(void *data, char *path, size_t size)
+read_file(void *data, const char *path, size_t size)
 {
     FILE *temp = fopen(path, "r");
 

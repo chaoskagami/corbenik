@@ -72,13 +72,13 @@ void clear_bg();
  *
  * \param fname_top filename to load from.
  */
-void load_bg_top(char* fname_top);
+void load_bg_top(const char* fname_top);
 
 /* Loads bottom background image from a path.
  *
  * \param fname_bottom filename to load from.
  */
-void load_bg_bottom(char* fname_bottom);
+void load_bg_bottom(const char* fname_bottom);
 
 /* Clears the displays either to black or the background image.
  */
@@ -159,11 +159,11 @@ void clear_disp(uint8_t *screen);
  * \param Format string.
  * \param ... Format arguments
  */
-void fprintf(void *channel, char *format, ...) __attribute__ ((format (printf, 2, 3)));
+void fprintf(void *channel, const char *format, ...) __attribute__ ((format (printf, 2, 3)));
 
 /* See fprintf. Takes a va_list instead of variable arguments.
  */
-void vfprintf(void *channel, char *format, va_list ap);
+void vfprintf(void *channel, const char *format, va_list ap);
 
 #define BLACK     0
 #define BLUE      1

@@ -9,7 +9,7 @@ REVISION := $(shell git rev-parse HEAD | head -c10)+$(shell git rev-list --count
 AM_CFLAGS= -std=gnu11 -Os -g -ffast-math \
 	-Wpedantic -Wall -Wextra -Wcast-align -Wcast-qual \
 	-Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op \
-	-Wmissing-include-dirs -Wredundant-decls \
+	-Wmissing-include-dirs -Wredundant-decls -Wunreachable-code -Wmissing-noreturn -Wwrite-strings \
 	-Wshadow -Wsign-conversion -Wstrict-overflow=5 -Wswitch-default \
 	-Wundef -Wno-unused -Werror -Wno-error=cast-align -Wno-error=strict-overflow -Wno-error=pedantic \
 	$(THUMBFLAGS) $(SIZE_OPTIMIZATION) $(INCPATHS) $(C9FLAGS) \

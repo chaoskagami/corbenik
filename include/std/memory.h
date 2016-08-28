@@ -17,6 +17,6 @@ uint8_t *memfind(uint8_t *startPos, uint32_t size, const void *pattern, uint32_t
  * \param str String to duplicate
  * \return Duplicated string.
  */
-char* strdup_self(char* str);
+char* strdup_self(const char* str);
 
 #endif

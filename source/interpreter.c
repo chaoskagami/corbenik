@@ -592,7 +592,7 @@ execb(uint64_t tid, uint16_t ver, uint8_t *text_mem, uint32_t text_len, uint8_t 
 {
 #else
 int
-execb(char *filename, int build_cache)
+execb(const char *filename, int build_cache)
 {
     uint16_t ver = 0; // FIXME - Provide native_firm version
 #endif

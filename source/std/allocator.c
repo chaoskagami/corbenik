@@ -28,7 +28,7 @@ typedef struct free_block {
     size_t size;
     size_t real_size;
 #ifdef MALLOC_DEBUG
-    char* info;
+    const char* info;
 #endif
     struct free_block* next;
 } free_block;
@@ -51,7 +51,7 @@ static size_t allocated_memory = 0;
 #endif
 
 #ifdef MALLOC_DEBUG
-void* malloc_chkd(size_t size, char* info) {
+void* malloc_chkd(size_t size, const char* info) {
 #else
 void* malloc(size_t size) {
 #endif
@@ -102,7 +102,7 @@ void* malloc_zero(size_t size) {
 }
 
 #ifdef MALLOC_DEBUG
-void free_chkd(void* ptr, char* info) {
+void free_chkd(void* ptr, const char* info) {
 #else
 void free(void* ptr) {
 #endif

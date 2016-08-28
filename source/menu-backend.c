@@ -5,7 +5,7 @@ extern unsigned int font_w;
 extern unsigned int font_h;
 
 void
-header(char *append)
+header(const char *append)
 {
     set_cursor(TOP_SCREEN, 0, 0);
     fill_line(stdout, 0, config->options[OPTION_ACCENT_COLOR]);
@@ -13,7 +13,7 @@ header(char *append)
     fprintf(stdout, "\x1b[30m ." FW_NAME " // %s\x1b[0m\n\n", append);
 }
 
-void show_help(char* help) {
+void show_help(const char* help) {
     clear_disp(TOP_SCREEN);
     set_cursor(TOP_SCREEN, 0, 0);
     header("Any:Back");

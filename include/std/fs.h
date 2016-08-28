@@ -22,9 +22,9 @@ int fmount(void);
 
 int fumount(void);
 
-void recurse_call(char *name, void (*call_fun)(char*));
+void recurse_call(const char *name, void (*call_fun)(char*));
 
-int rrmdir(char *dir_path);
+int rrmdir(const char *dir_path);
 
 FILE *fopen(const char *filename, const char *mode);
 
@@ -42,8 +42,8 @@ size_t fwrite(const void *buffer, size_t elementSize, size_t elementCnt, FILE *f
 
 size_t fread(void *buffer, size_t elementSize, size_t elementCnt, FILE *fp);
 
-size_t write_file(void *data, char *path, size_t size);
+size_t write_file(void *data, const char *path, size_t size);
 
-size_t read_file(void *data, char *path, size_t size);
+size_t read_file(void *data, const char *path, size_t size);
 
 #endif

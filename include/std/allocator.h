@@ -23,14 +23,14 @@ void print_alloc_stats();
  * \param size Size in bytes to allocate.
  * \param info Info to store about malloc
  */
-void* malloc_chkd(size_t size, char* info);
+void* malloc_chkd(size_t size, const char* info);
 
 /* Free in-use memory allocated by malloc (debugging only, don't call)
  *
  * \param ptr Pointer to free.
  * \param info Info to store about free
  */
-void  free_chkd(void* ptr, char* info);
+void  free_chkd(void* ptr, const char* info);
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)

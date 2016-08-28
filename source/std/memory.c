@@ -4,7 +4,7 @@
 #include <stddef.h>
 
 char*
-strdup_self(char* str)
+strdup_self(const char* str)
 {
     size_t l = strlen(str);
     char* new_st = malloc(l+1);

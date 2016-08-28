@@ -295,7 +295,7 @@ decrypt_arm9bin(arm9bin_h *header, uint64_t firm_title, uint8_t version)
 }
 
 int
-decrypt_firm(firm_h *dest, char *path_firmkey, char *path_cetk, uint32_t *size)
+decrypt_firm(firm_h *dest, const char *path_firmkey, const char *path_cetk, uint32_t *size)
 {
     uint8_t firm_key[AES_BLOCK_SIZE];
 
@@ -326,7 +326,7 @@ decrypt_firm(firm_h *dest, char *path_firmkey, char *path_cetk, uint32_t *size)
 extern int patch_services();
 
 int
-load_firm(firm_h *dest, char *path, char *path_firmkey, char *path_cetk, uint32_t *size, uint64_t firm_title)
+load_firm(firm_h *dest, const char *path, const char *path_firmkey, const char *path_cetk, uint32_t *size, uint64_t firm_title)
 {
     int status = 0;
     int firmware_changed = 0;
@@ -442,11 +442,14 @@ boot_firm()
     wait();
 #endif
 
+    uint32_t entry11 = firm_loc->a11Entry;
+    uint32_t entry9 = firm_loc->a9Entry;
+
     // Beyond this point, using malloc() memory is unsafe, since we're trashing memory possibly.
     // free() is also irrelevant from here on.
 
     for (firm_section_h *section = firm_loc->section; section < firm_loc->section + 4 && section->address != 0; section++) {
-        memcpy((void *)section->address, (void *)((uint8_t*)firm_loc + section->offset), section->size);
+        memmove((void *)section->address, (void *)((uint8_t*)firm_loc + section->offset), section->size);
     }
     fprintf(stderr, "Copied FIRM.\n");
 
@@ -463,9 +466,9 @@ boot_firm()
 
     deinitScreens();
 
-    *a11_entry = (uint32_t)firm_loc->a11Entry;
+    *a11_entry = (uint32_t)entry11;
 
-    ((void (*)())firm_loc->a9Entry)();
+    ((void (*)())entry9)();
 
     while(1);
 }

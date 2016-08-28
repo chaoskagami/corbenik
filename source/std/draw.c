@@ -156,7 +156,7 @@ void clear_bg() {
     memset(bottom_bg, 0, BOTTOM_SIZE);
 }
 
-void load_bg_top(char* fname_top) {
+void load_bg_top(const char* fname_top) {
     FILE* f = fopen(fname_top, "r");
     if (!f) return;
 
@@ -165,7 +165,7 @@ void load_bg_top(char* fname_top) {
     fclose(f);
 }
 
-void load_bg_bottom(char* fname_bottom) {
+void load_bg_bottom(const char* fname_bottom) {
     FILE* f = fopen(fname_bottom, "r");
     if (!f)
         return;
@@ -637,12 +637,13 @@ fflush(void *channel)
 int disable_format = 0;
 
 void
-vfprintf(void *channel, char *format, va_list ap)
+vfprintf(void *channel, const char *format, va_list ap)
 {
     if ((channel == stdout || channel == stderr) && kill_output)
         return;
 
-    char *ref = (char *)format;
+    char *copy = strdup_self(format);
+    char *ref = copy;
 
     unsigned char *color = NULL;
     if (channel == TOP_SCREEN)
@@ -708,10 +709,12 @@ vfprintf(void *channel, char *format, va_list ap)
         }
         ++ref;
     }
+
+    free(copy);
 }
 
 void
-fprintf(void *channel, char *format, ...)
+fprintf(void *channel, const char *format, ...)
 {
     // The output suppression is in all the functions to minimize overhead.
     // Function calls and format conversions take time and we don't just want
@@ -728,7 +731,7 @@ fprintf(void *channel, char *format, ...)
 }
 
 void
-printf(char *format, ...)
+printf(const char *format, ...)
 {
     va_list ap;
     va_start(ap, format);

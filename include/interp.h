@@ -8,7 +8,7 @@
  * \return Zero on success.
  */
 
-int execb(char *filename, int build_cache);
+int execb(const char *filename, int build_cache);
 
 /* Low level function to actually execute the bytecode. Do not call directly.
  *

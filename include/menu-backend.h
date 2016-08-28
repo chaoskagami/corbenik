@@ -24,7 +24,6 @@ struct options_s
     func_call_t func;  ///< Function to call on selection of option
     get_value_t value; ///< Function to get the value of the menu entry
     uint8_t indent;    ///< Indentation/ownership level of menu.
-    char pad[300];
 };
 
 /* Set the accent foreground color for a screen.

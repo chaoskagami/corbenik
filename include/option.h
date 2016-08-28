@@ -1,7 +1,7 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
-#define config_version 2      ///< Static version of the config. Updated when the config has changed in an
+#define config_version 3      ///< Static version of the config. Updated when the config has changed in an
                               ///< incompatible way.
 
 #define CONFIG_MAGIC   "OVAN" ///< Magic to identify config files.

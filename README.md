@@ -227,7 +227,7 @@ Credits
  * RE work, screen init, and sdmmc.c/h
 
 @delebile
- * RE work, screen init, and also the A9LH version I personally use.
+ * RE work, screen init, 2.x firmprot, and also the A9LH version I personally use.
 
 @smealum
  * Pioneering the open source hax frontier. (No actual code of his is in this repo itself, but ctrulib is basically essential for everything.)

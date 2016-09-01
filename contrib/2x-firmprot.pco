@@ -1,0 +1,19 @@
+# $name  FIRM Protection (2.x)
+# $desc  Patches FIRM writes in 2.x FIRMs.
+# $ver   01
+# $uuid  0004
+
+# This patch was originally implemented in Luma3ds and I really
+# haven't given it the testing needed.
+
+# Credit goes to @AuroraWright, @TuxSH, and @delebile.
+# According to @AuroraWright, @delebile actually came up with the patch.
+
+# This is also identical to the safemode patch for FIRM protection
+# if you're astute. Corbenik doesn't support that, though.
+
+rel native_p9
+
+find  041E1DDB
+abortnf
+set   00241DE0

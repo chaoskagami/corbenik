@@ -32,7 +32,7 @@
 #define PDC1_FRAMEBUFFER_SETUP_FBB_ADDR_1 PDC1_FRAMEBUFFER_SETUP_REG(0x94)
 #define PDC1_FRAMEBUFFER_SETUP_FBB_ADDR_2 PDC1_FRAMEBUFFER_SETUP_REG(0x98)
 
-#define MAKE_FRAMEBUFFER_PIXFMT(col, plx, screen) ((col & 0x7) | ((plx & 1) << 5) | ((screen & 1) << 6) | 0x80300)
+#define MAKE_FRAMEBUFFER_PIXFMT(col, plx, screen) ((col & 0x7) | ((plx & 1) << 5) | ((screen & 1) << 6))
 
 #define RGBA8        0
 #define RGB8         1

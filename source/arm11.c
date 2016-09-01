@@ -152,10 +152,13 @@ void screen_mode(uint32_t mode) {
     switch(mode) {
         case RGB8:
             stride *= 3;
+            break;
         case RGBA8:
             stride *= 4;
+            break;
         default:
             stride *= 2;
+            break;
     }
 
     init_top    = MAKE_FRAMEBUFFER_PIXFMT(mode, 0, 1);

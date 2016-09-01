@@ -28,7 +28,7 @@
 //   This is less a permanent solution and more a quickfix since I'd rather use libctr11
 //   whenever Gelex finishes it. Don't rely on it staying here.
 
-//   Also, you are correct in thinking this looks near nothing like Luma's code at this point.
+//   Also, this contains quite a few changes from luma's screen.c, which is where it originates from.
 
 #include <common.h>
 #include <ctr9/io.h>

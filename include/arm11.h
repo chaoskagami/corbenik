@@ -35,7 +35,7 @@
 #define MAKE_FRAMEBUFFER_PIXFMT(col, plx, screen) ((col & 0x7) | ((plx & 1) << 5) | ((screen & 1) << 6) | 0x80300)
 
 #define RGBA8        0
-#define BGR8         1
+#define RGB8         1
 #define RGB565_OES   2
 #define RGB5_A1_OES  3
 #define RGBA4_OES    4

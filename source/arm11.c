@@ -148,9 +148,15 @@ void screen_mode(uint32_t mode) {
 
     bright = brightness[config->options[OPTION_BRIGHTNESS]];
 
-    stride = 240 * 3;
-    if (mode == RGBA8)
-        stride = 240 * 4;
+    stride = 240;
+    switch(mode) {
+        case RGB8:
+            stride *= 3;
+        case RGBA8:
+            stride *= 4;
+        default:
+            stride *= 2;
+    }
 
     init_top    = MAKE_FRAMEBUFFER_PIXFMT(mode, 0, 1);
     init_bottom = MAKE_FRAMEBUFFER_PIXFMT(mode, 0, 0);

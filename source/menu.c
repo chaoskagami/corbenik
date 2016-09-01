@@ -6,6 +6,25 @@
 struct options_s *patches = NULL;
 uint8_t *enable_list;
 
+#define MAX_FIRMS 50
+struct options_s *firm = NULL;
+
+static int current_menu_index_patches = 0;
+static int desc_is_fname_sto = 0;
+
+#if defined(CHAINLOADER) && CHAINLOADER == 1
+void chainload_menu();
+#endif
+
+#ifndef REL
+#define REL "master"
+#endif
+
+#define ln(s) { s, "", unselectable, 0, NULL, NULL, 0, 0 }
+#define lnh(s) { s, "", unselectable, 0, NULL, NULL, 0, 1 }
+
+void config_main_menu();
+
 static struct options_s options[] = {
     // Patches.
     { "General Options", "", unselectable, 0, NULL, NULL, 0, 1 },
@@ -93,9 +112,75 @@ static struct options_s options[] = {
     { NULL, NULL, 0, 0, NULL, NULL, 0, 0 }, // cursor_min and cursor_max are stored in the last two.
 };
 
-static int current_menu_index_patches = 0;
+static struct options_s config_opts[] = {
+    { "Options",
+      "Internal options for the CFW.\nThese are part of " FW_NAME " itself.",
+      option, options, (void(*)(void*))show_menu, NULL, 0, 0 },
+    { "Patches",
+      "External bytecode patches found in `" PATH_PATCHES "`.\nYou can choose which to enable.",
+      option, NULL, (void(*)(void*))show_menu, NULL, 0, 0 },
 
-static int desc_is_fname_sto = 0;
+    // Sentinel.
+    { NULL, NULL, 0, 0, NULL, NULL, 0, 0 }, // cursor_min and cursor_max are stored in the last two.
+};
+
+static struct options_s help_d[] = {
+    lnh("About"),
+    ln("  This is another 3DS CFW for power users."),
+    ln("  It seeks to address some faults in other"),
+    ln("  CFWs and is generally just another choice"),
+    ln("  for users - but primarily is intended for"),
+    ln("  developers. It is not for the faint of heart."),
+    ln(""),
+    lnh("Usage"),
+    ln("  A         -> Select/Toggle/Increment"),
+    ln("  B         -> Back/Boot"),
+    ln("  X         -> Decrement"),
+    ln("  Select    -> Help/Information"),
+    ln("  Down      -> Down"),
+    ln("  Right     -> Down five"),
+    ln("  Up        -> Up"),
+    ln("  Left      -> Up five"),
+    ln("  L+R+Start -> Menu Screenshot"),
+    ln(""),
+    lnh("Credits"),
+    ln("  @mid-kid, @Wolfvak, @Reisyukaku, @AuroraWright"),
+    ln("  @d0k3, @TuxSH, @Steveice10, @delebile,"),
+    ln("  @Normmatt, @b1l1s, @dark-samus, @TiniVi,"),
+    ln("  @gemarcano, and anyone else I may have"),
+    ln("  forgotten (yell at me, please!)"),
+    ln(""),
+    lnh("  <https://github.com/chaoskagami/corbenik>"),
+    { NULL, NULL, unselectable, 0, NULL, NULL, 0, 0 }, // cursor_min and cursor_max are stored in the last two.
+};
+
+static struct options_s main_s[] = {
+    { "Configuration",
+      "Configuration options for the CFW.",
+      option, 0, config_main_menu, NULL, 0, 0 },
+    { "Readme",
+      "Mini-readme.\nWhy are you opening help on this, though?\nThat's kind of silly.",
+      option, help_d, (void(*)(void*))show_menu, NULL, 0, 0 },
+    { "Reboot",
+      "Reboots the console.",
+      option, 0, reset, NULL, 0, 0 },
+    { "Power off",
+      "Powers off the console.",
+      option, 0, poweroff, NULL, 0, 0 },
+#if defined(CHAINLOADER) && CHAINLOADER == 1
+    { "Chainload",
+      "Boot another ARM9 payload file.",
+       option, 0, chainload_menu, NULL, 0, 0 },
+#endif
+    { "Boot Firmware",
+      "Patches the firmware, and boots it.",
+      break_menu, 0, NULL, NULL, 0, 0 },
+
+    // Sentinel.
+    { NULL, NULL, 0, 0, NULL, NULL, 0, 0 }, // cursor_min and cursor_max are stored in the last two.
+};
+
+//===================================================================================================
 
 char* patch_get_enable(void* val) {
     uint32_t opt = (uint32_t)val;
@@ -147,42 +232,71 @@ void patch_func(char* fpath) {
     }
 }
 
-#ifndef REL
-#define REL "master"
+//===================================================================================================
+#if 0
+char* get_nfirm(void* val) {
+    return config->firms[0];
+}
+
+char* get_tfirm(void* val) {
+    return config->firms[1];
+}
+
+char* get_afirm(void* val) {
+    return config->firms[2];
+}
+
+char* patch_get_enable(void* val) {
+    uint32_t opt = (uint32_t)val;
+    uint32_t raw = enable_list[opt];
+    static char ret[2] = " ";
+    ret[0] = ' ';
+    if (raw == 1)
+        ret[0] = '*';
+    return ret;
+}
+
+void patch_set_enable(void* val) {
+    uint32_t opt = (uint32_t)val;
+    enable_list[opt] = !enable_list[opt];
+}
+
+void patch_func(char* fpath) {
+    FILINFO f2;
+    if (f_stat(fpath, &f2) != FR_OK)
+        return;
+
+    if (!(f2.fattrib & AM_DIR)) {
+        struct system_patch p;
+        read_file(&p, fpath, sizeof(struct system_patch));
+
+        if (memcmp(p.magic, "AIDA", 4))
+            return;
+
+        patches[current_menu_index_patches].name = strdup_self(p.name);
+        if (desc_is_fname_sto)
+            patches[current_menu_index_patches].param = strdup_self(fpath);
+        else
+            patches[current_menu_index_patches].desc = strdup_self(p.desc);
+
+        uint32_t val = p.uuid;
+
+        patches[current_menu_index_patches].param = (void*)val;
+
+        patches[current_menu_index_patches].handle = option;
+        patches[current_menu_index_patches].indent = 0;
+
+        patches[current_menu_index_patches].func  = patch_set_enable;
+        patches[current_menu_index_patches].value = patch_get_enable;
+
+        if (desc_is_fname_sto)
+            enable_list[p.uuid] = 0;
+
+        current_menu_index_patches++;
+    }
+}
 #endif
-
-#define ln(s) { s, "", unselectable, 0, NULL, NULL, 0, 0 }
-#define lnh(s) { s, "", unselectable, 0, NULL, NULL, 0, 1 }
-
-static struct options_s help_d[] = {
-    lnh("About"),
-    ln("  This is another 3DS CFW for power users."),
-    ln("  It seeks to address some faults in other"),
-    ln("  CFWs and is generally just another choice"),
-    ln("  for users - but primarily is intended for"),
-    ln("  developers. It is not for the faint of heart."),
-    ln(""),
-    lnh("Usage"),
-    ln("  A         -> Select/Toggle/Increment"),
-    ln("  B         -> Back/Boot"),
-    ln("  X         -> Decrement"),
-    ln("  Select    -> Help/Information"),
-    ln("  Down      -> Down"),
-    ln("  Right     -> Down five"),
-    ln("  Up        -> Up"),
-    ln("  Left      -> Up five"),
-    ln("  L+R+Start -> Menu Screenshot"),
-    ln(""),
-    lnh("Credits"),
-    ln("  @mid-kid, @Wolfvak, @Reisyukaku, @AuroraWright"),
-    ln("  @d0k3, @TuxSH, @Steveice10, @delebile,"),
-    ln("  @Normmatt, @b1l1s, @dark-samus, @TiniVi,"),
-    ln("  @gemarcano, and anyone else I may have"),
-    ln("  forgotten (yell at me, please!)"),
-    ln(""),
-    lnh("  <https://github.com/chaoskagami/corbenik>"),
-    { NULL, NULL, unselectable, 0, NULL, NULL, 0, 0 }, // cursor_min and cursor_max are stored in the last two.
-};
+//===================================================================================================
 
 void
 reset()
@@ -209,22 +323,6 @@ poweroff()
 
     ctr_system_poweroff();
 }
-
-#if defined(CHAINLOADER) && CHAINLOADER == 1
-void chainload_menu();
-#endif
-
-static struct options_s config_opts[] = {
-    { "Options",
-      "Internal options for the CFW.\nThese are part of " FW_NAME " itself.",
-      option, options, (void(*)(void*))show_menu, NULL, 0, 0 },
-    { "Patches",
-      "External bytecode patches found in `" PATH_PATCHES "`.\nYou can choose which to enable.",
-      option, NULL, (void(*)(void*))show_menu, NULL, 0, 0 },
-
-    // Sentinel.
-    { NULL, NULL, 0, 0, NULL, NULL, 0, 0 }, // cursor_min and cursor_max are stored in the last two.
-};
 
 // This is dual purpose. When we actually list
 // patches to build the cache - desc_is_fname
@@ -264,32 +362,6 @@ void config_main_menu() {
 
     generate_patch_cache();
 }
-
-static struct options_s main_s[] = {
-    { "Configuration",
-      "Configuration options for the CFW.",
-      option, 0, config_main_menu, NULL, 0, 0 },
-    { "Readme",
-      "Mini-readme.\nWhy are you opening help on this, though?\nThat's kind of silly.",
-      option, help_d, (void(*)(void*))show_menu, NULL, 0, 0 },
-    { "Reboot",
-      "Reboots the console.",
-      option, 0, reset, NULL, 0, 0 },
-    { "Power off",
-      "Powers off the console.",
-      option, 0, poweroff, NULL, 0, 0 },
-#if defined(CHAINLOADER) && CHAINLOADER == 1
-    { "Chainload",
-      "Boot another ARM9 payload file.",
-       option, 0, chainload_menu, NULL, 0, 0 },
-#endif
-    { "Boot Firmware",
-      "Patches the firmware, and boots it.",
-      break_menu, 0, NULL, NULL, 0, 0 },
-
-    // Sentinel.
-    { NULL, NULL, 0, 0, NULL, NULL, 0, 0 }, // cursor_min and cursor_max are stored in the last two.
-};
 
 void
 menu_handler()

@@ -11,6 +11,13 @@ enum consoles
     console_n3ds  ///< N3DS
 };
 
+enum firm_type
+{
+    type_native, ///< NATIVE FIRM
+    type_twl,    ///< TWL FIRM
+    type_agb     ///< AGB FIRM
+};
+
 /* Storage struct for version information of FIRMs
  */
 struct firm_signature
@@ -19,6 +26,7 @@ struct firm_signature
     unsigned int version;    ///< CDN/contents version of FIRM
     char version_string[16]; ///< Human readable version number
     enum consoles console;   ///< Console type
+    enum firm_type type;     ///< Type of FIRM.
 };
 
 extern firm_h *firm_loc;
@@ -66,5 +74,9 @@ void boot_firm();
 /* Boots the CFW, generating caches and applying patches as-needed
  */
 void boot_cfw();
+
+/* Loads a firmware off disk, returning it. The memory should be free()'d when done, unless you plan to boot.
+ */
+firm_h* load_firm(const char *path, const char *path_firmkey, const char *path_cetk, uint32_t *size);
 
 #endif

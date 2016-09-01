@@ -2,6 +2,8 @@
 
 // We use the firm's section 0's hash to identify the version
 struct firm_signature firm_signatures[] = {
+    // NFIRM (old)
+
     {.sig = { 0xEE, 0xE2, 0x81, 0x2E, 0xB9, 0x10, 0x0D, 0x03, 0xFE, 0xA2, 0x3F, 0x44, 0xB5, 0x1C, 0xB3, 0x5E },
      .version = 0x1F,
      .version_string = "4.1.0",
@@ -34,6 +36,9 @@ struct firm_signature firm_signatures[] = {
      .version = 0x52,
      .version_string = "11.0.0",
      .console = console_o3ds },
+
+    // NFIRM (new)
+
     {.sig = { 0x31, 0xCC, 0x46, 0xCD, 0x61, 0x7A, 0xE7, 0x13, 0x7F, 0xE5, 0xFC, 0x20, 0x46, 0x91, 0x6A, 0xBB },
      .version = 0x04,
      .version_string = "9.0.0",
@@ -54,6 +59,9 @@ struct firm_signature firm_signatures[] = {
      .version = 0x21,
      .version_string = "11.0.0",
      .console = console_n3ds },
+
+    // TWL
+
     {.sig = { 0xE8, 0xB8, 0x82, 0xF5, 0x8C, 0xC4, 0x1B, 0x24, 0x05, 0x60, 0x6D, 0xB8, 0x74, 0xF5, 0xE5, 0xDD },
      .version = 0x16,
      .version_string = "6.2.0",
@@ -62,6 +70,9 @@ struct firm_signature firm_signatures[] = {
      .version = 0x00,
      .version_string = "9.0.0",
      .console = console_n3ds },
+
+    // AGB
+
     {.sig = { 0x65, 0xB7, 0x55, 0x78, 0x97, 0xE6, 0x5C, 0xD6, 0x11, 0x74, 0x95, 0xDD, 0x61, 0xE8, 0x08, 0x40 },
      .version = 0x0B,
      .version_string = "6.0.0",
@@ -78,7 +89,7 @@ struct firm_signature firm_signatures[] = {
      .version_string = "Dev 11.4",
      .console = console_o3ds },
 
-    {.version = 0xFF, .version_string = "Not found" } // Terminate list
+    {.version = 0xFF, .version_string = "Unknown" } // Terminate list
 };
 
 struct firm_signature *

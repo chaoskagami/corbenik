@@ -29,7 +29,7 @@ static int update_96_keys = 0;
 static volatile uint32_t *const a11_entry = (volatile uint32_t *)0x1FFFFFF8;
 
 // Fwd decl
-int decrypt_arm9bin(arm9bin_h *header, uint64_t firm_title, uint8_t version);
+int decrypt_arm9bin(arm9bin_h *header, struct firm_signature *sig);
 
 #define SECTOR_SIZE 0x200
 
@@ -72,10 +72,13 @@ void dump_firm(firm_h** buffer, uint8_t index) {
 
     uint8_t detver = 0;
 
+    struct firm_signature s;
+    s.version = 0;
+    s.type = type_native;
     if(index == 1)
-        detver = 0x10;
+        s.version = 0x10;
 
-    if(decrypt_arm9bin((arm9bin_h*)((uint8_t*)firm + firm->section[2].offset), NATIVE_FIRM_TITLEID, detver)) {
+    if(decrypt_arm9bin((arm9bin_h*)((uint8_t*)firm + firm->section[2].offset), &s)) {
         abort("  Failed to decrypt FIRM%u arm9loader.\n", index);
     }
 
@@ -261,11 +264,11 @@ decrypt_firm_title(firm_h *dest, ncch_h *ncch, uint32_t *size, void *key)
 }
 
 int
-decrypt_arm9bin(arm9bin_h *header, uint64_t firm_title, uint8_t version)
+decrypt_arm9bin(arm9bin_h *header, struct firm_signature *sig)
 {
     uint8_t slot = 0x15;
 
-    if (firm_title == NATIVE_FIRM_TITLEID && version > 0x0F) {
+    if (sig->type == type_native && sig->version > 0x0F) {
         uint8_t decrypted_keyx[AES_BLOCK_SIZE];
 
         slot0x11key96_init();
@@ -285,10 +288,10 @@ decrypt_arm9bin(arm9bin_h *header, uint64_t firm_title, uint8_t version)
     use_aeskey(slot);
     ctr_decrypt(arm9bin, arm9bin, (size_t)size / AES_BLOCK_SIZE, AES_CNT_CTRNAND_MODE, header->ctr);
 
-    if (firm_title == NATIVE_FIRM_TITLEID)
+    if (sig->type == type_native)
         return *(uint32_t *)arm9bin != ARM9BIN_MAGIC;
 
-    else if (firm_title == AGB_FIRM_TITLEID || firm_title == TWL_FIRM_TITLEID)
+    else if (sig->type == type_twl || sig->type == type_agb)
         return *(uint32_t *)arm9bin != LGY_ARM9BIN_MAGIC;
 
     return 1;
@@ -325,25 +328,34 @@ decrypt_firm(firm_h *dest, const char *path_firmkey, const char *path_cetk, uint
 
 extern int patch_services();
 
-int
-load_firm(firm_h *dest, const char *path, const char *path_firmkey, const char *path_cetk, uint32_t *size, uint64_t firm_title)
+firm_h*
+load_firm(const char *path, const char *path_firmkey, const char *path_cetk, uint32_t *size)
 {
+    firm_h *dest;
+
     int status = 0;
     int firmware_changed = 0;
 
-    if (read_file(dest, path, *size) == 0) {
+    FILE* f = fopen(path, "r");
+    if (!f) {
         fprintf(stderr, "  FIRM file is missing.\n");
-        return 1;
-    } else {
-        fprintf(stderr, "  Loaded FIRM off filesystem\n");
+        return NULL;
     }
+    *size = fsize(f);
+
+    dest = (firm_h*)malloc(*size);
+
+    fread(dest, 1, *size, f);
+
+    fclose(f);
+    fprintf(stderr, "  Loaded FIRM off filesystem\n");
 
     // Check and decrypt FIRM if it is encrypted.
     if (dest->magic != FIRM_MAGIC) {
         status = decrypt_firm(dest, path_firmkey, path_cetk, size);
         if (status != 0) {
             fprintf(stderr, "  Decryption seems to have failed\n");
-            return 1;
+            return NULL;
         }
         firmware_changed = 1; // Decryption performed.
     } else {
@@ -351,6 +363,43 @@ load_firm(firm_h *dest, const char *path, const char *path_firmkey, const char *
     }
 
     struct firm_signature *fsig = get_firm_info(dest);
+    int unknown_firm_loaded = 0;
+
+    if (fsig->version == 0xFF) {
+        // Oh boy, here's a fun case. We have no clue what the user is loading, so
+        // a number of additional sanity checks and autodetection have to be done.
+
+        unknown_firm_loaded = 1;
+
+        fsig->type = type_native;
+
+        if (dest->section[3].size != 0) {
+            // Check for the presence of a TWL/AGB only sysmodule
+            if( !memcmp((char*)dest + dest->section[0].offset + 0x400, "TwlBg", 5))
+                fsig->type = type_twl;
+            else if( !memcmp((char*)dest + dest->section[0].offset + 0x400, "AgbBg", 5))
+                fsig->type = type_agb;
+        }
+
+        for (firm_section_h *section = dest->section; section < dest->section + 4; section++) {
+            if (section->type == FIRM_TYPE_ARM9) {
+                if (fsig->type == type_native) {
+                    char* k9l = (char*)memfind((uint8_t*)dest + section->offset, section->size, "K9L", 3);
+                    if (k9l == NULL) // O3DS.
+                        fsig->console = console_o3ds;
+                    else // N3DS.
+                        fsig->console = console_n3ds;
+                } else {
+                    if (section->address == 0x08006800) // O3DS entry
+                        fsig->console = console_o3ds;
+                    else if (section->address == 0x08006000) // N3DS entry
+                        fsig->console = console_n3ds;
+                }
+
+                break;
+            }
+        }
+    }
 
     // The N3DS firm has an additional encryption layer for ARM9
     if (fsig->console == console_n3ds) {
@@ -360,21 +409,21 @@ load_firm(firm_h *dest, const char *path, const char *path_firmkey, const char *
                 // Check whether the arm9bin is encrypted.
                 int arm9bin_iscrypt = 0;
                 uint32_t magic = *(uint32_t *)((uintptr_t)dest + section->offset + 0x800);
-                if (firm_title == NATIVE_FIRM_TITLEID)
+                if (fsig->type == type_native)
                     arm9bin_iscrypt = (magic != ARM9BIN_MAGIC);
-                else if (firm_title == AGB_FIRM_TITLEID || firm_title == TWL_FIRM_TITLEID)
+                else if (fsig->type == type_twl || fsig->type == type_twl)
                     arm9bin_iscrypt = (magic != LGY_ARM9BIN_MAGIC);
 
                 if (arm9bin_iscrypt) {
                     // Decrypt the arm9bin.
-                    if (decrypt_arm9bin((arm9bin_h *)((uintptr_t)dest + section->offset), firm_title, fsig->version)) {
+                    if (decrypt_arm9bin((arm9bin_h *)((uintptr_t)dest + section->offset), fsig)) {
                         fprintf(stderr, "  ARM9 segment is encrypted\n");
-                        return 1;
+                        return NULL;
                     }
                     firmware_changed = 1; // Decryption of arm9bin performed.
                 } else {
                     fprintf(stderr, "  ARM9 segment is decrypted\n");
-                    if (firm_title == NATIVE_FIRM_TITLEID && fsig->version > 0x0F) {
+                    if (fsig->type == type_native && fsig->version > 0x0F) {
                         slot0x11key96_init(); // This has to be loaded
                                               // regardless, otherwise boot will
                                               // fail.
@@ -397,16 +446,16 @@ load_firm(firm_h *dest, const char *path, const char *path_firmkey, const char *
         fprintf(stderr, "  Patching arm9 entrypoint\n");
 
         // Patch the entrypoint to skip arm9loader
-        if (firm_title == NATIVE_FIRM_TITLEID) {
+        if (fsig->type == type_native) {
             dest->a9Entry = 0x0801B01C;
-        } else if (firm_title == AGB_FIRM_TITLEID || firm_title == TWL_FIRM_TITLEID) {
+        } else if (fsig->type == type_twl || fsig->type == type_agb) {
             dest->a9Entry = 0x0801301C;
         }
         // The entrypoints seem to be the same across different FIRM versions,
         //  so we don't change them.
     }
 
-    return 0;
+    return dest;
 }
 
 __attribute__ ((noreturn))
@@ -516,19 +565,15 @@ load_firms()
 
     fprintf(stderr, "FIRM load triggered.\n");
 
-    firm_loc = malloc(firm_size);
-
     fprintf(stderr, "Loading NATIVE_FIRM\n");
-    if (load_firm(firm_loc, get_opt((void*)OPTION_NFIRM_PATH), PATH_NATIVE_FIRMKEY, PATH_NATIVE_CETK, &firm_size, NATIVE_FIRM_TITLEID) != 0) {
+    if ((firm_loc = load_firm(get_opt((void*)OPTION_NFIRM_PATH), PATH_NATIVE_FIRMKEY, PATH_NATIVE_CETK, &firm_size)) != NULL) {
         abort("\n  Failed to load NATIVE_FIRM.\n");
     }
     find_proc9(firm_loc, &firm_proc9, &firm_p9_exefs);
     fprintf(stderr, "  Ver: %x, %u\n", get_firm_info(firm_loc)->version, get_firm_info(firm_loc)->console );
 
-    twl_firm_loc = malloc(twl_firm_size);
-
     fprintf(stderr, "TWL_FIRM\n");
-    if (load_firm(twl_firm_loc, get_opt((void*)OPTION_TFIRM_PATH), PATH_TWL_FIRMKEY, PATH_TWL_CETK, &twl_firm_size, TWL_FIRM_TITLEID) != 0) {
+    if ((twl_firm_loc = load_firm(get_opt((void*)OPTION_TFIRM_PATH), PATH_TWL_FIRMKEY, PATH_TWL_CETK, &twl_firm_size)) != NULL) {
         fprintf(stderr, "\n  TWL_FIRM failed to load.\n");
         state = 1;
     } else {
@@ -536,10 +581,8 @@ load_firms()
         fprintf(stderr, "  Ver: %x, %u\n", get_firm_info(twl_firm_loc)->version, get_firm_info(twl_firm_loc)->console );
     }
 
-    agb_firm_loc = malloc(agb_firm_size);
-
     fprintf(stderr, "AGB_FIRM\n");
-    if (load_firm(agb_firm_loc, get_opt((void*)OPTION_AFIRM_PATH), PATH_AGB_FIRMKEY, PATH_AGB_CETK, &agb_firm_size, AGB_FIRM_TITLEID) != 0) {
+    if ((agb_firm_loc = load_firm(get_opt((void*)OPTION_AFIRM_PATH), PATH_AGB_FIRMKEY, PATH_AGB_CETK, &agb_firm_size)) != NULL) {
         fprintf(stderr, "\n  AGB_FIRM failed to load.\n");
         state = 1;
     } else {

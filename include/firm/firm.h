@@ -22,9 +22,7 @@ enum firm_type
  */
 struct firm_signature
 {
-    uint8_t sig[0x10];       ///< First 0x10 bytes of first section hash (used for identification)
-    unsigned int version;    ///< CDN/contents version of FIRM
-    char version_string[16]; ///< Human readable version number
+    unsigned int k9l;    ///< CDN/contents version of FIRM
     enum consoles console;   ///< Console type
     enum firm_type type;     ///< Type of FIRM.
 };

@@ -1,125 +1,79 @@
 #include <common.h>
 
-// We use the firm's section 0's hash to identify the version
-struct firm_signature firm_signatures[] = {
-    // NFIRM (old)
-
-    {.sig = { 0xEE, 0xE2, 0x81, 0x2E, 0xB9, 0x10, 0x0D, 0x03, 0xFE, 0xA2, 0x3F, 0x44, 0xB5, 0x1C, 0xB3, 0x5E },
-     .version = 0x1F,
-     .version_string = "4.1.0",
-     .type = type_native,
-     .console = console_o3ds },
-    {.sig = { 0x8C, 0x29, 0xDA, 0x7B, 0xB5, 0x5F, 0xFE, 0x44, 0x1F, 0x66, 0x79, 0x70, 0x8E, 0xE4, 0x42, 0xE3 },
-     .version = 0x2A,
-     .version_string = "6.1.0",
-     .type = type_native,
-     .console = console_o3ds },
-    {.sig = { 0x1D, 0x96, 0x80, 0xD9, 0x0A, 0xA9, 0xDB, 0xE8, 0x29, 0x77, 0xCB, 0x7D, 0x90, 0x55, 0xB7, 0xF9 },
-     .version = 0x30,
-     .version_string = "7.2.0",
-     .type = type_native,
-     .console = console_o3ds },
-    {.sig = { 0x3B, 0x61, 0x2E, 0xBA, 0x42, 0xAE, 0x24, 0x46, 0xAD, 0x60, 0x2F, 0x7B, 0x52, 0x16, 0x82, 0x91 },
-     .version = 0x37,
-     .version_string = "8.0.0",
-     .type = type_native,
-     .console = console_o3ds },
-    {.sig = { 0x3F, 0xBF, 0x14, 0x06, 0x33, 0x77, 0x82, 0xDE, 0xB2, 0x68, 0x83, 0x01, 0x6B, 0x1A, 0x71, 0x69 },
-     .version = 0x38,
-     .version_string = "9.0.0",
-     .type = type_native,
-     .console = console_o3ds },
-    {.sig = { 0x5C, 0x6A, 0x51, 0xF3, 0x79, 0x4D, 0x21, 0x91, 0x0B, 0xBB, 0xFD, 0x17, 0x7B, 0x72, 0x6B, 0x59 },
-     .version = 0x49,
-     .version_string = "9.6.0",
-     .type = type_native,
-     .console = console_o3ds },
-    {.sig = { 0xF5, 0x7E, 0xC3, 0x86, 0x1F, 0x8D, 0x8E, 0xFB, 0x44, 0x61, 0xF3, 0x16, 0x51, 0x0A, 0x57, 0x7D },
-     .version = 0x50,
-     .version_string = "10.4.0",
-     .type = type_native,
-     .console = console_o3ds },
-    {.sig = { 0xE9, 0xAD, 0x74, 0x9D, 0x46, 0x9C, 0x9C, 0xF4, 0x96, 0x9E, 0x1A, 0x7A, 0xDF, 0x40, 0x2A, 0x82 },
-     .version = 0x52,
-     .version_string = "11.0.0",
-     .type = type_native,
-     .console = console_o3ds },
-
-    // NFIRM (new)
-
-    {.sig = { 0x31, 0xCC, 0x46, 0xCD, 0x61, 0x7A, 0xE7, 0x13, 0x7F, 0xE5, 0xFC, 0x20, 0x46, 0x91, 0x6A, 0xBB },
-     .version = 0x04,
-     .version_string = "9.0.0",
-     .type = type_native,
-     .console = console_n3ds },
-    {.sig = { 0x40, 0x35, 0x6C, 0x9A, 0x24, 0x36, 0x93, 0x7B, 0x76, 0xFE, 0x5D, 0xB1, 0x4D, 0x05, 0x06, 0x52 },
-     .version = 0x0F,
-     .version_string = "9.5.0",
-     .type = type_native,
-     .console = console_n3ds },
-    {.sig = { 0x07, 0xFE, 0x9A, 0x62, 0x3F, 0xDE, 0x54, 0xC1, 0x9B, 0x06, 0x91, 0xD8, 0x4F, 0x44, 0x9C, 0x21 },
-     .version = 0x1B,
-     .version_string = "10.2.0",
-     .type = type_native,
-     .console = console_n3ds },
-    {.sig = { 0x1A, 0x56, 0x5C, 0xFF, 0xC9, 0xCC, 0x62, 0xBB, 0x2B, 0xC2, 0x23, 0xB6, 0x4F, 0x48, 0xD1, 0xCC },
-     .version = 0x1F,
-     .version_string = "10.4.0",
-     .type = type_native,
-     .console = console_n3ds },
-    {.sig = { 0x52, 0x30, 0x0F, 0x55, 0xA2, 0x64, 0x4E, 0xFF, 0x96, 0x90, 0xF0, 0xE5, 0x6E, 0xC8, 0x2E, 0xB3 },
-     .version = 0x21,
-     .version_string = "11.0.0",
-     .type = type_native,
-     .console = console_n3ds },
-
-    // TWL
-
-    {.sig = { 0xE8, 0xB8, 0x82, 0xF5, 0x8C, 0xC4, 0x1B, 0x24, 0x05, 0x60, 0x6D, 0xB8, 0x74, 0xF5, 0xE5, 0xDD },
-     .version = 0x16,
-     .version_string = "6.2.0",
-     .type = type_twl,
-     .console = console_o3ds },
-    {.sig = { 0x0F, 0x05, 0xC5, 0xF3, 0x60, 0x83, 0x8B, 0x9D, 0xC8, 0x44, 0x3F, 0xB3, 0x06, 0x4D, 0x30, 0xC7 },
-     .version = 0x00,
-     .version_string = "9.0.0",
-     .type = type_twl,
-     .console = console_n3ds },
-
-    // AGB
-
-    {.sig = { 0x65, 0xB7, 0x55, 0x78, 0x97, 0xE6, 0x5C, 0xD6, 0x11, 0x74, 0x95, 0xDD, 0x61, 0xE8, 0x08, 0x40 },
-     .version = 0x0B,
-     .version_string = "6.0.0",
-     .type = type_agb,
-     .console = console_o3ds },
-    {.sig = { 0xAF, 0x81, 0xA1, 0xAB, 0xBA, 0xAC, 0xAC, 0xA7, 0x30, 0xE8, 0xD8, 0x74, 0x7C, 0x47, 0x1C, 0x5D },
-     .version = 0x00,
-     .version_string = "9.0.0",
-     .type = type_agb,
-     .console = console_n3ds },
-
-    // I don't actually know what legitimate situation the below firmware would be encountered in.
-    // Better safe than sorry.
-    {.sig = { 0x16, 0x3B, 0x88, 0xD1, 0x7D, 0x7C, 0x13, 0x19, 0xB5, 0x8C, 0x7D, 0x59, 0x16, 0x81, 0x02, 0x03 },
-     .version = 0x50, // I don't actually know, honestly. Developer 11.4 seems to be 10.X based.
-     .version_string = "Dev 11.4",
-     .console = console_o3ds },
-
-    {.version = 0xFF, .version_string = "Unknown" } // Terminate list
-};
-
 struct firm_signature *
 get_firm_info(firm_h *firm)
 {
-    for (struct firm_signature *signature = firm_signatures;; signature++) {
-        if (memcmp(signature->sig, firm->section[0].hash, 0x10) == 0) {
-            return signature;
+    // What follows is a heuristic to detect the firmware's properties. Checks are as follows:
+
+    struct firm_signature *signature = (struct firm_signature*)malloc(sizeof(struct firm_signature));
+
+    signature->type = type_native;
+
+    // Test: Is section #4 a stub
+    //   True: If true, must be NFIRM.
+    //   False: Continue checking. No conclusions drawn.
+    //   Why: All current existing versions on NFIRM and ONLY NFIRM have a
+    //        non-existent section #4. TWL and AGB both do, so this automatically rules them out.
+
+    if (firm->section[3].size != 0) {
+        // Test: Check for a specific sysModule name
+        //   True: If true, must be the corresponding FIRM
+        //   False: No conclusions unless both fail, which means this is NFIRM (see caveat)
+        //   Why: TWL and AGB both contain a system module that handles various tasks.
+        //        Neither of these can be misdetected and they only occur in the correct firmtype.
+        //   Caveat: NFIRM. If we hit this here, unfortunate fact; either TWL and AGB are no longer
+        //           sane or NFIRM has a 4th segment; this would need investigation immediately.
+
+        // Check for the presence of a TWL/AGB only sysmodule
+        if( memfind((uint8_t*)firm + firm->section[0].offset, firm->section[0].size, "TwlBg", 5)) {
+            signature->type = type_twl;
+//            fprintf(stderr, "  TwlBg module found; probably TWL\n");
+        } else if( memfind((uint8_t*)firm + firm->section[0].offset, firm->section[0].size, "AgbBg", 5)) {
+            signature->type = type_agb;
+//            fprintf(stderr, "  AgbBg module found; probably AGB\n");
+        } else {
+//            fprintf(stderr, "  Warning: Native, but there is a 4th section. Report this IMMEDIATELY.\n");
         }
-        if (signature->version == 0xFF) {
-            return signature; // Error. Not found, invalid, etc.
+    } else {
+//        fprintf(stderr, "  Section #4 is empty; this is probably native\n");
+    }
+
+    for (firm_section_h *section = firm->section; section < firm->section + 4; section++) {
+        if (section->type == FIRM_TYPE_ARM9) {
+            if (signature->type == type_native) {
+                // Test: Can we find the string K9L in the arm9bin?
+                //   True: This is a N3DS FIRM
+                //   False: This is an O3DS FIRM
+                //   Why: New3ds arm9bins all use this fancy thing called K9L or Kernel9Loader.
+                //        You probably know this better by the same Arm9Loader (which isn't correct)
+                //        Only N3DS FIRMs have this property.
+                uint8_t* k9l = (uint8_t*)memfind((uint8_t*)firm + section->offset, section->size, "K9L", 3);
+                if (k9l == NULL) { // O3DS.
+//                    fprintf(stderr, "  No K9L; this is likely an O3DS FIRM\n");
+                    signature->console = console_o3ds;
+                } else { // N3DS.
+//                    fprintf(stderr, "  K9L found; this is likely an N3DS FIRM\n");
+                    signature->console = console_n3ds;
+                    signature->k9l = (unsigned int)(k9l[3] - '0'); // String is "K9LN" where N is the version
+                }
+            } else {
+                // Test: Address of segment
+                //   0x8006800: O3DS
+                //   0x8006000: N3DS
+                //   Why: O3DS and N3DS have slightly different load addresses on AGB and TWL
+                //        which allows determining which console it is intended for.
+                if (section->address == 0x08006800) { // O3DS entry
+                    signature->console = console_o3ds;
+//                    fprintf(stderr, "  Entry point seems correct for O3DS\n");
+                } else if (section->address == 0x08006000) { // N3DS entry
+                    signature->console = console_n3ds;
+//                    fprintf(stderr, "  Entry point seems correct for N3DS\n");
+                }
+            }
+
+            break;
         }
     }
 
-    return NULL;
+    return signature;
 }

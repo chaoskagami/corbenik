@@ -7,7 +7,9 @@ get_firm_info(firm_h *firm)
 
     struct firm_signature *signature = (struct firm_signature*)malloc(sizeof(struct firm_signature));
 
-    signature->type = type_native;
+    signature->type    = type_native;
+    signature->k9l     = 0;
+    signature->console = console_o3ds;
 
     // Test: Is section #4 a stub
     //   True: If true, must be NFIRM.

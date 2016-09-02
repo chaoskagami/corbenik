@@ -31,6 +31,9 @@ typedef struct free_block {
     const char* info;
 #endif
     struct free_block* next;
+
+    uint32_t canary;
+    uint32_t pad[3]; // Otherwise, not a 16-multiple
 } free_block;
 
 static free_block free_block_list_head = {
@@ -39,7 +42,9 @@ static free_block free_block_list_head = {
 #ifdef MALLOC_DEBUG
     NULL,
 #endif
-    0
+    0,
+    0,
+    {0}
 };
 
 static const size_t align_to = 64;
@@ -81,6 +86,7 @@ void* malloc(size_t size) {
     block = (free_block*)sbrk(bsize);
     block->size = bsize;
     block->real_size = size;
+    block->canary = 0x1337d00d; // Arbitrary. No special meaning.
 
 #ifdef MALLOC_DEBUG
     block->info = info;
@@ -111,6 +117,10 @@ void free(void* ptr) {
     free_block* block = (free_block*)(((char*)ptr) - sizeof(free_block ));
 
 #ifdef MALLOC_DEBUG
+    if (block->canary != 0x1337d00d) {
+        abort("%s: Attempt free non-pointer.\n", info);
+    }
+
     ++free_count;
     if (allocated_memory < block->size) {
         fprintf(stderr, "%s: Invalid free detected.\n"

@@ -27,15 +27,15 @@ get_firm_info(firm_h *firm)
         // Check for the presence of a TWL/AGB only sysmodule
         if( memfind((uint8_t*)firm + firm->section[0].offset, firm->section[0].size, "TwlBg", 5)) {
             signature->type = type_twl;
-//            fprintf(stderr, "  TwlBg module found; probably TWL\n");
+            fprintf(stderr, "  TwlBg module found; probably TWL\n");
         } else if( memfind((uint8_t*)firm + firm->section[0].offset, firm->section[0].size, "AgbBg", 5)) {
             signature->type = type_agb;
-//            fprintf(stderr, "  AgbBg module found; probably AGB\n");
+            fprintf(stderr, "  AgbBg module found; probably AGB\n");
         } else {
-//            fprintf(stderr, "  Warning: Native, but there is a 4th section. Report this IMMEDIATELY.\n");
+            fprintf(stderr, "  Warning: Native, but there is a 4th section. Report this IMMEDIATELY.\n");
         }
     } else {
-//        fprintf(stderr, "  Section #4 is empty; this is probably native\n");
+        fprintf(stderr, "  Section #4 is empty; this is probably native\n");
     }
 
     for (firm_section_h *section = firm->section; section < firm->section + 4; section++) {
@@ -49,10 +49,10 @@ get_firm_info(firm_h *firm)
                 //        Only N3DS FIRMs have this property.
                 uint8_t* k9l = (uint8_t*)memfind((uint8_t*)firm + section->offset, section->size, "K9L", 3);
                 if (k9l == NULL) { // O3DS.
-//                    fprintf(stderr, "  No K9L; this is likely an O3DS FIRM\n");
+                    fprintf(stderr, "  No K9L; this is likely an O3DS FIRM\n");
                     signature->console = console_o3ds;
                 } else { // N3DS.
-//                    fprintf(stderr, "  K9L found; this is likely an N3DS FIRM\n");
+                    fprintf(stderr, "  K9L found; this is likely an N3DS FIRM\n");
                     signature->console = console_n3ds;
                     signature->k9l = (unsigned int)(k9l[3] - '0'); // String is "K9LN" where N is the version
                 }
@@ -64,10 +64,10 @@ get_firm_info(firm_h *firm)
                 //        which allows determining which console it is intended for.
                 if (section->address == 0x08006800) { // O3DS entry
                     signature->console = console_o3ds;
-//                    fprintf(stderr, "  Entry point seems correct for O3DS\n");
+                    fprintf(stderr, "  Entry point seems correct for O3DS\n");
                 } else if (section->address == 0x08006000) { // N3DS entry
                     signature->console = console_n3ds;
-//                    fprintf(stderr, "  Entry point seems correct for N3DS\n");
+                    fprintf(stderr, "  Entry point seems correct for N3DS\n");
                 }
             }
 

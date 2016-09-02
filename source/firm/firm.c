@@ -72,6 +72,12 @@ void dump_firm(firm_h** buffer, uint8_t index) {
 
     struct firm_signature* sig = get_firm_info(firm);
 
+    sig->k9l = 0;
+    if(index == 1)
+        sig->k9l = 2;
+
+    fprintf(stderr, "  FIRM: K9L%u, Console:%u, Type:%u\n", sig->k9l, sig->console, sig->type);
+
     if(decrypt_arm9bin((arm9bin_h*)((uint8_t*)firm + firm->section[2].offset), sig)) {
         abort("  Failed to decrypt FIRM%u arm9loader.\n", index);
     }
@@ -327,6 +333,9 @@ extern int patch_services();
 firm_h*
 load_firm(const char *path, const char *path_firmkey, const char *path_cetk, uint32_t *size)
 {
+    if (path == NULL || path_firmkey == NULL || path_cetk == NULL || size == NULL)
+        return NULL;
+
     firm_h *dest;
 
     int status = 0;
@@ -359,6 +368,8 @@ load_firm(const char *path, const char *path_firmkey, const char *path_cetk, uin
     }
 
     struct firm_signature *fsig = get_firm_info(dest);
+
+    fprintf(stderr, "  FIRM: K9L%u, Console:%u, Type:%u\n", fsig->k9l, fsig->console, fsig->type);
 
     // The N3DS firm has an additional encryption layer for ARM9
     if (fsig->console == console_n3ds) {
@@ -427,6 +438,8 @@ void
 boot_firm()
 {
     struct firm_signature *fsig = get_firm_info(firm_loc);
+
+    fprintf(stderr, "  FIRM: K9L%u, Console:%u, Type:%u\n", fsig->k9l, fsig->console, fsig->type);
 
     // Set up the keys needed to boot a few firmwares, due to them being unset,
     // depending on which firmware you're booting from.

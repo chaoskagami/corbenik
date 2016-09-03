@@ -114,8 +114,9 @@ patchMPU(uint8_t *pos, uint32_t size)
 }
 
 void
-patch_emunand(uint32_t index)
+patch_emunand(firm_h* firm_loc, uint32_t index)
 {
+#if 0
     // ARM9 section.
     uint8_t *arm9Section = (uint8_t *)firm_loc + firm_loc->section[2].offset;
     uint32_t arm9SectionSize = firm_loc->section[2].size;
@@ -166,4 +167,5 @@ patch_emunand(uint32_t index)
     patchMPU(arm9Section, arm9SectionSize);
 
     fprintf(stderr, "emunand: patched MPU settings\n");
+#endif
 }

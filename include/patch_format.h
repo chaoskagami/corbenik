@@ -75,9 +75,8 @@
 #define PATH_TWL_FIRMKEY     PATH_KEYS "/twl.key"     ///< TWL FIRM decrypted titlekey
 #define PATH_AGB_FIRMKEY     PATH_KEYS "/agb.key"     ///< AGB FIRM decrypted titlekey
 
-#define PATH_SLOT0X11KEY96   PATH_KEYS "/11Key96.key" ///< 0x11 KeyY (for 9.6 FIRM arm9loader)
-
-#define PATH_ALT_SLOT0X11KEY96 "/slot0x11key96.bin"   ///< Alternate path for 0x11 KeyY
+#define PATH_SLOT0X11KEY95 "/slot0x11key95.bin"   ///< Alternate path for 0x11 KeyY
+#define PATH_SLOT0X11KEY96 "/slot0x11key96.bin"   ///< Alternate path for 0x11 KeyY
 
 #define PATH_LOG             LOCALSTATEDIR "/log"     ///< Log directory
 

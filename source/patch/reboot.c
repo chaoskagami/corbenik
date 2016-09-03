@@ -15,7 +15,7 @@ getProcess9(uint8_t *pos, uint32_t size, uint32_t *process9Size, uint32_t *proce
 }
 
 void
-patch_reboot()
+patch_reboot(firm_h* firm_loc)
 {
     // Look for firmlaunch code
     const uint8_t pattern[] = { 0xDE, 0x1F, 0x8D, 0xE2 };

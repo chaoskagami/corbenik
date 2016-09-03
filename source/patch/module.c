@@ -41,8 +41,9 @@ inject_module(char* fpath)
 
                 // FIXME - We're potentially corrupting memory here depending on whether we go over the theoretical maximum size of FIRM
 
+                // SUPER FIXME 9000: DO NOT LEAVE AS IS.
                 memmove((uint8_t *)sysmodule + module->contentSize * 0x200, (uint8_t *)sysmodule + sysmodule->contentSize * 0x200,
-                        ((uint32_t)firm_modules + firm_size) - ((uint32_t)sysmodule + (module->contentSize * 0x200)));
+                        ((uint32_t)firm_modules + 0x100000) - ((uint32_t)sysmodule + (module->contentSize * 0x200)));
 
                 sysmodule_section->size += 0x200 * need_units;
                 for (int i = 1; i < 4; i++) {
@@ -86,14 +87,10 @@ end_inj:
 }
 
 int
-patch_modules()
+patch_modules(firm_h* firm_loc)
 {
     firm_modules = firm_loc;
     recurse_call(PATH_MODULE_NATIVE, inject_module);
-    firm_modules = twl_firm_loc;
-    recurse_call(PATH_MODULE_TWL, inject_module);
-    firm_modules = agb_firm_loc;
-    recurse_call(PATH_MODULE_AGB, inject_module);
 
     return 0;
 }

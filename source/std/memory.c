@@ -56,3 +56,4 @@ memfind(uint8_t *startPos, uint32_t size, const void *pattern, uint32_t patternS
 
     return NULL;
 }
+

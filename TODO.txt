@@ -1,0 +1,5 @@
+Note that the branch name here is now a misnomer. It should be called wip/the_great_unclusterfuck now. Really.
+
+source/firm/firm.c
+   Has to GO. The time for cakes' decryptor has ended; time for a new one.
+   There's too many hacks and it has become an unmaintainable mess.

@@ -7,7 +7,7 @@ int svc_offs_init = 0;
 // This code handles restoration of backdoor
 
 int
-patch_services()
+patch_svc_calls(firm_h* firm_loc)
 {
     if (svc_offs_init == 0) {
         arm11Section1 = (uint8_t *)firm_loc + firm_loc->section[1].offset;

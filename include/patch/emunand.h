@@ -3,6 +3,6 @@
 
 #include <stdint.h>
 
-void patch_emunand(uint32_t size);
+void patch_emunand(firm_h* firm_loc, uint32_t size);
 
 #endif

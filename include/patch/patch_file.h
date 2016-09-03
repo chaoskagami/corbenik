@@ -4,6 +4,6 @@
 #include <stdint.h>
 
 // Build patch into CFW instead of as module.
-#define PATCH(name) int patch_##name()
+#define PATCH(name) int patch_##name(firm_h* firm_loc)
 
 #endif

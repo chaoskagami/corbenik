@@ -18,6 +18,7 @@
 #include <std/allocator.h>
 #include <firm/decryptor.h>
 #include <firm/firm.h>
+#include <firm/keys.h>
 
 #include <menu.h>
 #include <menu-backend.h>

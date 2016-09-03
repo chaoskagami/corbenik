@@ -1,7 +1,3 @@
-/*
-  This is all fairly minimal and based on @d0k3's decrypt9 code.
-*/
-
 #include <common.h>
 #include <ctr9/aes.h>
 #include <ctr9/sha.h>

@@ -3,9 +3,9 @@
 
 // TODO - Basically all this needs to move to patcher programs.
 
-extern int patch_services();
-extern int patch_modules();
-extern int patch_reboot();
+extern int patch_svc_calls(firm_h*);
+extern int patch_modules(firm_h*);
+extern int patch_reboot(firm_h*);
 
 extern int doing_autoboot;
 
@@ -51,7 +51,7 @@ generate_patch_cache()
 }
 
 int
-patch_firm_all()
+patch_firm_all(firm_h* firm)
 {
     execb(PATH_LOADER_CACHE "/BOOT", 0);
 
@@ -59,7 +59,7 @@ patch_firm_all()
 
     // Hook firmlaunch?
     if (get_opt_u32(OPTION_REBOOT)) {
-        patch_reboot();
+        patch_reboot(firm);
 
         wait();
     }
@@ -67,14 +67,14 @@ patch_firm_all()
     // Use EmuNAND?
     if (get_opt_u32(OPTION_EMUNAND)) {
         // Yes.
-        patch_emunand(get_opt_u32(OPTION_EMUNAND_INDEX));
+        patch_emunand(firm, get_opt_u32(OPTION_EMUNAND_INDEX));
 
         wait();
     }
 
     // Inject services?
     if (get_opt_u32(OPTION_SVCS)) {
-        if (patch_services()) {
+        if (patch_svc_calls(firm)) {
             abort("Fatal. Svc inject has failed.");
         }
         wait();
@@ -82,7 +82,7 @@ patch_firm_all()
 
     // Replace loader?
     if (get_opt_u32(OPTION_LOADER)) {
-        if (patch_modules()) {
+        if (patch_modules(firm)) {
             abort("Fatal. Loader inject has failed.");
         }
         // This requires OPTION_SIGPATCH.

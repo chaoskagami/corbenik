@@ -78,6 +78,7 @@ int is_n3ds = 1; // TODO - We don't really need to care, but it should still wor
   static uint8_t stack_glob[STACK_SIZE];
 #else
   static uint8_t *stack_glob = NULL;
+  firm_h* firm_patch;
 #endif
 
 int
@@ -85,66 +86,28 @@ exec_bytecode(uint8_t *bytecode, uint32_t len, uint8_t* stack, uint32_t stack_si
 {
     if (!init_bytecode) {
 #ifndef LOADER
-        modes[0].memory = (uint8_t *)firm_loc;
-        modes[0].size   = firm_loc->section[0].size + firm_loc->section[1].size + sizeof(firm_h) +
-                          firm_loc->section[2].size + firm_loc->section[3].size; // NATIVE_FIRM
+        modes[0].memory = (uint8_t *)firm_patch;
+        modes[0].size   = firm_patch->section[0].size + firm_patch->section[1].size + sizeof(firm_h) +
+                          firm_patch->section[2].size + firm_patch->section[3].size; // NATIVE_FIRM
 
-        modes[1].memory = (uint8_t *)agb_firm_loc;
-        modes[1].size   = agb_firm_loc->section[0].size + agb_firm_loc->section[1].size + sizeof(firm_h) +
-                          agb_firm_loc->section[2].size + agb_firm_loc->section[3].size; // AGB_FIRM
+#if 0
+        // FIRM Process9 (This is also the default mode.)
+        modes[1].memory = (uint8_t *)firm_p9_exefs + sizeof(exefs_h) + firm_p9_exefs->fileHeaders[0].offset;
+        modes[1].size   = firm_p9_exefs->fileHeaders[0].size;
+#endif
 
-        modes[2].memory = (uint8_t *)twl_firm_loc;
-        modes[2].size   = twl_firm_loc->section[0].size + twl_firm_loc->section[1].size + sizeof(firm_h) +
-                          twl_firm_loc->section[2].size + twl_firm_loc->section[3].size; // TWL_FIRM
-
-        // NATIVE_FIRM Process9 (This is also the default mode.)
-        modes[3].memory = (uint8_t *)firm_p9_exefs + sizeof(exefs_h) + firm_p9_exefs->fileHeaders[0].offset;
-        modes[3].size = firm_p9_exefs->fileHeaders[0].size;
-        // AGB_FIRM Process9
-        modes[4].memory = (uint8_t *)agb_firm_p9_exefs + sizeof(exefs_h) + firm_p9_exefs->fileHeaders[0].offset;
-        modes[4].size = firm_p9_exefs->fileHeaders[0].size;
-        // TWL_FIRM Process9
-        modes[5].memory = (uint8_t *)twl_firm_p9_exefs + sizeof(exefs_h) + firm_p9_exefs->fileHeaders[0].offset;
-        modes[5].size = firm_p9_exefs->fileHeaders[0].size;
-
-        // NATIVE_FIRM Sect 0
-        modes[6].memory = (uint8_t *)firm_loc + firm_loc->section[0].offset;
-        modes[6].size = firm_loc->section[0].size;
-        // NATIVE_FIRM Sect 1
-        modes[7].memory = (uint8_t *)firm_loc + firm_loc->section[1].offset;
-        modes[7].size = firm_loc->section[1].size;
-        // NATIVE_FIRM Sect 2
-        modes[8].memory = (uint8_t *)firm_loc + firm_loc->section[2].offset;
-        modes[8].size = firm_loc->section[2].size;
-        // NATIVE_FIRM Sect 3
-        modes[9].memory = (uint8_t *)firm_loc + firm_loc->section[3].offset;
-        modes[9].size = firm_loc->section[3].size;
-
-        // AGB_FIRM Sect 0
-        modes[10].memory = (uint8_t *)agb_firm_loc + agb_firm_loc->section[0].offset;
-        modes[10].size = agb_firm_loc->section[0].size;
-        // AGB_FIRM Sect 1
-        modes[11].memory = (uint8_t *)agb_firm_loc + agb_firm_loc->section[1].offset;
-        modes[11].size = agb_firm_loc->section[1].size;
-        // AGB_FIRM Sect 2
-        modes[12].memory = (uint8_t *)agb_firm_loc + agb_firm_loc->section[2].offset;
-        modes[12].size = agb_firm_loc->section[2].size;
-        // AGB_FIRM Sect 3
-        modes[13].memory = (uint8_t *)agb_firm_loc + agb_firm_loc->section[3].offset;
-        modes[13].size = agb_firm_loc->section[3].size;
-
-        // TWL_FIRM Sect 0
-        modes[14].memory = (uint8_t *)twl_firm_loc + twl_firm_loc->section[0].offset;
-        modes[14].size = twl_firm_loc->section[0].size;
-        // TWL_FIRM Sect 1
-        modes[15].memory = (uint8_t *)twl_firm_loc + twl_firm_loc->section[1].offset;
-        modes[15].size = twl_firm_loc->section[1].size;
-        // TWL_FIRM Sect 2
-        modes[16].memory = (uint8_t *)twl_firm_loc + twl_firm_loc->section[2].offset;
-        modes[16].size = twl_firm_loc->section[2].size;
-        // TWL_FIRM Sect 3
-        modes[17].memory = (uint8_t *)twl_firm_loc + twl_firm_loc->section[3].offset;
-        modes[17].size = twl_firm_loc->section[3].size;
+        // FIRM Sect 0
+        modes[2].memory = (uint8_t *)firm_patch + firm_patch->section[0].offset;
+        modes[2].size   = firm_patch->section[0].size;
+        // FIRM Sect 1
+        modes[3].memory = (uint8_t *)firm_patch + firm_patch->section[1].offset;
+        modes[3].size   = firm_patch->section[1].size;
+        // FIRM Sect 2
+        modes[4].memory = (uint8_t *)firm_patch + firm_patch->section[2].offset;
+        modes[4].size   = firm_patch->section[2].size;
+        // FIRM Sect 3
+        modes[5].memory = (uint8_t *)firm_patch + firm_patch->section[3].offset;
+        modes[5].size   = firm_patch->section[3].size;
 #endif
 
         init_bytecode = 1;

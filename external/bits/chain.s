@@ -49,6 +49,9 @@ boot:
         cmp r2, #4
         bcc flush_dcache
 
+    mov r0, #0
+    mcr p15, 0, r0, c7, c10, 4 // drain write buffer before jump
+
     // Reload argc and argv.
     ldr r0, argc
     ldr r1, argv

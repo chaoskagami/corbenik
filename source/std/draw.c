@@ -179,7 +179,7 @@ void set_font(const char* filename) {
 
     FILE* f = fopen(filename, "r");
 
-    if (!f) abort("Failed to load font file!\n");
+    if (!f) panic("Failed to load font file!\n");
 
     unsigned int new_w, new_h;
 
@@ -187,7 +187,7 @@ void set_font(const char* filename) {
     fread(&new_h, 1, 4, f);
 
     if (new_w == 0 || new_h == 0) {
-        abort("Invalid font file: w/h is 0 - not loaded\n");
+        panic("Invalid font file: w/h is 0 - not loaded\n");
     }
 
     unsigned int c_font_w = (new_w / 8) + ((new_w % 8) ? 1 : 0);
@@ -641,9 +641,10 @@ vfprintf(void *channel, const char *format, va_list ap)
 {
     if ((channel == stdout || channel == stderr) && kill_output)
         return;
-
-    char *copy = strdup_self(format);
-    char *ref = copy;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic warning "-Wdiscarded-qualifiers"
+    char *ref = format;
+#pragma GCC diagnostic pop
 
     unsigned char *color = NULL;
     if (channel == TOP_SCREEN)
@@ -709,8 +710,6 @@ vfprintf(void *channel, const char *format, va_list ap)
         }
         ++ref;
     }
-
-    free(copy);
 }
 
 void

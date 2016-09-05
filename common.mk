@@ -16,8 +16,9 @@ AM_CFLAGS= -std=gnu11 -Os -g -ffast-math \
 	-fno-builtin -std=gnu11 -DREVISION=\"$(REVISION)\" \
 	-DFW_NAME=\"corbenik\" $(PATHARGS) -DMALLOC_DEBUG=1
 
+# -fsanitize=undefined
 
-AM_LDFLAGS=-Wl,--use-blx,--pic-veneer,-q -nostdlib -nodefaultlibs -Wl,-z,defs -lgcc \
-	-lc -L$(top_srcdir)/external/libctr9/src
+AM_LDFLAGS=-Wl,--use-blx,--pic-veneer,-q -Wl,-z,defs \
+	-L$(top_srcdir)/external/libctr9/src
 
 OCFLAGS=--set-section-flags .bss=alloc,load,contents

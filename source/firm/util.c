@@ -6,17 +6,19 @@
 #include <ctr9/sha.h>
 #include <common.h>
 
-#define SECTOR_SIZE 0x200
+#define FIRM_INTERNAL_CODE
+#include <firm/internal.h>
 
-int decrypt_k9l(arm9bin_h *header, enum firm_type type) {
+int decrypt_k9l(arm9bin_h *header, enum firm_type type, uint32_t k9l) {
     uint8_t slot = 0x15;
 
-    if (type == type_native) {
+    if (type == type_native && k9l) {
         uint8_t decrypted_keyx[AES_BLOCK_SIZE];
 
         slot = 0x16;
 
-        use_aeskey(0x11);
+        set_N11_K9L(k9l - 1);
+
         ecb_decrypt(header->slot0x16keyX, decrypted_keyx, 1, AES_CNT_ECB_DECRYPT_MODE);
         setup_aeskeyX(slot, decrypted_keyx);
     }
@@ -32,91 +34,169 @@ int decrypt_k9l(arm9bin_h *header, enum firm_type type) {
 
     ctr_decrypt(arm9bin, arm9bin, (size_t)size / AES_BLOCK_SIZE, AES_CNT_CTRNAND_MODE, header->ctr);
 
-    if (type == type_native && *(uint32_t *)arm9bin == ARM9BIN_MAGIC)
-        return 0;
-    else if (*(uint32_t *)arm9bin == LGY_ARM9BIN_MAGIC)
-        return 0;
+    if (type == type_native)
+        return *(uint32_t *)arm9bin != ARM9BIN_MAGIC;
 
-    return 1; // Failed.
+    return *(uint32_t *)arm9bin != LGY_ARM9BIN_MAGIC;
 }
 
-void fix_entry(firm_h* firm, enum firm_type type) {
-    // Patch the entrypoint to skip arm9loader
+int patch_entry(firm_h *firm, enum firm_type type) {
     if (type == type_native)
         firm->a9Entry = 0x0801B01C;
     else
         firm->a9Entry = 0x0801301C;
 
-    // The entrypoints seem to be the same across different FIRM versions,
-    //  so we don't change them.
+    return 0;
 }
 
-// 0x0B130000 = start of FIRM0 partition, 0x400000 = size of FIRM partition (4MB)
-firm_h* dump_firm(firm_h* buffer, uint8_t index) {
-    firm_h* firm;
+uint8_t*
+get_titlekey(char *cetk_filename)
+{
+    FILE* f = fopen(cetk_filename, "r");
+    size_t size = fsize(f);
 
-    // NOTE - Cast, because GCC is making assumptions about 'index'.
-    uint32_t firm_offset = (uint32_t)(0x0B130000 + (index % 2) * 0x400000),
-             firm_b_size = 0x00100000; // 1MB, because
+    uint8_t* cetk = malloc(size);
 
-    firm = malloc(firm_b_size);
+    fread(cetk, 1, size, f);
 
-    uint8_t ctr[0x10],
-            cid[0x10],
-            sha_t[0x20];
+    fclose(f);
 
-    if (sdmmc_nand_readsectors(firm_offset / SECTOR_SIZE, firm_b_size / SECTOR_SIZE, (uint8_t*)firm))
-        goto failure;
+	uint8_t iv[AES_BLOCK_SIZE] = { 0 };
+	uint32_t sigtype = __builtin_bswap32(*(const uint32_t *)cetk);
 
-    sdmmc_get_cid(1, (uint32_t*)cid);
-    sha256sum(sha_t, cid, 0x10);
-    memcpy(ctr, sha_t, 0x10);
-    add_ctr(ctr, firm_offset / AES_BLOCK_SIZE);
+	if (sigtype != SIG_TYPE_RSA2048_SHA256) {
+        free(cetk);
+		return NULL;
+    }
 
-    use_aeskey(0x06);
-    set_ctr(ctr);
-    ctr_decrypt(firm, firm, firm_b_size / AES_BLOCK_SIZE, AES_CNT_CTRNAND_MODE, ctr);
+	const ticket_h *ticket = (const ticket_h *)((const uint8_t*)cetk + sizeof(sigtype) + 0x13C);
 
-    if (memcmp((char*) & firm->magic, "FIRM", 4))
-        goto failure;
+    set_Y3D_cetk(1);
 
-    return firm;
+    uint8_t *key = malloc(AES_BLOCK_SIZE);
 
-failure:
-    free(firm);
+	memcpy(iv, ticket->titleID, sizeof(ticket->titleID));
+	memcpy(key, ticket->titleKey, sizeof(ticket->titleKey));
 
-    return NULL;
+	cbc_decrypt(key, key, 1, AES_CNT_TITLEKEY_DECRYPT_MODE, iv);
+
+    free(cetk);
+
+	return key;
 }
 
-uint8_t* find_section_key(firm_h *firm_loc) {
-    // The key will be dword-aligned (I think? Verify this. May need new NFIRM to check assumption. Go, Nintendo!)
-#if 0
-    // The hash of the key. Can't give the key itself out, obviously.
-    uint8_t sha256[] = {0xb9, 0x4d, 0xb1, 0xb1, 0xc3, 0xe0, 0x11, 0x08, 0x9c, 0x19, 0x46, 0x06, 0x4a, 0xbc, 0x40, 0x2a,
-                        0x7c, 0x66, 0xf4, 0x4a, 0x74, 0x6f, 0x71, 0x50, 0x32, 0xfd, 0xff, 0x03, 0x74, 0xd7, 0x45, 0x2c};
+int dec_k9l(firm_h* firm) {
+    firm_section_h *arm9 = NULL;
+    for (firm_section_h* section = firm->section; section < firm->section + 4; section++) {
+        if (section->type == FIRM_TYPE_ARM9) { // ARM9
+            arm9 = section;
+            break;
+        }
+    }
 
-    uint8_t* key_loc = (uint8_t*)firm_loc + firm_loc->section[2].offset;
-    uint32_t search_size = firm_loc->section[2].size;
+    if (arm9 == NULL)
+        return 1;
 
-    uint8_t* key_data = key_search(key_loc, search_size, sha256, 0xDD);
+    struct firm_signature* sig = get_firm_info(firm);
 
-    if (!key_data)
-        abort("  FIRM Section key not found!\n");
+    if (decrypt_k9l((arm9bin_h*)((uint8_t*)firm + arm9->offset), sig->type, sig->k9l))
+        return 1;
 
-    fprintf(stderr, "  FIRM Section key at %lx in FIRM\n", (uint32_t)key_data - (uint32_t)key_loc);
-    return key_data;
-#endif
-    return NULL;
+    // Recalc section hash.
+    sha256sum(arm9->hash, (uint8_t*)firm + arm9->offset, arm9->size);
+
+    // Magic like D9.
+    memcpy(firm->magic, "DECFIRM", 7);
+
+    free(sig);
+
+    return 0;
 }
 
-int set_section_keys(firm_h* firm_loc) {
+firm_h*
+extract_firm_from_ncch(ncch_h *ncch, uint8_t *titlekey, size_t size)
+{
+	uint8_t firm_iv[16] = { 0 };
+	uint8_t exefs_key[16] = { 0 };
+	uint8_t exefs_iv[16] = { 0 };
+
+	setup_aeskey(0x16, titlekey);
+	use_aeskey(0x16);
+	cbc_decrypt(ncch, ncch, size / AES_BLOCK_SIZE, AES_CNT_CBC_DECRYPT_MODE, firm_iv);
+
+	if (ncch->magic != NCCH_MAGIC) {
+		return NULL;
+    }
+
+	memcpy(exefs_key, ncch, AES_BLOCK_SIZE);
+	ncch_getctr(ncch, exefs_iv, NCCHTYPE_EXEFS);
+
+	// Get the exefs offset and size from the NCCH
+	exefs_h *exefs = (exefs_h *)((uint8_t *)ncch + ncch->exeFSOffset * MEDIA_UNITS);
+	uint32_t exefs_size = ncch->exeFSSize * MEDIA_UNITS;
+
+	setup_aeskeyY(0x2C, exefs_key);
+	use_aeskey(0x2C);
+	ctr_decrypt(exefs, exefs, exefs_size / AES_BLOCK_SIZE, AES_CNT_CTRNAND_MODE, exefs_iv);
+
+	// Get the decrypted FIRM
+	// We assume the firm.bin is always the first file
+	firm_h *firm = (firm_h *)&exefs[1]; // The offset right behind the exefs
+
+	// header; the first file.
+	size = exefs->fileHeaders[0].size;
+	if (memcmp(firm->magic, "FIRM", 4)) {
+		return NULL;
+    }
+
+    firm_h* dest = malloc(size);
+
+	memcpy(dest, firm, size);
+
+	return dest;
+}
+
+uint8_t* key_search(uint8_t* mem, uint32_t size, uint8_t* sha256, uint8_t byte) {
+	uint8_t hash[0x20] = {0};
+	// Search for key.
+	for(uint32_t j = 0; j < size; j++) {
+		// Is candidate?
+		if (mem[j] == byte) {
+			// Yes. Check hash.
+			sha256sum(hash, &mem[j], 0x10);
+			if(!memcmp(sha256, hash, 0x20)) {
+				return &mem[j];
+			}
+		}
+	}
+	return NULL;
+}
+
+void* find_section_key(firm_h* firm_loc) {
+	uint8_t sha256[] = {0xb9, 0x4d, 0xb1, 0xb1, 0xc3, 0xe0, 0x11, 0x08, 0x9c, 0x19, 0x46, 0x06, 0x4a, 0xbc, 0x40, 0x2a,
+	                    0x7c, 0x66, 0xf4, 0x4a, 0x74, 0x6f, 0x71, 0x50, 0x32, 0xfd, 0xff, 0x03, 0x74, 0xd7, 0x45, 0x2c};
+
+	uint8_t* key_loc = (uint8_t*)firm_loc + firm_loc->section[2].offset;
+	uint32_t search_size = firm_loc->section[2].size;
+
+	uint8_t* key_data = key_search(key_loc, search_size, sha256, 0xDD);
+
+	if (!key_data)
+		return NULL;
+
+	return key_data;
+}
+
+int patch_section_keys(firm_h* firm_loc, uint32_t k9l) {
     // Set up the keys needed to boot a few firmwares, due to them being unset,
     // depending on which firmware you're booting from.
+
     uint8_t *keydata = find_section_key(firm_loc);
     if (!keydata)
         return 1;
 
-    use_aeskey(0x11);
+    set_N11_K9L(k9l - 1);
+
     uint8_t keyx[AES_BLOCK_SIZE];
     for (int slot = 0x19; slot < 0x20; slot++) {
         ecb_decrypt(keydata, keyx, 1, AES_CNT_ECB_DECRYPT_MODE);

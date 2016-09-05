@@ -19,4 +19,6 @@ uint8_t *memfind(uint8_t *startPos, uint32_t size, const void *pattern, uint32_t
  */
 char* strdup_self(const char* str);
 
+char* strdupcat(const char* str, const char *cat);
+
 #endif

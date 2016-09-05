@@ -34,7 +34,7 @@ verify_emunand(uint32_t index, uint32_t *off, uint32_t *head)
         fprintf(stderr, "emunand: found NCSD magic for %lu\n", index);
         fprintf(stderr, "emunand: layout is gateway\n");
     } else {
-        abort("emunand: selected NAND image is not valid.\n");
+        panic("emunand: selected NAND image is not valid.\n");
     }
 
     free(emunand_temp);
@@ -82,7 +82,7 @@ patchNANDRW(uint8_t *pos, uint32_t size, uint32_t branchOffset)
     uint16_t *writeOffset = (uint16_t *)memfind((uint8_t*)(readOffset + 5), 0x100, pattern, 4) - 3;
 
     if (!readOffset || !writeOffset)
-        abort("emunand: pattern for r/w missing!\n");
+        panic("emunand: pattern for r/w missing!\n");
 
     readOffset[0] = nandRedir[0];
     readOffset[1] = nandRedir[1];
@@ -127,11 +127,11 @@ patch_emunand(firm_h* firm_loc, uint32_t index)
     // Copy emuNAND code
     void *emuCodeOffset = getEmuCode(arm9Section, arm9SectionSize);
     if (!emuCodeOffset)
-        abort("emunand: code missing from arm9?\n");
+        panic("emunand: code missing from arm9?\n");
 
     FILE *f = fopen(PATH_EMUNAND_CODE, "r");
     if (!f)
-        abort("emunand: code not found on SD.\n");
+        panic("emunand: code not found on SD.\n");
 
     uint32_t emunand_size = fsize(f);
     fread(emuCodeOffset, 1, emunand_size, f);
@@ -147,7 +147,7 @@ patch_emunand(firm_h* firm_loc, uint32_t index)
              *pos_sdmmc  = (uint32_t *)memfind(emuCodeOffset, emunand_size, "SDMC", 4);
 
     if (!pos_offset || !pos_head || !pos_sdmmc)
-        abort("emunand: couldn't find pattern in hook?\n");
+        panic("emunand: couldn't find pattern in hook?\n");
 
     verify_emunand(index, pos_offset, pos_head);
 

@@ -31,13 +31,9 @@ struct firm_signature
  */
 struct firm_signature *get_firm_info(firm_h *firm);
 
-/* Boots native FIRM - do not call directly.
+/* Boots the CFW, generating caches and applying patches as-needed to the specified FIRM
  */
-void boot_firm();
-
-/* Boots the CFW, generating caches and applying patches as-needed
- */
-void boot_cfw();
+int boot_cfw(char *firm_path);
 
 /* Loads a firmware off disk, returning it. The memory should be free()'d when done, unless you plan to boot.
  */

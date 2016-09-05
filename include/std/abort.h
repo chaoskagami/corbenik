@@ -10,6 +10,6 @@
  * \param ... Format operands, see printf manpage
  */
 
-void abort(const char* x, ...) __attribute__ ((format (printf, 1, 2)));
+void panic(const char* x, ...) __attribute__ ((format (printf, 1, 2)));
 
 #endif

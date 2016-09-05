@@ -28,7 +28,7 @@ void chainload_file(void* data)
     FILE* f = fopen(code_file, "r");
     if (!f) {
         // File missing.
-        abort("Missing chainloader.\n");
+        panic("Missing chainloader.\n");
     }
 
     b_size = fsize(f);
@@ -40,7 +40,7 @@ void chainload_file(void* data)
     f = fopen(chain_file, "r");
     if (!f) {
         // File missing.
-        abort("Missing program to chainload?\n");
+        panic("Missing program to chainload?\n");
     }
 
     size = fsize(f);

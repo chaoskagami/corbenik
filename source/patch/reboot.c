@@ -42,7 +42,7 @@ patch_reboot(firm_h* firm_loc)
     // Copy firmlaunch code
     FILE *f = fopen(PATH_REBOOT_HOOK, "r");
     if (!f)
-        abort("reboot: hook not found on SD\n");
+        panic("reboot: hook not found on SD\n");
 
     uint32_t size = fsize(f);
     fread(off, 1, size, f);
@@ -51,7 +51,7 @@ patch_reboot(firm_h* firm_loc)
     // Put the fOpen offset in the right location
     uint32_t *pos_fopen = (uint32_t *)memfind(off, size, "open", 4);
     if (!pos_fopen)
-        abort("reboot: fopen location missing\n");
+        panic("reboot: fopen location missing\n");
 
     *pos_fopen = fOpenOffset;
 
@@ -60,7 +60,7 @@ patch_reboot(firm_h* firm_loc)
     uint32_t *pos_agb = (uint32_t *)memfind(off, size, "AGBF", 4);
 
     if (!pos_native && !pos_twl && !pos_agb)
-        abort("reboot: missing string placeholder?\n");
+        panic("reboot: missing string placeholder?\n");
 
     fprintf(stderr, "reboot: NATF @ %lx\n", (uint32_t)pos_native);
     fprintf(stderr, "reboot: TWLF @ %lx\n", (uint32_t)pos_twl);
@@ -104,7 +104,7 @@ patch_reboot(firm_h* firm_loc)
 
     f = fopen(PATH_REBOOT_CODE, "r");
     if (!f)
-        abort("reboot: boot not found on SD\n");
+        panic("reboot: boot not found on SD\n");
 
     fread(mem, 1, fsize(f), f);
     fclose(f);

@@ -63,5 +63,7 @@ main(int argc, char** argv)
         generate_patch_cache();
     }
 
-    boot_cfw();
+    boot_cfw(config->firm[0]);
+
+    panic("Firmlaunch failed!\n");
 }

@@ -4,7 +4,7 @@
 #include <stdarg.h>
 #include <common.h>
 
-void abort(char* x, ...) {
+void panic(char* x, ...) {
     va_list ap;
     va_start(ap, x);
 

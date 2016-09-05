@@ -28,8 +28,7 @@ typedef struct firm_section_h
 
 typedef struct firm_h
 {
-    uint32_t magic; // FIRM
-    uint32_t reserved1;
+    char magic[8];     // "FIRM" normally, but D9 has this as "DECFIRM"
     uint32_t a11Entry; // ARM11 entry
     uint32_t a9Entry;  // ARM9 entry
     uint8_t reserved2[0x30];
@@ -185,7 +184,7 @@ typedef struct arm9bin_h
     char size[8];
     uint8_t pad[8];
     uint8_t ctl_block[0x10];
-    uint8_t unk[0x10];
+    uint8_t unk[0x10]; // 3dbrew: Added with 9.5.0-X. Only used for hardware debugging: a nop instruction is executed with r0=0 and r1=<address of this data>.
     uint8_t slot0x16keyX[0x10];
 } arm9bin_h;
 

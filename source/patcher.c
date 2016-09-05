@@ -30,7 +30,7 @@ patch_cache_func(char* fpath)
         if (enable_list[p.uuid]) {
             // Patch is enabled. Cache it.
             if (execb(fpath, 1)) {
-                abort("Failed to cache:\n  %s\n", fpath);
+                panic("Failed to cache:\n  %s\n", fpath);
             }
 
             wait();
@@ -75,7 +75,7 @@ patch_firm_all(firm_h* firm)
     // Inject services?
     if (get_opt_u32(OPTION_SVCS)) {
         if (patch_svc_calls(firm)) {
-            abort("Fatal. Svc inject has failed.");
+            panic("Fatal. Svc inject has failed.");
         }
         wait();
     }
@@ -83,7 +83,7 @@ patch_firm_all(firm_h* firm)
     // Replace loader?
     if (get_opt_u32(OPTION_LOADER)) {
         if (patch_modules(firm)) {
-            abort("Fatal. Loader inject has failed.");
+            panic("Fatal. Loader inject has failed.");
         }
         // This requires OPTION_SIGPATCH.
         wait();

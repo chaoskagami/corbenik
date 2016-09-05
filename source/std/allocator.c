@@ -118,7 +118,7 @@ void free(void* ptr) {
 
 #ifdef MALLOC_DEBUG
     if (block->canary != 0x1337d00d) {
-        abort("%s: Attempt free non-pointer.\n", info);
+        panic("%s: Attempt free non-pointer.\n", info);
     }
 
     ++free_count;

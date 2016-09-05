@@ -49,7 +49,7 @@
 
 #ifdef LOADER
   #define log(a) logstr(a)
-  #define abort(a)                                                                                                                                               \
+  #define panic(a)                                                                                                                                               \
       {                                                                                                                                                          \
           logstr(a);                                                                                                                                             \
           svcBreak(USERBREAK_ASSERT);                                                                                                                            \
@@ -419,49 +419,49 @@ exec_bytecode(uint8_t *bytecode, uint32_t len, uint8_t* stack, uint32_t stack_si
                 if (debug)
                     log("abort\n");
 
-                abort("abort triggered, halting VM!\n");
+                panic("abort triggered, halting VM!\n");
                 break;
             case OP_ABORTEQ:
                 code++;
                 if (debug)
                     log("aborteq\n");
                 if (eq)
-                    abort("eq flag not set, halting VM!\n");
+                    panic("eq flag not set, halting VM!\n");
                 break;
             case OP_ABORTNE:
                 code++;
                 if (debug)
                     log("abortlt\n");
                 if (!eq)
-                    abort("eq flag not set, halting VM!\n");
+                    panic("eq flag not set, halting VM!\n");
                 break;
             case OP_ABORTLT:
                 code++;
                 if (debug)
                     log("abortlt\n");
                 if (lt)
-                    abort("lt flag set, halting VM!\n");
+                    panic("lt flag set, halting VM!\n");
                 break;
             case OP_ABORTGT:
                 code++;
                 if (debug)
                     log("abortgt\n");
                 if (gt)
-                    abort("gt flag set, halting VM!\n");
+                    panic("gt flag set, halting VM!\n");
                 break;
             case OP_ABORTF:
                 code++;
                 if (debug)
                     log("abortf\n");
                 if (found)
-                    abort("f flag set, halting VM!\n");
+                    panic("f flag set, halting VM!\n");
                 break;
             case OP_ABORTNF:
                 code++;
                 if (debug)
                     log("abortnf\n");
                 if (!found)
-                    abort("f flag is not set, halting VM!\n");
+                    panic("f flag is not set, halting VM!\n");
                 break;
             case OP_NEXT:
                 if (debug) {
@@ -524,7 +524,7 @@ exec_bytecode(uint8_t *bytecode, uint32_t len, uint8_t* stack, uint32_t stack_si
                         (uint32_t)code,
                         *code);
 #endif
-                abort("Halting startup.\n");
+                panic("Halting startup.\n");
                 break;
         }
 
@@ -532,7 +532,7 @@ exec_bytecode(uint8_t *bytecode, uint32_t len, uint8_t* stack, uint32_t stack_si
 #ifndef LOADER
             fprintf(stderr, " -> %lx", offset);
 #endif
-            abort("seeked out of bounds\n");
+            panic("seeked out of bounds\n");
         }
 
 #ifndef LOADER

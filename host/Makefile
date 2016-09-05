@@ -1,7 +1,6 @@
 all: bdfe font misc
 
 misc:
-	gcc -o key_char key_char.c -lcrypto -g -O0
 	gcc -o error_decoder error_decoder.c -g -O0
 
 bdfe_dir:

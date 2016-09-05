@@ -2,7 +2,8 @@
 #include <ctr9/aes.h>
 #include <ctr9/sha.h>
 
-typedef void (*void_call)();
+#define FIRM_INTERNAL_CODE
+#include <firm/internal.h>
 
 static volatile uint32_t *const a11_entry = (volatile uint32_t *)0x1FFFFFF8;
 

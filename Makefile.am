@@ -31,18 +31,18 @@ all-local:
 	chmod +x out/generate_localeemu.sh
 	echo "#!/bin/bash" > out/o3ds_firm.sh
 	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000002/00000052 -O .@libdir@/firmware/native"       >> out/o3ds_firm.sh
-	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000002/cetk     -O .@datarootdir@/keys/native.cetk" >> out/o3ds_firm.sh
+	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000002/cetk     -O .@libdir@/firmware/native.cetk" >> out/o3ds_firm.sh
 	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000102/00000016 -O .@libdir@/firmware/twl"       >> out/o3ds_firm.sh
-	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000102/cetk     -O .@datarootdir@/keys/twl.cetk" >> out/o3ds_firm.sh
+	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000102/cetk     -O .@libdir@/firmware/twl.cetk" >> out/o3ds_firm.sh
 	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000202/0000000B -O .@libdir@/firmware/agb"       >> out/o3ds_firm.sh
-	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000202/cetk     -O .@datarootdir@/keys/agb.cetk" >> out/o3ds_firm.sh
+	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000202/cetk     -O .@libdir@/firmware/agb.cetk" >> out/o3ds_firm.sh
 	echo "#!/bin/bash" > out/n3ds_firm.sh
 	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000002/00000021 -O .@libdir@/firmware/native"       >> out/n3ds_firm.sh
-	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000002/cetk     -O .@datarootdir@/keys/native.cetk" >> out/n3ds_firm.sh
+	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000002/cetk     -O .@libdir@/firmware/native.cetk" >> out/n3ds_firm.sh
 	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000102/00000000 -O .@libdir@/firmware/twl"       >> out/n3ds_firm.sh
-	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000102/cetk     -O .@datarootdir@/keys/twl.cetk" >> out/n3ds_firm.sh
+	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000102/cetk     -O .@libdir@/firmware/twl.cetk" >> out/n3ds_firm.sh
 	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000202/00000000 -O .@libdir@/firmware/agb"       >> out/n3ds_firm.sh
-	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000202/cetk     -O .@datarootdir@/keys/agb.cetk" >> out/n3ds_firm.sh
+	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000202/cetk     -O .@libdir@/firmware/agb.cetk" >> out/n3ds_firm.sh
 	chmod 755 out/*.sh
 	cp README.md LICENSE.txt out/
 

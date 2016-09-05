@@ -12,6 +12,17 @@ strdup_self(const char* str)
     return new_st;
 }
 
+char*
+strdupcat(const char* str, const char *cat)
+{
+	size_t l_str = strlen(str);
+	size_t l_cat = strlen(cat);
+    char *out = malloc(l_str + l_cat + 1);
+    memcpy(out, str, l_str);
+    memcpy(out + l_str, cat, l_cat + 1);
+    return out;
+}
+
 int
 atoi(const char *str)
 {

@@ -3,188 +3,54 @@
 #include <ctr9/aes.h>
 #include <ctr9/sha.h>
 
-key_find_t Y11_sec;
-key_find_t X11_sec;
+#define FIRM_INTERNAL_CODE
+#include <firm/internal.h>
 
-key_find_t Y11[] = {
-    #include "keys/Y11_95.gen"
-    #include "keys/Y11_96.gen"
-};
+int set_N11_K9L(uint32_t index) {
+	static uint8_t ss_keyn[2][16] = {
+        { 0 }, // 9.5
+        { 0 }, // 9.6+
+    };
 
-key_find_t Y3D[] = {
-    #include "keys/Y3D_0.gen"
-    #include "keys/Y3D_1.gen"
-    #include "keys/Y3D_2.gen"
-    #include "keys/Y3D_3.gen"
-    #include "keys/Y3D_4.gen"
-    #include "keys/Y3D_5.gen"
-};
-
-key_find_t Y05 =
-#include "keys/Y05.gen"
-;
-
-#define ROLL_WINDOW    AES_BLOCK_SIZE
-#define MODULO_WINDOW  (ROLL_WINDOW / 2)
-uint8_t* slice_roll_search(uint8_t *mem, uint32_t size, key_find_t* find) {
-    uint16_t roll = 0;
-    uint32_t i = 0;
-    uint8_t hash[32];
-
-    // Initial window.
-    for(; i < ROLL_WINDOW; i++) {
-        roll += mem[i];
-    }
-
-    // Loop through, moving the window.
-    for(i = ROLL_WINDOW; i < size; i++) {
-        if (find->roll == roll) {
-            // Yes. Check hash.
-            sha256sum(hash, &mem[i], 0x10);
-
-            if(!memcmp(find->sha, hash, 0x20)) {
-                return & mem[i];
-            }
+    if (ss_keyn[0][0] == 0) {
+        ss_keyn[0][0] = 1;
+        FILE* key = fopen(PATH_SLOT0X11KEY95, "r");
+        if (key) {
+            fread(ss_keyn[0], 1, AES_BLOCK_SIZE, key);
+            fclose(key);
         }
-
-        roll -= mem[i-16];
-        roll += mem[i];
-    }
-    return NULL;
-}
-
-int get_Y11_sec() {
-    // FIXME; this only handles the case of K9LH. Needs more sanity checks.
-
-    uint8_t hash[32];
-
-    // We know better here than GCC.
-#pragma GCC diagnostic push
-#pragma GCC diagnostic warning "-Wdiscarded-qualifiers"
-    memcpy(hash, (volatile void*)REG_SHAHASH, 32);
-#pragma GCC diagnostic pop
-
-    memcpy(X11_sec.key, hash, 16);
-    memcpy(Y11_sec.key, hash + 16, 16);
-
-    return 0;
-}
-
-int get_Y11_K9L(firm_h *firm, int index) {
-    // A9LH corrupts this one. Can't do much here.
-    int level = 0;
-
-    uint8_t key[AES_BLOCK_SIZE];
-    FILE* f;
-
-    // 9.5 key (K9L1)
-    f = fopen(PATH_SLOT0X11KEY95, "r");
-    if (!f) {
-        level |= 1;
-        goto next;
     }
 
-    fread(Y11[0].key, 1, AES_BLOCK_SIZE, f);
-    fclose(f);
-
-next:
-    // 9.6 key (K9L2)
-    f = fopen(PATH_SLOT0X11KEY96, "r");
-    if (!f) {
-        level |= 2;
-        goto end;
+    if (ss_keyn[1][0] == 0) {
+        ss_keyn[1][0] = 1;
+        FILE* key = fopen(PATH_SLOT0X11KEY96, "r");
+        if (key) {
+            fread(ss_keyn[1], 1, AES_BLOCK_SIZE, key);
+            fclose(key);
+        }
     }
 
-    fread(Y11[1].key, 1, AES_BLOCK_SIZE, f);
-    fclose(f);
-
-end:
-    return level;
-}
-
-int get_Y3D(firm_h *firm, int index) {
-    uint8_t* key_loc     = (uint8_t*)firm + firm->section[2].offset; // ARM9 segment
-    uint32_t search_size = firm->section[2].size;
-
-    uint8_t mem[16] __attribute__((aligned(16))) = {0};
-
-    uint8_t* key_data = slice_roll_search(key_loc, search_size, & Y3D[0]);
-
-    if (!key_data)
-        return 1;
-
-    memcpy(mem, key_data, 16);
-
-    return 0;
-}
-
-int get_Y05(firm_h *firm) {
-    uint8_t* key_loc     = (uint8_t*)firm + firm->section[2].offset; // ARM9 segment
-    uint32_t search_size = firm->section[2].size;
-
-    uint8_t mem[16] __attribute__((aligned(16))) = {0};
-
-    uint8_t* key_data = slice_roll_search(key_loc, search_size, &Y05);
-
-    if (!key_data)
-        return 1;
-
-    fprintf(stderr, "  0x05 KeyY at %lx in FIRM1\n", (uint32_t)key_data - (uint32_t)key_loc);
-
-    memcpy(mem, key_data, 16);
-
-    return 0;
-}
-
-int extract_keys() {
-    int level = 0;
-
-	if (get_Y11_sec()) {// MUST be done first. Otherwise, sha register gets clobbered.
-        // At best, a warning.
-        level |= 1;
-    }
-
-#if 0
-    if (get_Y11_K9L()) { // For decrypting K9L.
-        // Also a warning, but potentially fatal if an N3DS.
-        level |= 2;
-    }
-
-    if (get_Y3D()) {
-        // No cetk decryption.
-        level |= 4;
-    }
-
-    if (get_Y05()) {
-        // Pretty much a warning and nothing else atm.
-        level |= 8;
-    }
-#endif
-
-    return level;
-}
-
-int set_Y3D_common(int commonKeyIndex) {
-	setup_aeskeyY(0x3D, (void*) Y3D[commonKeyIndex].key);
-
-	use_aeskey(0x3D);
-
-	return 0;
-}
-
-int set_Y05() {
-    // N3DS nand key
-    setup_aeskeyY(0x05, Y05.key);
-
-	use_aeskey(0x05);
-
-	return 0;
-}
-
-int set_Y11_K9L(int index) {
-    setup_aeskey(0x11, Y11[index].key);
+    setup_aeskey(0x11, (void*) ss_keyn[index]);
 
 	use_aeskey(0x11);
+
+	return 0;
+}
+
+int set_Y3D_cetk(uint32_t index) {
+	// From https://github.com/profi200/Project_CTR/blob/master/makerom/pki/prod.h#L19
+	static uint8_t common_keyy[6][16] = {
+		{0xD0, 0x7B, 0x33, 0x7F, 0x9C, 0xA4, 0x38, 0x59, 0x32, 0xA2, 0xE2, 0x57, 0x23, 0x23, 0x2E, 0xB9} , // 0 - eShop Titles
+		{0x0C, 0x76, 0x72, 0x30, 0xF0, 0x99, 0x8F, 0x1C, 0x46, 0x82, 0x82, 0x02, 0xFA, 0xAC, 0xBE, 0x4C} , // 1 - System Titles
+		{0xC4, 0x75, 0xCB, 0x3A, 0xB8, 0xC7, 0x88, 0xBB, 0x57, 0x5E, 0x12, 0xA1, 0x09, 0x07, 0xB8, 0xA4} , // 2
+		{0xE4, 0x86, 0xEE, 0xE3, 0xD0, 0xC0, 0x9C, 0x90, 0x2F, 0x66, 0x86, 0xD4, 0xC0, 0x6F, 0x64, 0x9F} , // 3
+		{0xED, 0x31, 0xBA, 0x9C, 0x04, 0xB0, 0x67, 0x50, 0x6C, 0x44, 0x97, 0xA3, 0x5B, 0x78, 0x04, 0xFC} , // 4
+		{0x5E, 0x66, 0x99, 0x8A, 0xB4, 0xE8, 0x93, 0x16, 0x06, 0x85, 0x0F, 0xD7, 0xA1, 0x6D, 0xD7, 0x55} , // 5
+	};
+
+	setup_aeskeyY(0x3D, (void*) common_keyy[index]);
+
+	use_aeskey(0x3D);
 
 	return 0;
 }

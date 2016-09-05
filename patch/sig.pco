@@ -1,5 +1,6 @@
 # $name Signature Fix
 # $desc Disables signature checks on all content.
+# $title 0004013800000002 0004013820000002
 # $ver  09
 # $uuid 0c
 # $flags require
@@ -9,7 +10,7 @@
 # Signature patch.
 
 # Relative to exefs.
-rel  native_p9
+rel  section2
 
 # Pattern one.
 find c01c76e7

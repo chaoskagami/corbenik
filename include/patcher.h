@@ -5,7 +5,7 @@
  *
  * \return zero on success
  */
-int patch_firm_all();
+int patch_firm_all(uint64_t tid, firm_h* firm);
 
 /* Generates patch cache for boot/loader for the current configuration.
  *

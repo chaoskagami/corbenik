@@ -69,59 +69,13 @@ int init_bytecode = 0;
 #ifndef LOADER
 extern int is_n3ds;
 static const char hexDigits[] = "0123456789ABCDEF";
-#else
-int is_n3ds = 1; // TODO - We don't really need to care, but it should still work from loader
-#endif
-
-#define STACK_SIZE 4096
-#ifdef LOADER
-  static uint8_t stack_glob[STACK_SIZE];
-#else
-  static uint8_t *stack_glob = NULL;
-  firm_h* firm_patch;
 #endif
 
 int
-exec_bytecode(uint8_t *bytecode, uint32_t len, uint8_t* stack, uint32_t stack_size, uint16_t ver, int debug)
+exec_bytecode(uint8_t *bytecode, uint32_t len, uint16_t ver, int debug)
 {
-    if (!init_bytecode) {
-#ifndef LOADER
-        modes[0].memory = (uint8_t *)firm_patch;
-        modes[0].size   = firm_patch->section[0].size + firm_patch->section[1].size + sizeof(firm_h) +
-                          firm_patch->section[2].size + firm_patch->section[3].size; // NATIVE_FIRM
+    uint32_t set_mode = 0;
 
-#if 0
-        // FIRM Process9 (This is also the default mode.)
-        modes[1].memory = (uint8_t *)firm_p9_exefs + sizeof(exefs_h) + firm_p9_exefs->fileHeaders[0].offset;
-        modes[1].size   = firm_p9_exefs->fileHeaders[0].size;
-#endif
-
-        // FIRM Sect 0
-        modes[2].memory = (uint8_t *)firm_patch + firm_patch->section[0].offset;
-        modes[2].size   = firm_patch->section[0].size;
-        // FIRM Sect 1
-        modes[3].memory = (uint8_t *)firm_patch + firm_patch->section[1].offset;
-        modes[3].size   = firm_patch->section[1].size;
-        // FIRM Sect 2
-        modes[4].memory = (uint8_t *)firm_patch + firm_patch->section[2].offset;
-        modes[4].size   = firm_patch->section[2].size;
-        // FIRM Sect 3
-        modes[5].memory = (uint8_t *)firm_patch + firm_patch->section[3].offset;
-        modes[5].size   = firm_patch->section[3].size;
-#endif
-
-        init_bytecode = 1;
-    }
-
-    memset(stack, 0, stack_size); // Clear stack.
-
-    _UNUSED uint32_t top = stack_size - 1;
-
-#ifdef LOADER
-    uint32_t set_mode = 18;
-#else
-    uint32_t set_mode = 3;
-#endif
     struct mode *current_mode = &modes[set_mode];
 
     uint32_t offset = 0, new_offset = 0;
@@ -395,13 +349,6 @@ exec_bytecode(uint8_t *bytecode, uint32_t len, uint8_t* stack, uint32_t stack_si
                 eq = !eq;
                 code += 2;
                 break;
-            case OP_N3DS:
-                if (debug) {
-                    log("n3ds\n");
-                }
-                code++;
-                eq = is_n3ds;
-                break;
             case OP_SEEK: // Jump to offset if greater than or equal
                 code++;
                 offset = (uint32_t)(code[0] + (code[1] << 8) + (code[2] << 16) + (code[3] << 24));
@@ -469,12 +416,9 @@ exec_bytecode(uint8_t *bytecode, uint32_t len, uint8_t* stack, uint32_t stack_si
                 }
                 found = gt = lt = eq = 0;
 
-                memset(stack, 0, stack_size); // Clear stack.
-                top = stack_size - 1;
-
                 bytecode = code + 1;
 #ifndef LOADER
-                set_mode = 3;
+                set_mode = 0;
                 current_mode = &modes[set_mode];
 #else
                 set_mode = 18;
@@ -555,7 +499,7 @@ execb(uint64_t tid, uint16_t ver, uint8_t *text_mem, uint32_t text_len, uint8_t 
 {
 #else
 int
-execb(const char *filename, int build_cache)
+execb(uint64_t tid, firm_h* firm_patch)
 {
     uint16_t ver = 0; // FIXME - Provide native_firm version
 #endif
@@ -607,22 +551,88 @@ execb(const char *filename, int build_cache)
     FSFILE_Close(file); // Done reading in.
 
     // Set memory.
-    modes[18].memory = text_mem;
-    modes[18].size = text_len;
+    modes[0].memory = text_mem;
+    modes[0].size = text_len;
 
     // Set memory.
-    modes[19].memory = data_mem;
-    modes[19].size = data_len;
+    modes[1].memory = data_mem;
+    modes[1].size = data_len;
 
     // Set memory.
-    modes[20].memory = ro_mem;
-    modes[20].size = ro_len;
+    modes[2].memory = ro_mem;
+    modes[2].size = ro_len;
 
     log("  exec\n");
 
     uint8_t *patch_mem = (uint8_t *)patch_dat;
     patch_len = file_size;
 #else
+    // The WHOLE firm.
+    modes[0].memory = (uint8_t *)firm_patch;
+    modes[0].size   = firm_patch->section[0].size + firm_patch->section[1].size + sizeof(firm_h) +
+                      firm_patch->section[2].size + firm_patch->section[3].size;
+
+    // FIRM Sect 0
+    modes[1].memory = (uint8_t *)firm_patch + firm_patch->section[0].offset;
+    modes[1].size   = firm_patch->section[0].size;
+
+    // FIRM Sect 1
+    modes[2].memory = (uint8_t *)firm_patch + firm_patch->section[1].offset;
+    modes[2].size   = firm_patch->section[1].size;
+
+    // FIRM Sect 2
+    modes[3].memory = (uint8_t *)firm_patch + firm_patch->section[2].offset;
+    modes[3].size   = firm_patch->section[2].size;
+
+    // FIRM Sect 3
+    modes[4].memory = (uint8_t *)firm_patch + firm_patch->section[3].offset;
+    modes[4].size   = firm_patch->section[3].size;
+
+    char cache_path[] = PATH_LOADER_CACHE "/0000000000000000";
+
+    uint64_t title = tid;
+
+    uint32_t tlen = strlen(cache_path) - 1;
+    int j = 16;
+    while (j--) {
+        cache_path[tlen--] = hexDigits[title & 0xF];
+        title >>= 4;
+    }
+
+    // Read patch to scrap memory.
+
+    FILE *f = fopen(cache_path, "r");
+    if (!f) {
+        // File wasn't found. The user didn't enable anything.
+        return 0;
+    }
+
+    patch_len = fsize(f);
+
+    uint8_t* patch_mem = malloc(patch_len);
+
+    fread(patch_mem, 1, patch_len, f);
+    fclose(f);
+#endif
+
+    int debug = 0;
+#ifdef LOADER
+    if (config.options[OPTION_OVERLY_VERBOSE]) {
+#else
+    if (get_opt_u32(OPTION_OVERLY_VERBOSE)) {
+#endif
+        debug = 1;
+    }
+
+    return exec_bytecode(patch_mem, patch_len, ver, debug);
+}
+
+#ifndef LOADER
+
+int cache_patch(const char *filename) {
+    uint16_t ver = 0; // FIXME - Provide native_firm version
+    uint32_t patch_len;
+
     struct system_patch *patch;
     uint8_t *patch_mem;
     // Read patch to scrap memory.
@@ -640,55 +650,42 @@ execb(const char *filename, int build_cache)
     fread(patch_loc, 1, len, f);
     fclose(f);
 
-    if (build_cache == 1) {
-        patch = (struct system_patch*)patch_loc;
+    patch = (struct system_patch*)patch_loc;
 
-        // Make sure various bits are correct.
-        if (memcmp(patch->magic, "AIDA", 4)) {
-            // Incorrect magic.
-            return 1;
-        }
+    // Make sure various bits are correct.
+    if (memcmp(patch->magic, "AIDA", 4)) {
+        // Incorrect magic.
+        return 1;
+    }
 
-        fprintf(stderr, "Cache: %s\n", patch->name);
+    fprintf(stderr, "Cache: %s\n", patch->name);
 
-        patch_mem = (uint8_t *)patch + sizeof(struct system_patch) + (patch->depends * 8) + (patch->titles * 8);
-        patch_len = patch->size;
+    patch_mem = (uint8_t *)patch + sizeof(struct system_patch) + (patch->depends * 8) + (patch->titles * 8);
+    patch_len = patch->size;
 
-        if (patch->titles != 0) {
-            // Not an error, per se, but it means this patch is meant for loader, not us.
-            // Patches intended for use during boot will always be applied to zero titles.
-            // We should generate a cache for loader in a file intended for titleid.
-            uint8_t *title_buf = (uint8_t *)patch + sizeof(struct system_patch);
+    if (patch->titles != 0) {
+        // Not an error, per se, but it means this patch is meant for loader, not us.
+        // Patches intended for use during boot will always be applied to zero titles.
+        // We should generate a cache for loader in a file intended for titleid.
+        uint8_t *title_buf = (uint8_t *)patch + sizeof(struct system_patch);
 
-            fprintf(stderr, "  Version: %u\n", patch->version);
+        fprintf(stderr, "  Version: %u\n", patch->version);
 
-            for (uint32_t i = 0; i < patch->titles; i++) {
-                char cache_path[] = PATH_LOADER_CACHE "/0000000000000000";
+        for (uint32_t i = 0; i < patch->titles; i++) {
+            char cache_path[] = PATH_LOADER_CACHE "/0000000000000000";
 
-                uint64_t title = 0;
-                memcpy(&title, &title_buf[i * 8], 8);
+            uint64_t title = 0;
+            memcpy(&title, &title_buf[i * 8], 8);
 
-                uint32_t tlen = strlen(cache_path) - 1;
-                int j = 16;
-                while (j--) {
-                    cache_path[tlen--] = hexDigits[title & 0xF];
-                    title >>= 4;
-                }
-
-                fprintf(stderr, "  cache: %s\n", &cache_path[strlen(cache_path) - 16]);
-
-                char reset = 0xFF;
-
-                FILE *cache = fopen(cache_path, "w");
-                fseek(cache, 0, SEEK_END);
-                fwrite(patch_mem, 1, patch_len, cache);
-                fwrite(&reset, 1, 1, cache);
-                fclose(cache);
-                // Add to cache.
+            uint32_t tlen = strlen(cache_path) - 1;
+            int j = 16;
+            while (j--) {
+                cache_path[tlen--] = hexDigits[title & 0xF];
+                title >>= 4;
             }
-        } else {
-            // BOOT patch
-            char cache_path[] = PATH_LOADER_CACHE "/BOOT";
+
+            fprintf(stderr, "  cache: %s\n", &cache_path[strlen(cache_path) - 16]);
+
             char reset = 0xFF;
 
             FILE *cache = fopen(cache_path, "w");
@@ -696,29 +693,11 @@ execb(const char *filename, int build_cache)
             fwrite(patch_mem, 1, patch_len, cache);
             fwrite(&reset, 1, 1, cache);
             fclose(cache);
+            // Add to cache.
         }
-
-        return 0;
-    } else {
-        patch_mem = patch_loc;
-        patch_len = len;
-    }
-#endif
-
-    int debug = 0;
-#ifdef LOADER
-    if (config.options[OPTION_OVERLY_VERBOSE]) {
-#else
-    if (get_opt_u32(OPTION_OVERLY_VERBOSE)) {
-#endif
-        debug = 1;
     }
 
-#ifndef LOADER
-    if (stack_glob == NULL) {
-        stack_glob = malloc(STACK_SIZE);
-    }
-#endif
-
-    return exec_bytecode(patch_mem, patch_len, stack_glob, STACK_SIZE, ver, debug);
+    return 0;
 }
+
+#endif

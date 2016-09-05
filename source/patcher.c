@@ -29,7 +29,7 @@ patch_cache_func(char* fpath)
 
         if (enable_list[p.uuid]) {
             // Patch is enabled. Cache it.
-            if (execb(fpath, 1)) {
+            if (cache_patch(fpath)) {
                 panic("Failed to cache:\n  %s\n", fpath);
             }
 
@@ -51,9 +51,9 @@ generate_patch_cache()
 }
 
 int
-patch_firm_all(firm_h* firm)
+patch_firm_all(uint64_t tid, firm_h* firm)
 {
-    execb(PATH_LOADER_CACHE "/BOOT", 0);
+    execb(tid, firm);
 
     fprintf(stderr, "VM exited without issue\n");
 

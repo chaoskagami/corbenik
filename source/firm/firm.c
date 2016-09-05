@@ -62,7 +62,6 @@ load_firm(const char *path)
 
                 if (sig->console == console_n3ds) {
                     if(dec_k9l(firm)) {
-                        panic("K9L?");
                         free(firm);
                         free(mem);
                         return NULL;
@@ -71,7 +70,6 @@ load_firm(const char *path)
                     patch_entry(firm, sig->type);
 
                     if (patch_section_keys(firm, sig->k9l)) {
-                        panic("Section keys?");
                         free(firm);
                         free(mem);
                         return NULL;
@@ -87,19 +85,29 @@ load_firm(const char *path)
     return firm;
 }
 
-
 int
 boot_cfw(char* firm_path)
 {
     firm_h* firm = load_firm(firm_path);
 
     if (firm == NULL)
-        panic("Invalid FIRM?");
+        return 1;
 
-//    if (patch_firm_all(firm) != 0)
-//        return 1;
+    struct firm_signature *sig = get_firm_info(firm);
 
-    firmlaunch(firm);
+    uint64_t tid = 0x0004013800000002LLu;
 
-    return 0;
+    if (sig->console == console_n3ds)
+        tid += 0x20000000LLu;
+
+    tid += sig->type * 0x100LLu;
+
+    free(sig);
+
+    if (patch_firm_all(tid, firm) != 0)
+        return 1;
+
+    firmlaunch(firm); // <- should NOT return if all is well
+
+    return 1;
 }

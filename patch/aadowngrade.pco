@@ -1,5 +1,6 @@
 # $name Title Downgrade Fix (11.0 NFIRM)
 # $desc Removes added checks to prevent downgrade of system titles (in 11.0 NATIVE_FIRM.) Do not use on any other native_firm.
+# $title 0004013800000002 0004013820000002
 # $ver  09
 # $uuid 00
 # $flags require
@@ -8,8 +9,8 @@
 
 # Anti-anti-downgrade fix.
 
-# Relative to process9.
-rel  native_p9
+# Relative to arm9 segment
+rel  section2
 
 # We want to patch the fifth byte of this pattern.
 find 890a814202D2

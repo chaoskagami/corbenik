@@ -1,12 +1,13 @@
 # $name FIRM Protection
 # $desc Prevents writing FIRM to the NAND during updates. Enable this if booting sysNAND.
+# $title 0004013800000002 0004013820000002
 # $ver  09
 # $uuid 08
 # $flags require
 
 # Status: Untested, but theoretically fine (Next system update I'll either brick or I won't.)
 
-rel native_p9
+rel section2
 # String: 'exe:'
 find 6578653a
 abortnf

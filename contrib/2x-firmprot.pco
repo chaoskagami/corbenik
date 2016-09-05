@@ -1,5 +1,6 @@
 # $name  FIRM Protection (2.x)
 # $desc  Patches FIRM writes in 2.x FIRMs.
+# $title 0004013800000002 0004013800000003 0004013820000003
 # $ver   01
 # $uuid  0004
 
@@ -12,7 +13,7 @@
 # This is also identical to the safemode patch for FIRM protection
 # if you're astute. Corbenik doesn't support that, though.
 
-rel native_p9
+rel section2
 
 find  041E1DDB
 abortnf

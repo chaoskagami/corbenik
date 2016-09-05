@@ -26,32 +26,16 @@ def syn_err(x):
 
 def rel_name(x):
 	return {
-		'native'   : "00",
-		'agb'      : "01",
-		'twl'      : "02",
+		'firm'     : "00",
 
-		'native_p9': "03",
-		'agb_p9'   : "04",
-		'twl_p9'   : "05",
+		'section0' : "01",
+		'section1' : "02",
+		'section2' : "03",
+		'section3' : "04",
 
-		'native_s0': "06",
-		'native_s1': "07",
-		'native_s2': "08",
-		'native_s3': "09",
-
-		'agb_s0'   : "0A",
-		'agb_s1'   : "0B",
-		'agb_s2'   : "0C",
-		'agb_s3'   : "0D",
-
-		'twl_s0'   : "0E",
-		'twl_s1'   : "0F",
-		'twl_s2'   : "10",
-		'twl_s3'   : "11",
-
-		'exe_text' : "12",
-		'exe_data' : "13",
-		'exe_ro'   : "14",
+		'exe_text' : "00",
+		'exe_data' : "01",
+		'exe_ro'   : "02",
 	}.get(x, "-1")
 
 name = "NO NAME"

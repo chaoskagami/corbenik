@@ -17,6 +17,8 @@ void firmlaunch(firm_h* firm) {
         memmove((void *)section->address, (void *)((uint8_t*)firm + section->offset), section->size);
     }
 
+    free(firm); // Really, no point in this. Why not, though.
+
     fflush(stderr); // Flush logs if need be before unmount.
 
     fumount(); // Unmount SD.

@@ -1,5 +1,6 @@
 # $name Disable SVC Permission Checks
 # $desc Disables permission checks on SVC calls, so all titles have permission to use all SVC calls. This is a potential security hazard, especially with svcBackdoor Fixup.
+# $title 0004013800000002 0004013820000002
 # $ver  01
 # $uuid 0002
 
@@ -7,7 +8,7 @@
 
 # Original patch by Subv. Conversion by @Wolfvak.
 
-rel  native_s1
+rel  section1
 
 find EAFFFF0A
 abortnf

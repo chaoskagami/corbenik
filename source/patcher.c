@@ -1,12 +1,6 @@
 #include <common.h>
 #include <stdint.h>
 
-// TODO - Basically all this needs to move to patcher programs.
-
-extern int patch_svc_calls(firm_h*);
-extern int patch_modules(firm_h*);
-extern int patch_reboot(firm_h*);
-
 extern int doing_autoboot;
 
 extern uint8_t *enable_list;
@@ -51,43 +45,43 @@ generate_patch_cache()
 }
 
 int
-patch_firm_all(uint64_t tid, firm_h* firm)
+patch_firm_all(uint64_t tid, firm_h* firm, const char* module_path)
 {
+    int exit = 0;
+
     execb(tid, firm);
 
-    fprintf(stderr, "VM exited without issue\n");
+    switch (tid) {
+        case 0x0004013800000002LLu: // NFIRM
+        case 0x0004013820000002LLu:
+            // Hook firmlaunch?
+            if (get_opt_u32(OPTION_REBOOT))
+                patch_reboot(firm);
 
-    // Hook firmlaunch?
-    if (get_opt_u32(OPTION_REBOOT)) {
-        patch_reboot(firm);
+            // Use EmuNAND?
+            if (get_opt_u32(OPTION_EMUNAND))
+                patch_emunand(firm, get_opt_u32(OPTION_EMUNAND_INDEX));
 
-        wait();
-    }
-
-    // Use EmuNAND?
-    if (get_opt_u32(OPTION_EMUNAND)) {
-        // Yes.
-        patch_emunand(firm, get_opt_u32(OPTION_EMUNAND_INDEX));
-
-        wait();
-    }
-
-    // Inject services?
-    if (get_opt_u32(OPTION_SVCS)) {
-        if (patch_svc_calls(firm)) {
-            panic("Fatal. Svc inject has failed.");
-        }
-        wait();
+            // Inject services?
+            if (get_opt_u32(OPTION_SVCS))
+                if (patch_svc_calls(firm))
+                    exit |= 2;
+            break;
+        case 0x0004013800000102LLu:
+        case 0x0004013820000102LLu:
+            break;
+        case 0x0004013800000202LLu:
+        case 0x0004013820000202LLu:
+            break;
+        default:
+            exit |= 4;
+            break;
     }
 
     // Replace loader?
-    if (get_opt_u32(OPTION_LOADER)) {
-        if (patch_modules(firm)) {
-            panic("Fatal. Loader inject has failed.");
-        }
-        // This requires OPTION_SIGPATCH.
-        wait();
-    }
+    if (get_opt_u32(OPTION_LOADER))
+        if (patch_modules(firm, module_path))
+            exit |= 1;
 
     return 0;
 }

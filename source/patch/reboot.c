@@ -14,7 +14,7 @@ getProcess9(uint8_t *pos, uint32_t size, uint32_t *process9Size, uint32_t *proce
     return off - 0x204 + (*(uint32_t *)(off - 0x64) * 0x200) + 0x200;
 }
 
-void
+int
 patch_reboot(firm_h* firm_loc)
 {
     // Look for firmlaunch code
@@ -51,7 +51,7 @@ patch_reboot(firm_h* firm_loc)
     // Put the fOpen offset in the right location
     uint32_t *pos_fopen = (uint32_t *)memfind(off, size, "open", 4);
     if (!pos_fopen)
-        panic("reboot: fopen location missing\n");
+        return 1;
 
     *pos_fopen = fOpenOffset;
 
@@ -60,7 +60,7 @@ patch_reboot(firm_h* firm_loc)
     uint32_t *pos_agb = (uint32_t *)memfind(off, size, "AGBF", 4);
 
     if (!pos_native && !pos_twl && !pos_agb)
-        panic("reboot: missing string placeholder?\n");
+        return 1;
 
     fprintf(stderr, "reboot: NATF @ %lx\n", (uint32_t)pos_native);
     fprintf(stderr, "reboot: TWLF @ %lx\n", (uint32_t)pos_twl);
@@ -104,8 +104,10 @@ patch_reboot(firm_h* firm_loc)
 
     f = fopen(PATH_REBOOT_CODE, "r");
     if (!f)
-        panic("reboot: boot not found on SD\n");
+        return 1;
 
     fread(mem, 1, fsize(f), f);
     fclose(f);
+
+    return 0;
 }

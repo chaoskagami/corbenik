@@ -63,7 +63,17 @@ main(int argc, char** argv)
         generate_patch_cache();
     }
 
-    boot_cfw(config->firm[0]);
+    if (prepatch_firm(config->firm[1], PATH_TWL_P, PATH_MODULE_TWL)) {
+        fprintf(stderr, "WARNING: Failed to load/patch TWL.\n");
+        wait();
+    }
+
+    if(prepatch_firm(config->firm[2], PATH_AGB_P, PATH_MODULE_AGB)) {
+        fprintf(stderr, "WARNING: Failed to load/patch AGB.\n");
+        wait();
+    }
+
+    boot_firm(config->firm[0], PATH_NATIVE_P, PATH_MODULE_NATIVE);
 
     panic("Firmlaunch failed!\n");
 }

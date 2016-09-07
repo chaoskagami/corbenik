@@ -87,10 +87,10 @@ end_inj:
 }
 
 int
-patch_modules(firm_h* firm_loc)
+patch_modules(firm_h* firm_loc, const char* module_path)
 {
     firm_modules = firm_loc;
-    recurse_call(PATH_MODULE_NATIVE, inject_module);
+    recurse_call(module_path, inject_module);
 
     return 0;
 }

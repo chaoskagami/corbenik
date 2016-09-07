@@ -2,7 +2,7 @@ include $(top_srcdir)/common.mk
 
 noinst_PROGRAMS = corbenik
 corbenik_CFLAGS=$(AM_CFLAGS) -T$(srcdir)/linker.ld -nostartfiles
-corbenik_LDFLAGS=$(AM_LDFLAGS) -lctr9
+corbenik_LDFLAGS=$(AM_LDFLAGS) -lctr9 -Wl,-Map,corbenik.map
 EXTRA_DIST = linker.ld
 
 install:

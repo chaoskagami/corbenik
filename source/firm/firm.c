@@ -10,7 +10,7 @@
 #include <firm/internal.h>
 
 firm_h*
-load_firm(const char *path)
+load_firm(const char *path, size_t *size_out)
 {
     int success = 0;
 
@@ -20,6 +20,9 @@ load_firm(const char *path)
     }
 
     size_t size = fsize(firm_file);
+
+    if (size_out)
+        *size_out = size;
 
     uint8_t* mem = malloc(size);
 
@@ -69,7 +72,7 @@ load_firm(const char *path)
 
                     patch_entry(firm, sig->type);
 
-                    if (patch_section_keys(firm, sig->k9l)) {
+                    if (sig->type == type_native && patch_section_keys(firm, sig->k9l)) {
                         free(firm);
                         free(mem);
                         return NULL;
@@ -86,9 +89,44 @@ load_firm(const char *path)
 }
 
 int
-boot_cfw(char* firm_path)
+prepatch_firm(const char* firm_path, const char* prepatch_path, const char* module_path)
 {
-    firm_h* firm = load_firm(firm_path);
+	size_t size = 0;
+    firm_h* firm = load_firm(firm_path, &size);
+
+    if (firm == NULL)
+        return 1;
+
+    struct firm_signature *sig = get_firm_info(firm);
+
+    uint64_t tid = 0x0004013800000002LLu;
+
+    if (sig->console == console_n3ds)
+        tid |= 0x20000000LLu;
+
+    tid |= sig->type * 0x100LLu;
+
+    free(sig);
+
+    if (patch_firm_all(tid, firm, module_path)) {
+		free(firm);
+        return 1;
+	}
+
+	FILE* f = fopen(prepatch_path, "w");
+	fwrite(firm, 1, size, f);
+	fclose(f);
+
+	free(firm);
+
+	return 0;
+}
+
+int
+boot_firm(const char* firm_path, const char* prepatch_path, const char* module_path)
+{
+	size_t size = 0;
+    firm_h* firm = load_firm(firm_path, &size);
 
     if (firm == NULL)
         return 1;
@@ -104,8 +142,14 @@ boot_cfw(char* firm_path)
 
     free(sig);
 
-    if (patch_firm_all(tid, firm) != 0)
+    if (patch_firm_all(tid, firm, module_path)) {
+		free(firm);
         return 1;
+	}
+
+	FILE* f = fopen(prepatch_path, "w");
+	fwrite(firm, 1, size, f);
+	fclose(f);
 
     firmlaunch(firm); // <- should NOT return if all is well
 

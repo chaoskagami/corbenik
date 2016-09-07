@@ -31,12 +31,16 @@ struct firm_signature
  */
 struct firm_signature *get_firm_info(firm_h *firm);
 
+/* Loads a firmware off disk, returning it. The memory should be free()'d when done, unless you plan to boot.
+ */
+int prepatch_firm(const char *path, const char *prepatch_path, const char* module_path);
+
 /* Boots the CFW, generating caches and applying patches as-needed to the specified FIRM
  */
-int boot_cfw(char *firm_path);
+int boot_firm(const char *firm_path, const char *prepatch_path, const char* module_path);
 
 /* Loads a firmware off disk, returning it. The memory should be free()'d when done, unless you plan to boot.
  */
-firm_h* load_firm(const char *path);
+firm_h* load_firm(const char *path, size_t *size_out);
 
 #endif

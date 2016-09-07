@@ -31,6 +31,8 @@ depcomp
 /external/Makefile
 /include/Makefile
 /source/corbenik
+/source/corbenik.bin
 /m4
 /include/config.h
 /include/stamp-h1
+/source/corbenik.map

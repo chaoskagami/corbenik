@@ -113,7 +113,7 @@ patchMPU(uint8_t *pos, uint32_t size)
     fprintf(stderr, "emunand: mpu @ %lx\n", (uint32_t)off);
 }
 
-void
+int
 patch_emunand(firm_h* firm_loc, uint32_t index)
 {
 #if 0
@@ -127,11 +127,11 @@ patch_emunand(firm_h* firm_loc, uint32_t index)
     // Copy emuNAND code
     void *emuCodeOffset = getEmuCode(arm9Section, arm9SectionSize);
     if (!emuCodeOffset)
-        panic("emunand: code missing from arm9?\n");
+        return 1;
 
     FILE *f = fopen(PATH_EMUNAND_CODE, "r");
     if (!f)
-        panic("emunand: code not found on SD.\n");
+        return 1;
 
     uint32_t emunand_size = fsize(f);
     fread(emuCodeOffset, 1, emunand_size, f);
@@ -147,7 +147,7 @@ patch_emunand(firm_h* firm_loc, uint32_t index)
              *pos_sdmmc  = (uint32_t *)memfind(emuCodeOffset, emunand_size, "SDMC", 4);
 
     if (!pos_offset || !pos_head || !pos_sdmmc)
-        panic("emunand: couldn't find pattern in hook?\n");
+        return 1;
 
     verify_emunand(index, pos_offset, pos_head);
 
@@ -168,4 +168,5 @@ patch_emunand(firm_h* firm_loc, uint32_t index)
 
     fprintf(stderr, "emunand: patched MPU settings\n");
 #endif
+    return 0;
 }

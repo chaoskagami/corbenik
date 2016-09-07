@@ -43,4 +43,6 @@ int boot_firm(const char *firm_path, const char *prepatch_path, const char* modu
  */
 firm_h* load_firm(const char *path, size_t *size_out);
 
+exefs_h* find_proc9(firm_h *firm);
+
 #endif

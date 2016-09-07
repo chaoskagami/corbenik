@@ -206,3 +206,26 @@ int patch_section_keys(firm_h* firm_loc, uint32_t k9l) {
 
     return 0;
 }
+
+
+exefs_h*
+find_proc9(firm_h *firm)
+{
+	for (firm_section_h *section = firm->section; section < firm->section + 4; section++) {
+		if (section->address == 0)
+			break;
+		if (section->type == FIRM_TYPE_ARM9) {
+			uint8_t* arm9section = memfind((uint8_t *)firm + section->offset, section->size, "Process9", 8);
+			if (!arm9section)
+				return NULL;
+
+			ncch_h *ncch = (ncch_h *)((uint8_t*)arm9section - sizeof(ncch_h));
+			if (ncch->magic == NCCH_MAGIC) {
+				// Found Process9
+				ncch_ex_h *p9exheader = (ncch_ex_h *)(ncch + 1);
+				return (exefs_h *)(p9exheader + 1);
+			}
+		}
+	}
+	return NULL;
+}

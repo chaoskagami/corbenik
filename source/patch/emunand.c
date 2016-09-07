@@ -116,10 +116,11 @@ patchMPU(uint8_t *pos, uint32_t size)
 int
 patch_emunand(firm_h* firm_loc, uint32_t index)
 {
-#if 0
     // ARM9 section.
     uint8_t *arm9Section = (uint8_t *)firm_loc + firm_loc->section[2].offset;
     uint32_t arm9SectionSize = firm_loc->section[2].size;
+
+    exefs_h* firm_p9_exefs = find_proc9(firm_loc);
 
     uint8_t *process9Offset = (uint8_t *)firm_p9_exefs + sizeof(exefs_h) + firm_p9_exefs->fileHeaders[0].offset;
     uint32_t process9Size = firm_p9_exefs->fileHeaders[0].size;
@@ -167,6 +168,6 @@ patch_emunand(firm_h* firm_loc, uint32_t index)
     patchMPU(arm9Section, arm9SectionSize);
 
     fprintf(stderr, "emunand: patched MPU settings\n");
-#endif
+
     return 0;
 }

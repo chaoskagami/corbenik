@@ -27,6 +27,7 @@ libtool
 .dirstamp
 depcomp
 /Makefile
+/host/error_decoder
 /source/Makefile
 /external/Makefile
 /include/Makefile

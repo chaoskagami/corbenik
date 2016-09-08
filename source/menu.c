@@ -233,69 +233,9 @@ void patch_func(char* fpath) {
 }
 
 //===================================================================================================
-#if 0
-char* get_nfirm(void* val) {
-    return config->firms[0];
-}
 
-char* get_tfirm(void* val) {
-    return config->firms[1];
-}
+// TODO - Enumerate FIRMs and list
 
-char* get_afirm(void* val) {
-    return config->firms[2];
-}
-
-char* patch_get_enable(void* val) {
-    uint32_t opt = (uint32_t)val;
-    uint32_t raw = enable_list[opt];
-    static char ret[2] = " ";
-    ret[0] = ' ';
-    if (raw == 1)
-        ret[0] = '*';
-    return ret;
-}
-
-void patch_set_enable(void* val) {
-    uint32_t opt = (uint32_t)val;
-    enable_list[opt] = !enable_list[opt];
-}
-
-void patch_func(char* fpath) {
-    FILINFO f2;
-    if (f_stat(fpath, &f2) != FR_OK)
-        return;
-
-    if (!(f2.fattrib & AM_DIR)) {
-        struct system_patch p;
-        read_file(&p, fpath, sizeof(struct system_patch));
-
-        if (memcmp(p.magic, "AIDA", 4))
-            return;
-
-        patches[current_menu_index_patches].name = strdup_self(p.name);
-        if (desc_is_fname_sto)
-            patches[current_menu_index_patches].param = strdup_self(fpath);
-        else
-            patches[current_menu_index_patches].desc = strdup_self(p.desc);
-
-        uint32_t val = p.uuid;
-
-        patches[current_menu_index_patches].param = (void*)val;
-
-        patches[current_menu_index_patches].handle = option;
-        patches[current_menu_index_patches].indent = 0;
-
-        patches[current_menu_index_patches].func  = patch_set_enable;
-        patches[current_menu_index_patches].value = patch_get_enable;
-
-        if (desc_is_fname_sto)
-            enable_list[p.uuid] = 0;
-
-        current_menu_index_patches++;
-    }
-}
-#endif
 //===================================================================================================
 
 void

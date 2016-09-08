@@ -16,6 +16,10 @@ static int desc_is_fname_sto = 0;
 void chainload_menu();
 #endif
 
+#if defined(UNITTESTS) && UNITTESTS == 1
+void run_test_harness();
+#endif
+
 #ifndef REL
 #define REL "master"
 #endif
@@ -171,6 +175,11 @@ static struct options_s main_s[] = {
     { "Chainload",
       "Boot another ARM9 payload file.",
        option, 0, chainload_menu, NULL, 0, 0 },
+#endif
+#if defined(UNITTESTS) && UNITTESTS == 1
+    { "Unit tests",
+      "Runs through a number of sanity and regression tests to check for defects.",
+       option, 0, run_test_harness, NULL, 0, 0 },
 #endif
     { "Boot Firmware",
       "Patches the firmware, and boots it.",

@@ -1,0 +1,37 @@
+{
+	FILE* file_handle = NULL;
+	char filename[] = "/lolidontexistwowlol";
+
+	// Test; open nonexistent file for read.
+	file_handle = fopen(filename, "r");
+
+	test(assert_null(file_handle),    "Nonexistent file");
+
+	// Test; open nonexistent file for write.
+	file_handle = fopen(filename, "w");
+
+	test(assert_nonnull(file_handle), "Open for writing");
+
+	// Test; write string. Close file, check length, compare equality.
+	char data_str[]  = "LOOK AT THIS STRING; It Should be equal."; 
+	char data_str2[] = "                                        ";
+
+	test(assert_u32(fwrite(data_str, 1, sizeof(data_str), file_handle), sizeof(data_str)), "fwrite return");
+	fclose(file_handle);
+
+	file_handle = fopen(filename, "r");
+	test(assert_nonnull(file_handle),    "Open for read");
+
+	test(assert_u32(fread(data_str2, 1, sizeof(data_str), file_handle), sizeof(data_str)), "fread return");
+
+	test(assert_int(memcmp(data_str, data_str2, sizeof(data_str)), 0), "read data");
+
+    fclose(file_handle);
+
+    // Test removal.
+
+    f_unlink(filename);
+
+	file_handle = fopen(filename, "r");
+	test(assert_null(file_handle),    "Remove file");
+}

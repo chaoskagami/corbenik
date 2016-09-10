@@ -22,6 +22,7 @@ all-local:
 	mkdir -p out@sysconfdir@
 	mkdir -p out@localstatedir@
 	cp source/corbenik.bin out/arm9loaderhax.bin
+	cp source/corbenik out/corbenik.elf
 	cp external/loader/loader.cxi out@libdir@/module/native/loader.cxi
 	cp external/bits/*.bin out@libexecdir@/
 	cp host/termfont.bin out@datarootdir@/

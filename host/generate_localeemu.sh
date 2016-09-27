@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Downloads the XML from 3dsdb, parses it, and using this information generates
 # a langemu config for single-language single-region games, which can have langemu
@@ -24,7 +24,7 @@ while true; do
   read -r region <&4 || break
   read -r languages <&5 || break
 
-  if [ "${#titleid}" == "16" ]; then
+  if [ "${#titleid}" = "16" ]; then
     # Length of TID is correct.
     echo "$languages" | grep ',' 2>&1 >/dev/null
     R=$?

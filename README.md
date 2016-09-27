@@ -31,11 +31,11 @@ Without the FIRMs, it cannot boot up your system. You'll need to fetch the follo
 
 Otherwise, manually fetching firmware should be done from the following URLs:
 
-Old 3DS (Native FIRM, 11.0):
+Old 3DS (Native FIRM, 11.1):
  * firm: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000002/00000056
  * cetk: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000002/cetk
 
-New 3DS (Native FIRM, 11.0):
+New 3DS (Native FIRM, 11.1):
  * firm: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000002/00000026
  * cetk: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000002/cetk
 
@@ -79,15 +79,15 @@ Unless otherwise noted, menu controls are always shown at the top, but for refer
  * Select    -> Help (on any selectable option)
  * L+R+Start -> Screenshot (Menu ONLY.)
 
-For starters, you'll want to go into options and enable `Loader Replacement` to get loader to run patches as well. Even if you don't plan to run any loader patches, this will at very least kill ASLR and anti-OoThax/anti-Ninjhax features in the official Nintendo loader.
+For starters, you'll want to go into Configuration->Options and enable `System Module Inject` to get loader to run patches as well. Even if you don't plan to run any loader patches, this will at very least kill ASLR and anti-OoThax/anti-Ninjhax features in the official Nintendo loader.
 
-If you're using 11.0 NATIVE_FIRM like I suggested, you may want to tick `svcBackdoor Fixup` to fix the broken svcBackdoor if you plan on using anything which requires it. This includes HBMenu, some Retroarch cores, etc. Your system will be more secure (as in against malicious code, not as in Nintendo) if you leave it off.
+If you're using 11.1 NATIVE_FIRM like I suggested, you may want to tick `svcBackdoor Fixup` to fix the broken svcBackdoor if you plan on using anything which requires it. This includes HBMenu, some Retroarch cores, etc. Your system will be more secure (as in against malicious code, not as in Nintendo) if you leave it off.
 
 If you need to use an EmuNAND, you'll want to enable `EmuNAND` in options. If you've been using multiple EmuNANDs via Cakes or Luma you can also select the index while you're there with A to increase and X to decrease. This supports both Gateway-style (first sector at back) and standard copy NANDs (RedNAND)
 
 You can enable `Autoboot` if you'd like, including `Silent mode` if you're using something like BootAnim9. As of 0.0.8, EmuNAND will be automatically disabled on AGB reboot, so you need not worry about your savedata with this. If you want to get back in the menu, hold the `R` button while booting.
 
-If you plan to use TWL/AGB patches or have an O3DS, you should enable `Reboot Hook` in options.
+If you plan to use TWL/AGB patches or have an O3DS, you should enable `Reboot Hook` in Options.
 
 You'll also want to go into `Patches` and enable the usual bits, which includes:
  * Signature Fix
@@ -125,8 +125,6 @@ And these YOU SHOULD NOT ENABLE unless you have specialized needs:
  * ARM11 XN Disable   (Grants +X maps by default to kernel)
  * Force TestMenu     (Boots into TestMenu rather than HOME - requires TestMenu to be installed)
 
-Before booting, you should select 'Save Configuration' from the menu.
-
 Customization
 -------------------------
 
@@ -157,19 +155,11 @@ Briefly; the following commands are enough to build, assuming devkitarm is in yo
 ./configure --host=arm-none-eabi
 ```
 
-If you REALLY don't like the new directory structure for some reason, you can configure with the following to sort-of revert to the old paths:
-
-```
-./configure --host=arm-none-eabi --prefix=/corbenik --bindir=/corbenik/contrib --sbindir=/corbenik/patch --libexecdir=/corbenik/bits --sysconfdir=/corbenik/config --localstatedir=/corbenik/tmp --localedir=/corbenik/locale --datarootdir=/corbenik --libdir=/corbenik
-```
-
-Keep in mind I can't support every possible method of building, but that should work fine for the most part.
-
 Output will be produced in a directory named `out` after a successful build. This produces a build largely identical to normal releases from master.
 
 There's additional options one can provide - see `./configure --help` for information on these.
 
-Building corbenik on Windows never has and never will be supported. Your mileage may vary.
+Building corbenik on Windows never has and never will be officially supported. Your mileage may vary.
 
 Reporting issues
 -------------------------
@@ -179,7 +169,7 @@ If you think you've found a bug, please do the following first, to save me some 
  * Check if a recently enabled patch is the cause of the issue. If so, you should include this in the report.
  * Enable `Logging` and `Verbose` in `Options` then `Save Configuration` and retrieve the files `/corbenik/var/log/boot.log` and `/corbenik/var/log/loader.log` if they exist. I will want them. Do not report bugs without them, unless they are not created with the above enabled.
  * Please at least try to reproduce the bug from a clean installation.
- * Try to reproduce the problem from another CFW like luma or cakes, optionally.
+ * Try to reproduce the problem from another CFW like luma or cakes, to determine if the cause is truly corbenik.
 
 Contributions
 -------------------------
@@ -188,7 +178,7 @@ If you have a feature or bugfix, PR or hit me on freenode/#Cakey. However, pleas
 
  * Do NOT base any code on Nintendo's SDK. Additionally, if you are under NDA, do not even bother to PR. I cannot accept tainted code. This is for my own legal safety (and sanity)
  * Please attempt to obey coding standards. The .clang-format is a loose guide to this. I'll tell you if I need reformatting.
- * Please ensure your changes are functional and don't break consoles, O3DS or N3DS. Do not assume anything about the environment you are running under.
+ * Please ensure your changes are functional and don't break consoles, O3DS or N3DS. Do not assume anything about the environment you are running under unless it is a safe assumption.
 
 Credits
 -------------------------

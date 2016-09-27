@@ -17,11 +17,17 @@ LT_INIT
 AC_ARG_ENABLE([chainloader],
 	AS_HELP_STRING([--disable-chainloader], [Disable chainloading of external programs]))
 
+AC_ARG_ENABLE([unittests],
+	AS_HELP_STRING([--enable-unittests], [Include unit tests in resultant binary.]))
+
 AC_PREFIX_DEFAULT([/corbenik])
+
+UNITTESTS=0
+test "$enable_unittests" = "yes" && UNITTESTS=1
+AC_DEFINE_UNQUOTED([UNITTESTS], [$UNITTESTS])
 
 CHAINLOADER=1
 test "$enable_chainloader" = "no" && CHAINLOADER=0
-
 AC_DEFINE_UNQUOTED([CHAINLOADER], [$CHAINLOADER])
 
 AC_CONFIG_FILES([Makefile source/Makefile external/Makefile include/Makefile])
@@ -46,6 +52,7 @@ ldflags:         ${LDFLAGS}
 ocflags:         ${OCFLAGS}
 
 Chainloader:     ${CHAINLOADER}
+Chainloader:     ${UNITTESTS}
 "
 
 AC_OUTPUT

@@ -3,6 +3,4 @@
 
 #include <config.h>
 
-#define UNITTESTS 1
-
 #endif

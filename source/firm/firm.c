@@ -12,19 +12,28 @@
 firm_h*
 load_firm(const char *path, size_t *size_out)
 {
+    uint8_t* mem;
+    struct firm_signature* sig;
     int success = 0;
+    FILE* firm_file;
+    size_t size;
+    int save_dec = 0;
 
-    FILE *firm_file = fopen(path, "r");
+    char* decpath = strdupcat(path, ".dec");
+    firm_file = fopen(decpath, "r");
     if (!firm_file) {
-        return NULL;
+        firm_file = fopen(path, "r");
+        if (!firm_file) {
+            return NULL;
+        }
     }
 
-    size_t size = fsize(firm_file);
+    size = fsize(firm_file);
 
     if (size_out)
         *size_out = size;
 
-    uint8_t* mem = malloc(size);
+    mem = malloc(size);
 
     firm_h *firm = (firm_h*)mem;
 
@@ -32,57 +41,84 @@ load_firm(const char *path, size_t *size_out)
 
     fclose(firm_file);
 
-    if (!memcmp(firm->magic, "DECFIRM", 7)) {
-        // Fully decrypted FIRM, courtesy D9. Fix the entrypoint and we're good.
-        firm = (firm_h*)mem;
+    if (memcmp(firm->magic, "FIRM", 4)) {
+        char *key_path = strdupcat(path, ".key");
 
-        struct firm_signature* sig = get_firm_info(firm);
+        // Attempt to open keyfile.
+        uint8_t* firmkey = malloc(16);
+        if (read_file(firmkey, key_path, 16) != 16) {
+            // Keyfile couldn't be opened, try the cetk.
+            free(firmkey);
 
-        patch_entry(firm, sig->type);
-        if (patch_section_keys(firm, sig->k9l)) {
-            free(mem);
-            return NULL;
+            // Encrypted. Open CETK.
+            char *cetk_path = strdupcat(path, ".cetk");
+            firmkey = get_titlekey(cetk_path);
+            free(cetk_path);
+
+            // Save firmkey.
+            FILE* keyfile = fopen(key_path, "w");
+            fwrite(firmkey, 1, 16, keyfile);
+            fclose(keyfile);
         }
 
-        free(sig);
-    } else if (!memcmp(firm->magic, "FIRM", 4)) {
-        // O3DS fully decrypted FIRM
-
-        firm = (firm_h*)mem;
-    } else {
-        // Encrypted.
-        char *cetk_path = strdupcat(path, ".cetk");
-
-        uint8_t* firmkey = get_titlekey(cetk_path);
-
-        free(cetk_path);
+        free(key_path);
 
         if (firmkey) {
             firm = extract_firm_from_ncch((ncch_h*)mem, firmkey, size);
 
-            if (firm) {
-                struct firm_signature* sig = get_firm_info(firm);
+            free(firmkey);
 
-                if (sig->console == console_n3ds) {
-                    if(dec_k9l(firm)) {
-                        free(firm);
-                        free(mem);
-                        return NULL;
-                    }
+            if (!firm) {
+                free(mem);
+                return NULL;
+            }
+        } else {
+            free(mem);
+            return NULL;
+        }
 
-                    patch_entry(firm, sig->type);
+        save_dec = 1;
+    }
 
-                    if (sig->type == type_native && patch_section_keys(firm, sig->k9l)) {
-                        free(firm);
-                        free(mem);
-                        return NULL;
-                    }
-                }
+    sig = get_firm_info(firm);
 
-                free(sig);
+    if (memcmp(firm->magic, "FIRM", 4)) {
+        // Error. Abort.
+        free(mem);
+        return NULL;
+    }
+
+    // If this is a FIRM and not a k9l decrypted FIRM...
+    if (!memcmp(firm->magic, "FIRM", 4) && memcmp(firm->magic + 4, "DEC", 3)) {
+        if (sig->console == console_n3ds) {
+            if (dec_k9l(firm)) {
+                free(firm);
+                free(mem);
+                return NULL;
             }
         }
-        free(mem);
+    }
+
+    // Save decrypted FIRM.
+    if (save_dec == 1) {
+        firm_file = fopen(decpath, "w");
+        fwrite(firm, 1, size, firm_file);
+        fclose(firm_file);
+    }
+
+    free(decpath);
+
+    // Arm9 decrypted firmware (n3ds)?
+    if (!memcmp(firm->magic, "FIRMDEC", 7)) {
+        if (sig->console == console_n3ds) {
+            patch_entry(firm, sig->type);
+
+            if (sig->type == type_native && patch_section_keys(firm, sig->k9l)) {
+                free(firm);
+                free(mem);
+                return NULL;
+            }
+        }
     }
 
     return firm;
@@ -91,7 +127,7 @@ load_firm(const char *path, size_t *size_out)
 int
 prepatch_firm(const char* firm_path, const char* prepatch_path, const char* module_path)
 {
-	size_t size = 0;
+    size_t size = 0;
     firm_h* firm = load_firm(firm_path, &size);
 
     if (firm == NULL)
@@ -109,23 +145,23 @@ prepatch_firm(const char* firm_path, const char* prepatch_path, const char* modu
     free(sig);
 
     if (patch_firm_all(tid, firm, module_path)) {
-		free(firm);
+        free(firm);
         return 1;
-	}
+    }
 
-	FILE* f = fopen(prepatch_path, "w");
-	fwrite(firm, 1, size, f);
-	fclose(f);
+    FILE* f = fopen(prepatch_path, "w");
+    fwrite(firm, 1, size, f);
+    fclose(f);
 
-	free(firm);
+    free(firm);
 
-	return 0;
+    return 0;
 }
 
 int
 boot_firm(const char* firm_path, const char* prepatch_path, const char* module_path)
 {
-	size_t size = 0;
+    size_t size = 0;
     firm_h* firm = load_firm(firm_path, &size);
 
     if (firm == NULL)
@@ -143,13 +179,13 @@ boot_firm(const char* firm_path, const char* prepatch_path, const char* module_p
     free(sig);
 
     if (patch_firm_all(tid, firm, module_path)) {
-		free(firm);
+        free(firm);
         return 1;
-	}
+    }
 
-	FILE* f = fopen(prepatch_path, "w");
-	fwrite(firm, 1, size, f);
-	fclose(f);
+    FILE* f = fopen(prepatch_path, "w");
+    fwrite(firm, 1, size, f);
+    fclose(f);
 
     firmlaunch(firm); // <- should NOT return if all is well
 

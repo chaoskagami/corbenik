@@ -1,3 +1,4 @@
+
 #include <ctr9/ctr_hid.h>
 #include <ctr9/io.h>
 #include <ctr9/ctr_screen.h>
@@ -48,32 +49,34 @@ main(int argc, char** argv)
     clear_disp(TOP_SCREEN);
     clear_disp(BOTTOM_SCREEN);
 
-    if (get_opt_u32(OPTION_AUTOBOOT) && !r_held) {
-        doing_autoboot = 1;
+    while (1) {
+        if (get_opt_u32(OPTION_AUTOBOOT) && !r_held && !doing_autoboot) {
+            doing_autoboot = 1;
 
-        if (get_opt_u32(OPTION_SILENCE))
-            shut_up(); // This does exactly what it sounds like.
-    } else {
-        menu_handler();
+            if (get_opt_u32(OPTION_SILENCE))
+                shut_up(); // This does exactly what it sounds like.
+        } else {
+            menu_handler();
+        }
+
+        if (changed_consoles) {
+            fprintf(stderr, "Console changed, regenerating caches\n");
+            save_config();
+            generate_patch_cache();
+        }
+
+        if (prepatch_firm(config->firm[1], PATH_TWL_P, PATH_MODULE_TWL)) {
+            fprintf(stderr, "WARNING: Failed to load/patch TWL.\n");
+            wait();
+        }
+
+        if(prepatch_firm(config->firm[2], PATH_AGB_P, PATH_MODULE_AGB)) {
+            fprintf(stderr, "WARNING: Failed to load/patch AGB.\n");
+            wait();
+        }
+
+        boot_firm(config->firm[0], PATH_NATIVE_P, PATH_MODULE_NATIVE);
+
+        fprintf(stderr, "Firmlaunch failed, returning to menu\n");
     }
-
-    if (changed_consoles) {
-        fprintf(stderr, "Console changed, regenerating caches\n");
-        save_config();
-        generate_patch_cache();
-    }
-
-    if (prepatch_firm(config->firm[1], PATH_TWL_P, PATH_MODULE_TWL)) {
-        fprintf(stderr, "WARNING: Failed to load/patch TWL.\n");
-        wait();
-    }
-
-    if(prepatch_firm(config->firm[2], PATH_AGB_P, PATH_MODULE_AGB)) {
-        fprintf(stderr, "WARNING: Failed to load/patch AGB.\n");
-        wait();
-    }
-
-    boot_firm(config->firm[0], PATH_NATIVE_P, PATH_MODULE_NATIVE);
-
-    panic("Firmlaunch failed!\n");
 }

@@ -230,6 +230,7 @@ void patch_func(char* fpath) {
 
         patches[current_menu_index_patches].handle = option;
         patches[current_menu_index_patches].indent = 0;
+        patches[current_menu_index_patches].highlight = 0;
 
         patches[current_menu_index_patches].func  = patch_set_enable;
         patches[current_menu_index_patches].value = patch_get_enable;

@@ -99,6 +99,7 @@ void chain_file_hdl(char* fpath) {
         chains[current_chain_index].value  = NULL;
         chains[current_chain_index].param = dup;
         chains[current_chain_index].indent = 0;
+        chains[current_chain_index].highlight = 0;
 
         current_chain_index++;
     }

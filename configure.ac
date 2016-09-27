@@ -1,4 +1,4 @@
-AC_INIT([Corbenik], [0.1.2], [https://github.com/chaoskagami/corbenik], [corbenik])
+AC_INIT([Corbenik], [0.3.0], [https://github.com/chaoskagami/corbenik], [corbenik])
 AM_INIT_AUTOMAKE([foreign no-dist-gzip dist-xz subdir-objects])
 
 # Find AR and RANLIB for lto support before initializing libtool

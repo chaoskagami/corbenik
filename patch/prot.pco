@@ -5,7 +5,30 @@
 # $uuid 08
 # $flags require
 
-# Status: Untested, but theoretically fine (Next system update I'll either brick or I won't.)
+# Status: Working
+
+#
+# The firmprot patch works by nop'ing out a call in Process9 which normally
+# is called post-update of the FIRM. Normally it is responsible for writing exe:/<titleid>/.firm
+# to the NAND.
+#
+# We first search for the 'exe:' string because this is a reliable constant located at the end
+# of the stated function and is consistent through firmware versions. The full string is (null-terminated):
+#
+# "exe:/%016llx/.firm"
+#
+# Afterwards, we seek back 0x100 - which is close enough to the beginning of the function.
+# Then we search for the following thumb mode code:
+#
+# cmp r0, #0
+# bge loc_8043f82 ; relative jump
+#
+# This is then replaced with the following assembly to stub out the NAND writing routine
+# and prevent it from ever being called:
+#
+# movs r0, #0
+# nop
+#
 
 rel section2
 # String: 'exe:'

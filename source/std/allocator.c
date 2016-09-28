@@ -8,18 +8,21 @@ static uint32_t *heap_end = NULL;
 extern uint32_t __end__; /* Defined by the linker */
 
 void* sbrk(size_t incr) {
-  uint32_t        *prev_heap_end;
+    uint32_t        *prev_heap_end;
 
-  if (heap_end == NULL) {
-    heap_end = &__end__;
-  }
+    if (heap_end == NULL) {
+        heap_end = &__end__;
+    }
 
-  // FIXME - Make sure heap isn't leaking into stack here. That would be bad.
+    // FIXME - Make sure heap isn't leaking into stack here. That would be bad.
 
-  prev_heap_end = heap_end;
+    prev_heap_end = heap_end;
 
-  heap_end += incr;
-  return (void*) prev_heap_end;
+    heap_end += incr;
+
+    memset(prev_heap_end, 0, heap_end - prev_heap_end); // Clear heap.
+
+    return (void*) prev_heap_end;
 }
 
 // This is an incredibly crappy and inefficient implementation of malloc/free nicked from stackoverflow.

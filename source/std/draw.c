@@ -88,7 +88,6 @@ void rect(void* channel, unsigned int x, unsigned int y, unsigned int x2, unsign
             screen[pos + 1] = colors[color & 0xF];
             screen[pos + 2] = colors[color & 0xF] >> 8;
             screen[pos + 3] = colors[color & 0xF] >> 16;
-            screen[pos] = 0xFF;
         }
     }
 }
@@ -237,7 +236,6 @@ clear_disp(uint8_t *screen)
 
     if (screen == framebuffers->top_left || screen == framebuffers->top_right) {
         for(int i=0, j=0; j < TOP_SIZE; i += 3, j += 4) {
-            screen[j] = 0xFF;
             screen[j + 1] = top_bg[i];
             screen[j + 2] = top_bg[i + 1];
             screen[j + 3] = top_bg[i + 2];
@@ -252,7 +250,6 @@ clear_disp(uint8_t *screen)
         top_cursor_y = 0;
     } else if (screen == framebuffers->bottom) {
         for(int i=0, j=0; j < BOTTOM_SIZE; i += 3, j += 4) {
-            screen[j] = 0x7F;
             screen[j + 1] = bottom_bg[i];
             screen[j + 2] = bottom_bg[i + 1];
             screen[j + 3] = bottom_bg[i + 2];
@@ -321,8 +318,6 @@ draw_character(uint8_t *screen, const unsigned int character, unsigned int ch_x,
         unsigned char char_dat = font_data[(character - ' ') * (c_font_w * font_h) + yy];
 
         for(unsigned int i=0; i < font_w + font_kern; i++) {
-            screen[pos] = 0xFF;
-
             if (color_bg == 0) {
                 screen[pos + 1] = buffer_bg[pos_b];
                 screen[pos + 2] = buffer_bg[pos_b + 1];

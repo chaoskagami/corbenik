@@ -44,6 +44,7 @@ void std_init() {
 
     top_bg     = malloc(TOP_SIZE);
     bottom_bg  = malloc(BOTTOM_SIZE);
+
     log_buffer = malloc(LOG_BUFFER_SIZE);
 }
 
@@ -159,7 +160,9 @@ void load_bg_top(const char* fname_top) {
     FILE* f = fopen(fname_top, "r");
     if (!f) return;
 
-    fread(top_bg, 1, TOP_SIZE, f);
+    for (int i=1; i < TOP_SIZE; i += 4) {
+        fread(&top_bg[i], 1, 3, f);
+    }
 
     fclose(f);
 }
@@ -169,7 +172,10 @@ void load_bg_bottom(const char* fname_bottom) {
     if (!f)
         return;
 
-    fread(bottom_bg, 1, BOTTOM_SIZE, f);
+    for (int i=1; i < BOTTOM_SIZE; i += 4) {
+        fread(&bottom_bg[i], 1, 3, f);
+    }
+
     fclose(f);
 }
 
@@ -235,28 +241,26 @@ clear_disp(uint8_t *screen)
         screen = framebuffers->bottom;
 
     if (screen == framebuffers->top_left || screen == framebuffers->top_right) {
-        for(int i=0, j=0; j < TOP_SIZE; i += 3, j += 4) {
-            screen[j + 1] = top_bg[i];
-            screen[j + 2] = top_bg[i + 1];
-            screen[j + 3] = top_bg[i + 2];
-            if (!kill_output && get_opt_u32(OPTION_DIM_MODE)) {
-                screen[j + 1] = alphamap[screen[j + 1]];
-                screen[j + 2] = alphamap[screen[j + 2]];
-                screen[j + 3] = alphamap[screen[j + 3]];
+        memcpy(screen, top_bg, TOP_SIZE);
+
+        if (!kill_output && get_opt_u32(OPTION_DIM_MODE)) {
+            for(int i=0; i < TOP_SIZE; i += 4) {
+                screen[i + 1] = alphamap[screen[i + 1]];
+                screen[i + 2] = alphamap[screen[i + 2]];
+                screen[i + 3] = alphamap[screen[i + 3]];
             }
         }
 
         top_cursor_x = 0;
         top_cursor_y = 0;
     } else if (screen == framebuffers->bottom) {
-        for(int i=0, j=0; j < BOTTOM_SIZE; i += 3, j += 4) {
-            screen[j + 1] = bottom_bg[i];
-            screen[j + 2] = bottom_bg[i + 1];
-            screen[j + 3] = bottom_bg[i + 2];
-            if (!kill_output && get_opt_u32(OPTION_DIM_MODE)) {
-                screen[j + 1] = alphamap[screen[j + 1]];
-                screen[j + 2] = alphamap[screen[j + 2]];
-                screen[j + 3] = alphamap[screen[j + 3]];
+        memcpy(screen, bottom_bg, BOTTOM_SIZE);
+
+        if (!kill_output && get_opt_u32(OPTION_DIM_MODE)) {
+            for(int i=0; i < BOTTOM_SIZE; i += 4) {
+                screen[i + 1] = alphamap[screen[i + 1]];
+                screen[i + 2] = alphamap[screen[i + 2]];
+                screen[i + 3] = alphamap[screen[i + 3]];
             }
         }
 
@@ -311,48 +315,45 @@ draw_character(uint8_t *screen, const unsigned int character, unsigned int ch_x,
         unsigned int yDisplacement   = ((height - (y + yy) - 1) * SCREEN_DEPTH);
         unsigned int pos    = xDisplacement + yDisplacement;
 
-        unsigned int xDisplacementBg = (x * 3 * height);
-        unsigned int yDisplacementBg = ((height - (y + yy) - 1) * 3);
-        unsigned int pos_b  = xDisplacementBg + yDisplacementBg;
-
         unsigned char char_dat = font_data[(character - ' ') * (c_font_w * font_h) + yy];
 
         for(unsigned int i=0; i < font_w + font_kern; i++) {
-            if (color_bg == 0) {
-                screen[pos + 1] = buffer_bg[pos_b];
-                screen[pos + 2] = buffer_bg[pos_b + 1];
-                screen[pos + 3] = buffer_bg[pos_b + 2];
-                if (get_opt_u32(OPTION_DIM_MODE)) {
-                    screen[pos + 1] = alphamap[screen[pos + 1]];
-                    screen[pos + 2] = alphamap[screen[pos + 2]];
-                    screen[pos + 3] = alphamap[screen[pos + 3]];
-                }
-            } else {
-                screen[pos + 1] = color_bg;
-                screen[pos + 2] = color_bg >> 8;
-                screen[pos + 3] = color_bg >> 16;
-            }
-
             if (char_dat & 0x80) {
                 if (color_fg == 0) {
-                    screen[pos + 1] = buffer_bg[pos_b];
-                    screen[pos + 2] = buffer_bg[pos_b + 1];
-                    screen[pos + 3] = buffer_bg[pos_b + 2];
-                    if (get_opt_u32(OPTION_DIM_MODE)) {
-                        screen[pos + 1] = alphamap[screen[pos + 1]];
-                        screen[pos + 2] = alphamap[screen[pos + 2]];
-                        screen[pos + 3] = alphamap[screen[pos + 3]];
+                    if (!kill_output && get_opt_u32(OPTION_DIM_MODE)) {
+                        screen[pos + 1] = alphamap[buffer_bg[pos + 1]];
+                        screen[pos + 2] = alphamap[buffer_bg[pos + 2]];
+                        screen[pos + 3] = alphamap[buffer_bg[pos + 3]];
+                    } else {
+                        screen[pos + 1] = buffer_bg[pos + 1];
+                        screen[pos + 2] = buffer_bg[pos + 2];
+                        screen[pos + 3] = buffer_bg[pos + 3];
                     }
                 } else {
                     screen[pos + 1] = color_fg;
                     screen[pos + 2] = color_fg >> 8;
                     screen[pos + 3] = color_fg >> 16;
                 }
+            } else {
+                if (color_bg == 0) {
+                    if (!kill_output && get_opt_u32(OPTION_DIM_MODE)) {
+                        screen[pos + 1] = alphamap[buffer_bg[pos + 1]];
+                        screen[pos + 2] = alphamap[buffer_bg[pos + 2]];
+                        screen[pos + 3] = alphamap[buffer_bg[pos + 3]];
+                    } else {
+                        screen[pos + 1] = buffer_bg[pos + 1];
+                        screen[pos + 2] = buffer_bg[pos + 2];
+                        screen[pos + 3] = buffer_bg[pos + 3];
+                    }
+                } else {
+                    screen[pos + 1] = color_bg;
+                    screen[pos + 2] = color_bg >> 8;
+                    screen[pos + 3] = color_bg >> 16;
+                }
             }
 
             char_dat <<= 1;
             pos      += SCREEN_DEPTH * height;
-            pos_b    += 3 * height;
         }
     }
 }

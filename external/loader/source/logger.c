@@ -37,6 +37,14 @@ openLogger()
 }
 
 void
+breakstr(const char *str)
+{
+    logstr(str);
+    closeLogger();
+    svcBreak(USERBREAK_ASSERT);
+}
+
+void
 logstr(const char *str)
 {
     if (logger_is_initd == -1)

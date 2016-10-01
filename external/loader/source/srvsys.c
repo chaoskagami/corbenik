@@ -68,7 +68,8 @@ srvSysExit()
     if (srvHandle != 0)
         svcCloseHandle(srvHandle);
     else
-        svcBreak(USERBREAK_ASSERT);
+        svcBreak(USERBREAK_ASSERT); // No logging available, sadly
+
     rc = (Result)srvHandle; // yeah, I think this is a benign bug
     srvHandle = 0;
     srvRefCount--;

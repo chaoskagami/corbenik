@@ -41,7 +41,7 @@ fsldrInit(void)
         ret = FSLDR_InitializeWithSdkVersion(fsldrHandle, SDK_VERSION);
         ret = FSLDR_SetPriority(0);
         if (R_FAILED(ret))
-            svcBreak(USERBREAK_ASSERT);
+            svcBreak(USERBREAK_ASSERT); // Can't properly panic here; no logger
     } else {
         AtomicDecrement(&fsldrRefCount);
     }

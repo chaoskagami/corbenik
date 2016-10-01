@@ -56,13 +56,13 @@ load_code(u64 progid, u16 progver, prog_addrs_t *shared, prog_addrs_t *original,
     path.size = sizeof(CODE_PATH);
 
     if (R_FAILED(FSLDR_OpenFileDirectly(&handle, ARCHIVE_SAVEDATA_AND_CONTENT2, archivePath, path, FS_OPEN_READ, 0))) {
-        svcBreak(USERBREAK_ASSERT);
+        panicstr("Failed to open program code path.\n");
     }
 
     // get file size
     if (R_FAILED(FSFILE_GetSize(handle, &size))) {
         FSFILE_Close(handle);
-        svcBreak(USERBREAK_ASSERT);
+        panicstr("Failed to get code size.\n");
     }
 
     // check size
@@ -75,7 +75,7 @@ load_code(u64 progid, u16 progver, prog_addrs_t *shared, prog_addrs_t *original,
     res = FSFILE_Read(handle, &total, 0, (void *)shared->text_addr, size);
     FSFILE_Close(handle); // done reading
     if (R_FAILED(res)) {
-        svcBreak(USERBREAK_ASSERT);
+        panicstr("Failed to read program code.\n");
     }
 
     // decompress in place
@@ -246,21 +246,27 @@ loader_RegisterProgram(u64 *prog_handle, FS_ProgramInfo *title, FS_ProgramInfo *
                     return 0;
                 }
             }
-            svcBreak(USERBREAK_ASSERT);
+            panicstr("Registration of program failed.\n");
         }
     }
 
-    if ((title->mediaType != update->mediaType) || (prog_id != update->programId)) {
-        svcBreak(USERBREAK_ASSERT);
+    if (title->mediaType != update->mediaType)
+        panicstr("Program and update are different mediaTypes, abort.\n");
     }
+
+    if (prog_id != update->programId) {
+        panicstr("Program and update have different titleIDs, abort.\n");
+    }
+
     res = FSREG_LoadProgram(prog_handle, title);
     if (R_SUCCEEDED(res)) {
         if (*prog_handle >> 32 == 0xFFFF0000) {
             return 0;
         }
+
         res = FSREG_CheckHostLoadId(*prog_handle);
         if (R_FAILED(res) || (R_SUCCEEDED(res) && R_LEVEL(res) != RL_SUCCESS)) {
-            svcBreak(USERBREAK_ASSERT);
+            panicstr("CheckHostLoadId failed.\n");
         }
     }
     return res;
@@ -437,11 +443,11 @@ main()
     notification_handle = &g_handles[0];
 
     if (R_FAILED(srvSysRegisterService(srv_handle, "Loader", MAX_SESSIONS))) {
-        svcBreak(USERBREAK_ASSERT);
+        panicstr("Failed to register loader service.\n");
     }
 
     if (R_FAILED(srvSysEnableNotification(notification_handle))) {
-        svcBreak(USERBREAK_ASSERT);
+        panicstr("Failed to enable notifcations to loader service.\n");
     }
 
     g_active_handles = 2;
@@ -473,7 +479,7 @@ main()
                 g_active_handles--;
                 reply_target = 0;
             } else {
-                svcBreak(USERBREAK_ASSERT);
+                panicstr("Unhandled response from svcReplyAndRecieve, abort.\n");
             }
         } else {
             // process responses
@@ -482,14 +488,14 @@ main()
                 case 0: // notification
                 {
                     if (R_FAILED(should_terminate(&term_request))) {
-                        svcBreak(USERBREAK_ASSERT);
+                        panicstr("Failed to check termination.\n");
                     }
                     break;
                 }
                 case 1: // new session
                 {
                     if (R_FAILED(svcAcceptSession(&handle, *srv_handle))) {
-                        svcBreak(USERBREAK_ASSERT);
+                        panicstr("Failed to accept and open session.\n");
                     }
                     if (g_active_handles < MAX_SESSIONS + 2) {
                         g_handles[g_active_handles] = handle;

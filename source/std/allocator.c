@@ -20,7 +20,7 @@ void* sbrk(size_t incr) {
 
     heap_end += incr;
 
-    memset(prev_heap_end, 0, heap_end - prev_heap_end); // Clear heap.
+    memset(prev_heap_end, 0, (uint32_t)heap_end - (uint32_t)prev_heap_end); // Clear heap.
 
     return (void*) prev_heap_end;
 }

@@ -37,14 +37,6 @@ openLogger()
 }
 
 void
-breakstr(const char *str)
-{
-    logstr(str);
-    closeLogger();
-    svcBreak(USERBREAK_ASSERT);
-}
-
-void
 logstr(const char *str)
 {
     if (logger_is_initd == -1)
@@ -89,3 +81,12 @@ closeLogger()
     FSFILE_Close(log_file_hdl);
     logger_is_initd = 0;
 }
+
+void
+panicstr(const char *str)
+{
+    logstr(str);
+    closeLogger();
+    svcBreak(USERBREAK_ASSERT);
+}
+

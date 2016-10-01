@@ -26,12 +26,10 @@ static Result
 allocate_shared_mem(prog_addrs_t *shared, prog_addrs_t *vaddr, int flags)
 {
     // Somehow, we need to allow reallocating.
-
     u32 dummy;
 
     memcpy(shared, vaddr, sizeof(prog_addrs_t));
-    shared->text_addr = 0x10000000; // Code is forcibly relocated to this
-                                    // address to kill ASLR (I believe.)
+    shared->text_addr = 0x10000000; // Base virtual address for code.
     shared->ro_addr = shared->text_addr + (shared->text_size << 12);
     shared->data_addr = shared->ro_addr + (shared->ro_size << 12);
     return svcControlMemory(&dummy, shared->text_addr, 0, shared->total_size << 12, (flags & 0xF00) | MEMOP_ALLOC, MEMPERM_READ | MEMPERM_WRITE);
@@ -252,11 +250,9 @@ loader_RegisterProgram(u64 *prog_handle, FS_ProgramInfo *title, FS_ProgramInfo *
 
     if (title->mediaType != update->mediaType)
         panicstr("Program and update are different mediaTypes, abort.\n");
-    }
 
-    if (prog_id != update->programId) {
+    if (prog_id != update->programId)
         panicstr("Program and update have different titleIDs, abort.\n");
-    }
 
     res = FSREG_LoadProgram(prog_handle, title);
     if (R_SUCCEEDED(res)) {
@@ -381,47 +377,6 @@ should_terminate(int *term_request)
         *term_request = 1;
     }
     return 0;
-}
-
-// this is called before main
-void
-__appInit()
-{
-    srvSysInit();
-    fsregInit();
-    fsldrInit();
-    pxipmInit();
-}
-
-// this is called after main exits
-void
-__appExit()
-{
-    pxipmExit();
-    fsldrExit();
-    fsregExit();
-    srvSysExit();
-}
-
-// stubs for non-needed pre-main functions
-void __sync_init();
-void __sync_fini();
-void __system_initSyscalls();
-
-void
-__ctru_exit()
-{
-    __appExit();
-    __sync_fini();
-    svcExitProcess();
-}
-
-void
-initSystem()
-{
-    __sync_init();
-    __system_initSyscalls();
-    __appInit();
 }
 
 int

@@ -509,7 +509,7 @@ execb(uint64_t tid, firm_h* firm_patch)
 
     hexdump_titleid(tid, cache_path);
 
-    static uint8_t patch_dat[MAX_PATCHSIZE];
+    static uint8_t *patch_mem;
 
     Handle file;
     u32 total;
@@ -532,8 +532,9 @@ execb(uint64_t tid, firm_h* firm_patch)
         return 1;
     }
 
-    if (file_size > MAX_PATCHSIZE) {
-        log("  too large (please report)\n");
+    patch_mem = malloc(file_size);
+    if (patch_mem == NULL) {
+        log("  out of memory on loading patch\n");
 
         FSFILE_Close(file); // Read to memory.
 
@@ -541,7 +542,7 @@ execb(uint64_t tid, firm_h* firm_patch)
     }
 
     // Read file.
-    if (!R_SUCCEEDED(FSFILE_Read(file, &total, 0, patch_dat, file_size))) {
+    if (!R_SUCCEEDED(FSFILE_Read(file, &total, 0, patch_mem, file_size))) {
         FSFILE_Close(file); // Read to memory.
 
         // Failed to read.
@@ -564,7 +565,6 @@ execb(uint64_t tid, firm_h* firm_patch)
 
     log("  exec\n");
 
-    uint8_t *patch_mem = (uint8_t *)patch_dat;
     patch_len = file_size;
 #else
     // The WHOLE firm.
@@ -624,7 +624,11 @@ execb(uint64_t tid, firm_h* firm_patch)
         debug = 1;
     }
 
-    return exec_bytecode(patch_mem, patch_len, ver, debug);
+    int r = exec_bytecode(patch_mem, patch_len, ver, debug);
+
+    free(patch_mem);
+
+    return r;
 }
 
 #ifndef LOADER

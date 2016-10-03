@@ -70,7 +70,6 @@ srvSysExit()
     else
         svcBreak(USERBREAK_ASSERT); // No logging available, sadly
 
-    rc = (Result)srvHandle; // yeah, I think this is a benign bug
     srvHandle = 0;
     srvRefCount--;
     RecursiveLock_Unlock(&initLock);

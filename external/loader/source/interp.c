@@ -1,6 +1,4 @@
-// 'Tis not ready for the world at large yet.
-// I don't want to delete it since I'm working on it though,
-// so it's temporarliy #if'd 0.
+// This is a thin shim used to set the right parameters and include the interpreter from toplevel code.
 #include <3ds.h>
 #include <stdlib.h>
 #include "patcher.h"
@@ -20,6 +18,3 @@
 // Yes, we're including a C file. Problem?
 #include "../../../source/interpreter.c"
 
-#if 0
-
-#endif

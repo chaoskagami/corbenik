@@ -38,8 +38,7 @@ fsldrInit(void)
     ret = srvSysGetServiceHandle(&fsldrHandle, "fs:LDR");
     if (R_SUCCEEDED(ret)) {
         fsldrPatchPermissions();
-        ret = FSLDR_InitializeWithSdkVersion(fsldrHandle, SDK_VERSION);
-        ret = FSLDR_SetPriority(0);
+        ret = FSLDR_Initialize(fsldrHandle);
         if (R_FAILED(ret))
             svcBreak(USERBREAK_ASSERT); // Can't properly panic here; no logger
     } else {
@@ -58,31 +57,15 @@ fsldrExit(void)
 }
 
 Result
-FSLDR_InitializeWithSdkVersion(Handle session, u32 version)
+FSLDR_Initialize(Handle session)
 {
     u32 *cmdbuf = getThreadCommandBuffer();
 
-    cmdbuf[0] = IPC_MakeHeader(0x861, 1, 2); // 0x8610042
-    cmdbuf[1] = version;
-    cmdbuf[2] = 32;
+    cmdbuf[0] = IPC_MakeHeader(0x801, 0, 2); // 0x8010002
+    cmdbuf[1] = 32;
 
     Result ret = 0;
     if (R_FAILED(ret = svcSendSyncRequest(session)))
-        return ret;
-
-    return cmdbuf[1];
-}
-
-Result
-FSLDR_SetPriority(u32 priority)
-{
-    u32 *cmdbuf = getThreadCommandBuffer();
-
-    cmdbuf[0] = IPC_MakeHeader(0x862, 1, 0); // 0x8620040
-    cmdbuf[1] = priority;
-
-    Result ret = 0;
-    if (R_FAILED(ret = svcSendSyncRequest(fsldrHandle)))
         return ret;
 
     return cmdbuf[1];

@@ -1,7 +1,9 @@
 #include <3ds.h>
 #include "patcher.h"
 #include "fsldr.h"
-#include "internal.h"
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "memory.h"
 
 #ifndef PATH_MAX

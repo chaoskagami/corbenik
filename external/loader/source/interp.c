@@ -4,7 +4,9 @@
 #include "patcher.h"
 #include "exheader.h"
 #include "fsldr.h"
-#include "internal.h"
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "memory.h"
 #include "logger.h"
 

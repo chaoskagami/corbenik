@@ -6,7 +6,9 @@
 #include "pxipm.h"
 #include "srvsys.h"
 #include <lzss.c>
-#include "internal.h"
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "logger.h"
 
 // TODO - a lot of this is unecessarily verbose and shitty. Clean it up to be

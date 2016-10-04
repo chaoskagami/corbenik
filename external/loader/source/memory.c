@@ -2,7 +2,7 @@
 #include <string.h>
 #include "patcher.h"
 #include "fsldr.h"
-#include "internal.h"
+#include <string.h>
 
 #ifndef PATH_MAX
 #define PATH_MAX 255
@@ -62,15 +62,4 @@ patchMemory(u8 *start, u32 size, const void *pattern, u32 patSize, int offset, c
     }
 
     return i;
-}
-
-size_t
-strnlen(const char *string, size_t maxlen)
-{
-    size_t size;
-
-    for (size = 0; *string && size < maxlen; string++, size++)
-        ;
-
-    return size;
 }

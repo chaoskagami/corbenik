@@ -5,7 +5,7 @@
 #include "fsreg.h"
 #include "pxipm.h"
 #include "srvsys.h"
-#include "internal.h"
+#include <string.h>
 #include "logger.h"
 
 extern char* fake_heap_start;

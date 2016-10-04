@@ -3,7 +3,9 @@
 #include "patcher.h"
 #include "exheader.h"
 #include "fsldr.h"
-#include "internal.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include "memory.h"
 #include "logger.h"
 #include <patch_format.h>

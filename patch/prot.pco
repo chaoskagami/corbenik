@@ -8,9 +8,9 @@
 # Status: Working
 
 #
-# The firmprot patch works by nop'ing out a call in Process9 which normally
-# is called post-update of the FIRM. Normally it is responsible for writing exe:/<titleid>/.firm
-# to the NAND.
+# The firmprot patch works by nop'ing out a jump in Process9 which normally
+# is executed post-update of the FIRM. Normally it is responsible for writing
+# exe:/<titleid>/.firm to the NAND.
 #
 # We first search for the 'exe:' string because this is a reliable constant located at the end
 # of the stated function and is consistent through firmware versions. The full string is (null-terminated):
@@ -21,7 +21,7 @@
 # Then we search for the following thumb mode code:
 #
 # cmp r0, #0
-# bge loc_8043f82 ; relative jump
+# bge loc_8043f82 ; relative jump to another part of this function that calls the bad stuff
 #
 # This is then replaced with the following assembly to stub out the NAND writing routine
 # and prevent it from ever being called:

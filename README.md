@@ -15,12 +15,7 @@ If you're compiling this from source code, see at the bottom the `Building` sect
 
 If you are using a nightly build off of https://github.com/chaoskagami/skeith - treat all paths starting in `/corbenik` as `/skeith` instead for these instructions.
 
-Skip to `Installing` if you are installing this for the first time, otherwise follow `Updating` and then `Installing`.
-
-Updating
--------------------------
-
-This version is a mandatory clean install. Please wipe your corbenik folder and start fresh.
+Skip to `Installing` if you are installing this for the first time, otherwise read the release page for update instructions (if any) and then `Installing`.
 
 Installing
 -------------------------
@@ -91,34 +86,33 @@ If you plan to use TWL/AGB patches or have an O3DS, you should enable `Reboot Ho
 
 You'll also want to go into `Patches` and enable the usual bits, which includes:
  * Signature Fix
- * FIRM Protect
+ * FIRM Protection
 
 You'll also want these patches, which are done by loader and therefore require it:
- * Block Cart Updates
- * Block eShop Updates
- * Block NIM updates
- * Region free HOME
- * RO signature fix
+ * Block Cart Update / Cart RF (Loader)
+ * Block eShop Updates (Loader)
+ * Block NIM Updates (Loader)
+ * Region Free HOME (Loader)
+ * RO Signature Fix (Loader
 
 If you're using the reboot hook, you might want these:
- * AGB Signature fix
+ * AGB Signature Fix
  * AGB Bootscreen
-   * Will stop games with corrupted Nintendo logos from running. Disable for ROM hacks if this occurs.
- * TWL Patches
+   * Will stop games with corrupted Nintendo logos from running. Disable for ROM hacks if this occurs. No, there's nothing I can do, since the GBA bios is on the SoC. Please take this up with the author of the romhack.
+ * TWL Patches - Select either one, the correct one will be applied
 
-If you're on 11.0, you also want these:
- * Title Downgrade Fix (Only enable with 11.0 firmware.)
+If you're on 11.0 or higher and using the respective FIRM, you also want these:
+ * Title Downgrade Fix (11.0+ NFIRM)
 
-If you're deliberately still running older firmware on your NAND, you'll
-want these:
- * Fake Friends Version
+If you're deliberately still running older firmware on your NAND, you'll want these:
+ * Fake Friends Version (Loader)
 
 If you region changed your console and replaced SecureInfo_A, you want:
- * SecureInfo_A Signature Fix
+ * SecureInfo_A Signature Fix (Loader)
 
 Optional, but recommended patches are:
- * Settings Version String
- * ErrDisp devmode
+ * Settings Version String (Loader)
+ * Verbose ErrDisp (Loader)
 
 And these YOU SHOULD NOT ENABLE unless you have specialized needs:
  * Developer UNITINFO (Pretends to be a developer console/Panda)
@@ -133,6 +127,15 @@ You can copy some 90° rotated BGR8 pixel data sized to the screen (essentially,
  * Bottom: `/corbenik/share/bottom.bin`
 
 The font is also customizable (`/corbenik/share/termfont.bin`) - read the github wiki for details.
+
+Optionals
+-------------------------
+
+Corbenik has a chainloader that can be used to load other a9lh payloads. Simply place them in `/corbenik/boot` and they will be automatically picked up and shown in the `Chainloader` menu for use.
+
+The chainloader only supports .bin payloads. .dat payloads are unsupported, since they are intended for execution from an ARM11 environment. Supporting them would require far too much effort for far too little gain.
+
+There is a set of in-progress unit-tests that can be used to verify functionality works correctly. These are not yet complete, and are not enabled by default in regular builds (they never will be.)
 
 Building
 -------------------------

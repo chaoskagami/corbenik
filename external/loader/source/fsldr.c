@@ -1,9 +1,12 @@
+/**
+ * Random annoyance; All the command headers etc for fsLdr are EXACTLY the same as fsUser.
+ * This is annpying mainly because - if I could open the file handle manually in ctrulib -
+ * e.g. not static and inaccessible - I could simply use the FSUSER API for this. ALL. OF. THIS.
+ */
 #include <3ds.h>
 #include "fsldr.h"
 #include "fsreg.h"
 #include "srvsys.h"
-
-#define SDK_VERSION 0x70200C8
 
 static Handle fsldrHandle;
 static int fsldrRefCount;

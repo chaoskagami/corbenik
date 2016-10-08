@@ -41,7 +41,7 @@ wait_key(_UNUSED int sleep)
 extern int doing_autoboot;
 
 void
-wait()
+wait(void)
 {
     if (get_opt_u32(OPTION_TRACE) && !doing_autoboot) {
         fprintf(stderr, "[Waiting...]");

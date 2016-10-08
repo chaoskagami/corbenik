@@ -10,7 +10,6 @@ uint8_t *enable_list;
 struct options_s *firm = NULL;
 
 static int current_menu_index_patches = 0;
-static int desc_is_fname_sto = 0;
 
 #if defined(CHAINLOADER) && CHAINLOADER == 1
 void chainload_menu();
@@ -121,7 +120,7 @@ static struct options_s config_opts[] = {
       "Internal options for the CFW.\nThese are part of " FW_NAME " itself.",
       option, options, (void(*)(void*))show_menu, NULL, 0, 0 },
     { "Patches",
-      "External bytecode patches found in `" PATH_PATCHES "`.\nYou can choose which to enable.",
+      "External bytecode patches found in `" PATH_PATCHES "` and `" PATH_AUX_PATCHES "` .\nYou can choose which to enable.",
       option, NULL, (void(*)(void*))show_menu, NULL, 0, 0 },
 
     // Sentinel.
@@ -219,10 +218,7 @@ void patch_func(char* fpath) {
             return;
 
         patches[current_menu_index_patches].name = strdup_self(p.name);
-        if (desc_is_fname_sto)
-            patches[current_menu_index_patches].param = strdup_self(fpath);
-        else
-            patches[current_menu_index_patches].desc = strdup_self(p.desc);
+        patches[current_menu_index_patches].desc = strdup_self(p.desc);
 
         uint32_t val = p.uuid;
 
@@ -234,9 +230,6 @@ void patch_func(char* fpath) {
 
         patches[current_menu_index_patches].func  = patch_set_enable;
         patches[current_menu_index_patches].value = patch_get_enable;
-
-        if (desc_is_fname_sto)
-            enable_list[p.uuid] = 0;
 
         current_menu_index_patches++;
     }
@@ -274,15 +267,9 @@ poweroff()
     ctr_system_poweroff();
 }
 
-// This is dual purpose. When we actually list
-// patches to build the cache - desc_is_fname
-// will be set to 1.
-
 void
-list_patches_build(const char *name, int desc_is_fname)
+reset_patch_menu(void)
 {
-    desc_is_fname_sto = desc_is_fname;
-
     current_menu_index_patches = 0;
 
     if (!patches)
@@ -297,7 +284,11 @@ list_patches_build(const char *name, int desc_is_fname)
     patches[0].highlight = 1;
 
     current_menu_index_patches += 1;
+}
 
+void
+add_patch_menu(const char *name)
+{
     recurse_call(name, patch_func);
 
     patches[current_menu_index_patches].name = NULL;
@@ -314,7 +305,7 @@ void config_main_menu() {
 }
 
 void
-menu_handler()
+menu_handler(void)
 {
     show_menu(main_s);
 }

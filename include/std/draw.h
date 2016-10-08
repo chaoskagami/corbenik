@@ -39,11 +39,11 @@ extern struct framebuffers *framebuffers;
 
 /* Initialize stdlib functionality. Must be called before ANY other functions here can be used.
  */
-void std_init();
+void std_init(void);
 
 /* Take a screenshot and save to path.
  */
-void screenshot();
+void screenshot(void);
 
 /* Fill an area on the screen with a color.
  *
@@ -66,7 +66,7 @@ void fill_line(void* channel, unsigned int y, uint8_t color);
 
 /* Clears background image bitmaps.
  */
-void clear_bg();
+void clear_bg(void);
 
 /* Loads top background image from a path.
  *
@@ -82,7 +82,7 @@ void load_bg_bottom(const char* fname_bottom);
 
 /* Clears the displays either to black or the background image.
  */
-void clear_screens();
+void clear_screens(void);
 
 /* Draws a character to the screen. Internal use.
  *

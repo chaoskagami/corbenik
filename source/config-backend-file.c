@@ -8,10 +8,8 @@ char *config_file_path = NULL;
 int changed_consoles = 0;
 uint32_t cid[4];
 
-void list_patches_build(const char *name, int desc_is_fname);
-
 void
-regenerate_config()
+regenerate_config(void)
 {
     for(int i=0; i < 4; i++)
         config->magic[i] = CONFIG_MAGIC[i];
@@ -28,7 +26,7 @@ regenerate_config()
 }
 
 void
-mk_structure()
+mk_structure(void)
 {
     f_mkdir(PREFIX);
       f_mkdir(LIBEXECDIR);
@@ -56,7 +54,7 @@ mk_structure()
 }
 
 void
-update_config()
+update_config(void)
 {
     int updated = 0;
 
@@ -74,10 +72,10 @@ update_config()
     }
 }
 
-void get_cfg_path();
+void get_cfg_path(void);
 
 void
-load_config()
+load_config(void)
 {
     mk_structure(); // Make directory structure if needed.
 
@@ -138,13 +136,15 @@ load_config()
         }
     }
 
-    list_patches_build(PATH_PATCHES, 0);
+    reset_patch_menu();
+    add_patch_menu(PATH_PATCHES);
+    add_patch_menu(PATH_AUX_PATCHES);
 
     update_config();
 }
 
 void
-save_config()
+save_config(void)
 {
     if (changed_consoles) {
         FILE* f = fopen(SYSCONFDIR "/current-nand-cid", "w");

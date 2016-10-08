@@ -95,11 +95,11 @@ extern struct config_file *config;
 
 /* Loads the config file off SD from the configured location.
  */
-void load_config();
+void load_config(void);
 
 /* Saves the config file to SD at the configured location.
  */
-void save_config();
+void save_config(void);
 
 /* Changes an option according to internal rules. Used in menus.
  */

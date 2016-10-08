@@ -138,7 +138,7 @@ void free(void* ptr) {
 }
 
 #ifdef MALLOC_DEBUG
-void print_alloc_stats() {
+void print_alloc_stats(void) {
 	fprintf(stderr, "[A] %u [F] %u [M] %u [B] %lu\n", alloc_count, free_count, allocated_memory, (uint32_t)heap_end - (uint32_t)&__end__);
 }
 #endif

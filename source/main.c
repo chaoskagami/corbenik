@@ -9,8 +9,8 @@
 int is_n3ds = 0;
 int doing_autoboot = 0;
 
-int menu_handler();
-void shut_up();
+int menu_handler(void);
+void shut_up(void);
 
 extern int changed_consoles;
 

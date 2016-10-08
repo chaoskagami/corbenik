@@ -52,7 +52,7 @@ ldflags:         ${LDFLAGS}
 ocflags:         ${OCFLAGS}
 
 Chainloader:     ${CHAINLOADER}
-Chainloader:     ${UNITTESTS}
+Unit tests:      ${UNITTESTS}
 "
 
 AC_OUTPUT

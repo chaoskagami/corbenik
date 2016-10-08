@@ -4,4 +4,7 @@
 void reset();
 void poweroff();
 
+void reset_patch_menu(void);
+void add_patch_menu(const char *name);
+
 #endif

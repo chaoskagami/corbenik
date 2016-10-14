@@ -60,7 +60,7 @@ LIBS	:= -lctru
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:= $(CTRULIB)
+LIBDIRS	:= $(CURDIR)/../ctrulib/libctru
 
 
 #---------------------------------------------------------------------------------

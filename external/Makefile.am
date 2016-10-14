@@ -1,3 +1,3 @@
-SUBDIRS = libctr9 loader bits
+SUBDIRS = libctr9 ctrulib/libctru loader bits
 
 install:

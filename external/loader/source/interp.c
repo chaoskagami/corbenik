@@ -2,8 +2,6 @@
 #include <3ds.h>
 #include <stdlib.h>
 #include "patcher.h"
-#include "exheader.h"
-#include "fsldr.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>

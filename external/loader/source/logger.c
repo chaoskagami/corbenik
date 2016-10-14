@@ -1,6 +1,5 @@
 #include <3ds.h>
 #include "patcher.h"
-#include "fsldr.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>

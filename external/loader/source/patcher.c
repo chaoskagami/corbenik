@@ -1,8 +1,6 @@
 #include <3ds.h>
 #include <string.h>
 #include "patcher.h"
-#include "exheader.h"
-#include "fsldr.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -39,7 +37,7 @@ fileOpen(Handle *file, FS_ArchiveID id, const char *path, int flags)
     ppath.data = path;
     ppath.size = strnlen(path, PATH_MAX) + 1;
 
-    return FSLDR_OpenFileDirectly(file, id, apath, ppath, flags, 0);
+    return FSUSER_OpenFileDirectly(file, id, apath, ppath, flags, 0);
 }
 
 struct config_file config;
@@ -53,7 +51,7 @@ load_config()
     static u32 cid[4];
     static char config_file_path[] = SYSCONFDIR "/config-00000000";
 
-    if (!R_SUCCEEDED(FSLDR_GetNandCid((u8*)cid, 0x10))) {
+    if (!R_SUCCEEDED(FSUSER_GetNandCid((u8*)cid, 0x10))) {
         return;
     }
 
@@ -405,7 +403,7 @@ overlay_patch(_UNUSED u64 progId, _UNUSED u8 *code, _UNUSED u32 size)
 }
 
 void
-code_handler(u64 progId, prog_addrs_t *shared)
+code_handler(u64 progId, EXHEADER_prog_addrs *shared)
 {
     // If configuration was not loaded, or both options (load / dump) are disabled
     if (failed_load_config || (!config.options[OPTION_LOADER_DUMPCODE] && !config.options[OPTION_LOADER_LOADCODE]))

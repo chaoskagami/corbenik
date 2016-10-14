@@ -1,10 +1,6 @@
 #include <3ds.h>
 #include "patcher.h"
-#include "exheader.h"
-#include "fsldr.h"
-#include "fsreg.h"
 #include "pxipm.h"
-#include "srvsys.h"
 #include <string.h>
 #include "logger.h"
 
@@ -24,9 +20,9 @@ void __system_initSyscalls(void);
 void
 __appInit()
 {
-    srvSysInit();
+    srvInit();
     fsregInit();
-    fsldrInit();
+    fsInitFromService("fs:LDR");
     pxipmInit();
 }
 
@@ -35,9 +31,9 @@ void
 __appExit()
 {
     pxipmExit();
-    fsldrExit();
+    fsExit();
     fsregExit();
-    srvSysExit();
+    srvExit();
 }
 
 void __system_allocateHeaps(void) {

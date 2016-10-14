@@ -20,10 +20,17 @@ void __system_initSyscalls(void);
 void
 __appInit()
 {
-    srvInit();
-    fsregInit();
-    fsInitFromService("fs:LDR");
-    pxipmInit();
+    if (R_FAILED(srvSysInit()))
+        svcBreak(USERBREAK_PANIC);
+
+    if (R_FAILED(fsregInit()))
+        svcBreak(USERBREAK_PANIC);
+
+    if (R_FAILED(fsInitFromService("fs:LDR")))
+        svcBreak(USERBREAK_PANIC);
+
+    if (R_FAILED(pxipmInit()))
+        svcBreak(USERBREAK_PANIC);
 }
 
 // Post-main cleanup function.
@@ -33,7 +40,7 @@ __appExit()
     pxipmExit();
     fsExit();
     fsregExit();
-    srvExit();
+    srvSysExit();
 }
 
 void __system_allocateHeaps(void) {

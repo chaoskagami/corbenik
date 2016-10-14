@@ -10,3 +10,4 @@
 [submodule "external/ctrulib"]
 	path = external/ctrulib
 	url = https://github.com/chaoskagami/ctrulib
+	branch = system

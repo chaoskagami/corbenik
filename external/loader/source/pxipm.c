@@ -1,7 +1,6 @@
 #include <3ds.h>
 #include <string.h>
 #include "pxipm.h"
-#include "srvsys.h"
 
 static Handle pxipmHandle;
 static int pxipmRefCount;
@@ -14,7 +13,7 @@ pxipmInit(void)
     if (AtomicPostIncrement(&pxipmRefCount))
         return 0;
 
-    ret = srvSysGetServiceHandle(&pxipmHandle, "PxiPM");
+    ret = srvGetServiceHandle(&pxipmHandle, "PxiPM");
 
     if (R_FAILED(ret))
         AtomicDecrement(&pxipmRefCount);

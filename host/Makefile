@@ -10,5 +10,5 @@ font: bdfe_dir
 	./bdfe/bdfe -n -A ../external/tewi-font/tewi-medium-11.bdf > termfont.bin
 
 clean:
-	make -C bdfe clean
+	$(MAKE) -C bdfe clean
 	rm -f termfont.bin key_char error_decoder

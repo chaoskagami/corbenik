@@ -35,6 +35,8 @@ wait_key(_UNUSED int sleep)
     }
     while (ctr_hid_get_buttons());
 
+    waitcycles(ARM9_APPROX_DELAY_MAX); // Approximately what a human can input - fine tuning needed (sorry, TASers!)
+
     return ret;
 }
 

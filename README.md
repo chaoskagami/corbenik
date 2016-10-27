@@ -34,9 +34,9 @@ New 3DS (Native FIRM, 11.1):
  * firm: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000002/00000026
  * cetk: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000002/cetk
 
-This is only a recommendation - you can supply near any valid firmware file for your console (it has only been tested until 9.2 backwards, however.) You can also supply a decrypted native_firm titlekey as `/corbenik/share/keys/native.key`, although this is no longer required and it can be automatically retrieved from the cetk.
+This is only a recommendation - you can supply near any valid firmware file for your console (it has only been tested extensively until 9.2 backwards, however.)
 
-You can also fetch the agb firm and twl firms to `/corbenik/lib/firmware/agb` and `/corbenik/lib/firmware/twl` respectively. You can fetch the cetk for each of them to `/corbenik/lib/firmware/agb.cetk` and `/corbenik/lib/firmware/twl.cetk`, or acquire decrypted titlekeys (firmkeys) for them.
+You should also fetch the agb firm and twl firms to `/corbenik/lib/firmware/agb` and `/corbenik/lib/firmware/twl` respectively. You can fetch the cetk for each of them to `/corbenik/lib/firmware/agb.cetk` and `/corbenik/lib/firmware/twl.cetk`.
 
 Old 3DS TWL_FIRM (Firmware for DS/DSi games):
  * cetk: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000102/cetk
@@ -54,7 +54,7 @@ New 3DS AGB_FIRM (Firmware for GBA games):
  * cetk: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000202/cetk
  * firm: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000202/00000000
 
-**IMPORTANT** - On New3DS units, there's additional encryption on arm9loader which requires the 9.6 key to decrypt. This key also happens to be trashed by arm9loaderhax, so you'll need to acquire it elsewhere. It usually is named as `Slot0x11Key96.bin`. I can't tell you where to find this. Corbenik will attempt to read this from the root as well as `/corbenik/share/keys/11key96.key`. In a future version, keydb reading may be implemented, but no guarantees.
+**IMPORTANT** - On New3DS units, there's additional encryption on arm9loader which requires the 9.6 key to decrypt. This key also happens to be trashed by arm9loaderhax, so you'll need to acquire it elsewhere. It usually is named as `Slot0x11Key96.bin`. I can't tell you where to find this. Corbenik will attempt to read this from the root as `slot0x11key96.bin`. In a future version, keydb reading may be implemented, but no guarantees.
 
 The folder `/corbenik/share/locale/emu` is for language emulation files. You can retrieve a set of files from 3dsdb for games that only specify one region and one language by running the `generate_localeemu.sh` shell script. Games which support more than one language are not generated, because there's no 'correct' language.
 
@@ -144,14 +144,14 @@ First; make sure you have submodules properly checked out. If you do not, the bu
 
 You will need at minimum the following:
 
- * devkitARM
+ * devkitARM (must be in your PATH)
  * ctrulib (from git)
  * Host gcc (as in a native system compiler)
  * Python 2.7 (for patches)
  * Autotools (as in, automake/autoconf - mandatory)
  * libtool (expect weird link errors if this is missing)
 
-Briefly; the following commands are enough to build, assuming devkitarm is in your `PATH`:
+Briefly; the following commands are enough to build:
 
 ```
 ./autogen.sh
@@ -185,6 +185,8 @@ If you have a feature or bugfix, PR or hit me on freenode/#Cakey. However, pleas
 
 Credits
 -------------------------
+
+In no specific order:
 
 @yifanlu
  * For the absolutely insane and wonderful idea to use bytecode, as well as the open source loader replacement. https://github.com/yifanlu/3ds_injector

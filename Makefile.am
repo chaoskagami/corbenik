@@ -13,7 +13,6 @@ all-local:
 	mkdir -p out@libdir@/module/twl
 	mkdir -p out@libdir@/module/agb
 	mkdir -p out@libdir@/firmware
-	mkdir -p out@datarootdir@/keys
 	mkdir -p out@datarootdir@/locale/emu
 	mkdir -p out@bindir@
 	mkdir -p out@sbindir@
@@ -31,14 +30,14 @@ all-local:
 	cat host/generate_localeemu.sh | sed "s|\@localedir\@|@localedir@|g" > out/generate_localeemu.sh
 	chmod +x out/generate_localeemu.sh
 	echo "#!/bin/sh" > out/o3ds_firm.sh
-	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000002/00000056 -O .@libdir@/firmware/native"       >> out/o3ds_firm.sh
+	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000002/00000058 -O .@libdir@/firmware/native"       >> out/o3ds_firm.sh
 	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000002/cetk     -O .@libdir@/firmware/native.cetk" >> out/o3ds_firm.sh
 	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000102/00000016 -O .@libdir@/firmware/twl"       >> out/o3ds_firm.sh
 	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000102/cetk     -O .@libdir@/firmware/twl.cetk" >> out/o3ds_firm.sh
 	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000202/0000000B -O .@libdir@/firmware/agb"       >> out/o3ds_firm.sh
 	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000202/cetk     -O .@libdir@/firmware/agb.cetk" >> out/o3ds_firm.sh
 	echo "#!/bin/sh" > out/n3ds_firm.sh
-	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000002/00000026 -O .@libdir@/firmware/native"       >> out/n3ds_firm.sh
+	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000002/00000028 -O .@libdir@/firmware/native"       >> out/n3ds_firm.sh
 	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000002/cetk     -O .@libdir@/firmware/native.cetk" >> out/n3ds_firm.sh
 	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000102/00000000 -O .@libdir@/firmware/twl"       >> out/n3ds_firm.sh
 	echo "wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000102/cetk     -O .@libdir@/firmware/twl.cetk" >> out/n3ds_firm.sh

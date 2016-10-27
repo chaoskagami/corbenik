@@ -9,11 +9,21 @@
 
 # Anti-anti-downgrade fix.
 
+# How this works: The FIRM has a list of titleids in it to verify
+# that downgrade is not performed. This is verified in a function
+# that loops through each of the titleids on an install.
+
+# The downgrade check ends when a zero is encountered. Luma patches
+# this check by zeroing the first titleid.
+
+# The "first" revision of this patched the code for said check to never 
+# execute. Sadly, the code is VERY different in 11.2...
+
 # Relative to arm9 segment
 rel  section2
 
-# We want to patch the fifth byte of this pattern.
-find 890a814202D2
+find ff000002
 abortnf
-fwd  05
-set  E0
+fwd  01
+set  0000000000000000
+

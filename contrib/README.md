@@ -12,6 +12,9 @@ Current contrib patches:
 
  * mysterymachine-sm.pco
    * Patches mystery gift in S/M to point to SALT servers (Based on work by @shinyquagsire23, contributed by @GrayJack, based in @Wolfvak code)
+ 
+  * remoutlines-sm.pco
+   * Patch to remove the outlines in Pokemon Sun and Moon (Based on work by @SciresM, contributed by @GrayJack)
 
  * svc_permission_chk_dis.pco
    * Disables SVC call permission checks. Potential security hazard. (Based on work by @Subv, contributed by @Wolfvak)

@@ -1,5 +1,5 @@
 # $name  MysteryMachine Patcher X/Y and OR/AS(Loader)
-# $desc  Patches Mystery Gift in Pokemon X, Y, Omega Ruby, and Alpha Sapphire to point to SALT's servers. See <https://mys.salthax.org/>
+# $desc  Patches Mystery Gift in Pokemon X, Y, Omega Ruby and Alpha Sapphire to point to SALT's servers. See <https://mys.salthax.org/>
 # $title 000400000011C400 000400000011C500 0004000000055D00 0004000000055E00
 # $ver   01
 # $uuid  0001

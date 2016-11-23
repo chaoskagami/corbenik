@@ -1,0 +1,44 @@
+# $name  MysteryMachine Patcher S/M (Loader)
+# $desc  Patches Mystery Gift in Pokemon Sun and Moon to point to SALT's servers. See <https://mys.salthax.org/>
+# $title 0004000000164800 0004000000175E00
+# $ver   01
+# $uuid  0001
+
+# This is for seventh-gen pokemon games, and points mystery gift
+# to SALT's servers. See here:
+#   http://mys.salthax.org/
+# This performs the same patching done by the official HANS-based
+# patcher here:
+#   https://github.com/shinyquagsire23/MysteryMachine-Patcher
+# You do not need to use HBLauncher to use this, either. ;P
+
+# This patch was originally created by @Wolfvak for X/Y and OR/AS and modified by @Gray_Jack for S/M although there's
+# really only one way to implement it.
+
+# I extended it to the other games using newer VM features - that's
+# about it.
+
+rel exe_ro
+
+find  "https://3ds3-fushigi.pokemon-gl.com/api/"
+abortnf
+set   "http://mys.salthax.org/api/"
+set   00
+rewind
+
+find  "https://npdl.cdn.nintendowifi.net/p01/nsa/%s/%s/%s"
+abortnf
+set   "http://mys.salthax.org/p01/nsa/%s/%s/%s"
+set   00
+rewind
+
+find  "https://npfl.c.app.nintendowifi.net/p01/filelist/"
+abortnf
+set   "http://mys.salthax.org/p01/filelist/"
+set   00
+rewind
+
+find  "https://npdl.cdn.nintendowifi.net/p01/nsa/%s/%s/%s/%s"
+abortnf
+set   "https://mys.salthax.org/p01/nsa/%s/%s/%s/%s"
+set   00

@@ -1,6 +1,6 @@
 # $name  MysteryMachine Patcher (Loader)
-# $desc  Patches Mystery Gift in Pokemon X, Y, Omega Ruby, and Alpha Sapphire to point to SALT's servers. See <https://mys.salthax.org/>
-# $title 000400000011C400 000400000011C500 0004000000055D00 0004000000055E00
+# $desc  Patches Mystery Gift in Pokemon X, Y, Omega Ruby, Alpha Sapphire, Sun, and Moon to point to SALT's servers. See <https://mys.salthax.org/>
+# $title 000400000011C400 000400000011C500 0004000000055D00 0004000000055E00 0004000000164800 0004000000175E00
 # $ver   01
 # $uuid  0001
 
@@ -25,6 +25,10 @@ jmpf  seturl
 
 rewind
 find  "https://3ds2-fushigi.pokemon-gl.com/api/"
+jmpf  seturl
+
+rewind
+find  "https://3ds3-fushigi.pokemon-gl.com/api/"
 abortnf
 
 seturl:
@@ -43,3 +47,9 @@ find  "https://npfl.c.app.nintendowifi.net/p01/filelist/"
 abortnf
 set   "http://mys.salthax.org/p01/filelist/"
 set   00
+
+find  "https://npdl.cdn.nintendowifi.net/p01/nsa/%s/%s/%s/%s"
+jmpnf end
+set   "https://mys.salthax.org/p01/nsa/%s/%s/%s/%s"
+set   00
+end:

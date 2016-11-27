@@ -35,7 +35,7 @@ uint8_t* font_data = NULL;
 
 static uint8_t alphamap[256] = {0};
 
-void std_init() {
+void std_init(void) {
     for(uint16_t i=0; i < 0x100; i++) {
         alphamap[i] = 0;
         if (i > 0x7F)
@@ -104,7 +104,7 @@ void fill_line(void* channel, unsigned int y, uint8_t color) {
 }
 
 // This is (roughly) the screenshot specs as used by smeas scrtool.
-void screenshot() {
+void screenshot(void) {
     f_unlink(PATH_TEMP "/screenshot.ppm");
 
     // Open the screenshot blob used by hbmenu et al
@@ -151,7 +151,7 @@ void screenshot() {
     fprintf(stderr, "Screenshot: %s\n", PATH_TEMP "/screenshot.ppm");
 }
 
-void clear_bg() {
+void clear_bg(void) {
     memset(top_bg, 0, TOP_SIZE);
     memset(bottom_bg, 0, BOTTOM_SIZE);
 }
@@ -359,7 +359,7 @@ draw_character(uint8_t *screen, const unsigned int character, unsigned int ch_x,
 }
 
 void
-shut_up()
+shut_up(void)
 {
     kill_output = 1; // Immediately cancel all output operations.
 }

@@ -3,6 +3,6 @@
 
 /* Install interrupt handlers via libctr9.
  */
-void install_interrupts();
+void install_interrupts(void);
 
 #endif

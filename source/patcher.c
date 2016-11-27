@@ -33,7 +33,7 @@ patch_cache_func(char* fpath)
 }
 
 int
-generate_patch_cache()
+generate_patch_cache(void)
 {
     // Remove cache
     rrmdir(PATH_LOADER_CACHE);

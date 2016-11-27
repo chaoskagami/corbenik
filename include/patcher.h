@@ -11,7 +11,7 @@ int patch_firm_all(uint64_t tid, firm_h* firm, const char* module_path);
  *
  * \return Zero on success.
  */
-int generate_patch_cache();
+int generate_patch_cache(void);
 
 int patch_svc_calls(firm_h* firm_loc);
 int patch_reboot(firm_h* firm_loc);

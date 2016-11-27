@@ -1,10 +1,5 @@
 #include <3ds.h>
 #include "patcher.h"
-#include "exheader.h"
-#include "fsldr.h"
-#include "fsreg.h"
-#include "pxipm.h"
-#include "srvsys.h"
 #include <string.h>
 #include "logger.h"
 
@@ -24,10 +19,17 @@ void __system_initSyscalls(void);
 void
 __appInit()
 {
-    srvSysInit();
-    fsregInit();
-    fsldrInit();
-    pxipmInit();
+    if (R_FAILED(srvSysInit()))
+        svcBreak(USERBREAK_PANIC);
+
+    if (R_FAILED(fsregInit()))
+        svcBreak(USERBREAK_PANIC);
+
+    if (R_FAILED(fsInitFromService("fs:LDR")))
+        svcBreak(USERBREAK_PANIC);
+
+    if (R_FAILED(pxipmInit()))
+        svcBreak(USERBREAK_PANIC);
 }
 
 // Post-main cleanup function.
@@ -35,7 +37,7 @@ void
 __appExit()
 {
     pxipmExit();
-    fsldrExit();
+    fsExit();
     fsregExit();
     srvSysExit();
 }

@@ -1,10 +1,5 @@
 #include <3ds.h>
 #include "patcher.h"
-#include "exheader.h"
-#include "fsldr.h"
-#include "fsreg.h"
-#include "pxipm.h"
-#include "srvsys.h"
 #include <lzss.c>
 #include <string.h>
 #include <stdio.h>
@@ -21,16 +16,16 @@ const char CODE_PATH[] = { 0x01, 0x00, 0x00, 0x00, 0x2E, 0x63, 0x6F, 0x64, 0x65,
 static Handle g_handles[MAX_SESSIONS + 2];
 static int g_active_handles;
 static u64 g_cached_prog_handle;
-static exheader_header g_exheader;
+static EXHEADER_header g_exheader;
 static char g_ret_buf[1024];
 
 static Result
-allocate_shared_mem(prog_addrs_t *shared, prog_addrs_t *vaddr, int flags)
+allocate_shared_mem(EXHEADER_prog_addrs *shared, EXHEADER_prog_addrs *vaddr, int flags)
 {
     // Somehow, we need to allow reallocating.
     u32 dummy;
 
-    memcpy(shared, vaddr, sizeof(prog_addrs_t));
+    memcpy(shared, vaddr, sizeof(EXHEADER_prog_addrs));
     shared->text_addr = 0x10000000; // Base virtual address for code.
     shared->ro_addr = shared->text_addr + (shared->text_size << 12);
     shared->data_addr = shared->ro_addr + (shared->ro_size << 12);
@@ -38,7 +33,7 @@ allocate_shared_mem(prog_addrs_t *shared, prog_addrs_t *vaddr, int flags)
 }
 
 static Result
-load_code(u64 progid, u16 progver, prog_addrs_t *shared, prog_addrs_t *original, u64 prog_handle, int is_compressed)
+load_code(u64 progid, u16 progver, EXHEADER_prog_addrs *shared, EXHEADER_prog_addrs *original, u64 prog_handle, int is_compressed)
 {
     Handle handle;
     FS_Path archivePath;
@@ -55,7 +50,7 @@ load_code(u64 progid, u16 progver, prog_addrs_t *shared, prog_addrs_t *original,
     path.data = CODE_PATH;
     path.size = sizeof(CODE_PATH);
 
-    if (R_FAILED(FSLDR_OpenFileDirectly(&handle, ARCHIVE_SAVEDATA_AND_CONTENT2, archivePath, path, FS_OPEN_READ, 0))) {
+    if (R_FAILED(FSUSER_OpenFileDirectly(&handle, ARCHIVE_SAVEDATA_AND_CONTENT2, archivePath, path, FS_OPEN_READ, 0))) {
         panicstr("Failed to open program code path.\n");
     }
 
@@ -94,7 +89,7 @@ load_code(u64 progid, u16 progver, prog_addrs_t *shared, prog_addrs_t *original,
 }
 
 static Result
-loader_GetProgramInfo(exheader_header *exheader, u64 prog_handle)
+loader_GetProgramInfo(EXHEADER_header *exheader, u64 prog_handle)
 {
     Result res;
 
@@ -122,9 +117,9 @@ loader_LoadProcess(Handle *process, u64 prog_handle)
     u32 flags;
     u32 desc;
     u32 dummy;
-    prog_addrs_t shared_addr;
-    prog_addrs_t vaddr;
-    prog_addrs_t original_vaddr;
+    EXHEADER_prog_addrs shared_addr;
+    EXHEADER_prog_addrs vaddr;
+    EXHEADER_prog_addrs original_vaddr;
     Handle codeset;
     CodeSetInfo codesetinfo;
     u32 data_mem_size;
@@ -370,7 +365,7 @@ should_terminate(int *term_request)
     u32 notid;
     Result ret;
 
-    ret = srvSysReceiveNotification(&notid);
+    ret = srvReceiveNotification(&notid);
     if (R_FAILED(ret)) {
         return ret;
     }
@@ -399,11 +394,11 @@ main()
     srv_handle = &g_handles[1];
     notification_handle = &g_handles[0];
 
-    if (R_FAILED(srvSysRegisterService(srv_handle, "Loader", MAX_SESSIONS))) {
+    if (R_FAILED(srvRegisterService(srv_handle, "Loader", MAX_SESSIONS))) {
         panicstr("Failed to register loader service.\n");
     }
 
-    if (R_FAILED(srvSysEnableNotification(notification_handle))) {
+    if (R_FAILED(srvEnableNotification(notification_handle))) {
         panicstr("Failed to enable notifcations to loader service.\n");
     }
 
@@ -472,7 +467,7 @@ main()
         }
     } while (!term_request || g_active_handles != 2);
 
-    srvSysUnregisterService("Loader");
+    srvUnregisterService("Loader");
     svcCloseHandle(*srv_handle);
     svcCloseHandle(*notification_handle);
 

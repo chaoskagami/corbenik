@@ -35,13 +35,15 @@ wait_key(_UNUSED int sleep)
     }
     while (ctr_hid_get_buttons());
 
+    waitcycles(ARM9_APPROX_DELAY_MAX); // Approximately what a human can input - fine tuning needed (sorry, TASers!)
+
     return ret;
 }
 
 extern int doing_autoboot;
 
 void
-wait()
+wait(void)
 {
     if (get_opt_u32(OPTION_TRACE) && !doing_autoboot) {
         fprintf(stderr, "[Waiting...]");

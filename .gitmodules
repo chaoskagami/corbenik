@@ -7,3 +7,7 @@
 [submodule "external/libctr9"]
 	path = external/libctr9
 	url = https://github.com/gemarcano/libctr9
+[submodule "external/ctrulib"]
+	path = external/ctrulib
+	url = https://github.com/chaoskagami/ctrulib
+	branch = system

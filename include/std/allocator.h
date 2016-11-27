@@ -16,7 +16,7 @@ void *sbrk(size_t bytes);
 
 /* Prints stats for allocation to stderr.
  */
-void print_alloc_stats();
+void print_alloc_stats(void);
 
 /* Allocate memory for use (debugging only, don't call)
  *

@@ -45,7 +45,7 @@ void fiq_INT(_UNUSED uint32_t* regs) {
     fprintf(stderr, "FIQ called. Returning.\n");
 }
 
-void install_interrupts() {
+void install_interrupts(void) {
     ctr_interrupt_prepare();
     ctr_irq_initialize();
 

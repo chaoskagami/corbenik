@@ -27,6 +27,7 @@
 #define PATH_MODULE_TWL      PATH_MODULES "/twl"        ///< TWL FIRM Sysmodule location
 
 #define PATH_PATCHES         SBINDIR                 ///< Patch binary folder.
+#define PATH_AUX_PATCHES     BINDIR                  ///< Patch binary folder.
 
 #define PATH_BITS            LIBEXECDIR              ///< Path to misc bits we need (emunand code, reboot code, etc)
 

@@ -1,0 +1,21 @@
+# $name  Remove Outlines - Pokemon S/M (Loader)
+# $desc  Patch to remove the outlines in the Pokemon Sun and Moon games
+# $title 0004000000164800 0004000000175E00
+# $ver   01
+# $uuid  0005
+
+# This is just a simple patch to remove the outlines in the Pokemon Sun and Moon games,
+# removing the need to extract and patch the code.bin.
+# Made it dynamic and ready when @kitling found a way to do it with all of the 
+# recent pokemon games.
+
+# The original patch was made by @SciresM. See here:
+#   https://github.com/SciresM/SunMoonPatches
+
+rel exe_text
+
+# Status: needs loader
+
+find E0042080E51E
+abortnf
+set  E000F020E3

@@ -11,11 +11,38 @@ Corbenik is licensed under the terms of the GPLv3. Please obey it. You should ha
 Usage
 -------------------------
 
-If you're compiling this from source code, see at the bottom the `Building` section.
+You will likely want to compile corbenik from source code to get the latest changes (if any.) Therefore, you will want to follow the `Building` section.
 
-If you are using a nightly build off of https://github.com/chaoskagami/skeith - treat all paths starting in `/corbenik` as `/skeith` instead for these instructions.
+Afterwards, you should skip to `Installing` if you are installing this for the first time, otherwise run `git log` and search for any `BREAKING` within the log to figure out what incompatibilities the new commit has (if any.)
 
-Skip to `Installing` if you are installing this for the first time, otherwise read the release page for update instructions (if any) and then `Installing`.
+Building
+-------------------------
+
+First; make sure you have submodules properly checked out. If you do not, the build will fail in odd and unintelligible ways. You should either run `git clone --recursive` to check out the code, or run `git submodule update --init --recursive` if you did not clone recursively.
+
+You will need at minimum the following:
+
+ * devkitARM (must be in your PATH)
+ * Host gcc (as in a native system compiler)
+ * Python 2.7 (for patches)
+ * Autotools (as in, automake/autoconf - mandatory)
+ * libtool (expect weird link errors if this is missing)
+
+Briefly; the following commands are enough to build:
+
+```
+./autogen.sh
+./configure --host=arm-none-eabi
+make -j4
+```
+
+In other words, the fairly standard autotools dance.
+
+Output will be produced in a directory named `out` after a successful build. This produces a build largely identical to normal releases from master. You can create a release.zip and sha512sums by running `./host/release.sh` from the root of the project.
+
+There's additional options one can provide - see `./configure --help` for information on these.
+
+Building corbenik on Windows never has and never will be officially supported. Your mileage may vary, but you'll likely have issues.
 
 Installing
 -------------------------
@@ -26,17 +53,17 @@ Without the FIRMs, it cannot boot up your system. You'll need to fetch the follo
 
 Otherwise, manually fetching firmware should be done from the following URLs:
 
-Old 3DS (Native FIRM, 11.1):
- * firm: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000002/00000056
+Old 3DS (Native FIRM, 11.2):
+ * firm: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000002/00000058
  * cetk: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000002/cetk
 
-New 3DS (Native FIRM, 11.1):
- * firm: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000002/00000026
+New 3DS (Native FIRM, 11.2):
+ * firm: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000002/00000028
  * cetk: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000002/cetk
 
-This is only a recommendation - you can supply near any valid firmware file for your console (it has only been tested extensively until 9.2 backwards, however.)
+This is only a recommendation - you can supply near any valid firmware file for your console (it has only been tested extensively for >=9.2, however.)
 
-You should also fetch the agb firm and twl firms to `/corbenik/lib/firmware/agb` and `/corbenik/lib/firmware/twl` respectively. You can fetch the cetk for each of them to `/corbenik/lib/firmware/agb.cetk` and `/corbenik/lib/firmware/twl.cetk`.
+You should also fetch the agb firm and twl firms to `/corbenik/lib/firmware/agb` and `/corbenik/lib/firmware/twl` respectively. You can fetch the cetk for each of them to `/corbenik/lib/firmware/agb.cetk` and `/corbenik/lib/firmware/twl.cetk`. If these are missing, it will not be possible to run AGB and TWL patched, though they will still run (and without patches, this limits you to properly signed content.)
 
 Old 3DS TWL_FIRM (Firmware for DS/DSi games):
  * cetk: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000102/cetk
@@ -58,7 +85,7 @@ New 3DS AGB_FIRM (Firmware for GBA games):
 
 The folder `/corbenik/share/locale/emu` is for language emulation files. You can retrieve a set of files from 3dsdb for games that only specify one region and one language by running the `generate_localeemu.sh` shell script. Games which support more than one language are not generated, because there's no 'correct' language.
 
-The folder `/corbenik/bin` contains additional patches you may enable at your own discretion. These are not as well tested as official patches and don't generally affect core functionality. Documentation is usually found on the header of the source code for them (contrib/*.pco) in the git repo. Everything in `/corbenik/sbin` is core mostly-essential patches. Patches in `/corbenik/bin` will not yet be automatically indexed.
+The folder `/corbenik/bin` contains additional patches you may enable at your own discretion. These are not as well tested as official patches and don't generally affect core functionality. Documentation is usually found on the header of the source code for them (contrib/*.pco) in the git repo. Patches in `/corbenik/bin` will be listed at the bottom of the list of patches, after the patches within `/corbenik/sbin` which are mostly core functionality.
 
 Setup
 -------------------------
@@ -74,9 +101,9 @@ Unless otherwise noted, menu controls are always shown at the top, but for refer
  * Select    -> Help (on any selectable option)
  * L+R+Start -> Screenshot (Menu ONLY.)
 
-For starters, you'll want to go into Configuration->Options and enable `System Module Inject` to get loader to run patches as well. Even if you don't plan to run any loader patches, this will at very least kill ASLR and anti-OoThax/anti-Ninjhax features in the official Nintendo loader.
+For starters, you'll want to go into Configuration->Options and enable `System Module Inject` to get loader to run patches as well. Even if you don't plan to run any loader patches, this will at very least kill ASLR and anti-OoThax/anti-Ninjhax features in the official Nintendo loader. Corbenik's loader is a bit weightier than nintendo's (approximately 10 mediaunits as of last check) but contains extra functionality.
 
-If you're using 11.1 NATIVE_FIRM like I suggested, you may want to tick `svcBackdoor Fixup` to fix the broken svcBackdoor if you plan on using anything which requires it. This includes HBMenu, some Retroarch cores, etc. Your system will be more secure (as in against malicious code, not as in Nintendo) if you leave it off.
+If you're using 11.2 NATIVE_FIRM like I suggested, you may want to tick `svcBackdoor Fixup` to fix the broken svcBackdoor if you plan on using anything which requires it. This includes HBMenu, some Retroarch cores, etc. Your system will be more secure (as in against malicious code, not as in Nintendo) if you leave it off.
 
 If you need to use an EmuNAND, you'll want to enable `EmuNAND` in options. If you've been using multiple EmuNANDs via Cakes or Luma you can also select the index while you're there with A to increase and X to decrease. This supports both Gateway-style (first sector at back) and standard copy NANDs (RedNAND)
 
@@ -97,8 +124,7 @@ You'll also want these patches, which are done by loader and therefore require i
 
 If you're using the reboot hook, you might want these:
  * AGB Signature Fix
- * AGB Bootscreen
-   * Will stop games with corrupted Nintendo logos from running. Disable for ROM hacks if this occurs. No, there's nothing I can do, since the GBA bios is on the SoC. Please take this up with the author of the romhack.
+ * AGB Bootscreen [1]
  * TWL Patches - Select either one, the correct one will be applied
 
 If you're on 11.0 or higher and using the respective FIRM, you also want these:
@@ -115,9 +141,13 @@ Optional, but recommended patches are:
  * Verbose ErrDisp (Loader)
 
 And these YOU SHOULD NOT ENABLE unless you have specialized needs:
- * Developer UNITINFO (Pretends to be a developer console/Panda)
- * ARM11 XN Disable   (Grants +X maps by default to kernel)
- * Force TestMenu     (Boots into TestMenu rather than HOME - requires TestMenu to be installed)
+ * Developer UNITINFO [2]
+ * ARM11 XN Disable
+ * Force TestMenu [3]
+
+[1] - This will stop games with corrupted Nintendo logos from running. Disable for ROM hacks if this occurs. There's nothing I can do to resolve this, since the GBA bios is on the SoC. Please take this up with the author of your rom(hack).
+[2] - This will disable usage of most internet functionality on the 3DS. Verbose ErrDisp is preferred.
+[3] - Boots into TestMenu rather than HOME. This requires a TestMenu to be installed, either factory or the re-encrypted developer one.
 
 Customization
 -------------------------
@@ -126,62 +156,39 @@ You can copy some 90° rotated BGR8 pixel data sized to the screen (essentially,
  * Top: `/corbenik/share/top.bin`
  * Bottom: `/corbenik/share/bottom.bin`
 
-The font is also customizable (`/corbenik/share/termfont.bin`) - read the github wiki for details.
+The font is also customizable (`/corbenik/share/termfont.bin`) - read the github wiki for details. The bundled font is the very nice Tewi font.
 
 Optionals
 -------------------------
 
-Corbenik has a chainloader that can be used to load other a9lh payloads. Simply place them in `/corbenik/boot` and they will be automatically picked up and shown in the `Chainloader` menu for use.
+Corbenik has a chainloader that can be used to load other payloads. Simply place them in `/corbenik/boot` and they will be automatically picked up and shown in the `Chainloader` menu for use.
 
 The chainloader only supports .bin payloads. .dat payloads are unsupported, since they are intended for execution from an ARM11 environment. Supporting them would require far too much effort for far too little gain.
 
-There is a set of in-progress unit-tests that can be used to verify functionality works correctly. These are not yet complete, and are not enabled by default in regular builds (they never will be.)
-
-Building
--------------------------
-
-First; make sure you have submodules properly checked out. If you do not, the build will fail in odd and unintelligible ways.
-
-You will need at minimum the following:
-
- * devkitARM (must be in your PATH)
- * ctrulib (from git)
- * Host gcc (as in a native system compiler)
- * Python 2.7 (for patches)
- * Autotools (as in, automake/autoconf - mandatory)
- * libtool (expect weird link errors if this is missing)
-
-Briefly; the following commands are enough to build:
-
-```
-./autogen.sh
-./configure --host=arm-none-eabi
-```
-
-Output will be produced in a directory named `out` after a successful build. This produces a build largely identical to normal releases from master.
-
-There's additional options one can provide - see `./configure --help` for information on these.
-
-Building corbenik on Windows never has and never will be officially supported. Your mileage may vary.
+There is a set of in-progress unit-tests that can be used to verify functionality works correctly. These are not yet complete.
 
 Reporting issues
 -------------------------
 
 If you think you've found a bug, please do the following first, to save me some time:
-
  * Check if a recently enabled patch is the cause of the issue. If so, you should include this in the report.
  * Enable `Logging` and `Verbose` in `Options` then `Save Configuration` and retrieve the files `/corbenik/var/log/boot.log` and `/corbenik/var/log/loader.log` if they exist. I will want them. Do not report bugs without them, unless they are not created with the above enabled.
  * Please at least try to reproduce the bug from a clean installation.
  * Try to reproduce the problem from another CFW like luma or cakes, to determine if the cause is truly corbenik.
 
+If you are requesting a feature, please do the following first, before opening an issue:
+ * Determine whether you can implement and PR the feature yourself.
+ * Determine whether what you are asking is reasonable.
+ * Determine the relative difficulty of what you are asking.
+ * Clarify what exactly you would like to see implemented.
+
 Contributions
 -------------------------
 
 If you have a feature or bugfix, PR or hit me on freenode/#Cakey. However, please note the following conditions:
-
  * Do NOT base any code on Nintendo's SDK. Additionally, if you are under NDA, do not even bother to PR. I cannot accept tainted code. This is for my own legal safety (and sanity)
  * Please attempt to obey coding standards. The .clang-format is a loose guide to this. I'll tell you if I need reformatting.
- * Please ensure your changes are functional and don't break consoles, O3DS or N3DS. Do not assume anything about the environment you are running under unless it is a safe assumption.
+ * Please ensure your changes are functional and don't break consoles, O3DS or N3DS. Do not assume anything about the environment you are running under unless it is a safe assumption (and near none are)
 
 Credits
 -------------------------

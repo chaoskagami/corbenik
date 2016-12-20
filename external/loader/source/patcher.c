@@ -300,14 +300,16 @@ adjust_cpu_settings(_UNUSED u64 progId, u8 *code, u32 size)
         cpuSetting |= config.options[OPTION_LOADER_CPU_800MHZ] << 1;
 
         if (cpuSetting) {
-            static const u8 cfgN3dsCpuPattern[] = { 0x00, 0x40, 0xA0, 0xE1, 0x07, 0x00 };
+            static const u8 cfgN3dsCpuPattern[] = { 0x0C, 0x00, 0x94, 0x15 };
 
             u32 *cfgN3dsCpuLoc = (u32 *)memfind(code, size, cfgN3dsCpuPattern, sizeof(cfgN3dsCpuPattern));
 
             // Patch N3DS CPU Clock and L2 cache setting
             if (cfgN3dsCpuLoc != NULL) {
-                *(cfgN3dsCpuLoc + 1) = 0xE1A00000;
-                *(cfgN3dsCpuLoc + 8) = 0xE3A00000 | cpuSetting;
+                *(cfgN3dsCpuLoc - 4) = *(cfgN3dsCpuLoc - 3);
+                *(cfgN3dsCpuLoc - 3) = *(cfgN3dsCpuLoc - 1);
+                memcpy(cfgN3dsCpuLoc - 1, cfgN3dsCpuLoc, 16);
+                *(cfgN3dsCpuLoc + 3) = 0xE3800000 | cpuSetting;
             }
         }
     }

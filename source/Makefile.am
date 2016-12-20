@@ -12,7 +12,7 @@ all-local: corbenik.bin
 clean-local:
 	rm -f corbenik.bin
 
-corbenik.bin:
+corbenik.bin: corbenik
 	$(OBJCOPY) $(OCFLAGS) -O binary corbenik corbenik.bin
 
 corbenikdir = $(top_srcdir)/source

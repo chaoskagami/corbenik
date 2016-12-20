@@ -1,6 +1,10 @@
 SUBDIRS = include host external source patch contrib
 ACLOCAL_AMFLAGS = -I m4
 
+source: include host external
+
+external: include host
+
 install:
 	@echo "Please don't call the install target directly, it doesn't work."
 	@exit 1

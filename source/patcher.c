@@ -39,7 +39,8 @@ generate_patch_cache(void)
     rrmdir(PATH_LOADER_CACHE);
     f_mkdir(PATH_LOADER_CACHE);
 
-    recurse_call(PATH_PATCHES, patch_cache_func);
+    recurse_call(PATH_PATCHES,     patch_cache_func);
+    recurse_call(PATH_AUX_PATCHES, patch_cache_func);
 
     return 0;
 }

@@ -1,6 +1,8 @@
 #ifndef __COMMON_H
 #define __COMMON_H
 
+#include <stdlib.h>
+
 #include <corbconf.h>
 
 #include <std/unused.h>
@@ -15,7 +17,6 @@
 #include <std/draw.h>
 
 #include <firm/headers.h>
-#include <std/allocator.h>
 #include <firm/decryptor.h>
 #include <firm/firm.h>
 #include <firm/keys.h>

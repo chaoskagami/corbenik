@@ -8,6 +8,8 @@ char *config_file_path = NULL;
 int changed_consoles = 0;
 uint32_t cid[4];
 
+#define PATCH_MAX 0x100000
+
 void
 regenerate_config(void)
 {
@@ -21,7 +23,7 @@ regenerate_config(void)
     if (!(conf_handle = fopen(config_file_path, "w")))
         poweroff();
 
-    fwrite(config, 1, sizeof(struct config_file) + FCRAM_SPACING / 2, conf_handle);
+    fwrite(config, 1, sizeof(struct config_file) + PATCH_MAX, conf_handle);
     fclose(conf_handle);
 }
 
@@ -111,8 +113,8 @@ load_config(void)
             cid_cp >>= 4;
         }
 
-        config = (struct config_file*)malloc(sizeof(struct config_file) + FCRAM_SPACING / 2);
-        memset(config, 0, sizeof(struct config_file) + FCRAM_SPACING / 2);
+        config = (struct config_file*)malloc(sizeof(struct config_file) + PATCH_MAX);
+        memset(config, 0, sizeof(struct config_file) + PATCH_MAX);
         enable_list = (uint8_t*)config + sizeof(struct config_file);
         fclose(f);
     }
@@ -121,7 +123,7 @@ load_config(void)
     if (!(conf_handle = fopen(config_file_path, "r"))) {
         regenerate_config();
     } else {
-        fread(config, 1, sizeof(struct config_file) + FCRAM_SPACING / 2, conf_handle);
+        fread(config, 1, sizeof(struct config_file) + PATCH_MAX, conf_handle);
 
         fclose(conf_handle);
 
@@ -157,7 +159,7 @@ save_config(void)
     if (!(conf_handle = fopen(config_file_path, "w")))
         while(1);
 
-    fwrite(config, 1, sizeof(struct config_file) + FCRAM_SPACING / 2, conf_handle);
+    fwrite(config, 1, sizeof(struct config_file) + PATCH_MAX, conf_handle);
 
     fclose(conf_handle);
 }

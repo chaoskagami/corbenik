@@ -23,20 +23,6 @@ strdupcat(const char* str, const char *cat)
     return out;
 }
 
-int
-atoi(const char *str)
-{
-    int res = 0;
-
-    while (str[0] && str[0] >= '0' && str[0] <= '9') {
-        res *= 10;
-        res += str[0] - '0';
-        str++;
-    }
-
-    return res;
-}
-
 #define ALPHABET_LEN 256
 #define NOT_FOUND patlen
 #define max(a, b) ((a < b) ? b : a)

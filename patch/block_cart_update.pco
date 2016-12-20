@@ -11,9 +11,11 @@ rel exe_text
 
 # Therefore, loop to replace these instances and exit upon not-found.
 
-find 0C18E1D8
+next:
+
+find  0C18E1D8
 jmpnf end
-set  0B1821C8
-jmp next
+set   0B1821C8
+jmp   next
 
 end:

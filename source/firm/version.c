@@ -8,7 +8,7 @@ get_firm_info(firm_h *firm)
 {
     // What follows is a heuristic to detect the firmware's properties. Checks are as follows:
 
-    struct firm_signature *signature = (struct firm_signature*)malloc(sizeof(struct firm_signature));
+    struct firm_signature *signature = (struct firm_signature*)memalign(16, sizeof(struct firm_signature));
 
     signature->type    = type_native;
     signature->k9l     = 0;

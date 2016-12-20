@@ -46,26 +46,26 @@ generate_patch_cache(void)
 }
 
 int
-patch_firm_all(uint64_t tid, firm_h* firm, const char* module_path)
+patch_firm_all(uint64_t tid, firm_h** firm, const char* module_path)
 {
     int exit = 0;
 
-    execb(tid, firm);
+    execb(tid, *firm);
 
     switch (tid) {
         case 0x0004013800000002LLu: // NFIRM
         case 0x0004013820000002LLu:
             // Hook firmlaunch?
             if (get_opt_u32(OPTION_REBOOT))
-                patch_reboot(firm);
+                patch_reboot(*firm);
 
             // Use EmuNAND?
             if (get_opt_u32(OPTION_EMUNAND))
-                patch_emunand(firm, get_opt_u32(OPTION_EMUNAND_INDEX));
+                patch_emunand(*firm, get_opt_u32(OPTION_EMUNAND_INDEX));
 
             // Inject services?
             if (get_opt_u32(OPTION_SVCS))
-                if (patch_svc_calls(firm))
+                if (patch_svc_calls(*firm))
                     exit |= 2;
             break;
         case 0x0004013800000102LLu:

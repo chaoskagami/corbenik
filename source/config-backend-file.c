@@ -20,11 +20,11 @@ regenerate_config(void)
     config->options[OPTION_ACCENT_COLOR] = 2;
     config->options[OPTION_BRIGHTNESS]   = 3;
 
-    if (!(conf_handle = fopen(config_file_path, "w")))
+    if (!(conf_handle = cropen(config_file_path, "w")))
         poweroff();
 
-    fwrite(config, 1, sizeof(struct config_file) + PATCH_MAX, conf_handle);
-    fclose(conf_handle);
+    crwrite(config, 1, sizeof(struct config_file) + PATCH_MAX, conf_handle);
+    crclose(conf_handle);
 }
 
 void
@@ -82,21 +82,21 @@ load_config(void)
     mk_structure(); // Make directory structure if needed.
 
     if (!config_file_path) {
-        config_file_path = malloc(256); // MAX_PATH
+        config_file_path = memalign(16, 256); // MAX_PATH
         memset(config_file_path, 0, 256);
 
         sdmmc_get_cid(1, cid);
 
-        FILE* f = fopen(SYSCONFDIR "/current-nand-cid", "r");
+        FILE* f = cropen(SYSCONFDIR "/current-nand-cid", "r");
         if (!f) {
             // Nonexistent. Write it.
-            f = fopen(SYSCONFDIR "/current-nand-cid", "w");
-            fwrite(cid, 1, 4, f);
-            fclose(f);
-            f = fopen(SYSCONFDIR "/current-nand-cid", "r");
+            f = cropen(SYSCONFDIR "/current-nand-cid", "w");
+            crwrite(cid, 1, 4, f);
+            crclose(f);
+            f = cropen(SYSCONFDIR "/current-nand-cid", "r");
         }
 
-        fread(&cid[1], 1, 4, f);
+        crread(&cid[1], 1, 4, f);
 
         // If our console's CID doesn't match what was read, we need to regenerate caches immediately when we can.
         if (cid[0] != cid[1]) {
@@ -113,19 +113,19 @@ load_config(void)
             cid_cp >>= 4;
         }
 
-        config = (struct config_file*)malloc(sizeof(struct config_file) + PATCH_MAX);
+        config = (struct config_file*)memalign(16, sizeof(struct config_file) + PATCH_MAX);
         memset(config, 0, sizeof(struct config_file) + PATCH_MAX);
         enable_list = (uint8_t*)config + sizeof(struct config_file);
-        fclose(f);
+        crclose(f);
     }
 
     // Zero on success.
-    if (!(conf_handle = fopen(config_file_path, "r"))) {
+    if (!(conf_handle = cropen(config_file_path, "r"))) {
         regenerate_config();
     } else {
-        fread(config, 1, sizeof(struct config_file) + PATCH_MAX, conf_handle);
+        crread(config, 1, sizeof(struct config_file) + PATCH_MAX, conf_handle);
 
-        fclose(conf_handle);
+        crclose(conf_handle);
 
         if (memcmp(&(config->magic), CONFIG_MAGIC, 4)) {
             f_unlink(config_file_path);
@@ -149,19 +149,19 @@ void
 save_config(void)
 {
     if (changed_consoles) {
-        FILE* f = fopen(SYSCONFDIR "/current-nand-cid", "w");
-        fwrite(cid, 1, 4, f);
-        fclose(f);
+        FILE* f = cropen(SYSCONFDIR "/current-nand-cid", "w");
+        crwrite(cid, 1, 4, f);
+        crclose(f);
     }
 
     f_unlink(config_file_path);
 
-    if (!(conf_handle = fopen(config_file_path, "w")))
+    if (!(conf_handle = cropen(config_file_path, "w")))
         while(1);
 
-    fwrite(config, 1, sizeof(struct config_file) + PATCH_MAX, conf_handle);
+    crwrite(config, 1, sizeof(struct config_file) + PATCH_MAX, conf_handle);
 
-    fclose(conf_handle);
+    crclose(conf_handle);
 }
 
 void change_opt(void* val) {

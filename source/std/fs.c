@@ -64,7 +64,7 @@ rrmdir(const char *name)
 }
 
 int
-fmount(void)
+crmount(void)
 {
     if(!set_up_fs && ctr_fatfs_initialize(&nand_io, NULL, NULL, &sd_io))
         return 1;
@@ -81,7 +81,7 @@ fmount(void)
 }
 
 int
-fumount(void)
+crumount(void)
 {
     if (f_mount(NULL, "SD:", 1))
         return 1;
@@ -92,7 +92,7 @@ fumount(void)
 }
 
 FILE *
-fopen(const char *filename, const char *mode)
+cropen(const char *filename, const char *mode)
 {
     if (mode[0] != 'r' && mode[0] != 'w' && mode[0] != 'a')
         return NULL; // Mode not valid.
@@ -112,7 +112,7 @@ fopen(const char *filename, const char *mode)
 }
 
 void
-fclose(FILE *fp)
+crclose(FILE *fp)
 {
     if (fp == NULL || !fp->is_open)
         return;
@@ -125,7 +125,7 @@ fclose(FILE *fp)
 }
 
 void
-fseek(FILE *fp, int64_t offset, int whence)
+crseek(FILE *fp, int64_t offset, int whence)
 {
     if (fp == NULL || !fp->is_open)
         return;
@@ -136,10 +136,10 @@ fseek(FILE *fp, int64_t offset, int whence)
             fixed_offset = 0;
             break;
         case SEEK_CUR:
-            fixed_offset = ftell(fp);
+            fixed_offset = crtell(fp);
             break;
         case SEEK_END:
-            fixed_offset = fsize(fp);
+            fixed_offset = crsize(fp);
             break;
         default:
             return;
@@ -149,7 +149,7 @@ fseek(FILE *fp, int64_t offset, int whence)
 }
 
 size_t
-ftell(FILE *fp)
+crtell(FILE *fp)
 {
     if (fp == NULL || !fp->is_open)
         return 0;
@@ -158,7 +158,7 @@ ftell(FILE *fp)
 }
 
 int
-feof(FILE *fp)
+creof(FILE *fp)
 {
     if (fp == NULL || !fp->is_open)
         return 0;
@@ -167,7 +167,7 @@ feof(FILE *fp)
 }
 
 size_t
-fsize(FILE *fp)
+crsize(FILE *fp)
 {
     if (fp == NULL || !fp->is_open)
         return 0;
@@ -176,7 +176,7 @@ fsize(FILE *fp)
 }
 
 size_t
-fwrite(const void *buffer, size_t elementSize, size_t elementCnt, FILE *fp)
+crwrite(const void *buffer, size_t elementSize, size_t elementCnt, FILE *fp)
 {
     if (fp == NULL || !fp->is_open)
         return 0;
@@ -190,7 +190,7 @@ fwrite(const void *buffer, size_t elementSize, size_t elementCnt, FILE *fp)
 }
 
 size_t
-fread(void *buffer, size_t elementSize, size_t elementCnt, FILE *fp)
+crread(void *buffer, size_t elementSize, size_t elementCnt, FILE *fp)
 {
     if (!fp->is_open)
         return 0;
@@ -207,19 +207,19 @@ fread(void *buffer, size_t elementSize, size_t elementCnt, FILE *fp)
 size_t
 write_file(void *data, const char *path, size_t size)
 {
-    FILE *temp = fopen(path, "w");
+    FILE *temp = cropen(path, "w");
 
     if (!temp)
         return 0;
 
     if (!temp->is_open) {
-        fclose(temp);
+        crclose(temp);
         return 0;
     }
 
-    size_t wrote = fwrite(data, 1, size, temp);
+    size_t wrote = crwrite(data, 1, size, temp);
 
-    fclose(temp);
+    crclose(temp);
 
     return wrote;
 }
@@ -227,19 +227,19 @@ write_file(void *data, const char *path, size_t size)
 size_t
 read_file(void *data, const char *path, size_t size)
 {
-    FILE *temp = fopen(path, "r");
+    FILE *temp = cropen(path, "r");
 
     if (!temp)
         return 0;
 
     if (!temp->is_open) {
-        fclose(temp);
+        crclose(temp);
         return 0;
     }
 
-    size_t read = fread(data, 1, size, temp);
+    size_t read = crread(data, 1, size, temp);
 
-    fclose(temp);
+    crclose(temp);
 
     return read;
 }

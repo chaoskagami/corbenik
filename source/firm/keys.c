@@ -14,19 +14,19 @@ int set_N11_K9L(uint32_t index) {
 
     if (ss_keyn[0][0] == 0) {
         ss_keyn[0][0] = 1;
-        FILE* key = fopen(PATH_SLOT0X11KEY95, "r");
+        FILE* key = cropen(PATH_SLOT0X11KEY95, "r");
         if (key) {
-            fread(ss_keyn[0], 1, AES_BLOCK_SIZE, key);
-            fclose(key);
+            crread(ss_keyn[0], 1, AES_BLOCK_SIZE, key);
+            crclose(key);
         }
     }
 
     if (ss_keyn[1][0] == 0) {
         ss_keyn[1][0] = 1;
-        FILE* key = fopen(PATH_SLOT0X11KEY96, "r");
+        FILE* key = cropen(PATH_SLOT0X11KEY96, "r");
         if (key) {
-            fread(ss_keyn[1], 1, AES_BLOCK_SIZE, key);
-            fclose(key);
+            crread(ss_keyn[1], 1, AES_BLOCK_SIZE, key);
+            crclose(key);
         }
     }
 

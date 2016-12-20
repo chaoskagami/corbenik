@@ -31,15 +31,15 @@ patch_svc_calls(firm_h* firm_loc)
     if (!svcTable[0x7B]) {
         fprintf(stderr, "svc: 0x7B (backdoor) missing.\n");
 
-        FILE *data = fopen(PATH_BACKDOOR, "r");
-        uint32_t size = fsize(data);
+        FILE *data = cropen(PATH_BACKDOOR, "r");
+        uint32_t size = crsize(data);
 
         fprintf(stderr, "Svc: backdoor is %lu bytes\n", size);
         fprintf(stderr, "Svc: Read code to %lx\n", (uint32_t)svc_tab_open);
 
-        fread(svc_tab_open, 1, size, data);
+        crread(svc_tab_open, 1, size, data);
 
-        fclose(data);
+        crclose(data);
 
         //        memcpy(svc_tab_open, svcbackdoor, sizeof(svcbackdoor));
         svcTable[0x7B] = 0xFFFF0000 + (uint32_t)((uint8_t *)svc_tab_open - (uint8_t *)exceptionsPage);

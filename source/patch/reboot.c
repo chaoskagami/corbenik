@@ -35,25 +35,25 @@ patch_reboot(firm_h* firm_loc)
     // Firmlaunch function offset - offset in BLX opcode (A4-16 - ARM DDI 0100E) + 1
     uint32_t fOpenOffset = (uint32_t)(off + 9 - (-((*(uint32_t *)off & 0x00FFFFFF) << 2) & (0xFFFFFF << 2)) - (uint32_t)process9Offset + process9MemAddr);
 
-    fprintf(stderr, "reboot: fopen @ %lx\n", fOpenOffset);
+    fprintf(stderr, "reboot: cropen @ %lx\n", fOpenOffset);
 
     wait();
 
     // Copy firmlaunch code
-    FILE *f = fopen(PATH_REBOOT_HOOK, "r");
+    FILE *f = cropen(PATH_REBOOT_HOOK, "r");
     if (!f)
         panic("reboot: hook not found on SD\n");
 
-    uint32_t size = fsize(f);
-    fread(off, 1, size, f);
-    fclose(f);
+    uint32_t size = crsize(f);
+    crread(off, 1, size, f);
+    crclose(f);
 
     // Put the fOpen offset in the right location
-    uint32_t *pos_fopen = (uint32_t *)memfind(off, size, "open", 4);
-    if (!pos_fopen)
+    uint32_t *pos_cropen = (uint32_t *)memfind(off, size, "open", 4);
+    if (!pos_cropen)
         return 1;
 
-    *pos_fopen = fOpenOffset;
+    *pos_cropen = fOpenOffset;
 
     uint32_t *pos_native = (uint32_t *)memfind(off, size, "NATF", 4);
     uint32_t *pos_twl = (uint32_t *)memfind(off, size, "TWLF", 4);
@@ -102,12 +102,12 @@ patch_reboot(firm_h* firm_loc)
 
     fprintf(stderr, "reboot: rebc @ %lx\n", (uint32_t)pos_rebc);
 
-    f = fopen(PATH_REBOOT_CODE, "r");
+    f = cropen(PATH_REBOOT_CODE, "r");
     if (!f)
         return 1;
 
-    fread(mem, 1, fsize(f), f);
-    fclose(f);
+    crread(mem, 1, crsize(f), f);
+    crclose(f);
 
     return 0;
 }

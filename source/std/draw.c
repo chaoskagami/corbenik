@@ -108,11 +108,11 @@ void screenshot(void) {
     f_unlink(PATH_TEMP "/screenshot.ppm");
 
     // Open the screenshot blob used by hbmenu et al
-    FILE* f = fopen(PATH_TEMP "/screenshot.ppm", "w");
+    FILE* f = cropen(PATH_TEMP "/screenshot.ppm", "w");
 
     if (!f) return;
 
-    fwrite("P6 400 480 255 ", 1, 15, f);
+    crwrite("P6 400 480 255 ", 1, 15, f);
 
     for(int y = 0; y < 240; y++) {
         for(int x = 0; x < 400; x++) {
@@ -120,9 +120,9 @@ void screenshot(void) {
             int yDisplacement = ((240 - y - 1) * SCREEN_DEPTH);
             int pos = xDisplacement + yDisplacement;
 
-            fwrite(& framebuffers->top_left[pos + 3], 1, 1, f);
-            fwrite(& framebuffers->top_left[pos + 2], 1, 1, f);
-            fwrite(& framebuffers->top_left[pos + 1], 1, 1, f);
+            crwrite(& framebuffers->top_left[pos + 3], 1, 1, f);
+            crwrite(& framebuffers->top_left[pos + 2], 1, 1, f);
+            crwrite(& framebuffers->top_left[pos + 1], 1, 1, f);
         }
     }
 
@@ -130,23 +130,23 @@ void screenshot(void) {
 
     for(int y = 0; y < 240; y++) {
         for (int i = 0; i < 40 * 3; i++)
-            fwrite(& zero, 1, 1, f);
+            crwrite(& zero, 1, 1, f);
 
         for (int x = 0; x < 320; x++) {
             int xDisplacement = (x * SCREEN_DEPTH * 240);
             int yDisplacement = ((240 - y - 1) * SCREEN_DEPTH);
             int pos = xDisplacement + yDisplacement;
 
-            fwrite(& framebuffers->bottom[pos + 3], 1, 1, f);
-            fwrite(& framebuffers->bottom[pos + 2], 1, 1, f);
-            fwrite(& framebuffers->bottom[pos + 1], 1, 1, f);
+            crwrite(& framebuffers->bottom[pos + 3], 1, 1, f);
+            crwrite(& framebuffers->bottom[pos + 2], 1, 1, f);
+            crwrite(& framebuffers->bottom[pos + 1], 1, 1, f);
         }
 
         for (int i = 0; i < 40 * 3; i++)
-            fwrite(& zero, 1, 1, f);
+            crwrite(& zero, 1, 1, f);
     }
 
-    fclose(f);
+    crclose(f);
 
     fprintf(stderr, "Screenshot: %s\n", PATH_TEMP "/screenshot.ppm");
 }
@@ -157,39 +157,39 @@ void clear_bg(void) {
 }
 
 void load_bg_top(const char* fname_top) {
-    FILE* f = fopen(fname_top, "r");
+    FILE* f = cropen(fname_top, "r");
     if (!f) return;
 
     for (int i=1; i < TOP_SIZE; i += 4) {
-        fread(&top_bg[i], 1, 3, f);
+        crread(&top_bg[i], 1, 3, f);
     }
 
-    fclose(f);
+    crclose(f);
 }
 
 void load_bg_bottom(const char* fname_bottom) {
-    FILE* f = fopen(fname_bottom, "r");
+    FILE* f = cropen(fname_bottom, "r");
     if (!f)
         return;
 
     for (int i=1; i < BOTTOM_SIZE; i += 4) {
-        fread(&bottom_bg[i], 1, 3, f);
+        crread(&bottom_bg[i], 1, 3, f);
     }
 
-    fclose(f);
+    crclose(f);
 }
 
 void set_font(const char* filename) {
     // TODO - Unicode support. Right now, we only load 32
 
-    FILE* f = fopen(filename, "r");
+    FILE* f = cropen(filename, "r");
 
     if (!f) panic("Failed to load font file!\n");
 
     unsigned int new_w, new_h;
 
-    fread(&new_w, 1, 4, f);
-    fread(&new_h, 1, 4, f);
+    crread(&new_w, 1, 4, f);
+    crread(&new_h, 1, 4, f);
 
     if (new_w == 0 || new_h == 0) {
         panic("Invalid font file: w/h is 0 - not loaded\n");
@@ -199,9 +199,9 @@ void set_font(const char* filename) {
 
     font_data = malloc(c_font_w * new_h * (256 - ' '));
 
-    fread(font_data, 1, c_font_w * new_h * (256 - ' '), f); // Skip non-printing chars.
+    crread(font_data, 1, c_font_w * new_h * (256 - ' '), f); // Skip non-printing chars.
 
-    fclose(f);
+    crclose(f);
 
     font_w = new_w;
     font_h = new_h;
@@ -223,12 +223,12 @@ void dump_log(unsigned int force) {
     if (log_size == 0)
         return;
 
-    FILE *f = fopen(PATH_BOOTLOG, "w");
-    fseek(f, 0, SEEK_END);
+    FILE *f = cropen(PATH_BOOTLOG, "w");
+    crseek(f, 0, SEEK_END);
 
-    fwrite(log_buffer, 1, log_size, f);
+    crwrite(log_buffer, 1, log_size, f);
 
-    fclose(f);
+    crclose(f);
     log_size = 0;
 }
 
@@ -522,7 +522,7 @@ putc(void *buf, int c)
         }
     } else {
         // FILE*, not stdin or stdout.
-        fwrite(&c, 1, 1, (FILE *)buf);
+        crwrite(&c, 1, 1, (FILE *)buf);
     }
 }
 
@@ -621,7 +621,7 @@ put_int(void *channel, int n, int length)
 }
 
 void
-fflush(void *channel)
+crflush(void *channel)
 {
     if (channel == BOTTOM_SCREEN) {
         dump_log(1);

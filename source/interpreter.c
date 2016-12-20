@@ -441,11 +441,11 @@ exec_bytecode(uint8_t *bytecode, uint32_t len, uint16_t ver, int debug)
                 (void)fname;
                 // NYI
 #else
-                FILE* f = fopen(fname, "r");
-                fread(current_mode->memory + offset, 1, fsize(f), f);
-                offset += fsize(f);
+                FILE* f = cropen(fname, "r");
+                crread(current_mode->memory + offset, 1, crsize(f), f);
+                offset += crsize(f);
                 code += strlen(fname);
-                fclose(f);
+                crclose(f);
 #endif
                 break;
             default:
@@ -601,18 +601,18 @@ execb(uint64_t tid, firm_h* firm_patch)
 
     // Read patch to scrap memory.
 
-    FILE *f = fopen(cache_path, "r");
+    FILE *f = cropen(cache_path, "r");
     if (!f) {
         // File wasn't found. The user didn't enable anything.
         return 0;
     }
 
-    patch_len = fsize(f);
+    patch_len = crsize(f);
 
-    uint8_t* patch_mem = malloc(patch_len);
+    uint8_t* patch_mem = memalign(16, patch_len);
 
-    fread(patch_mem, 1, patch_len, f);
-    fclose(f);
+    crread(patch_mem, 1, patch_len, f);
+    crclose(f);
 #endif
 
     int debug = 0;
@@ -641,18 +641,18 @@ int cache_patch(const char *filename) {
     uint8_t *patch_mem;
     // Read patch to scrap memory.
 
-    FILE *f = fopen(filename, "r");
+    FILE *f = cropen(filename, "r");
     if (!f) {
         // File wasn't found. The user didn't enable anything.
         return 0;
     }
 
-    uint32_t len = fsize(f);
+    uint32_t len = crsize(f);
 
     uint8_t* patch_loc = malloc(len);
 
-    fread(patch_loc, 1, len, f);
-    fclose(f);
+    crread(patch_loc, 1, len, f);
+    crclose(f);
 
     patch = (struct system_patch*)patch_loc;
 
@@ -692,11 +692,11 @@ int cache_patch(const char *filename) {
 
             char reset = 0xFF;
 
-            FILE *cache = fopen(cache_path, "w");
-            fseek(cache, 0, SEEK_END);
-            fwrite(patch_mem, 1, patch_len, cache);
-            fwrite(&reset, 1, 1, cache);
-            fclose(cache);
+            FILE *cache = cropen(cache_path, "w");
+            crseek(cache, 0, SEEK_END);
+            crwrite(patch_mem, 1, patch_len, cache);
+            crwrite(&reset, 1, 1, cache);
+            crclose(cache);
             // Add to cache.
         }
     }

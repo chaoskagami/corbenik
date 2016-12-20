@@ -133,10 +133,10 @@ setup_stacks_offset:
 .word setup_stacks-.
 
 __bss_start_offset:
-.word __bss_start-.
+.word __bss_start__-.
 
 __bss_end_offset:
-.word __bss_end-.
+.word __bss_end__-.
 
 clear_bss_offset:
 .word clear_bss-.

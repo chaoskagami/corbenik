@@ -168,7 +168,7 @@ void screen_mode(uint32_t mode) {
         // Look ma, dynamically allocating the CakeHax struct! (joking)
         // We literally just discard the previous state - for sanity's sake.
         // On chainload, it is needed to copy the framebuffer struct.
-        framebuffers = malloc(sizeof(struct framebuffers));
+        framebuffers = memalign(16, sizeof(struct framebuffers));
     }
 
     void __attribute__((naked)) ARM11(void) {

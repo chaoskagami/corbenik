@@ -244,9 +244,9 @@ void patch_func(char* fpath) {
 void
 reset()
 {
-    fflush(stderr);
+    crflush(stderr);
 
-    fumount(); // Unmount SD.
+    crumount(); // Unmount SD.
 
     // Reboot.
     fprintf(BOTTOM_SCREEN, "Rebooting system...\n");
@@ -257,9 +257,9 @@ reset()
 void
 poweroff()
 {
-    fflush(stderr);
+    crflush(stderr);
 
-    fumount(); // Unmount SD.
+    crumount(); // Unmount SD.
 
     // Power off
     fprintf(BOTTOM_SCREEN, "Powering off system...\n");
@@ -273,7 +273,7 @@ reset_patch_menu(void)
     current_menu_index_patches = 0;
 
     if (!patches)
-        patches = malloc(sizeof(struct options_s) * 258); // FIXME - hard limit. Implement realloc.
+        patches = memalign(16, sizeof(struct options_s) * 258); // FIXME - hard limit. Implement realloc.
 
     patches[0].name   = "Patches";
     patches[0].desc   = "";

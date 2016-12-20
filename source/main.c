@@ -24,7 +24,7 @@ main(int argc, char** argv)
 
     std_init();
 
-    if (fmount())
+    if (crmount())
         poweroff(); // Failed to mount SD. Bomb out.
 
     load_config(); // Load configuration.
@@ -72,6 +72,16 @@ main(int argc, char** argv)
 
         if(prepatch_firm(config->firm[2], PATH_AGB_P, PATH_MODULE_AGB)) {
             fprintf(stderr, "WARNING: Failed to load/patch AGB.\n");
+            wait();
+        }
+
+        if (get_opt_u32(OPTION_OVERLY_VERBOSE) && !get_opt_u32(OPTION_SILENCE)) {
+            struct mallinfo mal = mallinfo();
+            fprintf(stderr, "arena: %u\n"
+                            "ordblks: %u\n"
+                            "uordblks: %u\n"
+                            "fordblks: %u\n",
+                            mal.arena, mal.ordblks, mal.uordblks, mal.fordblks);
             wait();
         }
 

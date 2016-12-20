@@ -125,7 +125,7 @@ void puts(void *buf, char *string);
  *
  * \param channel Handle to flush output on
  */
-void fflush(void *channel);
+void crflush(void *channel);
 
 /* Moves the cursor/output location on a display device
  *

@@ -1,7 +1,7 @@
 SUBDIRS = include host external source patch contrib
 ACLOCAL_AMFLAGS = -I m4
 
-source: include host external
+source: include host external patch contrib
 
 external: include host
 

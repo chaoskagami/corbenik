@@ -20,32 +20,33 @@ load_firm(const char *path, size_t *size_out)
     int save_dec = 0;
 
     char* decpath = strdupcat(path, ".dec");
-    firm_file = fopen(decpath, "r");
+    firm_file = cropen(decpath, "r");
     if (!firm_file) {
-        firm_file = fopen(path, "r");
+        firm_file = cropen(path, "r");
         if (!firm_file) {
             return NULL;
         }
     }
 
-    size = fsize(firm_file);
+    size = crsize(firm_file);
 
     if (size_out)
         *size_out = size;
 
-    mem = malloc(size);
+    // FIXME - Temp fix; allocating way more memory than needed to prevent memory corruption
+    mem = memalign(16, 0x1000000);
 
     firm_h *firm = (firm_h*)mem;
 
-    fread(mem, 1, size, firm_file);
+    crread(mem, 1, size, firm_file);
 
-    fclose(firm_file);
+    crclose(firm_file);
 
     if (memcmp(firm->magic, "FIRM", 4)) {
         char *key_path = strdupcat(path, ".key");
 
         // Attempt to open keyfile.
-        uint8_t* firmkey = malloc(16);
+        uint8_t* firmkey = memalign(16, 16);
         if (read_file(firmkey, key_path, 16) != 16) {
             // Keyfile couldn't be opened, try the cetk.
             free(firmkey);
@@ -56,9 +57,9 @@ load_firm(const char *path, size_t *size_out)
             free(cetk_path);
 
             // Save firmkey.
-            FILE* keyfile = fopen(key_path, "w");
-            fwrite(firmkey, 1, 16, keyfile);
-            fclose(keyfile);
+            FILE* keyfile = cropen(key_path, "w");
+            crwrite(firmkey, 1, 16, keyfile);
+            crclose(keyfile);
         }
 
         free(key_path);
@@ -101,9 +102,9 @@ load_firm(const char *path, size_t *size_out)
 
     // Save decrypted FIRM.
     if (save_dec == 1) {
-        firm_file = fopen(decpath, "w");
-        fwrite(firm, 1, size, firm_file);
-        fclose(firm_file);
+        firm_file = cropen(decpath, "w");
+        crwrite(firm, 1, size, firm_file);
+        crclose(firm_file);
     }
 
     free(decpath);
@@ -144,14 +145,14 @@ prepatch_firm(const char* firm_path, const char* prepatch_path, const char* modu
 
     free(sig);
 
-    if (patch_firm_all(tid, firm, module_path)) {
+    if (patch_firm_all(tid, &firm, module_path)) {
         free(firm);
         return 1;
     }
 
-    FILE* f = fopen(prepatch_path, "w");
-    fwrite(firm, 1, size, f);
-    fclose(f);
+    FILE* f = cropen(prepatch_path, "w");
+    crwrite(firm, 1, size, f);
+    crclose(f);
 
     free(firm);
 
@@ -178,14 +179,14 @@ boot_firm(const char* firm_path, const char* prepatch_path, const char* module_p
 
     free(sig);
 
-    if (patch_firm_all(tid, firm, module_path)) {
+    if (patch_firm_all(tid, &firm, module_path)) {
         free(firm);
         return 1;
     }
 
-    FILE* f = fopen(prepatch_path, "w");
-    fwrite(firm, 1, size, f);
-    fclose(f);
+    FILE* f = cropen(prepatch_path, "w");
+    crwrite(firm, 1, size, f);
+    crclose(f);
 
     firmlaunch(firm); // <- should NOT return if all is well
 

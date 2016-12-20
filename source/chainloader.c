@@ -25,27 +25,27 @@ void chainload_file(void* data)
     uint32_t size = 0, b_size = 0;
     uint8_t* chain_data;
 
-    FILE* f = fopen(code_file, "r");
+    FILE* f = cropen(code_file, "r");
     if (!f) {
         // File missing.
         panic("Missing chainloader.\n");
     }
 
-    b_size = fsize(f);
-    fread(bootstrap, 1, b_size, f);
-    fclose(f);
+    b_size = crsize(f);
+    crread(bootstrap, 1, b_size, f);
+    crclose(f);
 
     chain_data = bootstrap + b_size;
 
-    f = fopen(chain_file, "r");
+    f = cropen(chain_file, "r");
     if (!f) {
         // File missing.
         panic("Missing program to chainload?\n");
     }
 
-    size = fsize(f);
-    fread(chain_data, 1, size, f);
-    fclose(f);
+    size = crsize(f);
+    crread(chain_data, 1, size, f);
+    crclose(f);
 
     fprintf(stderr, "Setting argc, argv...\n");
 
@@ -135,7 +135,7 @@ list_chain_build(const char *name)
 
 void chainload_menu() {
     if (chains == NULL) {
-        chains = malloc(sizeof(struct options_s) * 100);
+        chains = memalign(16, sizeof(struct options_s) * 100);
         list_chain_build(PATH_CHAINS);
     }
 

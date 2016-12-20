@@ -52,14 +52,14 @@ int patch_entry(firm_h *firm, enum firm_type type) {
 uint8_t*
 get_titlekey(char *cetk_filename)
 {
-    FILE* f = fopen(cetk_filename, "r");
-    size_t size = fsize(f);
+    FILE* f = cropen(cetk_filename, "r");
+    size_t size = crsize(f);
 
-    uint8_t* cetk = malloc(size);
+    uint8_t* cetk = memalign(16, size);
 
-    fread(cetk, 1, size, f);
+    crread(cetk, 1, size, f);
 
-    fclose(f);
+    crclose(f);
 
     uint8_t iv[AES_BLOCK_SIZE] = { 0 };
     uint32_t sigtype = __builtin_bswap32(*(const uint32_t *)cetk);
@@ -73,7 +73,7 @@ get_titlekey(char *cetk_filename)
 
     set_Y3D_cetk(1);
 
-    uint8_t *key = malloc(AES_BLOCK_SIZE);
+    uint8_t *key = memalign(16, AES_BLOCK_SIZE);
 
     memcpy(iv, ticket->titleID, sizeof(ticket->titleID));
     memcpy(key, ticket->titleKey, sizeof(ticket->titleKey));
@@ -149,7 +149,7 @@ extract_firm_from_ncch(ncch_h *ncch, uint8_t *titlekey, size_t size)
         return NULL;
     }
 
-    firm_h* dest = malloc(size);
+    firm_h* dest = memalign(16, size);
 
     memcpy(dest, firm, size);
 

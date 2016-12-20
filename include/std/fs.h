@@ -18,29 +18,29 @@ typedef struct
 #define SEEK_CUR 1
 #define SEEK_END 2
 
-int fmount(void);
+int crmount(void);
 
-int fumount(void);
+int crumount(void);
 
 void recurse_call(const char *name, void (*call_fun)(char*));
 
 int rrmdir(const char *dir_path);
 
-FILE *fopen(const char *filename, const char *mode);
+FILE *cropen(const char *filename, const char *mode);
 
-void fclose(FILE *fp);
+void crclose(FILE *fp);
 
-void fseek(FILE *fp, int64_t offset, int whence);
+void crseek(FILE *fp, int64_t offset, int whence);
 
-size_t ftell(FILE *fp);
+size_t crtell(FILE *fp);
 
-int feof(FILE *fp);
+int creof(FILE *fp);
 
-size_t fsize(FILE *fp);
+size_t crsize(FILE *fp);
 
-size_t fwrite(const void *buffer, size_t elementSize, size_t elementCnt, FILE *fp);
+size_t crwrite(const void *buffer, size_t elementSize, size_t elementCnt, FILE *fp);
 
-size_t fread(void *buffer, size_t elementSize, size_t elementCnt, FILE *fp);
+size_t crread(void *buffer, size_t elementSize, size_t elementCnt, FILE *fp);
 
 size_t write_file(void *data, const char *path, size_t size);
 

@@ -19,9 +19,9 @@ void firmlaunch(firm_h* firm) {
 
     free(firm); // Really, no point in this. Why not, though.
 
-    fflush(stderr); // Flush logs if need be before unmount.
+    crflush(stderr); // Flush logs if need be before unmount.
 
-    fumount(); // Unmount SD.
+    crumount(); // Unmount SD.
 
     deinitScreens(); // Turn off display
 

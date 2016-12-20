@@ -15,16 +15,16 @@ inject_module(char* fpath)
         return;
 
     // TODO - load other module cxis here
-    FILE *f = fopen(fpath, "r");
+    FILE *f = cropen(fpath, "r");
     if (!f) {
         fprintf(stderr, "Module: %s not found\n", fpath);
         return;
     }
 
-    size_t size = fsize(f);
+    size_t size = crsize(f);
     uint8_t* temp = malloc(size);
-    fread(temp, 1, size, f);
-    fclose(f);
+    crread(temp, 1, size, f);
+    crclose(f);
 
     int section_index = 0;
     firm_section_h *sysmodule_section = &firm_modules->section[0];
@@ -87,9 +87,9 @@ end_inj:
 }
 
 int
-patch_modules(firm_h* firm_loc, const char* module_path)
+patch_modules(firm_h** firm_loc, const char* module_path)
 {
-    firm_modules = firm_loc;
+    firm_modules = *firm_loc;
     recurse_call(module_path, inject_module);
 
     return 0;

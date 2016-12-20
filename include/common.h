@@ -2,6 +2,7 @@
 #define __COMMON_H
 
 #include <stdlib.h>
+#include <malloc.h>
 
 #include <corbconf.h>
 

@@ -10,7 +10,7 @@ verify_emunand(uint32_t index, uint32_t *off, uint32_t *head)
 {
     uint32_t nandSize = getMMCDevice(0)->total_size;
 
-    uint8_t *emunand_temp = (uint8_t*)malloc(2048);
+    uint8_t *emunand_temp = (uint8_t*)memalign(16, 2048);
 
     uint32_t offset;
     if (nandSize > 0x200000)
@@ -130,13 +130,13 @@ patch_emunand(firm_h* firm_loc, uint32_t index)
     if (!emuCodeOffset)
         return 1;
 
-    FILE *f = fopen(PATH_EMUNAND_CODE, "r");
+    FILE *f = cropen(PATH_EMUNAND_CODE, "r");
     if (!f)
         return 1;
 
-    uint32_t emunand_size = fsize(f);
-    fread(emuCodeOffset, 1, emunand_size, f);
-    fclose(f);
+    uint32_t emunand_size = crsize(f);
+    crread(emuCodeOffset, 1, emunand_size, f);
+    crclose(f);
 
     uint32_t branchOffset = (uintptr_t)emuCodeOffset - ((uintptr_t)firm_loc + firm_loc->section[2].offset - firm_loc->section[2].address);
 

@@ -1,0 +1,7 @@
+#!/bin/sh
+wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000002/00000028 -O .@libdir@/firmware/native
+wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000002/cetk     -O .@libdir@/firmware/native.cetk
+wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000102/00000000 -O .@libdir@/firmware/twl
+wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000102/cetk     -O .@libdir@/firmware/twl.cetk
+wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000202/00000000 -O .@libdir@/firmware/agb
+wget http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000202/cetk     -O .@libdir@/firmware/agb.cetk

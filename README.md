@@ -146,7 +146,9 @@ And these YOU SHOULD NOT ENABLE unless you have specialized needs:
  * Force TestMenu [3]
 
 [1] - This will stop games with corrupted Nintendo logos from running. Disable for ROM hacks if this occurs. There's nothing I can do to resolve this, since the GBA bios is on the SoC. Please take this up with the author of your rom(hack).
+
 [2] - This will disable usage of most internet functionality on the 3DS. Verbose ErrDisp is preferred.
+
 [3] - Boots into TestMenu rather than HOME. This requires a TestMenu to be installed, either factory or the re-encrypted developer one.
 
 Customization

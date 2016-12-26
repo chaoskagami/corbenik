@@ -87,11 +87,12 @@ static struct options_s options[] = {
     { "Load Code Sections",
       "Loads code sections (text/ro/data) from SD card and patches afterwards.",
       option, (void*)OPTION_LOADER_LOADCODE, change_opt, get_opt, 0, 0 },
-
     { "Dump Code Sections",
       "Dumps code sections for titles to SD card the first time they're loaded. Slows things down on first launch.",
       option, (void*)OPTION_LOADER_DUMPCODE, change_opt, get_opt, 0, 0 },
-
+    { "Merged codebins",
+      "Use merged codebins rather than segment split files.",
+      option, (void*)OPTION_LOADER_DUMPCODE_MERGED, change_opt, get_opt, 1, 0 },
     { "+ System Titles",
       "Dumps code sections for system titles, too. Expect to sit at a blank screen for >3mins on the first time you do this, because it dumps everything.",
       option, (void*)OPTION_LOADER_DUMPCODE_ALL, change_opt, get_opt, 1, 0 },

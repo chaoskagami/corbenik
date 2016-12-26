@@ -71,6 +71,8 @@ extern struct config_file *config;
 
 #define OPTION_SILENT_NOSCREEN     22  ///< Silenced autoboot will not init the screen.
 
+#define OPTION_LOADER_DUMPCODE_MERGED 23 ///< Dump and load merged codebins (Luma-style) rather than split segment. Note that this is lossy and you will be unable to split these properly without the exheader information.
+
 #define OPTION_SAVE_LOGS           253 ///< Save log files during boot and from loader. Slows down boot a bit.
 
 #define OPTION_OVERLY_VERBOSE      254 ///< Output so much debugging info, it'd make your head spin.

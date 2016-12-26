@@ -1,9 +1,8 @@
 # $name Signature Fix
 # $desc Disables signature checks on all content.
 # $title 0004013800000002 0004013820000002
-# $ver  09
-# $uuid 0c
-# $flags require
+# $ver  0A
+# $uuid 00
 
 # Status: Working
 

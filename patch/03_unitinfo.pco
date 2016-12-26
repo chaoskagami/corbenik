@@ -1,9 +1,8 @@
 # $name Developer UNITINFO
 # $desc Pretend to be a developer console. For the average user, loader ErrDisp is enough. This will break eShop/online access as long as it is enabled.
 # $title 0004013800000002 0004013820000002
-# $ver  09
-# $uuid 0d
-# $flags devmode
+# $ver  0A
+# $uuid 03
 
 # Status: untested, but should work
 

@@ -1,9 +1,8 @@
 # $name Title Downgrade Fix (11.0+ NFIRM)
 # $desc Removes added checks to prevent downgrade of system titles (in 11.0+ NATIVE_FIRM ONLY)
 # $title 0004013800000002 0004013820000002
-# $ver  09
-# $uuid 00
-# $flags require
+# $ver  0A
+# $uuid 02
 
 # Status: Working
 

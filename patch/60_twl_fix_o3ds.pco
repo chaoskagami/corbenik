@@ -1,8 +1,8 @@
 # $name TWL Patches (1/2 - new3ds)
 # $desc Disables a large number of validity checks on DS, DSi and DSiware titles.
 # $title 0004013820000102
-# $ver  09
-# $uuid 34
+# $ver  0A
+# $uuid 60
 
 # TODO - Make dynamic. Not that hard, but some 
 #        fixes need more context bytes than on Steveice10's

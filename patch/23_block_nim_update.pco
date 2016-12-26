@@ -1,8 +1,8 @@
 # $name  Block NIM Updates (Loader)
 # $desc  Prevents NIM from downloading system updates. This is what causes the HOME menu nag.
 # $title 0004013000002C02
-# $ver   09
-# $uuid  03
+# $ver   0A
+# $uuid  23
 
 rel exe_text
 

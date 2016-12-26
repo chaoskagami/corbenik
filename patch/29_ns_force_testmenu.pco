@@ -1,8 +1,8 @@
 # $name  Force TestMenu (Loader)
 # $desc  Force NS to boot TestMenu rather than HOME. TestMenu must be installed, and I can't tell you where to acquire it.
 # $title 0004013000008002
-# $ver   09
-# $uuid  1e
+# $ver   0A
+# $uuid  29
 
 rel exe_text
 

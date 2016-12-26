@@ -1,8 +1,8 @@
 # $name  SecureInfo_A Signature Fix (Loader)
 # $desc  Allows using unsigned or improperly signed SecureInfo_A files. Needed for region changed consoles.
 # $title 0004013000001702
-# $ver   09
-# $uuid  0b
+# $ver   0A
+# $uuid  2A
 
 rel exe_text
 

@@ -1,8 +1,8 @@
 # $name  AGB Bootscreen
 # $desc  Force usage of GBA bios in AGB_FIRM. Games must pass the Nintendo logo check. If you see garbage instead of Nintendo, turn this off.
 # $title 0004013800000202 0004013820000202
-# $ver   09
-# $uuid  35
+# $ver   0A
+# $uuid  71
 
 # TODO - Make dynamic. Also broken on O3DS.
 

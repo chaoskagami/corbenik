@@ -1,9 +1,8 @@
 # $name  Fake Friends Version (Loader)
 # $desc  Allows going online without the latest firmware. Only enable on non-11.0.0 firmware.
 # $title 0004013000003202
-# $ver   09
-# $uuid  05
-# $flags noabort
+# $ver   0A
+# $uuid  25
 
 rel exe_text
 

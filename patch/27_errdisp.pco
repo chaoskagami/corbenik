@@ -1,9 +1,8 @@
 # $name  Verbose ErrDisp (Loader)
 # $desc  Forces ErrDisp into displaying developer info on crashes without developer UNITINFO. Doesn't break eShop, so there's no harm in enabling this.
 # $title 0004003000008A02
-# $ver   09
-# $uuid  04
-# $flags devmode
+# $ver   0A
+# $uuid  27
 
 rel exe_text
 

@@ -1,11 +1,8 @@
 # $name FIRM Protection
 # $desc Prevents writing FIRM to the NAND during updates. Enable this if booting sysNAND.
 # $title 0004013800000002 0004013820000002
-# $ver  09
-# $uuid 08
-# $flags require
-
-# Status: Working
+# $ver  0A
+# $uuid 01
 
 #
 # The firmprot patch works by nop'ing out a jump in Process9 which normally

@@ -1,0 +1,12 @@
+# $name  DLP Region Fix (Loader)
+# $desc  Disables region check in DLP
+# $title 0004013000002802
+# $ver   01
+# $uuid  20
+
+rel exe_text
+
+find 0CACC0D8
+abortnf
+# nop (andeq r0, r0, r0) ?
+set  00000000

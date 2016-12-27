@@ -36,7 +36,8 @@ int
 generate_patch_cache(void)
 {
     // Remove cache
-    rrmdir(PATH_LOADER_CACHE);
+    rrmdir(PATH_TEMP);
+    f_mkdir(PATH_TEMP);
     f_mkdir(PATH_LOADER_CACHE);
 
     recurse_call(PATH_PATCHES,     patch_cache_func);

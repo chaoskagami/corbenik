@@ -37,7 +37,7 @@ int prepatch_firm(const char *path, const char *prepatch_path, const char* modul
 
 /* Boots the CFW, generating caches and applying patches as-needed to the specified FIRM
  */
-int boot_firm(const char *firm_path, const char *prepatch_path, const char* module_path);
+int boot_firm(const char* firm_path, const char* prepatch_path, const char* module_path);
 
 /* Loads a firmware off disk, returning it. The memory should be free()'d when done, unless you plan to boot.
  */

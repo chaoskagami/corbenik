@@ -128,6 +128,13 @@ load_firm(const char *path, size_t *size_out)
 int
 prepatch_firm(const char* firm_path, const char* prepatch_path, const char* module_path)
 {
+    FILE* test = cropen(prepatch_path, "r");
+    if (test) {
+        // Already exists.
+        crclose(test);
+        return 0;
+    }
+
     size_t size = 0;
     firm_h* firm = load_firm(firm_path, &size);
 
@@ -162,8 +169,10 @@ prepatch_firm(const char* firm_path, const char* prepatch_path, const char* modu
 int
 boot_firm(const char* firm_path, const char* prepatch_path, const char* module_path)
 {
+    firm_h* firm;
+
     size_t size = 0;
-    firm_h* firm = load_firm(firm_path, &size);
+    firm = load_firm(firm_path, &size);
 
     if (firm == NULL)
         return 1;

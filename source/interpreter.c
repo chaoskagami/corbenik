@@ -561,12 +561,12 @@ execb(uint64_t tid, firm_h* firm_patch)
     modes[1].size   = shared->text_size << 12;
 
     // Set memory.
-    modes[1].memory = (uint8_t*)shared->data_addr;
-    modes[1].size   = shared->data_size << 12;
+    modes[2].memory = (uint8_t*)shared->data_addr;
+    modes[2].size   = shared->data_size << 12;
 
     // Set memory.
-    modes[1].memory = (uint8_t*)shared->ro_addr;
-    modes[1].size   = shared->ro_size << 12;
+    modes[3].memory = (uint8_t*)shared->ro_addr;
+    modes[3].size   = shared->ro_size << 12;
 
     log("  exec\n");
 

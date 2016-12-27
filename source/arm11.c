@@ -143,6 +143,20 @@ void clearScreens(void) {
     invokeArm11Function(ARM11);
 }
 
+void set_fb_struct() {
+    if (!framebuffers) {
+        // Look ma, dynamically allocating the CakeHax struct! (joking)
+        // We literally just discard the previous state - for sanity's sake.
+        // On chainload, it is needed to copy the framebuffer struct.
+        framebuffers = memalign(16, sizeof(struct framebuffers));
+
+        // Set not-actually cakebrah framebuffers. Meh.
+        framebuffers->top_left  = (uint8_t *)0x18300000;
+        framebuffers->top_right = (uint8_t *)0x18300000;
+        framebuffers->bottom    = (uint8_t *)0x1835dc00;
+    }
+}
+
 void screen_mode(uint32_t mode) {
     static uint32_t stride, init_top, init_bottom, bright;
 
@@ -163,13 +177,6 @@ void screen_mode(uint32_t mode) {
 
     init_top    = MAKE_FRAMEBUFFER_PIXFMT(mode, 0, 1);
     init_bottom = MAKE_FRAMEBUFFER_PIXFMT(mode, 0, 0);
-
-    if (!framebuffers) {
-        // Look ma, dynamically allocating the CakeHax struct! (joking)
-        // We literally just discard the previous state - for sanity's sake.
-        // On chainload, it is needed to copy the framebuffer struct.
-        framebuffers = memalign(16, sizeof(struct framebuffers));
-    }
 
     void __attribute__((naked)) ARM11(void) {
         //Disable interrupts
@@ -259,11 +266,6 @@ void screen_mode(uint32_t mode) {
 
         PDC1_FRAMEBUFFER_SETUP_FBA_ADDR_1 = 0x1835dc00;
         PDC1_FRAMEBUFFER_SETUP_FBA_ADDR_2 = 0x1835dc00;
-
-        // Set not-actually cakebrah framebuffers. Meh.
-        framebuffers->top_left  = (uint8_t *)0x18300000;
-        framebuffers->top_right = (uint8_t *)0x18300000;
-        framebuffers->bottom    = (uint8_t *)0x1835dc00;
 
         WAIT_FOR_ARM9();
     }

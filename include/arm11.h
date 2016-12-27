@@ -73,4 +73,8 @@ void clearScreens(void);
  */
 void installArm11Stub(void);
 
+/* Sets up framebuffer offsets independent of screeninit.
+ */
+void set_fb_struct();
+
 #endif

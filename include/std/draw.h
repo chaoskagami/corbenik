@@ -71,14 +71,16 @@ void clear_bg(void);
 /* Loads top background image from a path.
  *
  * \param fname_top filename to load from.
+ * \return 1 if background loaded
  */
-void load_bg_top(const char* fname_top);
+int load_bg_top(const char* fname_top);
 
 /* Loads bottom background image from a path.
  *
  * \param fname_bottom filename to load from.
+ * \return 1 if background loaded
  */
-void load_bg_bottom(const char* fname_bottom);
+int load_bg_bottom(const char* fname_bottom);
 
 /* Clears the displays either to black or the background image.
  */

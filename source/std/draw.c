@@ -156,27 +156,31 @@ void clear_bg(void) {
     memset(bottom_bg, 0, BOTTOM_SIZE);
 }
 
-void load_bg_top(const char* fname_top) {
+int load_bg_top(const char* fname_top) {
     FILE* f = cropen(fname_top, "r");
-    if (!f) return;
+    if (!f) return 0;
 
     for (int i=1; i < TOP_SIZE; i += 4) {
         crread(&top_bg[i], 1, 3, f);
     }
 
     crclose(f);
+
+    return 1;
 }
 
-void load_bg_bottom(const char* fname_bottom) {
+int load_bg_bottom(const char* fname_bottom) {
     FILE* f = cropen(fname_bottom, "r");
     if (!f)
-        return;
+        return 0;
 
     for (int i=1; i < BOTTOM_SIZE; i += 4) {
         crread(&bottom_bg[i], 1, 3, f);
     }
 
     crclose(f);
+
+    return 1;
 }
 
 void set_font(const char* filename) {

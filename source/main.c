@@ -17,6 +17,9 @@ extern int changed_consoles;
 int
 main(int argc, char** argv)
 {
+    int have_bg = 0;
+    int si = 0;
+
     int r_held = (ctr_hid_get_buttons() & CTR_HID_RT);
 
     if (PDN_MPCORE_CFG == 7)
@@ -39,12 +42,13 @@ main(int argc, char** argv)
     set_font(PATH_TERMFONT); // Read the font before all else.
 
     // Check key down for autoboot
-    screen_mode(RGBA8); // Use RGBA8 mode.
+    set_fb_struct();
 
     clear_bg();
 
-    load_bg_top   (PATH_TOP_BG);
-    load_bg_bottom(PATH_BOTTOM_BG); // This is a menuhax splash (90deg rotated BGR8 pixel data)
+    // This is a menuhax splash (90deg rotated BGR8 pixel data)
+    if (load_bg_top(PATH_TOP_BG) || load_bg_bottom(PATH_BOTTOM_BG))
+        have_bg = 1;
 
     clear_disp(TOP_SCREEN);
     clear_disp(BOTTOM_SCREEN);
@@ -55,7 +59,16 @@ main(int argc, char** argv)
 
             if (get_opt_u32(OPTION_SILENCE))
                 shut_up(); // This does exactly what it sounds like.
+
+            if (have_bg && !si) {
+                screen_mode(RGBA8); // Use RGBA8 mode.
+                si = 1;
+            }
         } else {
+            if (!si) {
+                screen_mode(RGBA8); // Use RGBA8 mode.
+                si = 1;
+            }
             menu_handler();
         }
 

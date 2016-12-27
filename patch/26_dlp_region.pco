@@ -6,7 +6,10 @@
 
 rel exe_text
 
+# Patch the result code 0xD8C0ACC0 (DLP - Not supported) -> 0x0 (Succeeded)
+# This causes DLP initialization to proceed regardless of the mismatch.
+# (Thanks to @sykhro for the explanation)
+
 find 0CACC0D8
 abortnf
-# nop (andeq r0, r0, r0) ?
 set  00000000

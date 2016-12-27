@@ -43,7 +43,10 @@
 #define OP_JMPF  0x77
 #define OP_JMPNF 0x87
 
+// TODO - Add to python assembler
 #define OP_INJECT 0x90
+
+#define OP_STR    0x91
 
 #define OP_NEXT 0xFF
 
@@ -449,6 +452,16 @@ exec_bytecode(uint8_t *bytecode, uint32_t len, uint16_t ver, int debug)
                 crclose(f);
 #endif
                 break;
+            case OP_STR:
+                ++code;
+#ifdef LOADER
+                log((char*)code);
+                log("\n");
+#else
+                fprintf(stderr, "%s\n", code);
+#endif
+                code += strlen((char*)code) + 1;
+                break;
             default:
 #ifndef LOADER
                 // Panic; not proper opcode.
@@ -695,12 +708,18 @@ int cache_patch(const char *filename) {
 
             fprintf(stderr, "  cache: %s\n", &cache_path[strlen(cache_path) - 16]);
 
-            char reset = 0xFF;
+            size_t len_nam = 4 + strlen(patch->name);
+            char *write = malloc(len_nam);
+            write[0] = OP_NEXT;
+            write[1] = OP_STR;
+            memcpy(write+2, patch->name, len_nam - 4);
+            write[len_nam - 2] = 0;
+            write[len_nam - 1] = OP_NEXT;
 
             FILE *cache = cropen(cache_path, "w");
             crseek(cache, 0, SEEK_END);
+            crwrite(write, 1, len_nam, cache);
             crwrite(patch_mem, 1, patch_len, cache);
-            crwrite(&reset, 1, 1, cache);
             crclose(cache);
             // Add to cache.
         }

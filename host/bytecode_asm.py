@@ -33,9 +33,10 @@ def rel_name(x):
 		'section2' : "03",
 		'section3' : "04",
 
-		'exe_text' : "00",
-		'exe_data' : "01",
-		'exe_ro'   : "02",
+                'exe'      : '00',
+		'exe_text' : "01",
+		'exe_data' : "02",
+		'exe_ro'   : "03",
 	}.get(x, "-1")
 
 name = "NO NAME"

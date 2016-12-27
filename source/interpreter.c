@@ -63,6 +63,7 @@ struct mode
     uint8_t *memory;
     uint32_t size;
 };
+
 struct mode modes[21];
 int init_bytecode = 0;
 
@@ -495,7 +496,7 @@ exec_bytecode(uint8_t *bytecode, uint32_t len, uint16_t ver, int debug)
 
 #ifdef LOADER
 int
-execb(uint64_t tid, uint16_t ver, uint8_t *text_mem, uint32_t text_len, uint8_t *data_mem, uint32_t data_len, uint8_t *ro_mem, uint32_t ro_len)
+execb(uint64_t tid, uint16_t ver, EXHEADER_prog_addrs* shared)
 {
 #else
 int
@@ -552,16 +553,20 @@ execb(uint64_t tid, firm_h* firm_patch)
     FSFILE_Close(file); // Done reading in.
 
     // Set memory.
-    modes[0].memory = text_mem;
-    modes[0].size = text_len;
+    modes[0].memory = shared->text_addr;
+    modes[0].size   = shared->total_size << 12;
 
     // Set memory.
-    modes[1].memory = data_mem;
-    modes[1].size = data_len;
+    modes[1].memory = shared->text_addr;
+    modes[1].size   = shared->text_size << 12;
 
     // Set memory.
-    modes[2].memory = ro_mem;
-    modes[2].size = ro_len;
+    modes[1].memory = shared->data_addr;
+    modes[1].size   = shared->data_size << 12;
+
+    // Set memory.
+    modes[1].memory = shared->ro_addr;
+    modes[1].size   = shared->ro_size << 12;
 
     log("  exec\n");
 

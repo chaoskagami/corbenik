@@ -82,8 +82,7 @@ load_code(u64 progid, u16 progver, EXHEADER_prog_addrs *shared, EXHEADER_prog_ad
     code_handler(progid, shared);
 
     // Patch segments
-    patch_exe(progid, progver, (u8 *)shared->text_addr, shared->text_size << 12, original->text_size << 12, (u8 *)shared->data_addr, shared->data_size << 12,
-              original->data_size << 12, (u8 *)shared->ro_addr, shared->ro_size << 12, original->ro_size << 12);
+    patch_exe(progid, progver, shared, original);
 
     return 0;
 }

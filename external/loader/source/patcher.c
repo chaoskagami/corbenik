@@ -291,8 +291,11 @@ patchCfgGetRegion(u8 *code, u32 size, u8 regionId, u32 CFGUHandleOffset)
 }
 
 static void
-adjust_cpu_settings(_UNUSED u64 progId, u8 *code, u32 size)
+adjust_cpu_settings(_UNUSED u64 progId, EXHEADER_prog_addrs *shared)
 {
+    u8* code = shared->text_addr;
+    u32 size = shared->text_size << 12;
+
     if (!failed_load_config) {
         u32 cpuSetting = 0;
         // L2
@@ -319,8 +322,11 @@ adjust_cpu_settings(_UNUSED u64 progId, u8 *code, u32 size)
 }
 
 void
-language_emu(u64 progId, u8 *code, u32 size)
+language_emu(u64 progId, EXHEADER_prog_addrs *shared)
 {
+    u8* code = shared->text_addr;
+    u32 size = shared->text_size << 12;
+
     if (!failed_load_config && config.options[OPTION_LOADER_LANGEMU]) {
         u32 tidHigh = (progId & 0xFFFFFFF000000000LL) >> 0x24;
 
@@ -345,15 +351,6 @@ language_emu(u64 progId, u8 *code, u32 size)
 }
 
 void
-overlay_patch(_UNUSED u64 progId, _UNUSED u8 *code, _UNUSED u32 size)
-{
-    // TODO - Implement. Needs some thought. This should allow usage of files off SD rather than RomFS.
-
-    // FUTURE NOTE - Luma has this halfway w/ Romfs redirection. Their method consists of overwriting
-    // a known unused SDK function (possibly?) which is a clever workaround for lack of code expansion.
-}
-
-void
 code_handler(u64 progId, EXHEADER_prog_addrs *shared)
 {
     // If configuration was not loaded, or both options (load / dump) are disabled
@@ -373,7 +370,7 @@ code_handler(u64 progId, EXHEADER_prog_addrs *shared)
 
         u32 len;
 
-        u32 size = (shared->text_size + shared->ro_size + shared->data_size) << 12;
+        u32 size = shared->total_size << 12;
 
         // Attempts to load code section from SD card, including system titles/modules/etc.
         if (R_SUCCEEDED(fileOpen(&code_f, ARCHIVE_SDMC, merge_path, FS_OPEN_READ)) && config.options[OPTION_LOADER_LOADCODE]) {
@@ -468,14 +465,14 @@ code_handler(u64 progId, EXHEADER_prog_addrs *shared)
 
 // This is only for the .code segment.
 void
-patch_exe(u64 progId, u16 progver, u8 *text, _UNUSED u32 text_size, u32 orig_text, u8 *data, _UNUSED u32 data_size, u32 orig_data, u8 *ro, _UNUSED u32 ro_size, u32 orig_ro)
+patch_exe(u64 progId, u16 progver, EXHEADER_prog_addrs* shared, EXHEADER_prog_addrs* original)
 {
     if (progId == 0x0004013000008002LL)
-        adjust_cpu_settings(progId, text, orig_text);
+        adjust_cpu_settings(progId, shared);
 
-    execb(progId, progver, text, orig_text, data, orig_data, ro, orig_ro);
+    execb(progId, progver, shared);
 
-    language_emu(progId, text, orig_text);
+    language_emu(progId, shared);
 }
 
 // Gets how many bytes .text must be extended by for patches to fit.

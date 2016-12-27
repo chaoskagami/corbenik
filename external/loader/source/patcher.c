@@ -32,7 +32,7 @@ fileOpen(Handle *file, FS_ArchiveID id, const char *path, int flags)
 
     apath.type = PATH_EMPTY;
     apath.size = 1;
-    apath.data = (u8 *)"";
+    apath.data = (uint8_t *)"";
 
     ppath.type = PATH_ASCII;
     ppath.data = path;
@@ -48,11 +48,11 @@ void
 load_config()
 {
     static Handle file;
-    static u32 total;
-    static u32 cid[4];
+    static uint32_t total;
+    static uint32_t cid[4];
     static char config_file_path[] = SYSCONFDIR "/config-00000000";
 
-    if (!R_SUCCEEDED(FSUSER_GetNandCid((u8*)cid, 0x10))) {
+    if (!R_SUCCEEDED(FSUSER_GetNandCid((uint8_t*)cid, 0x10))) {
         return;
     }
 
@@ -101,18 +101,18 @@ load_config()
 }
 
 void
-hexdump_titleid(u64 progId, char *buf)
+hexdump_titleid(uint64_t progId, char *buf)
 {
-    u32 i = strlen(buf) - 1;
-    u32 j = 16;
+    uint32_t i = strlen(buf) - 1;
+    uint32_t j = 16;
     while (j--) {
-        buf[i--] = hexDigits[(u32)(progId & 0xF)];
+        buf[i--] = hexDigits[(uint32_t)(progId & 0xF)];
         progId >>= 4;
     }
 }
 
 static int
-loadTitleLocaleConfig(u64 progId, u8 *regionId, u8 *languageId)
+loadTitleLocaleConfig(uint64_t progId, uint8_t *regionId, uint8_t *languageId)
 {
     // FIXME - Rewrite this function to use a single line-based config of
     // the grammar:
@@ -143,16 +143,16 @@ loadTitleLocaleConfig(u64 progId, u8 *regionId, u8 *languageId)
     Result ret = fileOpen(&file, ARCHIVE_SDMC, path, FS_OPEN_READ);
     if (R_SUCCEEDED(ret)) {
         char buf[6];
-        u32 total;
+        uint32_t total;
         ret = FSFILE_Read(file, &total, 0, buf, 6);
         FSFILE_Close(file);
 
         if (!R_SUCCEEDED(ret) || total < 6)
             return -1;
 
-        for (u32 i = 0; i < 7; i++) {
+        for (uint32_t i = 0; i < 7; i++) {
             if (memcmp(buf, regions[i], 3) == 0) {
-                *regionId = (u8)i;
+                *regionId = (uint8_t)i;
                 logstr("  localeemu region - ");
                 logstr(regions[i]);
                 logstr("\n");
@@ -160,9 +160,9 @@ loadTitleLocaleConfig(u64 progId, u8 *regionId, u8 *languageId)
             }
         }
 
-        for (u32 i = 0; i < 12; i++) {
+        for (uint32_t i = 0; i < 12; i++) {
             if (memcmp(buf + 4, languages[i], 2) == 0) {
-                *languageId = (u8)i;
+                *languageId = (uint8_t)i;
                 logstr("  localeemu lang - ");
                 logstr(languages[i]);
                 logstr("\n");
@@ -177,35 +177,35 @@ loadTitleLocaleConfig(u64 progId, u8 *regionId, u8 *languageId)
     return ret;
 }
 
-static u8 *
-getCfgOffsets(u8 *code, u32 size, u32 *CFGUHandleOffset)
+static uint8_t *
+getCfgOffsets(uint8_t *code, uint32_t size, uint32_t *CFGUHandleOffset)
 {
     // HANS:
     // Look for error code which is known to be stored near cfg:u handle
     // this way we can find the right candidate
     // (handle should also be stored right after end of candidate function)
 
-    u32 n = 0, possible[24];
+    uint32_t n = 0, possible[24];
 
-    for (u8 *pos = code + 4; n < 24 && pos < code + size - 4; pos += 4) {
-        if (*(u32 *)pos == 0xD8A103F9) {
-            for (u32 *l = (u32 *)pos - 4; n < 24 && l < (u32 *)pos + 4; l++)
+    for (uint8_t *pos = code + 4; n < 24 && pos < code + size - 4; pos += 4) {
+        if (*(uint32_t *)pos == 0xD8A103F9) {
+            for (uint32_t *l = (uint32_t *)pos - 4; n < 24 && l < (uint32_t *)pos + 4; l++)
                 if (*l <= 0x10000000)
                     possible[n++] = *l;
         }
     }
 
-    for (u8 *CFGU_GetConfigInfoBlk2_endPos = code; CFGU_GetConfigInfoBlk2_endPos < code + size - 8; CFGU_GetConfigInfoBlk2_endPos += 4) {
-        static const u32 CFGU_GetConfigInfoBlk2_endPattern[] = { 0xE8BD8010, 0x00010082 };
+    for (uint8_t *CFGU_GetConfigInfoBlk2_endPos = code; CFGU_GetConfigInfoBlk2_endPos < code + size - 8; CFGU_GetConfigInfoBlk2_endPos += 4) {
+        static const uint32_t CFGU_GetConfigInfoBlk2_endPattern[] = { 0xE8BD8010, 0x00010082 };
 
         // There might be multiple implementations of GetConfigInfoBlk2 but
         // let's search for the one we want
-        u32 *cmp = (u32 *)CFGU_GetConfigInfoBlk2_endPos;
+        uint32_t *cmp = (uint32_t *)CFGU_GetConfigInfoBlk2_endPos;
 
         if (cmp[0] == CFGU_GetConfigInfoBlk2_endPattern[0] && cmp[1] == CFGU_GetConfigInfoBlk2_endPattern[1]) {
-            *CFGUHandleOffset = *((u32 *)CFGU_GetConfigInfoBlk2_endPos + 2);
+            *CFGUHandleOffset = *((uint32_t *)CFGU_GetConfigInfoBlk2_endPos + 2);
 
-            for (u32 i = 0; i < n; i++)
+            for (uint32_t i = 0; i < n; i++)
                 if (possible[i] == *CFGUHandleOffset)
                     return CFGU_GetConfigInfoBlk2_endPos;
 
@@ -217,27 +217,27 @@ getCfgOffsets(u8 *code, u32 size, u32 *CFGUHandleOffset)
 }
 
 static void
-patchCfgGetLanguage(u8 *code, u32 size, u8 languageId, u8 *CFGU_GetConfigInfoBlk2_endPos)
+patchCfgGetLanguage(uint8_t *code, uint32_t size, uint8_t languageId, uint8_t *CFGU_GetConfigInfoBlk2_endPos)
 {
-    u8 *CFGU_GetConfigInfoBlk2_startPos; // Let's find STMFD SP (there might be
+    uint8_t *CFGU_GetConfigInfoBlk2_startPos; // Let's find STMFD SP (there might be
                                          // a NOP before, but nevermind)
 
     for (CFGU_GetConfigInfoBlk2_startPos = CFGU_GetConfigInfoBlk2_endPos - 4;
-         CFGU_GetConfigInfoBlk2_startPos >= code && *((u16 *)CFGU_GetConfigInfoBlk2_startPos + 1) != 0xE92D; CFGU_GetConfigInfoBlk2_startPos -= 2)
+         CFGU_GetConfigInfoBlk2_startPos >= code && *((uint16_t *)CFGU_GetConfigInfoBlk2_startPos + 1) != 0xE92D; CFGU_GetConfigInfoBlk2_startPos -= 2)
         ;
 
-    for (u8 *languageBlkIdPos = code; languageBlkIdPos < code + size; languageBlkIdPos += 4) {
-        if (*(u32 *)languageBlkIdPos == 0xA0002) {
-            for (u8 *instr = languageBlkIdPos - 8; instr >= languageBlkIdPos - 0x1008 && instr >= code + 4; instr -= 4) // Should be enough
+    for (uint8_t *languageBlkIdPos = code; languageBlkIdPos < code + size; languageBlkIdPos += 4) {
+        if (*(uint32_t *)languageBlkIdPos == 0xA0002) {
+            for (uint8_t *instr = languageBlkIdPos - 8; instr >= languageBlkIdPos - 0x1008 && instr >= code + 4; instr -= 4) // Should be enough
             {
                 if (instr[3] == 0xEB) // We're looking for BL
                 {
-                    u8 *calledFunction = instr;
-                    u32 i = 0, found;
+                    uint8_t *calledFunction = instr;
+                    uint32_t i = 0, found;
 
                     do {
-                        u32 low24 = (*(u32 *)calledFunction & 0x00FFFFFF) << 2;
-                        u32 signMask = (u32)(-(low24 >> 25)) & 0xFC000000; // Sign extension
+                        uint32_t low24 = (*(uint32_t *)calledFunction & 0x00FFFFFF) << 2;
+                        uint32_t signMask = (uint32_t)(-(low24 >> 25)) & 0xFC000000; // Sign extension
                         s32 offset = (s32)(low24 | signMask) + 8;          // Branch offset + 8 for prefetch
 
                         calledFunction += offset;
@@ -247,12 +247,12 @@ patchCfgGetLanguage(u8 *code, u32 size, u8 languageId, u8 *CFGU_GetConfigInfoBlk
                     } while (i < 2 && !found && calledFunction[3] == 0xEA);
 
                     if (found) {
-                        *((u32 *)instr - 1) = 0xE3A00000 | languageId; // mov    r0, sp
+                        *((uint32_t *)instr - 1) = 0xE3A00000 | languageId; // mov    r0, sp
                                                                        // => mov r0, =languageId
-                        *(u32 *)instr = 0xE5CD0000;                    // bl
+                        *(uint32_t *)instr = 0xE5CD0000;                    // bl
                         // CFGU_GetConfigInfoBlk2 =>
                         // strb r0, [sp]
-                        *((u32 *)instr + 1) = 0xE3B00000; // (1 or 2 instructions)         => movs
+                        *((uint32_t *)instr + 1) = 0xE3B00000; // (1 or 2 instructions)         => movs
                                                           // r0, 0             (result code)
 
                         logstr("  patched cfggetlanguage\n");
@@ -267,20 +267,20 @@ patchCfgGetLanguage(u8 *code, u32 size, u8 languageId, u8 *CFGU_GetConfigInfoBlk
 }
 
 static void
-patchCfgGetRegion(u8 *code, u32 size, u8 regionId, u32 CFGUHandleOffset)
+patchCfgGetRegion(uint8_t *code, uint32_t size, uint8_t regionId, uint32_t CFGUHandleOffset)
 {
-    for (u8 *cmdPos = code; cmdPos < code + size - 28; cmdPos += 4) {
-        static const u32 cfgSecureInfoGetRegionCmdPattern[] = { 0xEE1D4F70, 0xE3A00802, 0xE5A40080 };
+    for (uint8_t *cmdPos = code; cmdPos < code + size - 28; cmdPos += 4) {
+        static const uint32_t cfgSecureInfoGetRegionCmdPattern[] = { 0xEE1D4F70, 0xE3A00802, 0xE5A40080 };
 
-        u32 *cmp = (u32 *)cmdPos;
+        uint32_t *cmp = (uint32_t *)cmdPos;
 
         if (cmp[0] == cfgSecureInfoGetRegionCmdPattern[0] && cmp[1] == cfgSecureInfoGetRegionCmdPattern[1] && cmp[2] == cfgSecureInfoGetRegionCmdPattern[2] &&
-            *((u16 *)cmdPos + 7) == 0xE59F && *(u32 *)(cmdPos + 20 + *((u16 *)cmdPos + 6)) == CFGUHandleOffset) {
-            *((u32 *)cmdPos + 4) = 0xE3A00000 | regionId; // mov    r0, =regionId
-            *((u32 *)cmdPos + 5) = 0xE5C40008;            // strb   r0, [r4, 8]
-            *((u32 *)cmdPos + 6) = 0xE3B00000;            // movs   r0, 0            (result
+            *((uint16_t *)cmdPos + 7) == 0xE59F && *(uint32_t *)(cmdPos + 20 + *((uint16_t *)cmdPos + 6)) == CFGUHandleOffset) {
+            *((uint32_t *)cmdPos + 4) = 0xE3A00000 | regionId; // mov    r0, =regionId
+            *((uint32_t *)cmdPos + 5) = 0xE5C40008;            // strb   r0, [r4, 8]
+            *((uint32_t *)cmdPos + 6) = 0xE3B00000;            // movs   r0, 0            (result
                                                           // code) ('s' not needed but nvm)
-            *((u32 *)cmdPos + 7) = 0xE5840004;            // str    r0, [r4, 4]
+            *((uint32_t *)cmdPos + 7) = 0xE5840004;            // str    r0, [r4, 4]
 
             // The remaining, not patched, function code will do the rest for us
             break;
@@ -291,22 +291,22 @@ patchCfgGetRegion(u8 *code, u32 size, u8 regionId, u32 CFGUHandleOffset)
 }
 
 static void
-adjust_cpu_settings(_UNUSED u64 progId, EXHEADER_prog_addrs *shared)
+adjust_cpu_settings(_UNUSED uint64_t progId, EXHEADER_prog_addrs *shared)
 {
-    u8* code = shared->text_addr;
-    u32 size = shared->text_size << 12;
+    uint8_t* code = (uint8_t*)shared->text_addr;
+    uint32_t size = shared->text_size << 12;
 
     if (!failed_load_config) {
-        u32 cpuSetting = 0;
+        uint32_t cpuSetting = 0;
         // L2
         cpuSetting |= config.options[OPTION_LOADER_CPU_L2];
         // Speed
         cpuSetting |= config.options[OPTION_LOADER_CPU_800MHZ] << 1;
 
         if (cpuSetting) {
-            static const u8 cfgN3dsCpuPattern[] = { 0x0C, 0x00, 0x94, 0x15 };
+            static const uint8_t cfgN3dsCpuPattern[] = { 0x0C, 0x00, 0x94, 0x15 };
 
-            u32 *cfgN3dsCpuLoc = (u32 *)memfind(code, size, cfgN3dsCpuPattern, sizeof(cfgN3dsCpuPattern));
+            uint32_t *cfgN3dsCpuLoc = (uint32_t *)memfind(code, size, cfgN3dsCpuPattern, sizeof(cfgN3dsCpuPattern));
 
             // Patch N3DS CPU Clock and L2 cache setting
             if (cfgN3dsCpuLoc != NULL) {
@@ -322,22 +322,22 @@ adjust_cpu_settings(_UNUSED u64 progId, EXHEADER_prog_addrs *shared)
 }
 
 void
-language_emu(u64 progId, EXHEADER_prog_addrs *shared)
+language_emu(uint64_t progId, EXHEADER_prog_addrs *shared)
 {
-    u8* code = shared->text_addr;
-    u32 size = shared->text_size << 12;
+    uint8_t* code = (uint8_t*)shared->text_addr;
+    uint32_t size = shared->text_size << 12;
 
     if (!failed_load_config && config.options[OPTION_LOADER_LANGEMU]) {
-        u32 tidHigh = (progId & 0xFFFFFFF000000000LL) >> 0x24;
+        uint32_t tidHigh = (progId & 0xFFFFFFF000000000LL) >> 0x24;
 
         if (tidHigh == 0x0004000) { // Normal Game
             // Language emulation
-            u8 regionId = 0xFF, languageId = 0xFF;
+            uint8_t regionId = 0xFF, languageId = 0xFF;
 
             if (R_SUCCEEDED(loadTitleLocaleConfig(progId, &regionId, &languageId))) {
-                u32 CFGUHandleOffset;
+                uint32_t CFGUHandleOffset;
 
-                u8 *CFGU_GetConfigInfoBlk2_endPos = getCfgOffsets(code, size, &CFGUHandleOffset);
+                uint8_t *CFGU_GetConfigInfoBlk2_endPos = getCfgOffsets(code, size, &CFGUHandleOffset);
 
                 if (CFGU_GetConfigInfoBlk2_endPos != NULL) {
                     if (languageId != 0xFF)
@@ -351,13 +351,13 @@ language_emu(u64 progId, EXHEADER_prog_addrs *shared)
 }
 
 void
-code_handler(u64 progId, EXHEADER_prog_addrs *shared)
+code_handler(uint64_t progId, EXHEADER_prog_addrs *shared)
 {
     // If configuration was not loaded, or both options (load / dump) are disabled
     if (failed_load_config || (!config.options[OPTION_LOADER_DUMPCODE] && !config.options[OPTION_LOADER_LOADCODE]))
         return;
 
-    u32 highTid = progId >> 0x20;
+    uint32_t highTid = progId >> 0x20;
 
     if (!(highTid == 0x00040000 || highTid == 0x00040002) && !config.options[OPTION_LOADER_DUMPCODE_ALL])
         return;
@@ -368,9 +368,9 @@ code_handler(u64 progId, EXHEADER_prog_addrs *shared)
 
         hexdump_titleid(progId, merge_path);
 
-        u32 len;
+        uint32_t len;
 
-        u32 size = shared->total_size << 12;
+        uint32_t size = shared->total_size << 12;
 
         // Attempts to load code section from SD card, including system titles/modules/etc.
         if (R_SUCCEEDED(fileOpen(&code_f, ARCHIVE_SDMC, merge_path, FS_OPEN_READ)) && config.options[OPTION_LOADER_LOADCODE]) {
@@ -399,7 +399,7 @@ code_handler(u64 progId, EXHEADER_prog_addrs *shared)
         hexdump_titleid(progId, data_path);
         hexdump_titleid(progId, ro_path);
 
-        u32 len;
+        uint32_t len;
 
         // Text section.
 
@@ -465,7 +465,7 @@ code_handler(u64 progId, EXHEADER_prog_addrs *shared)
 
 // This is only for the .code segment.
 void
-patch_exe(u64 progId, u16 progver, EXHEADER_prog_addrs* shared, EXHEADER_prog_addrs* original)
+patch_exe(uint64_t progId, uint16_t progver, EXHEADER_prog_addrs* shared, _UNUSED EXHEADER_prog_addrs* original)
 {
     if (progId == 0x0004013000008002LL)
         adjust_cpu_settings(progId, shared);
@@ -476,29 +476,29 @@ patch_exe(u64 progId, u16 progver, EXHEADER_prog_addrs* shared, EXHEADER_prog_ad
 }
 
 // Gets how many bytes .text must be extended by for patches to fit.
-u32
-get_text_extend(_UNUSED u64 progId, _UNUSED u16 progver, _UNUSED u32 size_orig)
+uint32_t
+get_text_extend(_UNUSED uint64_t progId, _UNUSED uint16_t progver, _UNUSED uint32_t size_orig)
 {
     return 0; // Stub - nothing needs this yet
 }
 
 // Gets how many bytes .ro must be extended.
-u32
-get_ro_extend(_UNUSED u64 progId, _UNUSED u16 progver, _UNUSED u32 size_orig)
+uint32_t
+get_ro_extend(_UNUSED uint64_t progId, _UNUSED uint16_t progver, _UNUSED uint32_t size_orig)
 {
     return 0; // Stub - nothing needs this yet
 }
 
 // Again, same, but for .data.
-u32
-get_data_extend(_UNUSED u64 progId, _UNUSED u16 progver, _UNUSED u32 size_orig)
+uint32_t
+get_data_extend(_UNUSED uint64_t progId, _UNUSED uint16_t progver, _UNUSED uint32_t size_orig)
 {
     return 0; // Stub - nothing needs this yet
 }
 
 // Get CPU speed for progId.
-u8
-get_cpumode(_UNUSED u64 progId)
+uint8_t
+get_cpumode(_UNUSED uint64_t progId)
 {
     return 0xff; // Skip.
 }

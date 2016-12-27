@@ -553,19 +553,19 @@ execb(uint64_t tid, firm_h* firm_patch)
     FSFILE_Close(file); // Done reading in.
 
     // Set memory.
-    modes[0].memory = shared->text_addr;
+    modes[0].memory = (uint8_t*)shared->text_addr;
     modes[0].size   = shared->total_size << 12;
 
     // Set memory.
-    modes[1].memory = shared->text_addr;
+    modes[1].memory = (uint8_t*)shared->text_addr;
     modes[1].size   = shared->text_size << 12;
 
     // Set memory.
-    modes[1].memory = shared->data_addr;
+    modes[1].memory = (uint8_t*)shared->data_addr;
     modes[1].size   = shared->data_size << 12;
 
     // Set memory.
-    modes[1].memory = shared->ro_addr;
+    modes[1].memory = (uint8_t*)shared->ro_addr;
     modes[1].size   = shared->ro_size << 12;
 
     log("  exec\n");

@@ -1,4 +1,4 @@
-all: bdfe font misc
+all: bdfe ips2pco font misc
 
 misc:
 	gcc -o error_decoder error_decoder.c -g -O0

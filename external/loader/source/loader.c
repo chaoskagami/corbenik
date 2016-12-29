@@ -62,6 +62,7 @@ load_code(u64 progid, u16 progver, EXHEADER_prog_addrs *shared, EXHEADER_prog_ad
 
     // check size
     if (size > (u64)shared->total_size << 12) {
+        panicstr("codebin (file) size is larger than code size?\n");
         FSFILE_Close(handle);
         return 0xC900464F;
     }

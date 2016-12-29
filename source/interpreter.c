@@ -360,7 +360,7 @@ exec_bytecode(uint8_t *bytecode, uint32_t len, uint16_t ver, int debug)
 #ifdef LOADER
                     log("seek\n");
 #else
-                    fprintf(stderr, "seek %lu\n", offset);
+                    fprintf(stderr, "seek %lx\n", offset);
 #endif
                 }
                 code += 4;

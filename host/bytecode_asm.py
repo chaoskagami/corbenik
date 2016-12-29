@@ -17,7 +17,7 @@ in_file  = ""
 out_file = ""
 
 def usage():
-	print("Usage: " + sys.argv[0] + " <input.bas> <output.bco>")
+	print("Usage: " + sys.argv[0] + " <input.pco> <output.vco>")
 
 lines = 0
 def syn_err(x):

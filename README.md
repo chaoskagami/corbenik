@@ -1,5 +1,7 @@
 ![Corbenik](https://raw.github.com/wiki/chaoskagami/corbenik/corbenik-logo.png)
 
+[![Build Status](https://j.chaos.moe/job/Corbenik/badge/icon)](https://j.chaos.moe/job/Corbenik/)
+
 Corbenik is another CFW for the 3DS somewhat like cakes, but using bytecode-based patches. This allows for doing most of what it does, but taking the control level to its logical extreme.
 
 It's mainly intended for developers; so if you don't know your way around the 3DS, chances are this isn't for you.
@@ -10,6 +12,8 @@ Corbenik is licensed under the terms of the GPLv3. Please obey it. You should ha
 
 Usage
 -------------------------
+
+Automated builds are located here, with an alternate path of `/skeith` instead of `/corbenik`: https://j.chaos.moe/job/Corbenik
 
 You will likely want to compile corbenik from source code to get the latest changes (if any.) Therefore, you will want to follow the `Building` section.
 

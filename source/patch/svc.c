@@ -22,8 +22,7 @@ patch_svc_calls(firm_h* firm_loc)
             svcTable++; // Look for SVC0 (NULL)
 
         // Skip to free space
-        for (svc_tab_open = exceptionsPage; *svc_tab_open != 0xFFFFFFFF; svc_tab_open++)
-            ;
+        for (svc_tab_open = exceptionsPage; *svc_tab_open != 0xFFFFFFFF; svc_tab_open++);
         svc_offs_init = 1;
     }
 

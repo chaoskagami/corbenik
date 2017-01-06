@@ -47,11 +47,10 @@ main(int argc, char** argv)
     clear_bg();
 
     // This is a menuhax splash (90deg rotated BGR8 pixel data)
-    if (load_bg_top(PATH_TOP_BG) || load_bg_bottom(PATH_BOTTOM_BG))
-        have_bg = 1;
+    int bg_top    = load_bg_top(PATH_TOP_BG);
+    int bg_bottom = load_bg_bottom(PATH_BOTTOM_BG);
 
-    clear_disp(TOP_SCREEN);
-    clear_disp(BOTTOM_SCREEN);
+    have_bg = (bg_top || bg_bottom);
 
     while (1) {
         if (get_opt_u32(OPTION_AUTOBOOT) && !r_held && !doing_autoboot) {
@@ -63,11 +62,17 @@ main(int argc, char** argv)
             if (have_bg && !si) {
                 screen_mode(RGBA8); // Use RGBA8 mode.
                 si = 1;
+
+                clear_disp(TOP_SCREEN);
+                clear_disp(BOTTOM_SCREEN);
             }
         } else {
             if (!si) {
                 screen_mode(RGBA8); // Use RGBA8 mode.
                 si = 1;
+
+                clear_disp(TOP_SCREEN);
+                clear_disp(BOTTOM_SCREEN);
             }
             menu_handler();
         }

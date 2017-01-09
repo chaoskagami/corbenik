@@ -1,0 +1,23 @@
+# $name Factory, 1.x, 2.x Signature Fix
+# $desc Disables signature checks on all content on Factory, 1.x, 2.x FIRM.
+# $title 0004013800000002 0004013820000002
+# $ver  01
+# $uuid 0006
+
+# Originally made by SciresM
+# Not tested
+
+rel  section2
+
+# Pattern 1.
+find C01CBDE7
+abortnf
+set  0020
+
+rewind
+
+# Pattern 2.
+find 4E0C007168
+abortnf
+back 03
+set  00207047

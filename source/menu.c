@@ -34,41 +34,41 @@ static struct options_s options[] = {
 
     { "System Module Inject",
       "Replaces system modules in FIRM like loader, fs, pxi, etc.",
-      option, (void*)OPTION_LOADER, change_opt, get_opt, 0, 0 },
+      option, (void*)OPTION_LOADER, toggle_opt, get_opt, 0, 0 },
 
     { "svcBackdoor Fixup",
       "Reinserts svcBackdoor on 11.0 NATIVE_FIRM. svcBackdoor allows executing arbitrary functions with ARM11 kernel permissions, and is required by some (poorly coded) applications.",
-      option, (void*)OPTION_SVCS, change_opt, get_opt, 0, 0 },
+      option, (void*)OPTION_SVCS, toggle_opt, get_opt, 0, 0 },
 
     { "Firmlaunch Hook",
       "Hooks firmlaunch to allow largemem games on o3DS. Also allows patching TWL/AGB on all consoles. Previously called 'Reboot hook' but renamed for accuracy.",
-      option, (void*)OPTION_REBOOT, change_opt, get_opt, 0, 0 },
+      option, (void*)OPTION_REBOOT, toggle_opt, get_opt, 0, 0 },
 
     { "Use EmuNAND",
       "Redirects NAND write/read to the SD. This supports both Gateway and redirected layouts.",
-      option, (void*)OPTION_EMUNAND, change_opt, get_opt, 0, 0 },
+      option, (void*)OPTION_EMUNAND, toggle_opt, get_opt, 0, 0 },
     { "Index",
       "Which EmuNAND to use. If you only have one, you want 0. Currently the maximum supported is 10 (0-9), but this is arbitrary.",
-      option, (void*)OPTION_EMUNAND_INDEX, change_opt, get_opt, 1, 0 },
+      option, (void*)OPTION_EMUNAND_INDEX, toggle_opt, get_opt, 1, 0 },
 
     { "Autoboot",
       "Boot the system automatically, unless the R key is held while booting.",
-      option, (void*)OPTION_AUTOBOOT, change_opt, get_opt, 0, 0 },
+      option, (void*)OPTION_AUTOBOOT, toggle_opt, get_opt, 0, 0 },
     { "Silent mode",
       "Suppress all debug output during autoboot. You'll see the screen turn on and then off once.",
-      option, (void*)OPTION_SILENCE, change_opt, get_opt, 1, 0 },
+      option, (void*)OPTION_SILENCE, toggle_opt, get_opt, 1, 0 },
 
     { "Dim Background",
       "Experimental! Dims colors on lighter backgrounds to improve readability with text. You won't notice the change until scrolling or exiting the current menu due to the way rendering works.",
-      option, (void*)OPTION_DIM_MODE, change_opt, get_opt, 0, 0 },
+      option, (void*)OPTION_DIM_MODE, toggle_opt, get_opt, 0, 0 },
 
     { "Accent color",
       "Changes the accent color in menus.",
-      option, (void*)OPTION_ACCENT_COLOR, change_opt, get_opt, 0, 0 },
+      option, (void*)OPTION_ACCENT_COLOR, toggle_opt, get_opt, 0, 0 },
 
     { "Brightness",
       "Changes the screeninit brightness in menu. WIP, only takes effect on reboot (this will change.)",
-      option, (void*)OPTION_BRIGHTNESS, change_opt, get_opt, 0, 0 },
+      option, (void*)OPTION_BRIGHTNESS, toggle_opt, get_opt, 0, 0 },
 
     // space
     { "", "", unselectable, 0, NULL, NULL, 0, 0 },
@@ -77,25 +77,25 @@ static struct options_s options[] = {
 
     { "CPU - L2 cache",
       "Forces the system to use the L2 cache on all applications. If you have issues with crashes, try turning this off.",
-      option_n3ds, (void*)OPTION_LOADER_CPU_L2, change_opt, get_opt, 0, 0 },
+      option_n3ds, (void*)OPTION_LOADER_CPU_L2, toggle_opt, get_opt, 0, 0 },
     { "CPU - 804Mhz",
       "Forces the system to run in 804Mhz mode on all applications.",
-      option_n3ds, (void*)OPTION_LOADER_CPU_800MHZ, change_opt, get_opt, 0, 0 },
+      option_n3ds, (void*)OPTION_LOADER_CPU_800MHZ, toggle_opt, get_opt, 0, 0 },
     { "Language Emulation",
       "Reads language emulation configuration from `" PATH_LOCEMU "` and imitates the region/language.",
-      option, (void*)OPTION_LOADER_LANGEMU, change_opt, get_opt, 0, 0 },
+      option, (void*)OPTION_LOADER_LANGEMU, toggle_opt, get_opt, 0, 0 },
     { "Load Code Sections",
       "Loads code sections (text/ro/data) from SD card and patches afterwards.",
-      option, (void*)OPTION_LOADER_LOADCODE, change_opt, get_opt, 0, 0 },
+      option, (void*)OPTION_LOADER_LOADCODE, toggle_opt, get_opt, 0, 0 },
     { "Dump Code Sections",
       "Dumps code sections for titles to SD card the first time they're loaded. Slows things down on first launch.",
-      option, (void*)OPTION_LOADER_DUMPCODE, change_opt, get_opt, 0, 0 },
+      option, (void*)OPTION_LOADER_DUMPCODE, toggle_opt, get_opt, 0, 0 },
     { "Merged codebins",
       "Use merged codebins rather than segment split files.",
-      option, (void*)OPTION_LOADER_DUMPCODE_MERGED, change_opt, get_opt, 1, 0 },
+      option, (void*)OPTION_LOADER_DUMPCODE_MERGED, toggle_opt, get_opt, 1, 0 },
     { "+ System Titles",
       "Dumps code sections for system titles, too. Expect to sit at a blank screen for >3mins on the first time you do this, because it dumps everything.",
-      option, (void*)OPTION_LOADER_DUMPCODE_ALL, change_opt, get_opt, 1, 0 },
+      option, (void*)OPTION_LOADER_DUMPCODE_ALL, toggle_opt, get_opt, 1, 0 },
 
     // space
     { "", "", unselectable, 0, NULL, NULL, 0, 0 },
@@ -104,13 +104,13 @@ static struct options_s options[] = {
 
     { "Step Through",
       "After each important step, [WAIT] will be shown and you'll need to press a key. Debug feature.",
-      option, (void*)OPTION_TRACE, change_opt, get_opt, 0, 0 },
+      option, (void*)OPTION_TRACE, toggle_opt, get_opt, 0, 0 },
     { "Verbose",
       "Output more debug information than the average user needs.",
-      option, (void*)OPTION_OVERLY_VERBOSE, change_opt, get_opt, 0, 0 },
+      option, (void*)OPTION_OVERLY_VERBOSE, toggle_opt, get_opt, 0, 0 },
     { "Logging",
       "Save logs to `" LOCALSTATEDIR "` as `boot.log` and `loader.log`. Slows operation a bit.",
-      option, (void*)OPTION_SAVE_LOGS, change_opt, get_opt, 0, 0 },
+      option, (void*)OPTION_SAVE_LOGS, toggle_opt, get_opt, 0, 0 },
 
     // Sentinel.
     { NULL, NULL, 0, 0, NULL, NULL, 0, 0 }, // cursor_min and cursor_max are stored in the last two.

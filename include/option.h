@@ -105,7 +105,7 @@ void save_config(void);
 
 /* Changes an option according to internal rules. Used in menus.
  */
-void  change_opt(void* val);
+void  toggle_opt(void* val);
 
 /* Gets an option as a readable string.
  */

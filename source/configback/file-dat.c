@@ -168,7 +168,7 @@ save_config(void)
     crclose(conf_handle);
 }
 
-void change_opt(void* val) {
+void toggle_opt(void* val) {
     uint32_t opt = (uint32_t)val;
     uint8_t* set = & (config->options[opt]);
     switch(opt) {

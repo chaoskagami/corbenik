@@ -21,7 +21,7 @@ inc_dir = $(top_srcdir)/include
 
 corbenik_SOURCES = \
 	start.s corbenik.c \
-	menu.c menu-backend.c interrupt.c arm11.c test-framework.c interpreter.c input.c patcher.c chainloader.c \
+	menu.c menu-backend.c interrupt.c arm11.c interpreter.c input.c patcher.c chainloader.c \
 	patch/reboot.c patch/svc.c patch/module.c patch/emunand.c \
 	std/fs.c std/draw.c std/memory.c std/abort.c \
 	firm/util.c firm/keys.c firm/firmlaunch.c firm/version.c firm/firm.c firm/decryptor.c \

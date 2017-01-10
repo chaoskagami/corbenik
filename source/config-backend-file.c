@@ -103,13 +103,17 @@ load_config(void)
             changed_consoles = 1;
         }
 
-        strcpy(config_file_path, SYSCONFDIR "/config-");
+        strcpy(config_file_path, SYSCONFDIR "/config-00000000");
 
-        size_t len = strlen(config_file_path) + 7;
+        static const char hexDigits[] = "0123456789ABCDEF";
+        char* cfg = config_file_path;
         uint32_t cid_cp = cid[0];
+        while(cfg[1] != 0) cfg++;
+
+        // Get path of actual config.
         while (cid_cp) {
-            static const char hexDigits[] = "0123456789ABCDEF";
-            config_file_path[len--] = hexDigits[(uint32_t)(cid_cp & 0xF)];
+            cfg[0] = hexDigits[(uint32_t)(cid_cp & 0xF)];
+            cfg--;
             cid_cp >>= 4;
         }
 

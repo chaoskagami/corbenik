@@ -23,7 +23,7 @@ CHAINLOADER=1
 test "$enable_chainloader" = "no" && CHAINLOADER=0
 AC_DEFINE_UNQUOTED([CHAINLOADER], [$CHAINLOADER])
 
-AC_CONFIG_FILES([Makefile source/Makefile external/Makefile include/Makefile])
+AC_CONFIG_FILES([Makefile boot/Makefile external/Makefile include/Makefile])
 
 AC_CONFIG_SUBDIRS([external/libctr9])
 

@@ -8,7 +8,7 @@ build: clean $(patsubst %.pco, %.vco, $(wildcard *.pco))
 install:
 
 %.vco: %.pco
-	../host/bytecode_asm.py $< $@
+	../../host/bytecode_asm.py $< $@
 
 clean:
 	rm -f *.vco

@@ -1,15 +1,18 @@
-SUBDIRS = include host external source patch contrib
+SUBDIRS = include host external source patch loader bits
+
 ACLOCAL_AMFLAGS = -I m4
 
-source: include host external patch contrib
+source: include host external patch
 
 external: include host
+
+loader: external
 
 install:
 	@echo "Please don't call the install target directly, it doesn't work."
 	@exit 1
 
-all-local:
+all-local: external loader source bits
 	mkdir -p out
 	mkdir -p out@prefix@
 	mkdir -p out@libdir@/module
@@ -30,7 +33,7 @@ all-local:
 	cp external/bits/*.bin out@libexecdir@/
 	cp host/termfont.bin out@datarootdir@/
 	cp patch/*.vco out@sbindir@
-	cp contrib/*.vco out@bindir@
+	cp external/contrib_patch/*.vco out@bindir@
 	cat host/generate_localeemu.sh.in | sed "s|\@localedir\@|@localedir@|g" > out/generate_localeemu.sh
 	chmod +x out/generate_localeemu.sh
 	cat host/o3ds_firm.sh.in | sed "s|\@libdir\@|@libdir@|g" > out/o3ds_firm.sh

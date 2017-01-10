@@ -1,5 +1,3 @@
-SUBDIRS = libctr9 ctrulib/libctru loader bits
-
-loader: ctrulib/libctru
+SUBDIRS = libctr9 ctrulib/libctru contrib_patch
 
 install:

@@ -8,7 +8,7 @@
 #define _MAX_LFN 255
 #endif
 #include <option.h>
-#include <patch_format.h>
+#include <structures.h>
 
 // Quick Search algorithm, adapted from
 // http://igm.univ-mlv.fr/~lecroq/string/node19.html#SECTION00190

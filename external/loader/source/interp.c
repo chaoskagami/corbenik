@@ -13,7 +13,7 @@
 #define _MAX_LFN 255
 #endif
 #include <option.h>
-#include <patch_format.h>
+#include <structures.h>
 
 // Yes, we're including a C file. Problem?
 #include "../../../source/interpreter.c"

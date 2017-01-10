@@ -11,7 +11,7 @@
 
 #include <std/types.h>
 
-#include <patch_format.h>
+#include <structures.h>
 
 #include <std/memory.h>
 #include <std/fs.h>

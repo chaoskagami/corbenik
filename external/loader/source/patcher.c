@@ -6,7 +6,7 @@
 #include <string.h>
 #include "memory.h"
 #include "logger.h"
-#include <patch_format.h>
+#include <structures.h>
 #include <std/unused.h>
 #include "interp.h"
 
@@ -195,6 +195,9 @@ getCfgOffsets(uint8_t *code, uint32_t size, uint32_t *CFGUHandleOffset)
         }
     }
 
+    if(!n)
+        return NULL;
+
     for (uint8_t *CFGU_GetConfigInfoBlk2_endPos = code; CFGU_GetConfigInfoBlk2_endPos < code + size - 8; CFGU_GetConfigInfoBlk2_endPos += 4) {
         static const uint32_t CFGU_GetConfigInfoBlk2_endPattern[] = { 0xE8BD8010, 0x00010082 };
 
@@ -206,7 +209,7 @@ getCfgOffsets(uint8_t *code, uint32_t size, uint32_t *CFGUHandleOffset)
             *CFGUHandleOffset = *((uint32_t *)CFGU_GetConfigInfoBlk2_endPos + 2);
 
             for (uint32_t i = 0; i < n; i++)
-                if (possible[i] == *CFGUHandleOffset)
+                if (possible[i] == cmp[2])
                     return CFGU_GetConfigInfoBlk2_endPos;
 
             CFGU_GetConfigInfoBlk2_endPos += 4;
@@ -242,24 +245,18 @@ patchCfgGetLanguage(uint8_t *code, uint32_t size, uint8_t languageId, uint8_t *C
 
                         calledFunction += offset;
 
-                        found = calledFunction >= CFGU_GetConfigInfoBlk2_startPos - 4 && calledFunction <= CFGU_GetConfigInfoBlk2_endPos;
+                        if(calledFunction >= CFGU_GetConfigInfoBlk2_startPos - 4 && calledFunction <= CFGU_GetConfigInfoBlk2_endPos) {
+                            *((uint32_t *)instr - 1) = 0xE3A00000 | languageId; // mov    r0, sp => mov r0, =languageId
+                            *(uint32_t *)instr = 0xE5CD0000; // bl CFGU_GetConfigInfoBlk2 => strb r0, [sp]
+                            *((uint32_t *)instr + 1) = 0xE3B00000; // (1 or 2 instructions)         => movs r0, 0             (result code)
+
+                            logstr("  patched cfggetlanguage\n");
+
+                            // We're done
+                            return;
+                        }
                         i++;
                     } while (i < 2 && !found && calledFunction[3] == 0xEA);
-
-                    if (found) {
-                        *((uint32_t *)instr - 1) = 0xE3A00000 | languageId; // mov    r0, sp
-                                                                       // => mov r0, =languageId
-                        *(uint32_t *)instr = 0xE5CD0000;                    // bl
-                        // CFGU_GetConfigInfoBlk2 =>
-                        // strb r0, [sp]
-                        *((uint32_t *)instr + 1) = 0xE3B00000; // (1 or 2 instructions)         => movs
-                                                          // r0, 0             (result code)
-
-                        logstr("  patched cfggetlanguage\n");
-
-                        // We're done
-                        return;
-                    }
                 }
             }
         }
@@ -270,16 +267,16 @@ static void
 patchCfgGetRegion(uint8_t *code, uint32_t size, uint8_t regionId, uint32_t CFGUHandleOffset)
 {
     for (uint8_t *cmdPos = code; cmdPos < code + size - 28; cmdPos += 4) {
-        static const uint32_t cfgSecureInfoGetRegionCmdPattern[] = { 0xEE1D4F70, 0xE3A00802, 0xE5A40080 };
+        static const uint32_t cfgSecureInfoGetRegionCmdPattern[] = { 0xEE1D4F70, 0xE3A00802 };
 
         uint32_t *cmp = (uint32_t *)cmdPos;
 
-        if (cmp[0] == cfgSecureInfoGetRegionCmdPattern[0] && cmp[1] == cfgSecureInfoGetRegionCmdPattern[1] && cmp[2] == cfgSecureInfoGetRegionCmdPattern[2] &&
+        if (cmp[0] == cfgSecureInfoGetRegionCmdPattern[0] && cmp[1] == cfgSecureInfoGetRegionCmdPattern[1] &&
             *((uint16_t *)cmdPos + 7) == 0xE59F && *(uint32_t *)(cmdPos + 20 + *((uint16_t *)cmdPos + 6)) == CFGUHandleOffset) {
+
             *((uint32_t *)cmdPos + 4) = 0xE3A00000 | regionId; // mov    r0, =regionId
             *((uint32_t *)cmdPos + 5) = 0xE5C40008;            // strb   r0, [r4, 8]
-            *((uint32_t *)cmdPos + 6) = 0xE3B00000;            // movs   r0, 0            (result
-                                                          // code) ('s' not needed but nvm)
+            *((uint32_t *)cmdPos + 6) = 0xE3A00000;            // mov    r0, 0            (result code)
             *((uint32_t *)cmdPos + 7) = 0xE5840004;            // str    r0, [r4, 4]
 
             // The remaining, not patched, function code will do the rest for us

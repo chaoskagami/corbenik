@@ -10,7 +10,7 @@
 #define _MAX_LFN 255
 #endif
 #include <option.h>
-#include <patch_format.h>
+#include <structures.h>
 
 Handle log_file_hdl;
 int logger_is_initd = 0;

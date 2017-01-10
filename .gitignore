@@ -28,12 +28,12 @@ libtool
 depcomp
 /Makefile
 /host/error_decoder
-/source/Makefile
+/boot/Makefile
 /external/Makefile
 /include/Makefile
-/source/corbenik
-/source/corbenik.bin
+/boot/corbenik
+/boot/corbenik.bin
 /m4
 /include/config.h
 /include/stamp-h1
-/source/corbenik.map
+/boot/corbenik.map

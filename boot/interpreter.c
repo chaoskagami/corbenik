@@ -5,6 +5,22 @@
 #ifndef LOADER
   #include <common.h>
 #else
+  #ifndef PATH_MAX
+    #define PATH_MAX 255
+    #define _MAX_LFN 255
+  #endif
+
+  #include <3ds.h>
+  #include <string.h>
+  #include <stdio.h>
+  #include <stdlib.h>
+
+  #include "patcher.h"
+  #include "memory.h"
+  #include "logger.h"
+
+  #include <option.h>
+  #include <structures.h>
   #include <string.h>
 #endif
 

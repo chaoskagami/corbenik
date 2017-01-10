@@ -47,7 +47,7 @@ CFLAGS	:= -flto -Wall -Os -mword-relocations $(ERROR) \
 			-fomit-frame-pointer -ffunction-sections -fdata-sections -fshort-wchar \
 			$(ARCH)
 
-CFLAGS	+=	$(INCLUDE) -DARM11 -D_3DS -DLOADER=1 -I../../../include $(PATHARGS)
+CFLAGS	+=	$(INCLUDE) -DARM11 -D_3DS -DLOADER=1 -I../../include $(PATHARGS)
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu99
 
@@ -60,7 +60,7 @@ LIBS	:= -lctru
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:= $(CURDIR)/../ctrulib/libctru
+LIBDIRS	:= $(CURDIR)/../external/ctrulib/libctru
 
 
 #---------------------------------------------------------------------------------

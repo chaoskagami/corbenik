@@ -1,8 +1,8 @@
-SUBDIRS = include host external source patch loader bits
+SUBDIRS = include host external boot patch loader bits
 
 ACLOCAL_AMFLAGS = -I m4
 
-source: include host external patch
+boot: include host external patch
 
 external: include host
 
@@ -12,7 +12,7 @@ install:
 	@echo "Please don't call the install target directly, it doesn't work."
 	@exit 1
 
-all-local: external loader source bits
+all-local: external loader boot bits
 	mkdir -p out
 	mkdir -p out@prefix@
 	mkdir -p out@libdir@/module
@@ -27,10 +27,10 @@ all-local: external loader source bits
 	mkdir -p out@libexecdir@
 	mkdir -p out@sysconfdir@
 	mkdir -p out@localstatedir@
-	cp source/corbenik.bin out/arm9loaderhax.bin
-	cp source/corbenik out/corbenik.elf
-	cp external/loader/loader.cxi out@libdir@/module/native/loader.cxi
-	cp external/bits/*.bin out@libexecdir@/
+	cp boot/corbenik.bin out/arm9loaderhax.bin
+	cp boot/corbenik out/corbenik.elf
+	cp loader/loader.cxi out@libdir@/module/native/loader.cxi
+	cp bits/*.bin out@libexecdir@/
 	cp host/termfont.bin out@datarootdir@/
 	cp patch/*.vco out@sbindir@
 	cp external/contrib_patch/*.vco out@bindir@

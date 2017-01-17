@@ -122,13 +122,13 @@ You'll also want to go into `Patches` and enable the usual bits, which includes:
 You'll also want these patches, which are done by loader and therefore require it:
  * Block Cart Update / Cart RF (Loader)
  * Block eShop Updates (Loader)
- * Block NIM Updates (Loader)
+ * Block NIM Updates (Loader) [1]
  * Region Free HOME (Loader)
  * RO Signature Fix (Loader
 
 If you're using the reboot hook, you might want these:
  * AGB Signature Fix
- * AGB Bootscreen [1]
+ * AGB Bootscreen [2]
  * TWL Patches - Select either one, the correct one will be applied
 
 If you're on 11.0 or higher and using the respective FIRM, you also want these:
@@ -145,15 +145,17 @@ Optional, but recommended patches are:
  * Verbose ErrDisp (Loader)
 
 And these YOU SHOULD NOT ENABLE unless you have specialized needs:
- * Developer UNITINFO [2]
+ * Developer UNITINFO [3]
  * ARM11 XN Disable
- * Force TestMenu [3]
+ * Force TestMenu [4]
 
-[1] - This will stop games with corrupted Nintendo logos from running. Disable for ROM hacks if this occurs. There's nothing I can do to resolve this, since the GBA bios is on the SoC. Please take this up with the author of your rom(hack).
+[1] - This is known to cause some issues with regards to software updates via HOME as of recent firmwares. Luma has disabled this by default. If you get errors repeatedly when attempting updates, this may be the cause.
 
-[2] - This will disable usage of most internet functionality on the 3DS. Verbose ErrDisp is preferred.
+[2] - This will stop games with a corrupted Nintendo logo from running. Disable for ROM hacks if this occurs. There's nothing I can do to resolve this, since the GBA bios is on the SoC. Please take this up with the author of your rom(hack).
 
-[3] - Boots into TestMenu rather than HOME. This requires a TestMenu to be installed, either factory or the re-encrypted developer one.
+[3] - This will disable usage of most internet functionality on the 3DS. Verbose ErrDisp is preferred.
+
+[4] - Boots into TestMenu rather than HOME. This requires a TestMenu implementation to be installed, either factory, re-encrypted developer, or some experimental applet with that titleID.
 
 Customization
 -------------------------

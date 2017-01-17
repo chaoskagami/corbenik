@@ -1,7 +1,12 @@
-#include <common.h>
-
+#include <malloc.h>        // for memalign
+#include <stddef.h>        // for NULL
+#include <stdint.h>        // for uint8_t
+#include "firm/headers.h"  // for firm_section_h, firm_h, FIRM_TYPE_ARM9
+#include "firm/keys.h"  // for firm_section_h, firm_h, FIRM_TYPE_ARM9
+#include "firm/firm.h"     // for firm_signature, consoles::console_o3ds
 #define FIRM_INTERNAL_CODE
-#include <firm/internal.h>
+#include <firm/internal.h>  // lines 4-4
+#include "std/memory.h"    // for memfind
 
 struct firm_signature *
 get_firm_info(firm_h *firm)

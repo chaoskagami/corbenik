@@ -1,4 +1,10 @@
-#include <common.h>
+#include <stdint.h>        // for uint32_t, uint8_t
+#include <stddef.h>         // for fprintf, NULL, FILE
+#include "firm/headers.h"  // for firm_section_h, firm_h
+#include "std/draw.h"      // for stderr
+#include "std/fs.h"        // for crclose, cropen, crread, crsize
+#include "std/memory.h"    // for memfind
+#include "structures.h"    // for PATH_BACKDOOR
 
 uint8_t *arm11Section1 = NULL;
 uint32_t *svc_tab_open = NULL, *exceptionsPage = NULL, *svcTable = NULL;

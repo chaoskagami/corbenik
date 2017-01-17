@@ -1,8 +1,14 @@
-#include <stdint.h>
-#include <assert.h>
-#include <stdarg.h>
-#include <common.h>
-#include <ctr9/io.h>
+#include <ctype.h>             // for ::_ISprint, isprint
+#include <stdarg.h>            // for va_arg, va_list, va_end, va_start
+#include <stdint.h>            // for uint8_t, uint32_t, int64_t, uint64_t
+#include <stdlib.h>            // for malloc
+#include <string.h>            // for memset, NULL, size_t, memcpy, strlen
+#include "ctr9/io/fatfs/ff.h"  // for f_unlink
+#include "option.h"            // for get_opt_u32, OPTION_DIM_MODE, OPTION_S...
+#include "std/abort.h"         // for panic
+#include "std/draw.h"          // for framebuffers, SCREEN_DEPTH, stderr
+#include "std/fs.h"            // for crwrite, crclose, cropen, crread, crseek
+#include "structures.h"        // for PATH_TEMP, PATH_BOOTLOG
 
 static unsigned int top_cursor_x = 0, top_cursor_y = 0;
 static unsigned int bottom_cursor_x = 0, bottom_cursor_y = 0;
@@ -291,7 +297,7 @@ draw_character(uint8_t *screen, const unsigned int character, unsigned int ch_x,
     if (!isprint(character))
         return; // Don't output non-printables.
 
-    _UNUSED unsigned int width = 0;
+    unsigned int width = 0;
     unsigned int height = 0;
     uint8_t* buffer_bg;
     if (screen == framebuffers->top_left || screen == framebuffers->top_right) {
@@ -471,7 +477,7 @@ putc(void *buf, int c)
             return;
 
         unsigned int width = 0;
-        _UNUSED unsigned int height = 0;
+        unsigned int height = 0;
         unsigned int *cursor_x = NULL;
         unsigned int *cursor_y = NULL;
         uint8_t *screen = NULL;

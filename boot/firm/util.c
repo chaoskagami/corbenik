@@ -1,13 +1,17 @@
-#include <stdint.h>
-#include <stddef.h>
-
-#include <ctr9/io.h>
-#include <ctr9/aes.h>
-#include <ctr9/sha.h>
-#include <common.h>
-
+#include <stddef.h>          // for NULL, size_t
+#include <stdint.h>          // for uint8_t, uint32_t
+#include <stdlib.h>          // for free, atoi
+#include <string.h>          // for memcpy, memcmp
+#include <ctr9/aes.h>        // for AES_BLOCK_SIZE, use_aeskey, cbc_decrypt
+#include <malloc.h>          // for memalign
+#include "firm/headers.h"    // for firm_h, firm_section_h, ncch_h, arm9bin_h
+#include "firm/keys.h"    // for firm_h, firm_section_h, ncch_h, arm9bin_h
+#include "firm/decryptor.h"  // for sha256sum, ncch_getctr, ::NCCHTYPE_EXEFS
+#include "firm/firm.h"       // for firm_type::type_native, firm_signature
 #define FIRM_INTERNAL_CODE
 #include <firm/internal.h>
+#include "std/fs.h"          // for crclose, cropen, crread, crsize
+#include "std/memory.h"      // for memfind
 
 int decrypt_k9l(arm9bin_h *header, enum firm_type type, uint32_t k9l) {
     uint8_t slot = 0x15;

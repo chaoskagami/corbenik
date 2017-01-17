@@ -2,8 +2,17 @@
 *   emunand.c
 */
 
-#include <ctr9/io.h>
-#include <common.h>
+#include <malloc.h>               // for memalign
+#include <stdint.h>               // for uint32_t, uint8_t, uint16_t, uintptr_t
+#include <stdlib.h>               // for free
+#include "ctr9/io/sdmmc/sdmmc.h"  // for sdmmc_sdcard_readsectors, getMMCDevice
+#include "firm/headers.h"         // for firm_section_h, firm_h, exefs_file_h
+#include "firm/firm.h"            // for find_proc9
+#include "std/abort.h"            // for panic
+#include "std/draw.h"             // for stderr
+#include "std/fs.h"               // for crclose, cropen, crread, crsize
+#include "std/memory.h"           // for memfind
+#include "structures.h"           // for PATH_EMUNAND_CODE
 
 void
 verify_emunand(uint32_t index, uint32_t *off, uint32_t *head)

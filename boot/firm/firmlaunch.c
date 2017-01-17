@@ -1,9 +1,15 @@
-#include <common.h>
-#include <ctr9/aes.h>
-#include <ctr9/sha.h>
-
+#include <stdint.h>         // for uint32_t, uint8_t
+#include <stdlib.h>         // for free
+#include <string.h>         // for memmove
+#include <firm/headers.h>
+#include <firm/keys.h>
+#include <firm/firm.h>
 #define FIRM_INTERNAL_CODE
-#include <firm/internal.h>
+#include <firm/internal.h>  // for void_call
+#include "arm11.h"          // for deinitScreens
+#include "firm/headers.h"   // for firm_section_h, firm_h
+#include "std/draw.h"       // for crflush, stderr
+#include "std/fs.h"         // for crumount
 
 static volatile uint32_t *const a11_entry = (volatile uint32_t *)0x1FFFFFF8;
 

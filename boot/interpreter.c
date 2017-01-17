@@ -1,9 +1,20 @@
 #include <stdint.h>
 #include <stddef.h>
-#include "std/unused.h"
 
 #ifndef LOADER
-  #include <common.h>
+  #include <stddef.h>        // for size_t, NULL
+  #include <stdint.h>        // for uint8_t, uint32_t, uint16_t, uint64_t
+  #include <stdlib.h>        // for malloc, free
+  #include <string.h>        // for strlen, memcmp, memcpy
+  #include <firm/headers.h>  // for firm_section_h, firm_h
+  #include <input.h>         // for wait
+  #include <malloc.h>        // for memalign
+  #include <option.h>        // for get_opt_u32, OPTION_OVERLY_VERBOSE
+  #include <std/abort.h>     // for panic
+  #include <std/draw.h>      // for stderr
+  #include <std/fs.h>        // for crclose, cropen, crsize, crread, crwrite
+  #include <std/memory.h>    // for memfind
+  #include <structures.h>    // for system_patch, PATH_LOADER_CACHE
 #else
   #ifndef PATH_MAX
     #define PATH_MAX 255

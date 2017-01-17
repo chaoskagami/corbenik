@@ -1,10 +1,12 @@
-#include <common.h>
-
-#include <ctr9/aes.h>
-#include <ctr9/sha.h>
-
+#include <stdint.h>      // for uint8_t, uint32_t
+#include <ctr9/aes.h>    // for use_aeskey, AES_BLOCK_SIZE, setup_aeskey
+#include <firm/headers.h>
+#include <firm/keys.h>
+#include <firm/firm.h>
 #define FIRM_INTERNAL_CODE
-#include <firm/internal.h>
+#include <firm/internal.h>  // lines 7-7
+#include "std/fs.h"      // for crclose, cropen, crread
+#include "structures.h"  // for PATH_SLOT0X11KEY95, PATH_SLOT0X11KEY96
 
 int set_N11_K9L(uint32_t index) {
     static uint8_t ss_keyn[2][16] = {

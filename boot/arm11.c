@@ -30,11 +30,15 @@
 
 //   Also, this contains quite a few changes from luma's screen.c, which is where it originates from.
 
-#include <common.h>
-#include <ctr9/io.h>
-#include <ctr9/ctr_screen.h>
-#include <ctr9/ctr_cache.h>
-#include <ctr9/i2c.h>
+#include <string.h>
+#include <stdbool.h>         // for false, true
+#include <stdint.h>          // for uint32_t, uint8_t
+#include <arm11.h>           // for PDC0_FRAMEBUFFER_SETUP_REG, PDC1_FRAMEBU...
+#include <ctr9/ctr_cache.h>  // for ctr_cache_clean_and_flush_all
+#include <ctr9/i2c.h>        // for i2cWriteRegister, I2C_DEV_MCU
+#include <malloc.h>          // for memalign
+#include <option.h>          // for get_opt_u32, OPTION_BRIGHTNESS
+#include <std/draw.h>        // for framebuffers
 
 struct framebuffers *framebuffers;
 

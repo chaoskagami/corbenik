@@ -1,12 +1,14 @@
-#include <stdint.h>
-#include <common.h>
+#include <stdint.h>        // for uint32_t
+#include <option.h>        // for get_opt_u32, OPTION_TRACE
+#include <std/draw.h>      // for screenshot, stderr
+#include "ctr9/ctr_hid.h"  // for ctr_hid_get_buttons, CTR_HID_A, CTR_HID_B
 
 extern void waitcycles(uint32_t cycles);
 
 #define ARM9_APPROX_DELAY_MAX 134058675 / 95
 
 uint32_t
-wait_key(_UNUSED int sleep)
+wait_key()
 {
     uint32_t ret = 0, get = 0;
     while (ret == 0) {
@@ -47,7 +49,7 @@ wait(void)
 {
     if (get_opt_u32(OPTION_TRACE) && !doing_autoboot) {
         fprintf(stderr, "[Waiting...]");
-        wait_key(0); // No delay on traces.
+        wait_key(); // No delay on traces.
     }
     fprintf(stderr, "\r            \r");
 }

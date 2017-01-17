@@ -1,10 +1,19 @@
-
-#include <ctr9/ctr_hid.h>
-#include <ctr9/io.h>
-#include <ctr9/ctr_screen.h>
-#include <ctr9/i2c.h>
-
-#include <common.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <arm11.h>         // for screen_mode, RGBA8, installArm11Stub, set_...
+#include <ctr9/ctr_hid.h>  // for ctr_hid_get_buttons, CTR_HID_RT
+#include <firm/headers.h>     // for prepatch_firm, boot_firm
+#include <firm/firm.h>     // for prepatch_firm, boot_firm
+#include <input.h>         // for wait
+#include <interrupt.h>     // for install_interrupts
+#include <malloc.h>        // for mallinfo
+#include <menu.h>          // for poweroff
+#include <option.h>        // for get_opt_u32, config, config_file, OPTION_S...
+#include <patcher.h>       // for generate_patch_cache
+#include <std/draw.h>      // for clear_disp, stderr, BOTTOM_SCREEN, TOP_SCREEN
+#include <std/fs.h>        // for crmount
+#include <std/types.h>     // for CFG_BOOTENV, PDN_MPCORE_CFG
+#include <structures.h>    // for PATH_AGB_P, PATH_BOTTOM_BG, PATH_MODULE_AGB
 
 int is_n3ds = 0;
 int doing_autoboot = 0;

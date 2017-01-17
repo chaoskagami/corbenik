@@ -1,6 +1,8 @@
-#include <common.h>
-#include <ctr9/ctr_interrupt.h>
-#include <ctr9/ctr_irq.h>
+#include <stdint.h>              // for uint32_t
+#include <ctr9/ctr_interrupt.h>  // for ctr_interrupt_set, ctr_interrupt_pre...
+#include <ctr9/ctr_irq.h>        // for ctr_irq_initialize
+#include <std/abort.h>           // for panic
+#include <std/draw.h>            // for stderr
 
 void dump_state_printf(uint32_t* regs) {
     fprintf(stderr, "  cpsr:%x sp:%x pc:%x\n"
@@ -15,7 +17,7 @@ void dump_state_printf(uint32_t* regs) {
                     (unsigned int)regs[15]);
 }
 
-void reset_INT(_UNUSED uint32_t* regs) {
+void reset_INT(__attribute((unused)) uint32_t* regs) {
     fprintf(stderr, "Reset called.\n");
 }
 
@@ -25,7 +27,7 @@ void undef_INT(uint32_t* regs) {
     panic("Cannot continue. Halting.\n");
 }
 
-void swi_INT(_UNUSED uint32_t* regs) {
+void swi_INT(__attribute__((unused)) uint32_t* regs) {
     fprintf(stderr, "SWI called. Returning.\n");
 }
 
@@ -41,7 +43,7 @@ void databrt_INT(uint32_t* regs) {
     panic("Cannot continue. Halting.\n");
 }
 
-void fiq_INT(_UNUSED uint32_t* regs) {
+void fiq_INT(__attribute__((unused)) uint32_t* regs) {
     fprintf(stderr, "FIQ called. Returning.\n");
 }
 

@@ -1,4 +1,10 @@
-#include <common.h>
+#include <stdint.h>        // for uint32_t
+#include <stdlib.h>        // for NULL
+#include <input.h>         // for wait_key
+#include <menu-backend.h>  // for options_s, type::unselectable, type::optio...
+#include <option.h>        // for get_opt_u32, OPTION_ACCENT_COLOR
+#include <std/draw.h>      // for TOP_SCREEN, clear_disp, set_cursor, stdout
+#include "ctr9/ctr_hid.h"  // for CTR_HID_A, CTR_HID_B, CTR_HID_DOWN, CTR_HI...
 
 extern int is_n3ds;
 extern unsigned int font_w;
@@ -18,7 +24,7 @@ void show_help(const char* help) {
     set_cursor(TOP_SCREEN, 0, 0);
     header("Any:Back");
     fprintf(stdout, "%s", help);
-    wait_key(1);
+    wait_key();
 }
 
 void accent_color(void* screen, int fg) {
@@ -47,7 +53,7 @@ show_menu(struct options_s *options)
         set_cursor(TOP_SCREEN, 0, 0);
         header("Any:Back");
         fprintf(stdout, "No entries.\n");
-        wait_key(1);
+        wait_key();
         return 0;
     }
 
@@ -125,7 +131,7 @@ show_menu(struct options_s *options)
             fprintf(TOP_SCREEN, "%s\x1b[0m", options[i].name);
         }
 
-        uint32_t key = wait_key(1);
+        uint32_t key = wait_key();
 
         switch (key) {
             case CTR_HID_UP:

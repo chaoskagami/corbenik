@@ -7,7 +7,6 @@
 #include "memory.h"
 #include "logger.h"
 #include <structures.h>
-#include <std/unused.h>
 #include "interp.h"
 
 #ifndef PATH_MAX
@@ -288,7 +287,7 @@ patchCfgGetRegion(uint8_t *code, uint32_t size, uint8_t regionId, uint32_t CFGUH
 }
 
 static void
-adjust_cpu_settings(_UNUSED uint64_t progId, EXHEADER_prog_addrs *shared)
+adjust_cpu_settings(__attribute__((unused)) uint64_t progId, EXHEADER_prog_addrs *shared)
 {
     uint8_t* code = (uint8_t*)shared->text_addr;
     uint32_t size = shared->text_size << 12;
@@ -462,7 +461,7 @@ code_handler(uint64_t progId, EXHEADER_prog_addrs *shared)
 
 // This is only for the .code segment.
 void
-patch_exe(uint64_t progId, uint16_t progver, EXHEADER_prog_addrs* shared, _UNUSED EXHEADER_prog_addrs* original)
+patch_exe(uint64_t progId, uint16_t progver, EXHEADER_prog_addrs* shared, __attribute__((unused)) EXHEADER_prog_addrs* original)
 {
     if (progId == 0x0004013000008002LL)
         adjust_cpu_settings(progId, shared);
@@ -474,28 +473,28 @@ patch_exe(uint64_t progId, uint16_t progver, EXHEADER_prog_addrs* shared, _UNUSE
 
 // Gets how many bytes .text must be extended by for patches to fit.
 uint32_t
-get_text_extend(_UNUSED uint64_t progId, _UNUSED uint16_t progver, _UNUSED uint32_t size_orig)
+get_text_extend(__attribute__((unused)) uint64_t progId, __attribute__((unused)) uint16_t progver, __attribute__((unused)) uint32_t size_orig)
 {
     return 0; // Stub - nothing needs this yet
 }
 
 // Gets how many bytes .ro must be extended.
 uint32_t
-get_ro_extend(_UNUSED uint64_t progId, _UNUSED uint16_t progver, _UNUSED uint32_t size_orig)
+get_ro_extend(__attribute__((unused)) uint64_t progId, __attribute__((unused)) uint16_t progver, __attribute__((unused)) uint32_t size_orig)
 {
     return 0; // Stub - nothing needs this yet
 }
 
 // Again, same, but for .data.
 uint32_t
-get_data_extend(_UNUSED uint64_t progId, _UNUSED uint16_t progver, _UNUSED uint32_t size_orig)
+get_data_extend(__attribute__((unused)) uint64_t progId, __attribute__((unused)) uint16_t progver, __attribute__((unused)) uint32_t size_orig)
 {
     return 0; // Stub - nothing needs this yet
 }
 
 // Get CPU speed for progId.
 uint8_t
-get_cpumode(_UNUSED uint64_t progId)
+get_cpumode(__attribute__((unused)) uint64_t progId)
 {
     return 0xff; // Skip.
 }

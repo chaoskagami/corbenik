@@ -1,5 +1,18 @@
-#include <common.h>
-#include <ctr9/ctr_system.h>
+#include <stdint.h>            // for uint32_t, uint8_t
+#include <stdlib.h>            // for NULL
+#include <string.h>            // for memcmp
+#include <ctr9/ctr_system.h>   // for ctr_system_poweroff, ctr_system_reset
+#include <malloc.h>            // for memalign
+#include <menu-backend.h>      // for type::unselectable, type::option, opti...
+#include <option.h>            // for get_opt, toggle_opt, save_config, OPTI...
+#include <firm/headers.h>
+#include <patcher.h>           // for generate_patch_cache
+#include <std/draw.h>          // for crflush, BOTTOM_SCREEN, stderr
+#include <std/fs.h>            // for crumount, read_file, recurse_call
+#include <std/memory.h>        // for strdup_self
+#include <structures.h>        // for system_patch, PATH_AUX_PATCHES, PATH_L...
+#include "config.h"            // for LOCALSTATEDIR
+#include "ctr9/io/fatfs/ff.h"  // for FILINFO, f_stat, ::FR_OK, AM_DIR
 
 // FIXME - Remove limit
 #define MAX_PATCHES 256
@@ -23,6 +36,8 @@ void chainload_menu();
 #define lnh(s) { s, "", unselectable, 0, NULL, NULL, 0, 1 }
 
 void config_main_menu();
+void poweroff();
+void reset();
 
 static struct options_s options[] = {
     // Patches.

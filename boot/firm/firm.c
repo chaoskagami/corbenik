@@ -1,13 +1,16 @@
-#include <stdint.h>
-#include <stddef.h>
-
-#include <ctr9/io.h>
-#include <ctr9/aes.h>
-#include <ctr9/sha.h>
-#include <common.h>
-
+#include <stddef.h>         // for NULL, size_t
+#include <stdint.h>         // for uint64_t, uint8_t
+#include <stdlib.h>         // for free
+#include <string.h>         // for memcmp
+#include <malloc.h>         // for memalign
+#include "firm/headers.h"   // for firm_h, ncch_h
+#include "firm/keys.h"   // for firm_h, ncch_h
+#include "firm/firm.h"      // for firm_signature, get_firm_info, consoles::...
 #define FIRM_INTERNAL_CODE
-#include <firm/internal.h>
+#include <firm/internal.h>  // for dec_k9l, extract_firm_from_ncch, firmlaunch
+#include "patcher.h"        // for patch_firm_all
+#include "std/fs.h"         // for cropen, crclose, crwrite, crread, crsize
+#include "std/memory.h"     // for strdupcat
 
 firm_h*
 load_firm(const char *path, size_t *size_out)

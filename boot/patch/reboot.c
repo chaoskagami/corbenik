@@ -1,8 +1,16 @@
 /* This code was all nicked from Luma (before the GPL headers were corrected by TuxSH)
    Someone please remind me to fix this code.*/
 
-#include <common.h>
-#include <ctr9/io.h>
+#include <stdint.h>        // for uint32_t, uint8_t
+#include <stddef.h>         // for fprintf, size_t, FILE
+#include <string.h>        // for memcpy
+#include "firm/headers.h"  // for firm_section_h, firm_h
+#include "input.h"         // for wait
+#include "std/abort.h"     // for panic
+#include "std/draw.h"      // for stderr
+#include "std/fs.h"        // for crclose, cropen, crread, crsize
+#include "std/memory.h"    // for memfind
+#include "structures.h"    // for PATH_AGB_P, PATH_NATIVE_P, PATH_TWL_P, PAT...
 
 uint8_t*
 getProcess9(uint8_t *pos, uint32_t size, uint32_t *process9Size, uint32_t *process9MemAddr)

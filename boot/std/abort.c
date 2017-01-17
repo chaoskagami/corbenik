@@ -1,8 +1,10 @@
 #ifndef __ABORT_H
 #define __ABORT_H
 
-#include <stdarg.h>
-#include <common.h>
+#include <stdarg.h>    // for va_end, va_list, va_start
+#include "input.h"     // for wait_key
+#include "menu.h"      // for poweroff
+#include "std/draw.h"  // for stderr, clear_disp, set_cursor
 
 void panic(char* x, ...) {
     va_list ap;

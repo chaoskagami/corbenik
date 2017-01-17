@@ -1,5 +1,15 @@
-#include <common.h>
-#include <stdint.h>
+#include <stdint.h>            // for uint8_t, uint64_t
+#include <string.h>            // for memcmp
+#include <firm/headers.h>      // for firm_h
+#include <input.h>             // for wait
+#include <interp.h>            // for cache_patch, execb
+#include <option.h>            // for get_opt_u32, OPTION_EMUNAND, OPTION_EM...
+#include <patch/emunand.h>     // for patch_emunand
+#include <patcher.h>           // for patch_modules, patch_reboot, patch_svc...
+#include <std/abort.h>         // for panic
+#include <std/fs.h>            // for recurse_call, read_file, rrmdir
+#include <structures.h>        // for system_patch, PATH_TEMP, PATH_AUX_PATCHES
+#include "ctr9/io/fatfs/ff.h"  // for f_mkdir, FILINFO, f_stat, ::FR_OK, AM_DIR
 
 extern int doing_autoboot;
 

@@ -1,4 +1,10 @@
-#include <common.h>
+#include <stdint.h>            // for uint8_t, uint32_t
+#include <stdlib.h>            // for free, malloc
+#include <string.h>            // for memmove, memcmp, memcpy
+#include "ctr9/io/fatfs/ff.h"  // for FILINFO, f_stat, ::FR_OK, AM_DIR
+#include "firm/headers.h"      // for ncch_h, firm_section_h, firm_h, NCCH_M...
+#include "std/draw.h"          // for stderr
+#include "std/fs.h"            // for crclose, cropen, crread, crsize, recur...
 
 /* Not possible to be implemented as bytecode. Hey, can't win em all. */
 

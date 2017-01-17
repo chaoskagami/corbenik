@@ -1,7 +1,18 @@
 #include <corbconf.h>
 #if defined(CHAINLOADER) && CHAINLOADER == 1
 
-#include <common.h>
+#include <stdint.h>            // for uint32_t, uint8_t
+#include <stdlib.h>            // for NULL
+#include <string.h>            // for memcpy, strlen, strncpy
+#include <arm11.h>             // for screen_mode
+#include <malloc.h>            // for memalign
+#include <menu-backend.h>      // for options_s, show_menu, type::option
+#include <std/abort.h>         // for panic
+#include <std/draw.h>          // for framebuffers, stderr
+#include <std/fs.h>            // for crclose, cropen, crread, crsize, recur...
+#include <std/memory.h>        // for memfind, strdup_self
+#include <structures.h>        // for PATH_BITS, PATH_CHAINS
+#include "ctr9/io/fatfs/ff.h"  // for FILINFO, f_stat, ::FR_OK, AM_DIR
 
 uint32_t current_chain_index = 0;
 struct options_s *chains = NULL;

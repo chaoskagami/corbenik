@@ -1,6 +1,14 @@
-#include <stddef.h>
-#include <ctr9/io.h>
-#include <common.h>
+#include <stddef.h>                      // for size_t, NULL
+#include <stdint.h>                      // for int64_t, uint32_t
+#include <stdlib.h>                      // for free, malloc
+#include <string.h>                      // for memset, strcpy, strnlen, str...
+#include "ctr9/io/ctr_fatfs.h"           // for ctr_fatfs_initialize
+#include "ctr9/io/ctr_nand_interface.h"  // for ctr_nand_interface
+#include "ctr9/io/ctr_sd_interface.h"    // for ctr_sd_interface
+#include "ctr9/io/fatfs/ff.h"            // for FILINFO, f_mount, ::FR_OK
+#include "ctr9/io/fatfs/integer.h"       // for UINT
+#include "option.h"                      // for set_opt_u32, OPTION_SAVE_LOGS
+#include "std/fs.h"                      // for SEEK_CUR, SEEK_END, SEEK_SET
 
 // ctr_nand_crypto_interface ctr_io;
 // ctr_nand_crypto_interface twl_io;

@@ -1,9 +1,12 @@
-#include <common.h>
-#include <ctr9/aes.h>
-#include <ctr9/sha.h>
-
+#include <stdint.h>          // for uint8_t, uint32_t
+#include <stddef.h>          // for uint8_t, uint32_t
+#include <ctr9/sha.h>        // for sha_get, sha_init, sha_update, SHA256_MODE
+#include "firm/headers.h"    // for ncch_h, MEDIA_UNITS
+#include "firm/keys.h"    // for ncch_h, MEDIA_UNITS
+#include "firm/firm.h"    // for ncch_h, MEDIA_UNITS
 #define FIRM_INTERNAL_CODE
-#include <firm/internal.h>
+#include <firm/internal.h>  // lines 6-6
+#include "firm/decryptor.h"  // for ::NCCHTYPE_EXEFS, ::NCCHTYPE_EXHEADER
 
 void
 ncch_getctr(const ncch_h *ncch, uint8_t *ctr, uint8_t type)

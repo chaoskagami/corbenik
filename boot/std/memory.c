@@ -1,7 +1,7 @@
-#include <common.h>
-
-#include <stdint.h>
-#include <stddef.h>
+#include <stddef.h>  // for size_t, NULL
+#include <stdint.h>  // for uint32_t, uint8_t
+#include <stdlib.h>  // for malloc
+#include <string.h>  // for memcpy, strlen, memcmp
 
 char*
 strdup_self(const char* str)

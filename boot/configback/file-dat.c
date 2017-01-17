@@ -1,4 +1,13 @@
-#include <common.h>
+#include <malloc.h>               // for memalign
+#include <stdint.h>               // for uint8_t, uint32_t
+#include <string.h>               // for memset, strncpy, memcmp, strcpy, NULL
+#include "config.h"               // for SYSCONFDIR, BINDIR, LIBDIR, LIBEXECDIR
+#include "ctr9/io/fatfs/ff.h"     // for f_mkdir, f_unlink
+#include "ctr9/io/sdmmc/sdmmc.h"  // for sdmmc_get_cid
+#include "menu.h"                 // for add_patch_menu, poweroff, reset_pat...
+#include "option.h"               // for config_file, OPTION_ACCENT_COLOR
+#include "std/fs.h"               // for cropen, crclose, crwrite, crread
+#include "structures.h"           // for PATH_AGB_F, PATH_AUX_PATCHES, PATH_...
 
 FILE *conf_handle;
 

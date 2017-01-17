@@ -1,5 +1,3 @@
-#include <common.h>
-
 // This is a do-nothing implementation of the configuration backend.
 // It's solely to show what the access API for config should be.
 

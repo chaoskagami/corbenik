@@ -24,17 +24,17 @@ typedef struct firm_section_h
     uint32_t size;
     uint32_t type;      // Firmware Type ('0'=ARM9/'1'=ARM11)
     uint8_t hash[0x20]; // SHA-256 Hash of Firmware Section
-} firm_section_h;       // 0x30
+} __attribute__((packed)) firm_section_h;       // 0x30
 
 typedef struct firm_h
 {
-    char magic[8];     // "FIRM" normally, but D9 has this as "DECFIRM"
+    char magic[8];     // "FIRM" normally, but D9 has this as "FIRMDEC"
     uint32_t a11Entry; // ARM11 entry
     uint32_t a9Entry;  // ARM9 entry
     uint8_t reserved2[0x30];
     firm_section_h section[4];
     uint8_t sig[0x100];
-} firm_h;
+} __attribute__((packed)) firm_h;
 
 // http://3dbrew.org/wiki/NCCH/Extended_Header
 typedef struct code_set_info
@@ -42,14 +42,14 @@ typedef struct code_set_info
     uint32_t address;
     uint32_t phy_region_size; // Physical region size (in page-multiples)
     uint32_t size;            // size in bytes
-} code_set_info;              // 0x0C
+} __attribute__((packed)) code_set_info;              // 0x0C
 
 typedef struct system_info
 {
     uint32_t saveDataSize[2];
     uint32_t jumpID[2];
     uint8_t reserved[0x30];
-} system_info; // 0x40
+} __attribute__((packed)) system_info; // 0x40
 
 typedef struct system_control_info
 {
@@ -65,7 +65,7 @@ typedef struct system_control_info
     uint32_t bssSize;
     char depends[0x180]; // Dependency Module (Program ID) List 48*8
     system_info systemInfo;
-} system_control_info; // 0x200
+} __attribute__((packed)) system_control_info; // 0x200
 
 typedef struct ncch_ex_h
 {
@@ -74,7 +74,7 @@ typedef struct ncch_ex_h
     uint8_t accessDescSig[0x100];
     uint8_t ncchPubKey[0x100];
     uint8_t aciLim[0x200];
-} ncch_ex_h; // 0x800
+} __attribute__((packed)) ncch_ex_h; // 0x800
 
 // http://3dbrew.org/wiki/NCCH
 typedef struct ncch_h
@@ -117,7 +117,7 @@ typedef struct ncch_h
                              // starting at 0x0 of the RomFS over the number of
                              // media units specified in the RomFS hash region
                              // size)
-} ncch_h;                    // 0x200
+} __attribute__((packed)) ncch_h;                    // 0x200
 
 #define NCCH_FLAG_NOCRYPTO 0x4
 #define NCCH_FLAG_7XCRYPTO 0x1
@@ -126,19 +126,19 @@ typedef struct cxi_h
 {
     ncch_h ncch;
     ncch_ex_h exheader;
-} cxi_h;
+} __attribute__((packed)) cxi_h;
 
 typedef struct exefs_file_h
 {
     uint8_t fname[0x8];
     uint32_t offset; // offset starts after exefs_h
     uint32_t size;
-} exefs_file_h; // 0x10
+} __attribute__((packed)) exefs_file_h; // 0x10
 
 typedef struct exefs_file_hash
 {
     uint8_t hash[0x20];
-} exefs_file_hash;
+} __attribute__((packed)) exefs_file_hash;
 
 typedef struct exefs_h
 {
@@ -147,13 +147,13 @@ typedef struct exefs_h
     exefs_file_hash fileHashes[10]; // File hashes (10 hashes maximum, 32 bytes
                                     // each, one for each header), SHA256 over
                                     // entire file content
-} exefs_h;                          // 0x200
+} __attribute__((packed)) exefs_h;                          // 0x200
 
 typedef struct ncsd_partition_table
 {
     uint32_t offset;
     uint32_t size;
-} ncsd_partition_table;
+} __attribute__((packed)) ncsd_partition_table;
 
 // http://3dbrew.org/wiki/NCSD
 typedef struct ncsd_h
@@ -168,7 +168,7 @@ typedef struct ncsd_h
     uint8_t cryptType[8];           // Partitions crypt type
     ncsd_partition_table ptable[8]; // Offset & Length partition table, in media units
     uint8_t spec[0xA0];
-} ncsd_h;
+} __attribute__((packed)) ncsd_h;
 
 #define NCSD_PARTITION_EXE 0
 #define NCSD_PARTITION_MANUAL 1
@@ -186,7 +186,7 @@ typedef struct arm9bin_h
     uint8_t ctl_block[0x10];
     uint8_t unk[0x10]; // 3dbrew: Added with 9.5.0-X. Only used for hardware debugging: a nop instruction is executed with r0=0 and r1=<address of this data>.
     uint8_t slot0x16keyX[0x10];
-} arm9bin_h;
+} __attribute__((packed)) arm9bin_h;
 
 // http://3dbrew.org/wiki/Ticket
 typedef struct ticket_h

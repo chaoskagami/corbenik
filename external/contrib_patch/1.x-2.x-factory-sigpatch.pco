@@ -1,11 +1,12 @@
 # $name Factory, 1.x, 2.x Signature Fix
 # $desc Disables signature checks on all content on Factory, 1.x, 2.x FIRM.
-# $title 0004013800000002 0004013820000002
+# $title 0004000100000002 0004013800000002 0004013820000002
 # $ver  01
 # $uuid 0006
 
-# Originally made by SciresM
-# Not tested
+# Originally implemented by SciresM.
+# Not tested with factory FIRM.
+# Factory NATIVE_FIRM have a different TID-high.
 
 rel  section2
 

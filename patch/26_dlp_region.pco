@@ -4,7 +4,7 @@
 # $ver   0A
 # $uuid  26
 
-rel exe_text
+rel exe
 
 # Patch the result code 0xD8C0ACC0 (DLP - Not supported) -> 0x0 (Succeeded)
 # This causes DLP initialization to proceed regardless of the mismatch.

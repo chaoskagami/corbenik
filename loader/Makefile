@@ -33,7 +33,7 @@ endif
 #---------------------------------------------------------------------------------
 TARGET		:=	loader
 BUILD		:=	build
-SOURCES		:=	source source/patch
+SOURCES		:=	source ../common
 DATA		:=	data
 INCLUDES	:=	include
 

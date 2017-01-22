@@ -25,4 +25,4 @@ corbenik_SOURCES = \
 	patch/reboot.c patch/svc.c patch/module.c patch/emunand.c \
 	std/fs.c std/draw.c std/memory.c std/abort.c \
 	firm/util.c firm/keys.c firm/firmlaunch.c firm/version.c firm/firm.c firm/decryptor.c \
-	configback/file-dat.c
+	configback/file-dat.c ../common/lzss.c

@@ -1,6 +1,6 @@
 #include <3ds.h>
 #include "patcher.h"
-#include <lzss.c>
+#include <lzss.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>

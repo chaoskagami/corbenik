@@ -92,7 +92,7 @@ load_firm(const char *path, size_t *size_out)
         return NULL;
     }
 
-    // If this is a FIRM and not a k9l decrypted FIRM...
+    // If the firm's K9L is not decrypted...
     if (!memcmp(firm->magic, "FIRM", 4) && memcmp(firm->magic + 4, "DEC", 3)) {
         if (sig->console == console_n3ds) {
             if (dec_k9l(firm)) {

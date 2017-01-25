@@ -109,7 +109,9 @@ int dec_k9l(firm_h* firm) {
     // Recalc section hash.
     sha256sum(arm9->hash, (uint8_t*)firm + arm9->offset, arm9->size);
 
-    // Magic like D9.
+    // FIXME - Note that this is not technically correct as of recent 3dbrew docs;
+    // the second reserved field is "boot priority". We probably should stop tampering
+    // with it once firmhax becomes relevant, preferably sooner than that.
     memcpy(firm->magic, "FIRMDEC", 7);
 
     free(sig);

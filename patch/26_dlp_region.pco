@@ -1,5 +1,5 @@
-# $name  DLP Region Fix (Loader)
-# $desc  Disables region check in DLP
+# $name  Download Play Region Fix (Loader)
+# $desc  Disables region checking in DLP
 # $title 0004013000002802
 # $ver   0A
 # $uuid  26

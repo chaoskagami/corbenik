@@ -82,7 +82,7 @@ int conv_ips(__READ char* filename, __READ ips_record_t* records, __READ int rec
 
 	srand(time(NULL));
 	uint16_t uuid = (0x6600 + (rand() % 0x4400));
-	
+
 	fprintf(out, "# $name  EDITME\n");
 	fprintf(out, "# $desc  Converted IPS Patch\n");
 	fprintf(out, "# $title EDITME\n");
@@ -93,7 +93,7 @@ int conv_ips(__READ char* filename, __READ ips_record_t* records, __READ int rec
 	for (int i=0; i < record_count; i++) {
 		uint32_t offset = BYTE3_TO_UINT32(records[i].info->offset);
 		uint16_t size = BYTE2_TO_UINT16(records[i].info->size);
-		
+
 		fprintf(out, "seek %08x\n", offset);
 
 		if (size == 0) { // RLE
@@ -113,7 +113,7 @@ int conv_ips(__READ char* filename, __READ ips_record_t* records, __READ int rec
 			}
 		} else { // Normal
 			uint8_t* bytes = (uint8_t*)records[i].data;
-			
+
 			for (int i=0; i < size; i += 0x20) {
 				uint32_t max_l = (size - i > 0x20) ?
 					0x20 :

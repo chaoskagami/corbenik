@@ -66,7 +66,7 @@ static struct options_s options[] = {
       "Boot the system automatically, unless the R key is held while booting.",
       option, (void*)OPTION_AUTOBOOT, toggle_opt, get_opt, 0, 0 },
     { "Silent mode",
-      "Suppress all debug output during autoboot. You'll see the screen turn on and then off once.",
+      "Suppress all debug output during autoboot. If backgrounds are present, they will be shown briefly, otherwise the screen will remain off.",
       option, (void*)OPTION_SILENCE, toggle_opt, get_opt, 1, 0 },
 
     { "Dim Background",

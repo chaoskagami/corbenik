@@ -169,6 +169,21 @@ static struct options_s help_d[] = {
     { NULL, NULL, unselectable, 0, NULL, NULL, 0, 0 }, // cursor_min and cursor_max are stored in the last two.
 };
 
+
+#define quote(x) #x
+#define string(x) quote(x)
+
+static struct options_s build_d[] = {
+    lnh("Build Info"),
+    ln ("  Commit hash"),
+    ln ("    " string(REVISION) " (" string(BRANCH) ")"),
+    ln ("  Compiler"),
+    ln ("    " string(COMPILER_ID) ),
+    ln ("  Build configuration" ),
+    ln ("    " string(CONFIGURE_OPTIONS) ),
+    { NULL, NULL, unselectable, 0, NULL, NULL, 0, 0 }, // cursor_min and cursor_max are stored in the last two.
+};
+
 static struct options_s main_s[] = {
     { "Configuration",
       "Configuration options for the CFW.",
@@ -176,6 +191,9 @@ static struct options_s main_s[] = {
     { "Readme",
       "Mini-readme.\nWhy are you opening help on this, though?\nThat's kind of silly.",
       option, help_d, (void(*)(void*))show_menu, NULL, 0, 0 },
+    { "Build Info",
+      "Information such as GCC version for build, commit hash, flags, etc",
+      option, build_d, (void(*)(void*))show_menu, NULL, 0, 0 },
     { "Reboot",
       "Reboots the console.",
       option, 0, reset, NULL, 0, 0 },

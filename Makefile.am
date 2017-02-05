@@ -12,7 +12,7 @@ install:
 	@echo "Please don't call the install target directly, it doesn't work."
 	@exit 1
 
-all-local: external loader boot bits
+all-local: external loader boot bits patch
 	mkdir -p out
 	mkdir -p out@prefix@
 	mkdir -p out@libdir@/module

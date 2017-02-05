@@ -1,4 +1,7 @@
 AC_INIT([Corbenik], [0.3.0], [https://github.com/chaoskagami/corbenik], [corbenik])
+
+export CONFIGURE_OPTIONS="$@"
+
 AM_INIT_AUTOMAKE([foreign no-dist-gzip dist-xz subdir-objects])
 
 # Find AR and RANLIB for lto support before initializing libtool
@@ -22,6 +25,11 @@ AC_PREFIX_DEFAULT([/corbenik])
 CHAINLOADER=1
 test "$enable_chainloader" = "no" && CHAINLOADER=0
 AC_DEFINE_UNQUOTED([CHAINLOADER], [$CHAINLOADER])
+
+COMPILER_ID="$($CC --version | head -n1)"
+AC_DEFINE_UNQUOTED([COMPILER_ID], [$COMPILER_ID])
+
+AC_DEFINE_UNQUOTED([CONFIGURE_OPTIONS], [$CONFIGURE_OPTIONS])
 
 AC_CONFIG_FILES([Makefile boot/Makefile external/Makefile include/Makefile])
 
@@ -47,5 +55,8 @@ ldflags:         ${LDFLAGS}
 ocflags:         ${OCFLAGS}
 
 Chainloader:     ${CHAINLOADER}
+
+Configure:       ${CONFIGURE_OPTIONS}
+Compiler ID:     ${COMPILER_ID}
 "
 

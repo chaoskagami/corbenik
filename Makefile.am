@@ -1,8 +1,10 @@
-SUBDIRS = include host external boot patch loader bits
+SUBDIRS = include host external boot patch loader bits bootstub
 
 ACLOCAL_AMFLAGS = -I m4
 
 boot: include host external patch
+
+bootstub: boot
 
 external: include host
 
@@ -12,7 +14,7 @@ install:
 	@echo "Please don't call the install target directly, it doesn't work."
 	@exit 1
 
-all-local: external loader boot bits patch
+all-local: external loader boot bits patch bootstub
 	mkdir -p out
 	mkdir -p out@prefix@
 	mkdir -p out@libdir@/module
@@ -27,7 +29,8 @@ all-local: external loader boot bits patch
 	mkdir -p out@libexecdir@
 	mkdir -p out@sysconfdir@
 	mkdir -p out@localstatedir@
-	cp boot/corbenik.bin out/arm9loaderhax.bin
+	cp bootstub/bootstub.bin out/arm9loaderhax.bin
+	cp boot/corbenik.bin out@libexecdir@/
 	cp boot/corbenik out/corbenik.elf
 	cp loader/loader.cxi out@libdir@/module/native/loader.cxi
 	cp bits/*.bin out@libexecdir@/

@@ -7,7 +7,6 @@
 #include "ctr9/io/ctr_sd_interface.h"    // for ctr_sd_interface
 #include "ctr9/io/fatfs/ff.h"            // for FILINFO, f_mount, ::FR_OK
 #include "ctr9/io/fatfs/integer.h"       // for UINT
-#include "option.h"                      // for set_opt_u32, OPTION_SAVE_LOGS
 #include "std/fs.h"                      // for SEEK_CUR, SEEK_END, SEEK_SET
 
 // ctr_nand_crypto_interface ctr_io;
@@ -93,8 +92,6 @@ crumount(void)
 {
     if (f_mount(NULL, "SD:", 1))
         return 1;
-
-    set_opt_u32(OPTION_SAVE_LOGS, 0); // FS unmounted, can't log anymore
 
     return 0;
 }

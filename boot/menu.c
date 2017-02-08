@@ -273,6 +273,8 @@ reset()
 
     crumount(); // Unmount SD.
 
+    set_opt_u32(OPTION_SAVE_LOGS, 0); // FS unmounted, can't log anymore
+
     // Reboot.
     fprintf(BOTTOM_SCREEN, "Rebooting system...\n");
 
@@ -285,6 +287,8 @@ poweroff()
     crflush(stderr);
 
     crumount(); // Unmount SD.
+
+    set_opt_u32(OPTION_SAVE_LOGS, 0); // FS unmounted, can't log anymore
 
     // Power off
     fprintf(BOTTOM_SCREEN, "Powering off system...\n");

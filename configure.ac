@@ -31,7 +31,7 @@ AC_DEFINE_UNQUOTED([COMPILER_ID], [$COMPILER_ID])
 
 AC_DEFINE_UNQUOTED([CONFIGURE_OPTIONS], [$CONFIGURE_OPTIONS])
 
-AC_CONFIG_FILES([Makefile boot/Makefile external/Makefile include/Makefile])
+AC_CONFIG_FILES([Makefile boot/Makefile external/Makefile include/Makefile bootstub/Makefile])
 
 AC_CONFIG_SUBDIRS([external/libctr9])
 

@@ -27,26 +27,12 @@ void chainload_file(void* data)
     char* chain_file_data = (char*)data;
 
     // We copy because it's possible the payload will overwrite us in memory.
+    FILE* f;
     char chain_file[256];
     strncpy(chain_file, chain_file_data, 255);
 
-    char code_file[] = PATH_BITS "/chain.bin";
-
-    uint8_t* bootstrap = (uint8_t*)0x24F00000;
-    uint32_t size = 0, b_size = 0;
-    uint8_t* chain_data;
-
-    FILE* f = cropen(code_file, "r");
-    if (!f) {
-        // File missing.
-        panic("Missing chainloader.\n");
-    }
-
-    b_size = crsize(f);
-    crread(bootstrap, 1, b_size, f);
-    crclose(f);
-
-    chain_data = bootstrap + b_size;
+    uint32_t size = 0;
+    uint8_t* chain_data = (uint8_t*)0x23F00000;
 
     f = cropen(chain_file, "r");
     if (!f) {
@@ -70,22 +56,18 @@ void chainload_file(void* data)
     char* arg0 = (char*)&off[1];
     memcpy(arg0, chain_file, strlen(chain_file) + 1);
 
-    uint32_t* argc_off = (uint32_t*)memfind(bootstrap, b_size, "ARGC", 4);
-    uint32_t* argv_off = (uint32_t*)memfind(bootstrap, b_size, "ARGV", 4);
-
-    argc_off[0] = 1;
-    argv_off[0] = (uint32_t)off;
-
     fprintf(stderr, "Changing display mode and chainloading...\n");
 
-    screen_mode(1); // TODO - Because RGBA8 screeninit is non-standard...ugh
+    screen_mode(1); // Because RGBA8 screeninit is non-standard...ugh
 
     // Copy CakeHax struct where it is expected (at 0x23FFFE00)
     // It's very very likely we'll corrupt memory with this, but we aren't coming back anyways as of the
     // next call, so not my problem
     memcpy((void*)0x23FFFE00, framebuffers, sizeof(struct framebuffers));
 
-    ((void(*)(void*, uint32_t))0x24F00000)(chain_data, size + 256 + 8); // Size of payload + argv.
+    // TODO - TBH, I should really flush dcache and icache here
+
+    ((void(*)(int, char**))0x23F00000)(1, (char**)off);
 
     while(1);
 }

@@ -29,6 +29,7 @@ depcomp
 /Makefile
 /host/error_decoder
 /boot/Makefile
+/bootstub/Makefile
 /external/Makefile
 /include/Makefile
 /boot/corbenik

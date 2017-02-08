@@ -32,8 +32,8 @@ depcomp
 /external/Makefile
 /include/Makefile
 /boot/corbenik
-/boot/corbenik.bin
+/bootstub/bootstub
 /m4
 /include/config.h
 /include/stamp-h1
-/boot/corbenik.map
+*.map

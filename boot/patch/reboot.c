@@ -26,7 +26,7 @@ int
 patch_reboot(firm_h* firm_loc)
 {
     // Look for firmlaunch code
-    const uint8_t pattern[] = { 0xDE, 0x1F, 0x8D, 0xE2 };
+    const uint8_t pattern[] = { 0xE2, 0x20, 0x20, 0x90 };
 
     uint32_t process9Size, process9MemAddr;
     uint8_t *process9Offset =
@@ -36,7 +36,12 @@ patch_reboot(firm_h* firm_loc)
 
     wait();
 
-    uint8_t *off = memfind(process9Offset, process9Size, pattern, 4) - 0x10;
+    uint8_t *off = memfind(process9Offset, process9Size, pattern, 4);
+
+    if (!off)
+        return 1;
+
+    off -= 0x13;
 
     fprintf(stderr, "reboot: firmlaunch @ %lx\n", (uint32_t)off);
 

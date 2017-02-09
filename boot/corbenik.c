@@ -24,10 +24,19 @@ void shut_up(void);
 
 extern int changed_consoles;
 
+extern uint16_t titleid_passthru[8];
+
+int get_firmtype() {
+    if (titleid_passthru[5] >= u'0' && titleid_passthru[5] <= u'2')
+        return titleid_passthru[5] - u'0';
+
+    return 0;
+}
+
 int
 main(int argc, char** argv)
 {
-    if (ctr_hid_get_buttons() & CTR_HID_LT)
+    if (get_firmtype() != 0)
         ctr_system_poweroff();
 
     int have_bg = 0;

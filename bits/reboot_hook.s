@@ -5,9 +5,11 @@
 .global _start
 _start:
     // Interesting registers and locations to keep in mind, set before this code is ran:
-    // - sp + 0x3A8 - 0x70: FIRM path in exefs.
-    // - r7 (which is sp + 0x3A8 - 0x198): Reserved space for file handle
-    // - *(sp + 0x3A8 - 0x198) + 0x28: fread function.
+    // - r1: FIRM path in exefs.
+    // - r7: Reserved space for file handle
+    // - *(*r7 + 0x28): fread function.
+
+    mov r8, r1
 
     pxi_wait_recv:
         ldr r2, =0x44846
@@ -42,6 +44,13 @@ _start:
         ldr r6, [r6, #0x28]
         blx r6
 
+    // Copy the low TID (in UTF-16) of the wanted firm to the 5th byte of the payload
+    ldr r0, =load_addr
+    add r0, #4
+    add r1, r8, #0x1A
+    mov r2, #0x10
+    bl memcpy16
+
     // Set kernel state
     mov r0, #0
     mov r1, #0
@@ -58,6 +67,16 @@ _start:
     die:
         b die
 
+    memcpy16:
+        add r2, r0, r2
+        copy_loop:
+            ldrh r3, [r1], #2
+            strh r3, [r0], #2
+            cmp r0, r2
+            blo copy_loop
+        bx lr
+
+title:           .word 0
 bytes_read:      .word 0
 fopen:           .ascii "OPEN"
 koffset_base:    .word kernel_code-jump_to_kernel-12

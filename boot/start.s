@@ -2,18 +2,20 @@
 .global _start
 .section .text.start, "x"
 _start:
+    b init
+
+.global titleid_passthru
+titleid_passthru: .fill 8, 2, 0
+argc: .int 0
+argv: .int 0
+
+init:
     ldr r2, =argc
     str r0, [r2]
 
     ldr r2, =argv
     str r1, [r2]
 
-    b init
-
-argc: .int 0x00000000
-argv: .int 0x00000000
-
-init:
     // Disable IRQ
     mrs r0, cpsr
     orr r0, r0, #0x80

@@ -12,6 +12,7 @@
 #include <std/fs.h>            // for crclose, cropen, crread, crsize, recur...
 #include <std/memory.h>        // for memfind, strdup_self
 #include <structures.h>        // for PATH_BITS, PATH_CHAINS
+#include <option.h>        // for get_opt_u32
 #include "ctr9/io/fatfs/ff.h"  // for FILINFO, f_stat, ::FR_OK, AM_DIR
 
 uint32_t current_chain_index = 0;
@@ -58,7 +59,7 @@ void chainload_file(void* data)
 
     fprintf(stderr, "Changing display mode and chainloading...\n");
 
-    screen_mode(1); // Because RGBA8 screeninit is non-standard...ugh
+    screen_mode(1, get_opt_u32(OPTION_BRIGHTNESS)); // Because RGBA8 screeninit is non-standard...ugh
 
     // Copy CakeHax struct where it is expected (at 0x23FFFE00)
     // It's very very likely we'll corrupt memory with this, but we aren't coming back anyways as of the

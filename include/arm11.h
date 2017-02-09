@@ -47,7 +47,7 @@
  *
  * \param mode Screen mode to initialize in, one of RGBA8, BGR8, RGB565_OES, RGB5_A1_OES, or RGBA4_OES
  */
-void screen_mode(uint32_t mode);
+void screen_mode(uint32_t mode, uint32_t bright_level);
 
 /* Invokes a bare ARM11 function. For usage, see arm11.c.
  *

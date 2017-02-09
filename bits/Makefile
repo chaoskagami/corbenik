@@ -6,7 +6,7 @@ OBJECTS=$(patsubst %.s, %.bin, $(SOURCES))
 all: $(OBJECTS)
 
 %.o: %.s
-	arm-none-eabi-as -o $@ $<
+	arm-none-eabi-as -I$(shell pwd)/../include -o $@ $<
 
 %.elf: %.o
 	arm-none-eabi-ld -T link.ld -o $@ $<

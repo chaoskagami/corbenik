@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <arm11.h>         // for screen_mode, RGBA8, installArm11Stub, set_...
 #include <ctr9/ctr_hid.h>  // for ctr_hid_get_buttons, CTR_HID_RT
+#include <ctr9/ctr_system.h>  // for ctr_system_poweroff
 #include <firm/headers.h>     // for prepatch_firm, boot_firm
 #include <firm/firm.h>     // for prepatch_firm, boot_firm
 #include <input.h>         // for wait
@@ -26,6 +27,9 @@ extern int changed_consoles;
 int
 main(int argc, char** argv)
 {
+    if (ctr_hid_get_buttons() & CTR_HID_LT)
+        ctr_system_poweroff();
+
     int have_bg = 0;
     int si = 0;
 
@@ -37,7 +41,7 @@ main(int argc, char** argv)
     std_init();
 
     if (crmount())
-        poweroff(); // Failed to mount SD. Bomb out.
+        ctr_system_poweroff(); // We can't use poweroff here, since that does n/a cleanup that will cause a hang.
 
     load_config(); // Load configuration.
 
@@ -69,7 +73,7 @@ main(int argc, char** argv)
                 shut_up(); // This does exactly what it sounds like.
 
             if (have_bg && !si) {
-                screen_mode(RGBA8); // Use RGBA8 mode.
+                screen_mode(RGBA8, get_opt_u32(OPTION_BRIGHTNESS)); // Use RGBA8 mode.
                 si = 1;
 
                 clear_disp(TOP_SCREEN);
@@ -77,7 +81,7 @@ main(int argc, char** argv)
             }
         } else {
             if (!si) {
-                screen_mode(RGBA8); // Use RGBA8 mode.
+                screen_mode(RGBA8, get_opt_u32(OPTION_BRIGHTNESS)); // Use RGBA8 mode.
                 si = 1;
 
                 clear_disp(TOP_SCREEN);

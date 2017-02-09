@@ -1,5 +1,5 @@
-.set firm_addr, 0x24000000  // Temporary location where we'll load the FIRM to
-.set firm_maxsize, 0x200000  // Random value that's bigger than any of the currently known firm's sizes.
+.set load_addr,    0x24F00000
+.set load_maxsize, 0x200000  // Random value that's bigger than corbenik
 
 .section .text
 .global _start
@@ -20,84 +20,25 @@ _start:
         cmp r0, r2
         bne pxi_wait_recv
 
-    // Convert 2 bytes of the path string
-    // This will be the method of getting the lower 2 bytes of the title ID
-    //   until someone bothers figuring out where the value is derived from.
-    mov r0, #0  // Result
-    add r1, sp, #0x3A8 - 0x70
-    add r1, #0x22  // The significant bytes
-    mov r2, #4  // Maximum loops (amount of bytes * 2)
-
-    hex_string_to_int_loop:
-        ldr r3, [r1], #2  // 2 because it's a utf-16 string.
-        and r3, #0xFF
-
-        // Check if it"s a number
-        cmp r3, #'0'
-        blo hex_string_to_int_end
-        sub r3, #'0'
-        cmp r3, #9
-        bls hex_string_to_int_calc
-
-        // Check if it"s a capital letter
-        cmp r3, #'A' - '0'
-        blo hex_string_to_int_end
-        sub r3, #'A' - '0' - 0xA  // Make the correct value: 0xF >= al >= 0xA
-        cmp r3, #0xF
-        bls hex_string_to_int_calc
-
-        // Incorrect value: x > "A"
-        bhi hex_string_to_int_end
-
-        hex_string_to_int_calc:
-            orr r0, r3, r0, lsl #4
-            subs r2, #1
-            bne hex_string_to_int_loop
-    hex_string_to_int_end:
-
-    // Get the FIRM path
-    cmp r0, #0x0002  // NATIVE_FIRM
-    ldreq r1, firm_fname
-    beq check_fname
-
-    ldr r5, =0x0102  // TWL_FIRM
-    cmp r0, r5
-    ldreq r1, twl_firm_fname
-    beq check_fname
-
-    ldr r5, =0x0202  // AGB_FIRM
-    cmp r0, r5
-    ldreq r1, agb_firm_fname
-    beq check_fname
-
-    fallback:
-        // Fallback: Load specified FIRM from exefs
-        add r1, sp, #0x3A8-0x70  // Location of exefs string.
-        b load_firm
-
-    check_fname:
-        // Check the given string offset
-        cmp r1, #0
-        beq fallback
-
-    load_firm:
+    load_file:
         // Open file
         add r0, r7, #8
+        adr r1, boot_fname
         mov r2, #1
         ldr r6, fopen
         orr r6, #1
         blx r6
 
         cmp r0, #0  // Check if we were able to load the FIRM
-        bne fallback  // Otherwise, try again with the FIRM from exefs.
-        // This will loop indefinitely if the exefs FIRM fails to load, but whatever.
+        bne die  // Otherwise, hang.
 
-        // Read file
+    read_file:
+        // Read file to the proper base.
         mov r0, r7
         adr r1, bytes_read
-        mov r2, #firm_addr
-        mov r3, #firm_maxsize
-        ldr r6, [sp, #0x3A8-0x198]
+        ldr r2, =load_addr
+        ldr r3, =load_maxsize
+        ldr r6, [r7]
         ldr r6, [r6, #0x28]
         blx r6
 
@@ -108,18 +49,47 @@ _start:
     mov r3, #0
     swi 0x7C
 
-    // Jump to reboot code
-    ldr r0, reboot_code
-    swi 0x7B
+    jump_to_kernel:
+        // Jump to reboot code in kernel mode
+        ldr r0, koffset_base
+        add r0, pc
+        swi 0x7B
 
     die:
         b die
 
-.align 4
-bytes_read:     .word 0
-fopen:          .ascii "open"
-reboot_code:    .ascii "rebc"
+bytes_read:      .word 0
+fopen:           .ascii "OPEN"
+koffset_base:    .word kernel_code-jump_to_kernel-12
 .pool
-firm_fname:     .ascii "NATF"
-twl_firm_fname: .ascii "TWLF"
-agb_firm_fname: .ascii "AGBF"
+
+kernel_code:
+    // Disable MPU
+    ldr r0, =0x42078
+    mcr p15, 0, r0, c1, c0, 0
+
+    // Flush cache
+    mov r2, #0
+    mov r1, r2
+    flush_cache:
+        mov r0, #0
+        mov r3, r2, lsl #30
+        flush_cache_inner_loop:
+            orr r12, r3, r0, lsl#5
+            mcr p15, 0, r12, c7, c14, 2  // clean and flush dcache entry (index and segment)
+            add r0, #1
+            cmp r0, #0x20
+            bcc flush_cache_inner_loop
+        add r2, #1
+        cmp r2, #4
+        bcc flush_cache
+
+    mcr p15, 0, r1, c7, c10, 4  // drain write buffer
+
+    mcr p15, 0, r1, c7, c5, 0   // Flush icache
+
+    ldr r0, =load_addr
+    bx r0
+
+.pool
+boot_fname:      // This gets appended at insert-time

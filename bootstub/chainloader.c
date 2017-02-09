@@ -2,6 +2,9 @@
 #include <stdlib.h>            // for NULL
 #include <string.h>            // for memcpy, strlen, strncpy
 
+#include <ctr9/ctr_system.h>
+#include <ctr9/ctr_cache.h>
+
 #include <structures.h>
 #include <std/fs.h>
 #include <std/memory.h>
@@ -9,7 +12,7 @@
 
 __attribute__((noreturn))
 void panic() {
-    memset(*(uint8_t**)(0x23FFFE00), 0xFF, 320*240*3);
+    ctr_system_poweroff();
     while(1);
 }
 
@@ -42,8 +45,9 @@ int main()
     memmove(bootstrap, memory, size); // Memory is now clobbered. Any memory allocation is unsafe past this point.
 
     // Set args = 2, { PATH_BITS "/corbenik.bin", "-native" }
+    ctr_cache_clean_and_flush_all();
 
-    ((int(*)(int, char**))bootstrap)(0, 0);
+    ((int(*)(int, char**))bootstrap)(0, NULL);
 
     panic();
 }

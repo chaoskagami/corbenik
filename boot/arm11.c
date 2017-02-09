@@ -37,7 +37,6 @@
 #include <ctr9/ctr_cache.h>  // for ctr_cache_clean_and_flush_all
 #include <ctr9/i2c.h>        // for i2cWriteRegister, I2C_DEV_MCU
 #include <malloc.h>          // for memalign
-#include <option.h>          // for get_opt_u32, OPTION_BRIGHTNESS
 #include <std/draw.h>        // for framebuffers
 
 struct framebuffers *framebuffers;
@@ -161,10 +160,10 @@ void set_fb_struct() {
     }
 }
 
-void screen_mode(uint32_t mode) {
+void screen_mode(uint32_t mode, uint32_t bright_level) {
     static uint32_t stride, init_top, init_bottom, bright;
 
-    bright = brightness[get_opt_u32(OPTION_BRIGHTNESS)];
+    bright = brightness[bright_level];
 
     stride = 240;
     switch(mode) {

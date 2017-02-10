@@ -1,0 +1,14 @@
+# $name Stub Svc 0x59
+# $desc Patches the GSP module to access the Homebrew Launcher in 11.3 or above firmwares.
+# $title 0004013000001C02 0004013020001C02
+# $ver  01
+# $uuid 0007
+
+# Thanks for Wolfvak for explain me the logic behind that
+
+rel  exe_text
+
+find 590000EF
+abortnf
+# replace it with a NOP
+set  E1A00000

@@ -61,6 +61,10 @@ main(int argc, char** argv)
     // Check key down for autoboot
     set_fb_struct();
 
+    install_interrupts(); // Get some free debug info.
+
+    installArm11Stub();
+
     if (is_firmlaunch()) {
         shut_up();
 
@@ -70,10 +74,6 @@ main(int argc, char** argv)
 
         ctr_system_poweroff();
     }
-
-    install_interrupts(); // Get some free debug info.
-
-    installArm11Stub();
 
     if (CFG_BOOTENV == 7)
         set_opt_u32(OPTION_EMUNAND, 0); // Disable EmuNAND on AGB reboot.

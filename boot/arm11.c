@@ -38,12 +38,11 @@
 #include <ctr9/i2c.h>        // for i2cWriteRegister, I2C_DEV_MCU
 #include <malloc.h>          // for memalign
 #include <std/draw.h>        // for framebuffers
-
-int screen_is_init = 0;
+#include <util.h>
 
 struct framebuffers *framebuffers;
 
-volatile uint32_t *const arm11Entry = (volatile uint32_t *)0x1FFFFFF8;
+volatile uint32_t *arm11Entry = (volatile uint32_t *)0x1FFFFFF8;
 static const uint32_t brightness[4] = {0x26, 0x39, 0x4C, 0x5F};
 
 void  __attribute__((naked)) arm11Stub(void)
@@ -66,6 +65,9 @@ void installArm11Stub(void) {
         ctr_cache_clean_and_flush_all();
         hasCopiedStub = true;
     }
+
+    if (is_firmlaunch())
+        arm11Entry = (volatile uint32_t*)0x1FFFFFFC;
 }
 
 void invokeArm11Function(void (*func)())
@@ -160,10 +162,6 @@ void set_fb_struct() {
         framebuffers->top_right = (uint8_t *)0x18300000;
         framebuffers->bottom    = (uint8_t *)0x1835dc00;
     }
-}
-
-int get_screen_is_init() {
-    return screen_is_init;
 }
 
 void screen_mode(uint32_t mode, uint32_t bright_level) {
@@ -288,7 +286,5 @@ void screen_mode(uint32_t mode, uint32_t bright_level) {
 //    i2cWriteRegister(I2C_DEV_MCU, 0x22, 1 << 1);
     //Turn on backlight
     i2cWriteRegister(I2C_DEV_MCU, 0x22, 0x2A);
-
-    screen_is_init = 1;
 }
 

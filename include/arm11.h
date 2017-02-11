@@ -43,8 +43,6 @@
 #define ARM11_STUB_ADDRESS (0x25000000 - 0x30) //It's currently only 0x28 bytes large. We're putting 0x30 just to be sure here
 #define WAIT_FOR_ARM9() *arm11Entry = 0; while(!*arm11Entry); ((void (*)())*arm11Entry)();
 
-int get_screen_is_init();
-
 /* Initializes the screen and sets the display mode.
  *
  * \param mode Screen mode to initialize in, one of RGBA8, BGR8, RGB565_OES, RGB5_A1_OES, or RGBA4_OES

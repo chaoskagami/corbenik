@@ -26,6 +26,13 @@ extern int changed_consoles;
 
 extern uint16_t titleid_passthru[8];
 
+int is_firmlaunch() {
+    for (int i=0; i < 8; i++)
+        if (titleid_passthru[i] != 0)
+            return 1;
+    return 0;
+}
+
 int get_firmtype() {
     if (titleid_passthru[5] >= u'0' && titleid_passthru[5] <= u'2')
         return titleid_passthru[5] - u'0';
@@ -36,9 +43,6 @@ int get_firmtype() {
 int
 main(int argc, char** argv)
 {
-    if (get_firmtype() != 0)
-        ctr_system_poweroff();
-
     int have_bg = 0;
     int si = 0;
 
@@ -54,6 +58,19 @@ main(int argc, char** argv)
 
     load_config(); // Load configuration.
 
+    // Check key down for autoboot
+    set_fb_struct();
+
+    if (is_firmlaunch()) {
+        shut_up();
+
+        const char* firm_paths[] = { PATH_NATIVE_P, PATH_TWL_P, PATH_AGB_P };
+
+        firmlaunch_file(firm_paths[get_firmtype()]);
+
+        ctr_system_poweroff();
+    }
+
     install_interrupts(); // Get some free debug info.
 
     installArm11Stub();
@@ -62,9 +79,6 @@ main(int argc, char** argv)
         set_opt_u32(OPTION_EMUNAND, 0); // Disable EmuNAND on AGB reboot.
 
     set_font(PATH_TERMFONT); // Read the font before all else.
-
-    // Check key down for autoboot
-    set_fb_struct();
 
     clear_bg();
 

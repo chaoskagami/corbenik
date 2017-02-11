@@ -11,7 +11,11 @@
 #include "std/draw.h"       // for crflush, stderr
 #include "std/fs.h"         // for crumount
 
+#include "patcher.h"
+#include <ctr9/ctr_system.h>
+
 static volatile uint32_t *const a11_entry = (volatile uint32_t *)0x1FFFFFF8;
+static volatile uint32_t *const a11_entry_fl = (volatile uint32_t *)0x1FFFFFFC;
 
 void firmlaunch(firm_h* firm) {
     // Get entrypoints
@@ -29,10 +33,24 @@ void firmlaunch(firm_h* firm) {
 
     crumount(); // Unmount SD.
 
-    deinitScreens(); // Turn off display
+    if (get_screen_is_init())
+        deinitScreens(); // Turn off display if on
 
-    *a11_entry = (uint32_t)entry11; // Start kernel11
+    if (is_firmlaunch())
+        *a11_entry_fl = (uint32_t)entry11; // Start kernel11
+    else
+        *a11_entry    = (uint32_t)entry11; // Start kernel11
 
     entry9(); // Start process9
+}
+
+void firmlaunch_file(const char* path) {
+    FILE* f = cropen(path, "r");
+    size_t s = crsize(f);
+    uint8_t* mem = malloc(s);
+    crread(mem, 1, s, f);
+    crclose(f);
+
+    firmlaunch((firm_h*)mem);
 }
 

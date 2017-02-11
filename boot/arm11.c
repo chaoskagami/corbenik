@@ -39,6 +39,8 @@
 #include <malloc.h>          // for memalign
 #include <std/draw.h>        // for framebuffers
 
+int screen_is_init = 0;
+
 struct framebuffers *framebuffers;
 
 volatile uint32_t *const arm11Entry = (volatile uint32_t *)0x1FFFFFF8;
@@ -158,6 +160,10 @@ void set_fb_struct() {
         framebuffers->top_right = (uint8_t *)0x18300000;
         framebuffers->bottom    = (uint8_t *)0x1835dc00;
     }
+}
+
+int get_screen_is_init() {
+    return screen_is_init;
 }
 
 void screen_mode(uint32_t mode, uint32_t bright_level) {
@@ -282,4 +288,7 @@ void screen_mode(uint32_t mode, uint32_t bright_level) {
 //    i2cWriteRegister(I2C_DEV_MCU, 0x22, 1 << 1);
     //Turn on backlight
     i2cWriteRegister(I2C_DEV_MCU, 0x22, 0x2A);
+
+    screen_is_init = 1;
 }
+

@@ -1,6 +1,9 @@
 #ifndef __PATCHER_H
 #define __PATCHER_H
 
+int is_firmlaunch();
+int get_firmtype();
+
 /* Patches firmware with the current configuration.
  *
  * \return zero on success

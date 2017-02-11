@@ -28,6 +28,7 @@ all-local: external loader boot bits patch
 	mkdir -p out@sysconfdir@
 	mkdir -p out@localstatedir@
 	cp boot/corbenik.bin out/arm9loaderhax.bin
+	cp boot/corbenik.bin out@libexecdir@/
 	cp boot/corbenik out/corbenik.elf
 	cp loader/loader.cxi out@libdir@/module/native/loader.cxi
 	cp bits/*.bin out@libexecdir@/

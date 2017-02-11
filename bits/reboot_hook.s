@@ -1,4 +1,4 @@
-.set load_addr,    0x24F00000
+.set load_addr,    0x23F00000
 .set load_maxsize, 0x200000  // Random value that's bigger than corbenik
 
 .section .text

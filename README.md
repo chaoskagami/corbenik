@@ -57,12 +57,12 @@ Without the FIRMs, it cannot boot up your system. You'll need to fetch the follo
 
 Otherwise, manually fetching firmware should be done from the following URLs:
 
-Old 3DS (Native FIRM, 11.2):
- * firm: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000002/00000058
+Old 3DS (Native FIRM, 11.3):
+ * firm: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000002/0000005c
  * cetk: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000002/cetk
 
-New 3DS (Native FIRM, 11.2):
- * firm: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000002/00000028
+New 3DS (Native FIRM, 11.3):
+ * firm: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000002/0000002d
  * cetk: http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013820000002/cetk
 
 This is only a recommendation - you can supply near any valid firmware file for your console (it has only been tested extensively for >=9.2, however.)

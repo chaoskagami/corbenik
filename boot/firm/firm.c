@@ -96,7 +96,6 @@ load_firm(const char *path, size_t *size_out)
     if (!memcmp(firm->magic, "FIRM", 4) && memcmp(firm->magic + 4, "DEC", 3)) {
         if (sig->console == console_n3ds) {
             if (dec_k9l(firm)) {
-                free(firm);
                 free(mem);
                 return NULL;
             }
@@ -118,7 +117,6 @@ load_firm(const char *path, size_t *size_out)
             patch_entry(firm, sig->type);
 
             if (sig->type == type_native && patch_section_keys(firm, sig->k9l)) {
-                free(firm);
                 free(mem);
                 return NULL;
             }

@@ -155,11 +155,9 @@ extract_firm_from_ncch(ncch_h *ncch, uint8_t *titlekey, size_t size)
         return NULL;
     }
 
-    firm_h* dest = memalign(16, size);
+    memmove(ncch, firm, size);
 
-    memcpy(dest, firm, size);
-
-    return dest;
+    return (firm_h*)ncch;
 }
 
 uint8_t* key_search(uint8_t* mem, uint32_t size, uint8_t* sha256, uint8_t byte) {

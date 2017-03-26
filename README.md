@@ -173,8 +173,6 @@ Corbenik has a chainloader that can be used to load other payloads. Simply place
 
 The chainloader only supports .bin payloads. .dat payloads are unsupported, since they are intended for execution from an ARM11 environment. Supporting them would require far too much effort for far too little gain.
 
-There is a set of in-progress unit-tests that can be used to verify functionality works correctly. These are not yet complete.
-
 Reporting issues
 -------------------------
 

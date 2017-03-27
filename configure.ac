@@ -1,4 +1,5 @@
-AC_INIT([Corbenik], [0.3.0], [https://github.com/chaoskagami/corbenik], [corbenik])
+AC_INIT([Corbenik], [0.3.1], [https://github.com/chaoskagami/corbenik], 
+[corbenik])
 
 export CONFIGURE_OPTIONS="$@"
 

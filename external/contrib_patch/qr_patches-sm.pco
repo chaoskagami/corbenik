@@ -1,0 +1,110 @@
+# $name  Sun/Moon QR related patches (Loader)
+# $desc  SciresM's QR patches for Pokemon Sun/Moon
+# $title 0004000000164800 0004000000175E00
+# $ver   03
+# $uuid  0003
+
+# Original patches by SciresM.
+# For more info: https://github.com/SciresM/SunMoonPatches
+# It was made dynamic to be more future-proof
+# Need testing
+# What it does:
+#  -Allows for the resigning of any QR type, via hooked QR decryption.
+#  -Allows for the scanning of Injection QRs, generatable via PKHeX
+#  -Grants unlimited QR scans/day
+#  -Enables one to scan the same QR multiple times.
+
+# This patch is for 1.1 update only, if you want to port for 1.0, fell
+# free to fork and pull request
+
+# Relative to the entire code section, since it patches things in the
+# .data and .text sections
+rel exe
+
+# Debug Stub
+find 6C009FE51400D0E5
+abortnf
+set  0000a0e31eff2fe13f3f3f3f60c09fe500008ce504108ce508208ce50c308ce5
+set  00b0a0e310b08ce5f0412de90b270bea3f3f3f3f010050e3f081bd0830c09fe5
+set  10b09ce503005be3f081bd08f041bde800009ce504109ce508209ce50c309ce5
+set  03b0a0e300b08de510b08ce5edffffea3f3f3f3f80106a00
+
+
+# QR Decryption hook
+find 00F0412DE928D04DE201
+abortnf
+set  00ead8f4ea
+
+find F081BDE80C59
+abortnf
+set  ced8f4ea
+
+
+# Scanning hook
+find 0080A0E101A0A0E102B0
+abortnf
+set  45c201ea
+
+
+# Battery Query stub
+find 2FE1F0402DE914D04DE200
+abortnf
+fwd 02
+set  6460a0e30a60c0e51eff2f
+
+find F4509FE50800
+abortnf
+set  3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f
+
+find 0D70A0E108008DE26C
+abortnf
+set  0080a0e1d4609fe5060052e1b53dfe1a01a0a0e102b0a0e1022042e20390a0e1
+set  0000a0e38f69fceb1a1e8ae2b010d1e1010050e10a10a0e10b20a0e1a93dfe1a
+set  30008ae208109ae50c209ae510309ae5afa501eb000098e5341090e50800a0e1
+set  31ff2fe10010a0e16000a0e3fadb01eb00b0a0e1051d8ae26020a0e3f01f2de9
+set  29fdfaebf01fbde80b00a0e1b0709de52d10d0e50010c7e50820a0e188109de5
+set  f03bfeeb0040a0e10b00a0e1ad3efeea
+
+find 030082E8080087
+abortnf
+set  3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f
+set  3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f
+
+find 0600A0E1F080BDE8A8
+abortnf
+set  a20100003f3f3f3f
+
+
+# Registered QR Stub
+find 2FE1F0472DE920D04DE20140
+abortnf
+fwd 02
+set  0000a0e31eff2fe1
+
+find 0140A0E10050A0E158
+abortnf
+set  3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f
+
+find 0DA0A0E10A
+abortnf
+set  f04f2de90cd04de204008de5b86ef1eb00c0a0e124c09ce504c09ce50fcb8ce2
+set  31ce8ce21e60a0e30f7da0e3910601e0021081e0017047e0070053e10730a0c1
+set  08308de5e860a0e3910601e001c08ce000c08de500009de504109de5e820a0e3
+set  6c57f9eb08309de5010053e3020000ca0000a0e30cd08de2f08fbde8013043e2
+set  08308de500009de5e80080e200008de5efffffea
+
+find 0070A0E1100090
+abortnf
+set  3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f
+set  3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f
+set  3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f
+set  3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f
+set  3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f
+set  3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f
+
+
+# Forbidden QR patch
+find 01110312
+abortnf
+set  0100000000000000000000000000000000000000000000000000000000000000
+set  0000000000

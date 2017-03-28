@@ -1,0 +1,20 @@
+# $name  FIRM Protection (v0 / Factory)
+# $desc  Patches FIRM writes in v0 / Factory FIRMs.
+# $title 0004000100000002
+# $ver   01
+# $uuid  0006
+
+# This patch was originally implemented by SciresM and I really
+# haven't given it the testing needed.
+
+# This patch is O3DS only, since the Factory firm of the New 3DS is identical to
+# the 8.1 New 3DS FIRM so the usual FIRM protection will work.
+
+# This is also identical to the safemode patch for FIRM protection
+# if you're astute. Corbenik doesn't support that, though.
+
+rel section2
+
+find  041E22DBFF
+abortnf
+set   00241DE0

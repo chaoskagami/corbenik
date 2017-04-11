@@ -6,9 +6,10 @@
 _start:
     // Interesting registers and locations to keep in mind, set before this code is ran:
     // - r1: FIRM path in exefs.
-    // - r7: Reserved space for file handle
+    // - r7 or r8: Reserved space for file handle
     // - *(*r7 + 0x28): fread function.
 
+    sub r7, r0, #8
     mov r8, r1
 
     pxi_wait_recv:
@@ -83,6 +84,9 @@ koffset_base:    .word kernel_code-jump_to_kernel-12
 .pool
 
 kernel_code:
+
+    ldr sp, =0x080FF000
+
     // Disable MPU
     ldr r0, =0x42078
     mcr p15, 0, r0, c1, c0, 0

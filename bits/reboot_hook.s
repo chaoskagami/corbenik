@@ -6,9 +6,10 @@
 _start:
     // Interesting registers and locations to keep in mind, set before this code is ran:
     // - r1: FIRM path in exefs.
-    // - r7: Reserved space for file handle
+    // - r7 or r8: Reserved space for file handle
     // - *(*r7 + 0x28): fread function.
 
+    sub r7, r0, #8
     mov r8, r1
 
     pxi_wait_recv:

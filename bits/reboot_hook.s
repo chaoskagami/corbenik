@@ -84,9 +84,6 @@ koffset_base:    .word kernel_code-jump_to_kernel-12
 .pool
 
 kernel_code:
-
-    ldr sp, =0x080FF000
-
     // Disable MPU
     ldr r0, =0x42078
     mcr p15, 0, r0, c1, c0, 0

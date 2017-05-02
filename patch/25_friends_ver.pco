@@ -11,4 +11,4 @@ rel exe_text
 find E01EFF2FE1010101
 abortnf
 fwd  09
-set  10
+set  0A

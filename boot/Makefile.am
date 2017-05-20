@@ -7,13 +7,16 @@ EXTRA_DIST = linker.ld
 
 install:
 
-all-local: corbenik.bin
+all-local: corbenik.bin corbenik.firm
 
 clean-local:
-	rm -f corbenik.bin
+	rm -f corbenik.bin corbenik.firm
 
 corbenik.bin: corbenik
-	$(OBJCOPY) $(OCFLAGS) -O binary corbenik corbenik.bin
+	$(OBJCOPY) $(OCFLAGS) -O binary $< $@
+
+corbenik.firm: corbenik.bin
+	firmtool build $@ -n 0x23F00000 -e 0 -D $^ -A 0x23F00000 -C NDMA
 
 corbenikdir = $(top_srcdir)/source
 

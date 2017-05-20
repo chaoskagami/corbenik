@@ -13,10 +13,22 @@
 #define BOTTOM_WIDTH  320 ///< Bottom screen width
 #define BOTTOM_HEIGHT 240 ///< Bottom screen height
 
-#define SCREEN_DEPTH  4   ///< Pixel depth of the screen
+#define SCREEN_DEPTH  3   ///< Pixel depth of the screen
 
 #define TOP_SIZE      (TOP_WIDTH * TOP_HEIGHT * SCREEN_DEPTH)       ///< Buffer size of top screen
 #define BOTTOM_SIZE   (BOTTOM_WIDTH * BOTTOM_HEIGHT * SCREEN_DEPTH) ///< Buffer size of bottom screen
+
+#if SCREEN_DEPTH == 4
+  #define CH_B 1
+  #define CH_G 2
+  #define CH_R 3
+#elif SCREEN_DEPTH == 3
+  #define CH_B 0
+  #define CH_G 1
+  #define CH_R 2
+#else
+  #error "This screen format is not supported."
+#endif
 
 enum screen
 {

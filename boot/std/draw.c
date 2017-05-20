@@ -92,9 +92,9 @@ void rect(void* channel, unsigned int x, unsigned int y, unsigned int x2, unsign
             unsigned int yDisplacement = ((height - y_a - 1) * SCREEN_DEPTH);
             unsigned int pos = xDisplacement + yDisplacement;
 
-            screen[pos + 1] = colors[color & 0xF];
-            screen[pos + 2] = colors[color & 0xF] >> 8;
-            screen[pos + 3] = colors[color & 0xF] >> 16;
+            screen[pos + CH_B] = colors[color & 0xF];
+            screen[pos + CH_G] = colors[color & 0xF] >> 8;
+            screen[pos + CH_R] = colors[color & 0xF] >> 16;
         }
     }
 }
@@ -126,9 +126,9 @@ void screenshot(void) {
             int yDisplacement = ((240 - y - 1) * SCREEN_DEPTH);
             int pos = xDisplacement + yDisplacement;
 
-            crwrite(& framebuffers->top_left[pos + 3], 1, 1, f);
-            crwrite(& framebuffers->top_left[pos + 2], 1, 1, f);
-            crwrite(& framebuffers->top_left[pos + 1], 1, 1, f);
+            crwrite(& framebuffers->top_left[pos + CH_B], 1, 1, f);
+            crwrite(& framebuffers->top_left[pos + CH_G], 1, 1, f);
+            crwrite(& framebuffers->top_left[pos + CH_R], 1, 1, f);
         }
     }
 
@@ -143,9 +143,9 @@ void screenshot(void) {
             int yDisplacement = ((240 - y - 1) * SCREEN_DEPTH);
             int pos = xDisplacement + yDisplacement;
 
-            crwrite(& framebuffers->bottom[pos + 3], 1, 1, f);
-            crwrite(& framebuffers->bottom[pos + 2], 1, 1, f);
-            crwrite(& framebuffers->bottom[pos + 1], 1, 1, f);
+            crwrite(& framebuffers->bottom[pos + CH_B], 1, 1, f);
+            crwrite(& framebuffers->bottom[pos + CH_G], 1, 1, f);
+            crwrite(& framebuffers->bottom[pos + CH_R], 1, 1, f);
         }
 
         for (int i = 0; i < 40 * 3; i++)
@@ -255,9 +255,9 @@ clear_disp(uint8_t *screen)
 
         if (!kill_output && get_opt_u32(OPTION_DIM_MODE)) {
             for(int i=0; i < TOP_SIZE; i += 4) {
-                screen[i + 1] = alphamap[screen[i + 1]];
-                screen[i + 2] = alphamap[screen[i + 2]];
-                screen[i + 3] = alphamap[screen[i + 3]];
+                screen[i + CH_B] = alphamap[screen[i + 1]];
+                screen[i + CH_G] = alphamap[screen[i + 2]];
+                screen[i + CH_R] = alphamap[screen[i + 3]];
             }
         }
 
@@ -268,9 +268,9 @@ clear_disp(uint8_t *screen)
 
         if (!kill_output && get_opt_u32(OPTION_DIM_MODE)) {
             for(int i=0; i < BOTTOM_SIZE; i += 4) {
-                screen[i + 1] = alphamap[screen[i + 1]];
-                screen[i + 2] = alphamap[screen[i + 2]];
-                screen[i + 3] = alphamap[screen[i + 3]];
+                screen[i + CH_B] = alphamap[screen[i + 1]];
+                screen[i + CH_G] = alphamap[screen[i + 2]];
+                screen[i + CH_R] = alphamap[screen[i + 3]];
             }
         }
 
@@ -331,34 +331,34 @@ draw_character(uint8_t *screen, const unsigned int character, unsigned int ch_x,
             if (char_dat & 0x80) {
                 if (color_fg == 0) {
                     if (!kill_output && get_opt_u32(OPTION_DIM_MODE)) {
-                        screen[pos + 1] = alphamap[buffer_bg[pos + 1]];
-                        screen[pos + 2] = alphamap[buffer_bg[pos + 2]];
-                        screen[pos + 3] = alphamap[buffer_bg[pos + 3]];
+                        screen[pos + CH_B] = alphamap[buffer_bg[pos + 1]];
+                        screen[pos + CH_G] = alphamap[buffer_bg[pos + 2]];
+                        screen[pos + CH_R] = alphamap[buffer_bg[pos + 3]];
                     } else {
-                        screen[pos + 1] = buffer_bg[pos + 1];
-                        screen[pos + 2] = buffer_bg[pos + 2];
-                        screen[pos + 3] = buffer_bg[pos + 3];
+                        screen[pos + CH_B] = buffer_bg[pos + 1];
+                        screen[pos + CH_G] = buffer_bg[pos + 2];
+                        screen[pos + CH_R] = buffer_bg[pos + 3];
                     }
                 } else {
-                    screen[pos + 1] = color_fg;
-                    screen[pos + 2] = color_fg >> 8;
-                    screen[pos + 3] = color_fg >> 16;
+                    screen[pos + CH_B] = color_fg;
+                    screen[pos + CH_G] = color_fg >> 8;
+                    screen[pos + CH_R] = color_fg >> 16;
                 }
             } else {
                 if (color_bg == 0) {
                     if (!kill_output && get_opt_u32(OPTION_DIM_MODE)) {
-                        screen[pos + 1] = alphamap[buffer_bg[pos + 1]];
-                        screen[pos + 2] = alphamap[buffer_bg[pos + 2]];
-                        screen[pos + 3] = alphamap[buffer_bg[pos + 3]];
+                        screen[pos + CH_B] = alphamap[buffer_bg[pos + 1]];
+                        screen[pos + CH_G] = alphamap[buffer_bg[pos + 2]];
+                        screen[pos + CH_R] = alphamap[buffer_bg[pos + 3]];
                     } else {
-                        screen[pos + 1] = buffer_bg[pos + 1];
-                        screen[pos + 2] = buffer_bg[pos + 2];
-                        screen[pos + 3] = buffer_bg[pos + 3];
+                        screen[pos + CH_B] = buffer_bg[pos + 1];
+                        screen[pos + CH_G] = buffer_bg[pos + 2];
+                        screen[pos + CH_R] = buffer_bg[pos + 3];
                     }
                 } else {
-                    screen[pos + 1] = color_bg;
-                    screen[pos + 2] = color_bg >> 8;
-                    screen[pos + 3] = color_bg >> 16;
+                    screen[pos + CH_B] = color_bg;
+                    screen[pos + CH_G] = color_bg >> 8;
+                    screen[pos + CH_R] = color_bg >> 16;
                 }
             }
 

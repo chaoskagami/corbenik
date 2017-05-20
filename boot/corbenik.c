@@ -51,15 +51,15 @@ main(int argc, char** argv)
     if (PDN_MPCORE_CFG == 7)
         is_n3ds = 1; // Enable n3ds specific options.
 
+    // Init FB structs
+    set_fb_struct();
+
     std_init();
 
     if (crmount())
         ctr_system_poweroff(); // We can't use poweroff here, since that does n/a cleanup that will cause a hang.
 
     load_config(); // Load configuration.
-
-    // Check key down for autoboot
-    set_fb_struct();
 
     install_interrupts(); // Get some free debug info.
 
@@ -94,7 +94,7 @@ main(int argc, char** argv)
                 shut_up(); // This does exactly what it sounds like.
 
             if (have_bg && !si) {
-                screen_mode(RGBA8, get_opt_u32(OPTION_BRIGHTNESS)); // Use RGBA8 mode.
+//                screen_mode(RGBA8, get_opt_u32(OPTION_BRIGHTNESS)); // Use RGBA8 mode.
                 si = 1;
 
                 clear_disp(TOP_SCREEN);
@@ -102,7 +102,7 @@ main(int argc, char** argv)
             }
         } else {
             if (!si) {
-                screen_mode(RGBA8, get_opt_u32(OPTION_BRIGHTNESS)); // Use RGBA8 mode.
+//                screen_mode(RGBA8, get_opt_u32(OPTION_BRIGHTNESS)); // Use RGBA8 mode.
                 si = 1;
 
                 clear_disp(TOP_SCREEN);

@@ -36,6 +36,7 @@
 #include <arm11.h>           // for PDC0_FRAMEBUFFER_SETUP_REG, PDC1_FRAMEBU...
 #include <ctr9/ctr_cache.h>  // for ctr_cache_clean_and_flush_all
 #include <ctr9/i2c.h>        // for i2cWriteRegister, I2C_DEV_MCU
+#include <ctr9/ctr_system.h>        // for i2cWriteRegister, I2C_DEV_MCU
 #include <malloc.h>          // for memalign
 #include <std/draw.h>        // for framebuffers
 #include <util.h>
@@ -47,11 +48,8 @@ static const uint32_t brightness[4] = {0x26, 0x39, 0x4C, 0x5F};
 
 void invokeArm11Function(void (*func)())
 {
-    installArm11Stub();
-
     *arm11Entry = (uint32_t)func;
     while(*arm11Entry);
-    *arm11Entry = ARM11_STUB_ADDRESS;
 }
 
 void deinitScreens(void)
@@ -59,7 +57,7 @@ void deinitScreens(void)
     void __attribute__((naked)) ARM11(void)
     {
         //Disable interrupts
-        __asm(".word 0xF10C01C0");
+        __asm(".word 0xF10C01C0"); // This is actually 'cpsid aif' but gcc doesn't like mixing arm9 and arm11 code.
 
         //Shutdown LCDs
         *(volatile uint32_t *)0x10202A44 = 0;
@@ -95,36 +93,6 @@ void updateBrightness(uint32_t brightnessIndex)
     invokeArm11Function(ARM11);
 }
 
-void clearScreens(void) {
-    void __attribute__((naked)) ARM11(void)
-    {
-        //Disable interrupts
-        __asm(".word 0xF10C01C0");
-
-        //Setting up two simultaneous memory fills using the GPU
-        volatile uint32_t *REGs_PSC0 = (volatile uint32_t *)0x10400010;
-
-        REGs_PSC0[0] = (uint32_t)framebuffers->top_left >> 3; //Start address
-        REGs_PSC0[1] = (uint32_t)(framebuffers->top_left + (400 * 240 * 4)) >> 3; //End address
-        REGs_PSC0[2] = 0; //Fill value
-        REGs_PSC0[3] = (2 << 8) | 1; //32-bit pattern; start
-
-        volatile uint32_t *REGs_PSC1 = (volatile uint32_t *)0x10400020;
-
-        REGs_PSC1[0] = (uint32_t)framebuffers->bottom >> 3; //Start address
-        REGs_PSC1[1] = (uint32_t)(framebuffers->bottom + (320 * 240 * 4)) >> 3; //End address
-        REGs_PSC1[2] = 0; //Fill value
-        REGs_PSC1[3] = (2 << 8) | 1; //32-bit pattern; start
-
-        while(!((REGs_PSC0[3] & 2) && (REGs_PSC1[3] & 2)));
-
-        WAIT_FOR_ARM9();
-    }
-
-    ctr_cache_clean_and_flush_all();
-    invokeArm11Function(ARM11);
-}
-
 void set_fb_struct() {
     if (!framebuffers) {
         // Look ma, dynamically allocating the CakeHax struct! (joking)
@@ -135,12 +103,12 @@ void set_fb_struct() {
         // Set not-actually cakebrah framebuffers. Meh.
         framebuffers->top_left  = (uint8_t *)0x18300000;
         framebuffers->top_right = (uint8_t *)0x18300000;
-        framebuffers->bottom    = (uint8_t *)0x1835dc00;
+        framebuffers->bottom    = (uint8_t *)0x18300000 + (TOP_WIDTH * TOP_HEIGHT * SCREEN_DEPTH);
     }
 }
 
 void screen_mode(uint32_t mode, uint32_t bright_level) {
-    static uint32_t stride, init_top, init_bottom, bright;
+    static volatile uint32_t stride, init_top, init_bottom, bright;
 
     bright = brightness[bright_level];
 
@@ -254,8 +222,6 @@ void screen_mode(uint32_t mode, uint32_t bright_level) {
 
     ctr_cache_clean_and_flush_all();
     invokeArm11Function(ARM11);
-
-    clearScreens();
 
     // Turn on backlight
 //    i2cWriteRegister(I2C_DEV_MCU, 0x22, 1 << 1);

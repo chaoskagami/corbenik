@@ -42,33 +42,8 @@
 
 struct framebuffers *framebuffers;
 
-volatile uint32_t *arm11Entry = (volatile uint32_t *)0x1FFFFFF8;
+volatile uint32_t *arm11Entry = (volatile uint32_t *)0x1FFFFFFC;
 static const uint32_t brightness[4] = {0x26, 0x39, 0x4C, 0x5F};
-
-void  __attribute__((naked)) arm11Stub(void)
-{
-    //Disable interrupts
-    __asm(".word 0xF10C01C0");
-
-    //Wait for the entry to be set
-    while(*arm11Entry == ARM11_STUB_ADDRESS);
-
-    //Jump to it
-    ((void (*)())*arm11Entry)();
-}
-
-void installArm11Stub(void) {
-    static int hasCopiedStub = false;
-    if(!hasCopiedStub)
-    {
-        memcpy((void *)ARM11_STUB_ADDRESS, arm11Stub, 0x30);
-        ctr_cache_clean_and_flush_all();
-        hasCopiedStub = true;
-    }
-
-    if (is_firmlaunch())
-        arm11Entry = (volatile uint32_t*)0x1FFFFFFC;
-}
 
 void invokeArm11Function(void (*func)())
 {

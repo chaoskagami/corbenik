@@ -15,8 +15,9 @@ clean-local:
 corbenik.bin: corbenik
 	$(OBJCOPY) $(OCFLAGS) -O binary $< $@
 
+# XXX - Firmtool seems to incorrectly copy the elf's sections to the output, so we have to do this for now
 corbenik.firm: corbenik.bin
-	firmtool build $@ -n 0x23F00000 -e 0 -D $^ -A 0x23F00000 -C NDMA
+	firmtool build $@ -i -n 0x23F00000 -e 0 -D $^ -A 0x23F00000 -C NDMA
 
 corbenikdir = $(top_srcdir)/source
 

@@ -33,6 +33,7 @@ depcomp
 /external/Makefile
 /include/Makefile
 /boot/corbenik
+/boot/corbenik.firm
 /bootstub/bootstub
 /m4
 /include/config.h

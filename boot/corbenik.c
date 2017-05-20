@@ -63,8 +63,6 @@ main(int argc, char** argv)
 
     install_interrupts(); // Get some free debug info.
 
-    installArm11Stub();
-
     if (is_firmlaunch()) {
         shut_up();
 
@@ -110,6 +108,7 @@ main(int argc, char** argv)
                 clear_disp(TOP_SCREEN);
                 clear_disp(BOTTOM_SCREEN);
             }
+
             menu_handler();
         }
 

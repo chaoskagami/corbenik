@@ -10,16 +10,17 @@ argc: .int 0
 argv: .int 0
 
 init:
+    // Disable IRQ
+    mrs r2, cpsr
+    orr r2, r2, #0x1C0
+    msr cpsr_c, r2
+
+    // Save argc, argv
     ldr r2, =argc
     str r0, [r2]
 
     ldr r2, =argv
     str r1, [r2]
-
-    // Disable IRQ
-    mrs r0, cpsr
-    orr r0, r0, #0x80
-    msr cpsr_c, r0
 
     // Flush caches, make sure to sync memory with what's on the cache before
     // turning off the MPU
@@ -215,6 +216,7 @@ enable_mpu_and_caching:
     // Enable caches, MPU, and itcm
     mrc p15, 0, r0, c1, c0, 0  // read control register
     orr r0, r0, #(1<<18)       // - itcm enable
+    orr r0, r0, #(1<<13)       // - alt exception vector enable
     orr r0, r0, #(1<<12)       // - instruction cache enable
     orr r0, r0, #(1<<2)        // - data cache enable
     orr r0, r0, #(1<<0)        // - mpu enable

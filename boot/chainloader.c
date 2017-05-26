@@ -79,7 +79,8 @@ void chainload_file(void* data)
 
     fprintf(stderr, "Changing display mode and chainloading...\n");
 
-    screen_mode(1, get_opt_u32(OPTION_BRIGHTNESS)); // Because RGBA8 screeninit is non-standard...ugh
+    // XXX - Refactor arm11
+    // screen_mode(1, get_opt_u32(OPTION_BRIGHTNESS)); // Because RGBA8 screeninit is non-standard...ugh
 
     // Copy CakeHax struct where it is expected (at 0x23FFFE00)
     // It's very very likely we'll corrupt memory with this, but we aren't coming back anyways as of the

@@ -249,7 +249,7 @@ In no specific order:
 Temptress Cerise (GBATemp) 
  * A LOT of testing which was really helpful.
 
-Crystal the Glaceon (GBATemp)
+Lilith Valentine(GBATemp)
  * A LOT of testing which was really helpful.
 
 Everyone on #Cakey for being generally cool people.
